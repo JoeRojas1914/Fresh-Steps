@@ -1,6 +1,6 @@
 const detallesCargados = {};
 
-function toggleDetallesVenta(idVenta) {
+function toggleDetalles(idVenta) {
     const fila = document.getElementById(`detalles-${idVenta}`);
     const lista = document.getElementById(`lista-detalles-${idVenta}`);
 
@@ -15,9 +15,10 @@ function toggleDetallesVenta(idVenta) {
 
     fila.style.display = "table-row";
 
+    // 🔥 Si ya se cargaron, no vuelvas a pedirlos
     if (detallesCargados[idVenta]) return;
 
-    lista.innerHTML = `<li style="opacity:0.6;">⏳ Cargando...</li>`;
+    lista.innerHTML = `<li style="opacity:0.6;">Cargando...</li>`;
 
     fetch(`/ventas/detalles/${idVenta}`)
         .then(r => r.json())
@@ -31,10 +32,70 @@ function toggleDetallesVenta(idVenta) {
             }
 
             lista.innerHTML = detalles.map(item => {
-                return `<li>${item.tipo_articulo}</li>`;
+
+                let html = "";
+
+                if (item.tipo_articulo === "calzado") {
+                    html += `
+                        <div class="detalle-zapato">
+                            👟 ${item.datos.tipo} ${item.datos.marca}
+                        </div>
+                    `;
+
+                    html += item.servicios.map(s => `
+                        <div class="detalle-servicio">
+                            ${s.nombre}
+                            <span class="detalle-precio">
+                                $${parseFloat(s.precio_aplicado).toFixed(2)}
+                            </span>
+                        </div>
+                    `).join("");
+                }
+
+                else if (item.tipo_articulo === "confeccion") {
+                    html += `
+                        <div class="detalle-zapato">
+                            🧵 ${item.datos.tipo} ${item.datos.marca}
+                        </div>
+                        <div>
+                            Cantidad: <b>${item.datos.cantidad}</b>
+                        </div>
+                    `;
+
+                    html += item.servicios.map(s => `
+                        <div class="detalle-servicio">
+                            ${s.nombre}
+                            <span class="detalle-precio">
+                                $${parseFloat(s.precio_aplicado).toFixed(2)}
+                            </span>
+                        </div>
+                    `).join("");
+                }
+
+                else if (item.tipo_articulo === "maquila") {
+                    html += `
+                        <div class="detalle-zapato">
+                            🏭 ${item.datos.tipo}
+                        </div>
+                        <div>
+                            Cantidad: <b>${item.datos.cantidad}</b> |
+                            Precio: <b>$${parseFloat(item.datos.precio_unitario).toFixed(2)}</b>
+                        </div>
+                    `;
+                }
+
+                if (item.comentario) {
+                    html += `
+                        <div style="margin-top:6px; font-style:italic; opacity:0.8;">
+                            💬 ${item.comentario}
+                        </div>
+                    `;
+                }
+
+                return `<li class="detalle-item">${html}</li>`;
             }).join("");
         })
         .catch(() => {
-            lista.innerHTML = `<li>Error</li>`;
+            lista.innerHTML = `<li>Error al cargar detalles</li>`;
         });
 }
