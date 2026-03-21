@@ -102,12 +102,21 @@ def obtener_cliente_detalle_service(id_cliente, filtros, pedidos_por_pagina=5):
         pedidos_por_pagina, offset
     )
 
+    ids_venta = [p["id_venta"] for p in pedidos]
+
+    detalles_map = obtener_detalles_venta(ids_venta)
+
+    pagos_map = {}
     for p in pedidos:
-        p["detalles"] = obtener_detalles_venta(p["id_venta"])
-        pagos = obtener_pagos_por_venta(p["id_venta"])
+        pagos_map[p["id_venta"]] = obtener_pagos_por_venta(p["id_venta"])
+
+    for p in pedidos:
+        detalles = detalles_map.get(p["id_venta"], [])
+        pagos = pagos_map.get(p["id_venta"], [])
 
         total_pagado = sum(float(pg["monto"]) for pg in pagos)
 
+        p["detalles"] = detalles
         p["pagos"] = pagos
         p["total_pagado"] = total_pagado
         p["saldo_pendiente"] = float(p["total"]) - total_pagado

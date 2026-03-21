@@ -4,59 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const detallesCargados = {};
 
-    function toggleDetalles(idVenta) {
-        const fila = document.getElementById(`detalles-${idVenta}`);
-        const lista = document.getElementById(`lista-detalles-${idVenta}`);
-
-        if (!fila || !lista) return;
-
-        const visible = fila.style.display === "table-row";
-
-        if (visible) {
-            fila.style.display = "none";
-            return;
-        }
-
-        fila.style.display = "table-row";
-
-        if (detallesCargados[idVenta]) return;
-
-        lista.innerHTML = `<li style="opacity:0.6;">⏳ Cargando detalles...</li>`;
-
-        fetch(`/ventas/detalles/${idVenta}`)
-            .then(r => r.json())
-            .then(detalles => {
-
-                detallesCargados[idVenta] = true;
-
-                if (!detalles.length) {
-                    lista.innerHTML = `<li>Sin detalles</li>`;
-                    return;
-                }
-
-                lista.innerHTML = detalles.map(item => {
-
-                    let html = "";
-
-                    if (item.tipo_articulo === "calzado") {
-                        html += `👟 ${item.datos.tipo} ${item.datos.marca}`;
-                    }
-
-                    else if (item.tipo_articulo === "confeccion") {
-                        html += `🧵 ${item.datos.tipo} ${item.datos.marca}`;
-                    }
-
-                    else if (item.tipo_articulo === "maquila") {
-                        html += `🏭 ${item.datos.tipo}`;
-                    }
-
-                    return `<li class="detalle-item">${html}</li>`;
-                }).join("");
-            })
-            .catch(() => {
-                lista.innerHTML = `<li>Error al cargar detalles</li>`;
-            });
-    }
 
     document.querySelectorAll(".btn--info").forEach(btn => {
         btn.addEventListener("click", () => {
