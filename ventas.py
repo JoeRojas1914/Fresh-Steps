@@ -407,7 +407,7 @@ def obtener_ventas_listas(id_negocio=None):
         query += " AND v.id_negocio = %s"
         params.append(id_negocio)
 
-    query += " ORDER BY v.fecha_lista ASC, v.id_venta ASC"
+    query += " ORDER BY v.id_venta ASC"
 
     cursor.execute(query, params)
     ventas = cursor.fetchall()
