@@ -2,7 +2,13 @@ from decimal import Decimal, InvalidOperation
 from db import get_connection
 from datetime import datetime
 
-
+# Fuente única de verdad para el mapeo negocio → tipo de artículo.
+# Importar desde aquí en cualquier módulo que lo necesite.
+TIPOS_POR_NEGOCIO = {
+    1: "calzado",
+    2: "confeccion",
+    3: "maquila",
+}
 
 def crear_venta(
     id_negocio,
@@ -43,15 +49,9 @@ def crear_venta(
         id_venta = cursor.lastrowid
         total = Decimal("0.00")
 
-        tipos_por_negocio = {
-            1: "calzado",
-            2: "confeccion",
-            3: "maquila"
-        }
-
         for art in articulos:
             tipo_articulo = art["tipo_articulo"]
-            tipo_esperado = tipos_por_negocio.get(id_negocio)
+            tipo_esperado = TIPOS_POR_NEGOCIO.get(id_negocio)
 
             if tipo_esperado and tipo_articulo != tipo_esperado:
                 raise Exception(

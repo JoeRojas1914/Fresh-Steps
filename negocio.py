@@ -7,7 +7,7 @@ def obtener_negocios():
     try:
         cursor.execute("""
             SELECT id_negocio, nombre
-            FROM Negocio
+            FROM negocio
             ORDER BY nombre
         """)
         return cursor.fetchall()

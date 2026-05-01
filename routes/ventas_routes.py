@@ -1,14 +1,33 @@
+import logging
 from flask import Blueprint, render_template, jsonify, session, request
 from datetime import date
 
-from services.ventas_service import listar_ventas_listas_service, registrar_pago_final_service, listar_entregas_pendientes_service
+from services.ventas_service import (
+    listar_ventas_listas_service,
+    registrar_pago_final_service,
+    listar_entregas_pendientes_service,
+    guardar_venta_service,
+)
 from ventas import (
     marcar_entregada,
     obtener_venta,
     obtener_detalles_venta,
 )
 
+logger = logging.getLogger(__name__)
+
 ventas_bp = Blueprint("ventas", __name__)
+
+
+@ventas_bp.route("/ventas/guardar", methods=["POST"])
+def guardar_venta():
+    id_usuario = session.get("id_usuario")
+    id_venta, error = guardar_venta_service(request.form, id_usuario)
+
+    if error:
+        return jsonify({"ok": False, "error": error}), 400
+
+    return jsonify({"ok": True, "id_venta": id_venta}), 200
 
 
 @ventas_bp.route("/ventas")
@@ -71,7 +90,7 @@ def ventas_pendientes():
 
         data = listar_entregas_pendientes_service(id_negocio)
 
-        print("DATA:", data)
+        logger.debug("ventas_pendientes data: %s", data)
 
         return render_template(
             "ventas_pendientes.html",
@@ -79,7 +98,7 @@ def ventas_pendientes():
         )
 
     except Exception as e:
-        print("ERROR EN ventas_pendientes:", e)
+        logger.error("ERROR EN ventas_pendientes: %s", e, exc_info=True)
         return str(e), 500
 
 
