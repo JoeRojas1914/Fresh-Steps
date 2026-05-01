@@ -45,6 +45,7 @@ def eliminar_cliente(id_cliente, id_usuario):
             SELECT COUNT(*) AS total
             FROM venta
             WHERE id_cliente=%s
+              AND eliminado = 0
         """, (id_cliente,))
 
         if cursor.fetchone()["total"] > 0:

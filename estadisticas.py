@@ -55,6 +55,7 @@ def contar_ventas_por_semana(inicio: date, fin: date, id_negocio: str):
             FROM venta
             WHERE fecha_recibo >= %s
             AND fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
+            AND eliminado = 0
         """
 
         params = [semana_inicio_real, semana_fin_real]
@@ -179,6 +180,7 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str):
                 WHERE v.fecha_recibo >= %s
                   AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
                   AND v.id_negocio = 1
+                  AND v.eliminado = 0
             """
             cursor.execute(query, [semana_inicio, semana_fin])
             total_unidades += cursor.fetchone()["total"]
@@ -192,6 +194,7 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str):
                 WHERE v.fecha_recibo >= %s
                   AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
                   AND v.id_negocio = 2
+                  AND v.eliminado = 0
             """
             cursor.execute(query, [semana_inicio, semana_fin])
             total_unidades += cursor.fetchone()["total"]
@@ -205,6 +208,7 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str):
                 WHERE v.fecha_recibo >= %s
                   AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
                   AND v.id_negocio = 3
+                  AND v.eliminado = 0
             """
             cursor.execute(query, [semana_inicio, semana_fin])
             total_unidades += cursor.fetchone()["total"]
@@ -231,6 +235,7 @@ def obtener_total_ingresos(inicio, fin, id_negocio):
         JOIN venta v ON v.id_venta = pv.id_venta
         WHERE pv.fecha_pago >= %s
           AND pv.fecha_pago < DATE_ADD(%s, INTERVAL 1 DAY)
+          AND v.eliminado = 0
     """
     params = [inicio, fin]
 
@@ -267,6 +272,7 @@ def obtener_ingresos_por_semana(inicio, fin, id_negocio):
             JOIN venta v ON v.id_venta = pv.id_venta
             WHERE pv.fecha_pago >= %s
               AND pv.fecha_pago < DATE_ADD(%s, INTERVAL 1 DAY)
+              AND v.eliminado = 0
         """
         params = [semana_inicio, semana_fin]
 
@@ -308,6 +314,7 @@ def obtener_uso_servicios(inicio, fin, id_negocio):
         JOIN articulo a ON a.id_articulo = aps.id_articulo
         JOIN venta v ON v.id_venta = a.id_venta
         WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+          AND v.eliminado = 0
     """
     params = [inicio, fin]
 
@@ -339,6 +346,7 @@ def obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio):
             COUNT(*) AS total
         FROM venta v
         WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+          AND v.eliminado = 0
     """
     params = [inicio, fin]
 
@@ -370,6 +378,7 @@ def obtener_ventas_por_dia(inicio, fin, id_negocio):
         FROM venta
         WHERE DATE(fecha_recibo) BETWEEN %s AND %s
           AND WEEKDAY(fecha_recibo) BETWEEN 0 AND 5
+          AND eliminado = 0
     """
     params = [inicio, fin]
 

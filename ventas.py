@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from db import get_connection
 from datetime import datetime
 
@@ -250,6 +250,7 @@ def contar_entregas_listas(id_negocio=None):
         FROM venta
         WHERE fecha_lista IS NOT NULL
           AND fecha_entrega IS NULL
+          AND eliminado = 0
         {filtros}
     """, params)
 
@@ -399,6 +400,7 @@ def obtener_ventas_listas(id_negocio=None):
         JOIN negocio n ON n.id_negocio = v.id_negocio
         WHERE v.fecha_lista IS NOT NULL
           AND v.fecha_entrega IS NULL
+          AND v.eliminado = 0
     """
 
     params = []
@@ -442,6 +444,7 @@ def obtener_venta(id_venta):
         LEFT JOIN pago_venta p ON p.id_venta = v.id_venta
 
         WHERE v.id_venta = %s
+          AND v.eliminado = 0
         GROUP BY v.id_venta
     """, (id_venta,))
 
@@ -457,7 +460,7 @@ def contar_ventas_cliente(id_cliente, id_negocio=None, fecha_inicio=None, fecha_
     conn = get_connection()
     cursor = conn.cursor()
 
-    sql = "SELECT COUNT(*) FROM venta WHERE id_cliente=%s"
+    sql = "SELECT COUNT(*) FROM venta WHERE id_cliente=%s AND eliminado=0"
     params = [id_cliente]
 
     if id_negocio:
@@ -491,6 +494,7 @@ def obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limi
         FROM venta v
         LEFT JOIN negocio n ON v.id_negocio = n.id_negocio
         WHERE v.id_cliente = %s
+          AND v.eliminado = 0
     """
 
     params = [id_cliente]
@@ -537,6 +541,7 @@ def obtener_entregas_pendientes(id_negocio=None):
         JOIN negocio n ON n.id_negocio = v.id_negocio
         WHERE v.fecha_lista IS NULL
           AND v.fecha_entrega IS NULL
+          AND v.eliminado = 0
     """
 
     params = []
@@ -571,6 +576,7 @@ def contar_entregas_pendientes(id_negocio=None):
         FROM venta
         WHERE fecha_lista IS NULL
           AND fecha_entrega IS NULL
+          AND eliminado = 0
         {filtros}
     """, params)
 
@@ -607,59 +613,27 @@ def marcar_como_lista(id_venta):
 
 
 def eliminar_venta(id_venta):
+    """
+    Soft delete: marca la venta como eliminada en lugar de borrarla físicamente.
+    Los datos se conservan para auditoría e historial de estadísticas.
+    Solo un admin puede llamar esta función (validación en la ruta).
+    """
     conn = get_connection()
     cursor = conn.cursor()
 
     try:
         cursor.execute("""
-            SELECT id_articulo
-            FROM articulo
+            UPDATE venta
+            SET eliminado = 1,
+                fecha_eliminado = NOW()
             WHERE id_venta = %s
-        """, (id_venta,))
-        
-        articulos = cursor.fetchall()
-        ids_articulos = [row[0] for row in articulos]
-
-        if ids_articulos:
-            format_strings = ','.join(['%s'] * len(ids_articulos))
-
-            cursor.execute(f"""
-                DELETE FROM articulo_servicio
-                WHERE id_articulo IN ({format_strings})
-            """, ids_articulos)
-
-            cursor.execute(f"""
-                DELETE FROM articulo_calzado
-                WHERE id_articulo IN ({format_strings})
-            """, ids_articulos)
-
-            cursor.execute(f"""
-                DELETE FROM articulo_confeccion
-                WHERE id_articulo IN ({format_strings})
-            """, ids_articulos)
-
-            cursor.execute(f"""
-                DELETE FROM articulo_maquila
-                WHERE id_articulo IN ({format_strings})
-            """, ids_articulos)
-
-            cursor.execute(f"""
-                DELETE FROM articulo
-                WHERE id_articulo IN ({format_strings})
-            """, ids_articulos)
-
-        cursor.execute("""
-            DELETE FROM pago_venta
-            WHERE id_venta = %s
+              AND eliminado = 0
         """, (id_venta,))
 
-        cursor.execute("""
-            DELETE FROM venta
-            WHERE id_venta = %s
-        """, (id_venta,))
-
+        afectadas = cursor.rowcount
         conn.commit()
-        return True
+
+        return afectadas > 0
 
     except Exception:
         conn.rollback()
