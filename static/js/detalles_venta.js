@@ -15,7 +15,6 @@ function toggleDetalles(idVenta) {
 
     fila.style.display = "table-row";
 
-    // 🔥 Si ya se cargaron, no vuelvas a pedirlos
     if (detallesCargados[idVenta]) return;
 
     lista.innerHTML = `<li style="opacity:0.6;">Cargando...</li>`;
