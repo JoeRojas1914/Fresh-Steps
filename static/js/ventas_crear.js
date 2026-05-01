@@ -154,8 +154,11 @@ async function crearCliente(e) {
 
     const formData = new FormData(e.target);
 
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
     const res = await fetch("/api/clientes/crear", {
         method: "POST",
+        headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
         body: formData
     });
 
