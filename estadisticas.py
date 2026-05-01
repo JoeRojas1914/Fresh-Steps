@@ -43,37 +43,34 @@ def contar_ventas_por_semana(inicio: date, fin: date, id_negocio: str):
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-
     resultados = []
 
-    for s in semanas:
-        semana_inicio_real = max(s["inicio"], inicio)
-        semana_fin_real = min(s["fin"], fin)
+    try:
+        for s in semanas:
+            semana_inicio_real = max(s["inicio"], inicio)
+            semana_fin_real = min(s["fin"], fin)
 
-        query = """
-            SELECT COUNT(*) AS total
-            FROM venta
-            WHERE fecha_recibo >= %s
-            AND fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
-            AND eliminado = 0
-        """
+            query = """
+                SELECT COUNT(*) AS total
+                FROM venta
+                WHERE fecha_recibo >= %s
+                AND fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
+                AND eliminado = 0
+            """
+            params = [semana_inicio_real, semana_fin_real]
 
-        params = [semana_inicio_real, semana_fin_real]
+            if id_negocio != "all":
+                query += " AND id_negocio = %s"
+                params.append(id_negocio)
 
-        if id_negocio != "all":
-            query += " AND id_negocio = %s"
-            params.append(id_negocio)
+            cursor.execute(query, params)
+            total = cursor.fetchone()["total"]
 
-        cursor.execute(query, params)
-        total = cursor.fetchone()["total"]
+            resultados.append({"label": s["label"], "total": total})
 
-        resultados.append({
-            "label": s["label"],
-            "total": total
-        })
-
-    cursor.close()
-    conn.close()
+    finally:
+        cursor.close()
+        conn.close()
 
     return resultados
 
@@ -83,51 +80,42 @@ def obtener_gastos_por_semana_y_proveedor(inicio: date, fin: date, id_negocio: s
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-
     data_por_proveedor = defaultdict(lambda: [0] * len(semanas))
 
-    for i, s in enumerate(semanas):
-        semana_inicio_real = max(s["inicio"], inicio)
-        semana_fin_real = min(s["fin"], fin)
+    try:
+        for i, s in enumerate(semanas):
+            semana_inicio_real = max(s["inicio"], inicio)
+            semana_fin_real = min(s["fin"], fin)
 
-        query = """
-            SELECT proveedor, SUM(total) AS total
-            FROM gastos
-            WHERE fecha_registro >= %s
-              AND fecha_registro <= %s
-        """
-        params = [semana_inicio_real, semana_fin_real]
+            query = """
+                SELECT proveedor, SUM(total) AS total
+                FROM gastos
+                WHERE fecha_registro >= %s
+                  AND fecha_registro <= %s
+            """
+            params = [semana_inicio_real, semana_fin_real]
 
-        if id_negocio != "all":
-            query += " AND id_negocio = %s"
-            params.append(id_negocio)
+            if id_negocio != "all":
+                query += " AND id_negocio = %s"
+                params.append(id_negocio)
 
-        query += " GROUP BY proveedor"
+            query += " GROUP BY proveedor"
 
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
 
-        for r in rows:
-            proveedor = r["proveedor"] or "Sin proveedor"
-            total = float(r["total"] or 0)
-            data_por_proveedor[proveedor][i] = total
+            for r in rows:
+                proveedor = r["proveedor"] or "Sin proveedor"
+                data_por_proveedor[proveedor][i] = float(r["total"] or 0)
 
-    cursor.close()
-    conn.close()
+    finally:
+        cursor.close()
+        conn.close()
 
     labels = [s["label"] for s in semanas]
+    datasets = [{"label": p, "data": v} for p, v in data_por_proveedor.items()]
 
-    datasets = []
-    for proveedor, valores in data_por_proveedor.items():
-        datasets.append({
-            "label": proveedor,
-            "data": valores
-        })
-
-    return {
-        "labels": labels,
-        "datasets": datasets
-    }
+    return {"labels": labels, "datasets": datasets}
 
 
 
@@ -147,11 +135,12 @@ def obtener_total_gastos(inicio: date, fin: date, id_negocio: str):
         query += " AND id_negocio = %s"
         params.append(id_negocio)
 
-    cursor.execute(query, params)
-    total = cursor.fetchone()["total"] or 0
-
-    cursor.close()
-    conn.close()
+    try:
+        cursor.execute(query, params)
+        total = cursor.fetchone()["total"] or 0
+    finally:
+        cursor.close()
+        conn.close()
 
     return float(total)
 
@@ -162,64 +151,58 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str):
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-
     resultados = []
 
-    for s in semanas:
-        semana_inicio = max(s["inicio"], inicio)
-        semana_fin = min(s["fin"], fin)
+    try:
+        for s in semanas:
+            semana_inicio = max(s["inicio"], inicio)
+            semana_fin = min(s["fin"], fin)
+            total_unidades = 0
 
-        total_unidades = 0
+            if id_negocio in ("1", "all"):
+                cursor.execute("""
+                    SELECT COUNT(a.id_articulo) AS total
+                    FROM venta v
+                    JOIN articulo a ON a.id_venta = v.id_venta
+                    JOIN articulo_calzado aca ON aca.id_articulo = a.id_articulo
+                    WHERE v.fecha_recibo >= %s
+                      AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
+                      AND v.id_negocio = 1
+                      AND v.eliminado = 0
+                """, [semana_inicio, semana_fin])
+                total_unidades += cursor.fetchone()["total"]
 
-        if id_negocio in ("1", "all"):
-            query = """
-                SELECT COUNT(a.id_articulo) AS total
-                FROM venta v
-                JOIN articulo a ON a.id_venta = v.id_venta
-                JOIN articulo_calzado aca ON aca.id_articulo = a.id_articulo
-                WHERE v.fecha_recibo >= %s
-                  AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
-                  AND v.id_negocio = 1
-                  AND v.eliminado = 0
-            """
-            cursor.execute(query, [semana_inicio, semana_fin])
-            total_unidades += cursor.fetchone()["total"]
+            if id_negocio in ("2", "all"):
+                cursor.execute("""
+                    SELECT COALESCE(SUM(ac.cantidad), 0) AS total
+                    FROM venta v
+                    JOIN articulo a ON a.id_venta = v.id_venta
+                    JOIN articulo_confeccion ac ON ac.id_articulo = a.id_articulo
+                    WHERE v.fecha_recibo >= %s
+                      AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
+                      AND v.id_negocio = 2
+                      AND v.eliminado = 0
+                """, [semana_inicio, semana_fin])
+                total_unidades += cursor.fetchone()["total"]
 
-        if id_negocio in ("2", "all"):
-            query = """
-                SELECT COALESCE(SUM(ac.cantidad), 0) AS total
-                FROM venta v
-                JOIN articulo a ON a.id_venta = v.id_venta
-                JOIN articulo_confeccion ac ON ac.id_articulo = a.id_articulo
-                WHERE v.fecha_recibo >= %s
-                  AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
-                  AND v.id_negocio = 2
-                  AND v.eliminado = 0
-            """
-            cursor.execute(query, [semana_inicio, semana_fin])
-            total_unidades += cursor.fetchone()["total"]
+            if id_negocio in ("3", "all"):
+                cursor.execute("""
+                    SELECT COALESCE(SUM(am.cantidad), 0) AS total
+                    FROM venta v
+                    JOIN articulo a ON a.id_venta = v.id_venta
+                    JOIN articulo_maquila am ON am.id_articulo = a.id_articulo
+                    WHERE v.fecha_recibo >= %s
+                      AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
+                      AND v.id_negocio = 3
+                      AND v.eliminado = 0
+                """, [semana_inicio, semana_fin])
+                total_unidades += cursor.fetchone()["total"]
 
-        if id_negocio in ("3", "all"):
-            query = """
-                SELECT COALESCE(SUM(am.cantidad), 0) AS total
-                FROM venta v
-                JOIN articulo a ON a.id_venta = v.id_venta
-                JOIN articulo_maquila am ON am.id_articulo = a.id_articulo
-                WHERE v.fecha_recibo >= %s
-                  AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
-                  AND v.id_negocio = 3
-                  AND v.eliminado = 0
-            """
-            cursor.execute(query, [semana_inicio, semana_fin])
-            total_unidades += cursor.fetchone()["total"]
+            resultados.append({"label": s["label"], "total": int(total_unidades)})
 
-        resultados.append({
-            "label": s["label"],
-            "total": int(total_unidades)
-        })
-
-    cursor.close()
-    conn.close()
+    finally:
+        cursor.close()
+        conn.close()
 
     return resultados
 
@@ -243,11 +226,12 @@ def obtener_total_ingresos(inicio, fin, id_negocio):
         sql += " AND v.id_negocio = %s"
         params.append(id_negocio)
 
-    cursor.execute(sql, params)
-    total = cursor.fetchone()["total"] or 0
-
-    cursor.close()
-    conn.close()
+    try:
+        cursor.execute(sql, params)
+        total = cursor.fetchone()["total"] or 0
+    finally:
+        cursor.close()
+        conn.close()
 
     return float(total)
 
@@ -259,51 +243,50 @@ def obtener_ingresos_por_semana(inicio, fin, id_negocio):
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-
     resultados = []
 
-    for s in semanas:
-        semana_inicio = max(s["inicio"], inicio)
-        semana_fin = min(s["fin"], fin)
+    try:
+        for s in semanas:
+            semana_inicio = max(s["inicio"], inicio)
+            semana_fin = min(s["fin"], fin)
 
-        sql = """
-            SELECT COALESCE(SUM(pv.monto), 0) AS total
-            FROM pago_venta pv
-            JOIN venta v ON v.id_venta = pv.id_venta
-            WHERE pv.fecha_pago >= %s
-              AND pv.fecha_pago < DATE_ADD(%s, INTERVAL 1 DAY)
-              AND v.eliminado = 0
-        """
-        params = [semana_inicio, semana_fin]
+            sql = """
+                SELECT COALESCE(SUM(pv.monto), 0) AS total
+                FROM pago_venta pv
+                JOIN venta v ON v.id_venta = pv.id_venta
+                WHERE pv.fecha_pago >= %s
+                  AND pv.fecha_pago < DATE_ADD(%s, INTERVAL 1 DAY)
+                  AND v.eliminado = 0
+            """
+            params = [semana_inicio, semana_fin]
 
-        if id_negocio != "all":
-            sql += " AND v.id_negocio = %s"
-            params.append(id_negocio)
+            if id_negocio != "all":
+                sql += " AND v.id_negocio = %s"
+                params.append(id_negocio)
 
-        cursor.execute(sql, params)
-        total = cursor.fetchone()["total"] or 0
+            cursor.execute(sql, params)
+            total = cursor.fetchone()["total"] or 0
 
-        resultados.append({
-            "label": s["label"],
-            "total": float(total)
-        })
+            resultados.append({"label": s["label"], "total": float(total)})
 
-    cursor.close()
-    conn.close()
+    finally:
+        cursor.close()
+        conn.close()
 
     return resultados
 
 
 
 def ejecutar_query(sql, params=None):
+    """Abre su propia conexión. Usar solo para queries simples de una sola llamada."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute(sql, params or [])
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return rows
-
+    try:
+        cursor.execute(sql, params or [])
+        return cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def obtener_uso_servicios(inicio, fin, id_negocio):
@@ -356,15 +339,12 @@ def obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio):
 
     sql += " GROUP BY tipo"
 
-    cursor.execute(sql, params)
-    rows = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return rows
-
-
+    try:
+        cursor.execute(sql, params)
+        return cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def obtener_ventas_por_dia(inicio, fin, id_negocio):
@@ -388,11 +368,12 @@ def obtener_ventas_por_dia(inicio, fin, id_negocio):
 
     sql += " GROUP BY dia"
 
-    cursor.execute(sql, params)
-    rows = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
+    try:
+        cursor.execute(sql, params)
+        rows = cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
 
     dias = [0, 0, 0, 0, 0, 0]
     for r in rows:
