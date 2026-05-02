@@ -65,7 +65,8 @@
 {% endcall %}
 
 
-    <form method="POST" action="/ventas/guardar" id="formVenta" class="venta-layout">
+    <form id="formVenta" class="venta-layout">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="id_cliente" id="id_cliente">
 
         <div class="venta-main">
@@ -260,4 +261,4 @@
     <script src="{{ url_for('static', filename='js/ventas_crear.js') }}"></script>
 {% endblock %}
 
-{% endblock %} 
+{% endblock %}

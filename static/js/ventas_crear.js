@@ -1,8 +1,10 @@
-let contadorArticulos = 0;
-let serviciosGlobales = [];
-let negocioSeleccionado = "";
+if (typeof contadorArticulos === "undefined") {
+    var contadorArticulos = 0;
+    var serviciosGlobales = [];
+    var negocioSeleccionado = "";
+    var ventaEnProceso = false;
 
-document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("buscarCliente").addEventListener("input", buscarClientes);
 
     document.getElementById("btnCambiarCliente").addEventListener("click", () => {
@@ -38,6 +40,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("formVenta").addEventListener("submit", async function(e) {
         e.preventDefault();
 
+        if (ventaEnProceso) return;
+        ventaEnProceso = true;
+
+        const btnCrear = document.getElementById("btnCrear");
+        if (btnCrear) btnCrear.disabled = true;
+
         const form = e.target;
         const formData = new FormData(form);
 
@@ -45,25 +53,36 @@ document.addEventListener("DOMContentLoaded", () => {
         const nuevaPestana = window.open("", "_blank");
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
             const res = await fetch("/ventas/guardar", {
                 method: "POST",
+                headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
                 body: formData
             });
 
             const data = await res.json();
 
             if (!data.ok) {
-                nuevaPestana.close();
+                if (nuevaPestana) nuevaPestana.close();
+                ventaEnProceso = false;
+                if (btnCrear) btnCrear.disabled = false;
                 alert("❌ Error: " + (data.error || "No se pudo guardar la venta"));
                 return;
             }
 
-            nuevaPestana.location.href = `/ventas/ticket/${data.id_venta}`;
+            if (nuevaPestana) {
+                nuevaPestana.location.href = `/ventas/ticket/${data.id_venta}`;
+            } else {
+                window.open(`/ventas/ticket/${data.id_venta}`, "_blank");
+            }
 
             window.location.href = "/ventas/pendientes";
 
         } catch (err) {
-            nuevaPestana.close();
+            if (nuevaPestana) nuevaPestana.close();
+            ventaEnProceso = false;
+            if (btnCrear) btnCrear.disabled = false;
             alert("❌ Error inesperado al guardar la venta.");
             console.error(err);
         }
@@ -78,6 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleDescuento();
     validarFormulario();
 });
+
+} 
 
 
 function bloquearFechaMinima() {
