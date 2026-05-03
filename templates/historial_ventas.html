@@ -43,6 +43,14 @@
                 {% if id_negocio or fecha_inicio or fecha_fin %}
                 <a href="/ventas/historial" class="btn btn--danger btn--sm" style="text-decoration:none;">✕ Limpiar</a>
                 {% endif %}
+                <a href="{{ url_for('ventas.exportar_historial_excel',
+                            id_negocio=id_negocio or '',
+                            fecha_inicio=fecha_inicio or '',
+                            fecha_fin=fecha_fin or '') }}"
+                   class="btn btn--success btn--sm"
+                   style="text-decoration:none;">
+                    ⬇ Exportar Excel
+                </a>
             </div>
 
         </div>
@@ -92,9 +100,9 @@
     <td>${{ "%.2f" | format(v.total) }}</td>
     <td>
         <span class="badge-estado {{ v.estado }}">
-            {% if v.estado == 'pendiente' %}⏳ Pendiente
-            {% elif v.estado == 'lista' %}📦 Lista
-            {% else %}✅ Entregada{% endif %}
+            {% if v.estado == 'pendiente' %}Pendiente
+            {% elif v.estado == 'lista' %}Lista
+            {% else %}Entregada{% endif %}
         </span>
     </td>
     <td>
