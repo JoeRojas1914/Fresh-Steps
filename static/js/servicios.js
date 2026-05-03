@@ -1,24 +1,36 @@
 document.addEventListener("DOMContentLoaded", () => {
-
     const form = document.querySelector(".modal-form");
-    if (!form) return;
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            const negocio = document.getElementById("id_negocio").value;
+            const nombre = document.querySelector("[name=nombre]").value.trim();
+            const precio = document.querySelector("[name=precio]").value;
 
-    form.addEventListener("submit", function (e) {
-        const negocio = document.getElementById("id_negocio").value;
-        const nombre = document.querySelector("[name=nombre]").value.trim();
-        const precio = document.querySelector("[name=precio]").value;
+            if (!negocio || !nombre || precio === "") {
+                alert("Negocio, nombre y precio son obligatorios.");
+                e.preventDefault();
+                return;
+            }
 
-        if (!negocio || !nombre || precio === "") {
-            alert("Negocio, nombre y precio son obligatorios.");
-            e.preventDefault();
-            return;
-        }
+            if (parseFloat(precio) < 0) {
+                alert("El precio no puede ser negativo.");
+                e.preventDefault();
+            }
+        });
+    }
 
-        if (parseFloat(precio) < 0) {
-            alert("El precio no puede ser negativo.");
-            e.preventDefault();
-        }
-    });
+
+    const select = document.getElementById("select-negocio-servicios");
+    const toggle = document.getElementById("toggle-eliminados-servicios");
+    const formFiltro = document.getElementById("form-filtro-servicios");
+
+    if (select && formFiltro) {
+        select.addEventListener("change", () => formFiltro.submit());
+    }
+
+    if (toggle && formFiltro) {
+        toggle.addEventListener("change", () => formFiltro.submit());
+    }
 
 });
 

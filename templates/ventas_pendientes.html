@@ -3,28 +3,19 @@
 {% from "macros/badges.html" import badge_negocio %}
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal %}
-
-
     <h1>🧾 Entregas pendientes</h1>
 
-    {% if ventas %}
-    <div style="margin-bottom: 20px; display:flex; gap:10px; align-items:center;">
-
-        <input type="text" id="buscador-cliente" 
-            placeholder="🔍 Buscar cliente..."
-            style="padding:6px 10px; width:250px; border-radius:5px; border:1px solid #ccc;">
-
-        <select id="filtro-negocio"
-                style="padding:6px 10px; border-radius:5px; border:1px solid #ccc;">
-            <option value="">Todos los negocios</option>
-            {% for n in negocios %}
-                <option value="{{ n.nombre | lower }}">
-                    {{ n.nombre }}
-                </option>
-            {% endfor %}
-        </select>
-
+    <div class="filtro-box">
+        <div class="filtro-row">
+            <div class="filtro-item" style="max-width:280px;">
+                <label>Buscar cliente</label>
+                <input type="text" id="buscador-cliente"
+                       placeholder="Nombre o apellido...">
+            </div>
+        </div>
     </div>
+
+    {% if ventas %}
 
 
     <div id="toast-container"></div>
@@ -179,4 +170,3 @@
     <script src="{{ url_for('static', filename='js/detalles_venta.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/entregas_pendientes.js') }}"></script>
 {% endblock %}
-

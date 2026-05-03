@@ -12,36 +12,37 @@
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
-<form method="GET" action="/servicios" class="search-bar">
-    <select name="id_negocio" onchange="this.form.submit()">
-        <option value="">Todos los negocios</option>
-        {% for n in negocios %}
-            <option value="{{ n.id_negocio }}"
-                {% if id_negocio and id_negocio|int == n.id_negocio %}
-                    selected
-                {% endif %}
-            >
-                {{ n.nombre }}
-            </option>
-        {% endfor %}
-    </select>
-</form>
-
-<form method="GET" action="/servicios" class="filtro-toggle">
-    <input type="hidden" name="id_negocio" value="{{ id_negocio or '' }}">
-
-    <label class="switch">
-        <input type="checkbox"
-               name="eliminados"
-               value="1"
-               onchange="this.form.submit()"
-               {% if incluir_eliminados %}checked{% endif %}>
-        <span class="slider"></span>
-    </label>
-
-    <span class="toggle-text">
-        Mostrar eliminados
-    </span>
+<form method="GET" action="/servicios" id="form-filtro-servicios">
+    <div class="filtro-box">
+        <div class="filtro-row" style="align-items:center;">
+            <div class="filtro-item" style="max-width:240px;">
+                <label>Negocio</label>
+                <select name="id_negocio" id="select-negocio-servicios">
+                    <option value="">Todos los negocios</option>
+                    {% for n in negocios %}
+                        <option value="{{ n.id_negocio }}"
+                            {% if id_negocio and id_negocio|int == n.id_negocio %}selected{% endif %}>
+                            {{ n.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filtro-item" style="flex:0 0 auto; min-width:auto;">
+                <label>&nbsp;</label>
+                <div class="filtro-toggle" style="margin:0; gap:10px;">
+                    <label class="switch">
+                        <input type="checkbox"
+                               name="eliminados"
+                               value="1"
+                               id="toggle-eliminados-servicios"
+                               {% if incluir_eliminados %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="toggle-text">Mostrar eliminados</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
 
 
@@ -189,4 +190,14 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
     <script src="{{ url_for('static', filename='js/servicios.js') }}"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const select = document.getElementById("select-negocio-servicios");
+        const toggle = document.getElementById("toggle-eliminados-servicios");
+        const form   = document.getElementById("form-filtro-servicios");
+
+        if (select) select.addEventListener("change", () => form.submit());
+        if (toggle) toggle.addEventListener("change", () => form.submit());
+    });
+    </script>
 {% endblock %}

@@ -1,0 +1,24 @@
+{% macro abrir_filtro(action, method="GET") %}
+<form method="{{ method }}" action="{{ action }}">
+    <div class="filtro-box">
+        <div class="filtro-row">
+{% endmacro %}
+
+{% macro cerrar_filtro(limpiar_url=None, mostrar_limpiar=False, extra="") %}
+            <div class="filtro-actions">
+                <button type="submit" class="btn btn--primary btn--sm">
+                    🔍 Filtrar
+                </button>
+                {% if mostrar_limpiar and limpiar_url %}
+                <a href="{{ limpiar_url }}"
+                   class="btn btn--danger btn--sm"
+                   style="text-decoration:none;">
+                    ✕ Limpiar
+                </a>
+                {% endif %}
+                {{ extra | safe }}
+            </div>
+        </div>
+    </div>
+</form>
+{% endmacro %}

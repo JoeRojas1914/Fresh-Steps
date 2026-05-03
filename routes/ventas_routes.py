@@ -241,7 +241,6 @@ def exportar_historial_excel():
     detalles_map = obtener_detalles_venta(ids_venta)
     pagos_map    = obtener_pagos_venta(ids_venta)
 
-    # ── Paleta ───────────────────────────────────────────────
     C = {
         "azul":        "1E7FD6",
         "azul_claro":  "E6F3FF",
@@ -333,9 +332,7 @@ def exportar_historial_excel():
 
     wb = Workbook()
 
-    # ════════════════════════════════════════════════════════════
-    # HOJA 1 — Resumen de ventas
-    # ════════════════════════════════════════════════════════════
+
     ws1 = wb.active
     ws1.title = "Resumen ventas"
     ws1.freeze_panes = "A4"
@@ -379,7 +376,6 @@ def exportar_historial_excel():
         cell(ws1, r, 14, v.get("usuario_entrego") or "—", fg=bg)
         ws1.row_dimensions[r].height = 16
 
-    # Fila totales hoja 1
     if ventas:
         tr = len(ventas) + 4
         ws1.merge_cells(f"A{tr}:{get_column_letter(8)}{tr}")
@@ -406,9 +402,7 @@ def exportar_historial_excel():
     for ci, w in enumerate([10,16,26,16,20,20,18,18,13,13,13,13,18,18], 1):
         ws1.column_dimensions[get_column_letter(ci)].width = w
 
-    # ════════════════════════════════════════════════════════════
-    # HOJA 2 — Artículos por venta
-    # ════════════════════════════════════════════════════════════
+
     ws2 = wb.create_sheet("Artículos")
     ws2.freeze_panes = "A4"
 
@@ -489,9 +483,7 @@ def exportar_historial_excel():
     for ci, w in enumerate([10,16,26,14,24,28,10,24,18,24], 1):
         ws2.column_dimensions[get_column_letter(ci)].width = w
 
-    # ════════════════════════════════════════════════════════════
-    # HOJA 3 — Pagos por venta
-    # ════════════════════════════════════════════════════════════
+
     ws3 = wb.create_sheet("Pagos")
     ws3.freeze_panes = "A4"
 
@@ -542,7 +534,6 @@ def exportar_historial_excel():
     for ci, w in enumerate([10,16,26,16,16,14,14,18,18], 1):
         ws3.column_dimensions[get_column_letter(ci)].width = w
 
-    # ── Enviar archivo ────────────────────────────────────────
     buf = io.BytesIO()
     wb.save(buf)
     buf.seek(0)
