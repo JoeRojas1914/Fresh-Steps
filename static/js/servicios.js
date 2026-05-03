@@ -19,19 +19,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
     const select = document.getElementById("select-negocio-servicios");
     const toggle = document.getElementById("toggle-eliminados-servicios");
     const formFiltro = document.getElementById("form-filtro-servicios");
 
-    if (select && formFiltro) {
-        select.addEventListener("change", () => formFiltro.submit());
-    }
+    if (formFiltro) {
+        if (select) {
+            select.addEventListener("change", () => formFiltro.submit());
+        }
 
-    if (toggle && formFiltro) {
-        toggle.addEventListener("change", () => formFiltro.submit());
+        if (toggle) {
+            toggle.addEventListener("change", () => formFiltro.submit());
+        }
     }
-
 });
 
 

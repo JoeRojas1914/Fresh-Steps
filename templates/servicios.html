@@ -46,7 +46,15 @@
 </form>
 
 
-<button onclick="abrirNuevoServicio()" class="btn btn--primary">➕ Agregar servicio</button>
+<div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+    <button onclick="abrirNuevoServicio()" class="btn btn--primary">➕ Agregar servicio</button>
+    <a href="{{ url_for('servicios.exportar_servicios_excel',
+                id_negocio=request.args.get('id_negocio') or '',
+                eliminados='1' if incluir_eliminados else '') }}"
+       class="btn btn--success btn--sm" style="text-decoration:none;">
+        ⬇ Exportar Excel
+    </a>
+</div>
 
 
 {% call(section) modal("modalServicio", "Agregar servicio", "md") %}
