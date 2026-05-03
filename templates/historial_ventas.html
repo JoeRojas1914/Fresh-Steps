@@ -8,13 +8,13 @@
 {% from "macros/badges.html" import badge_negocio %}
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
-
+ 
 <h1>📋 Historial de ventas</h1>
-
+ 
 <form method="GET" action="/ventas/historial">
     <div class="filtro-box">
         <div class="filtro-row">
-
+ 
             <div class="filtro-item">
                 <label>Negocio</label>
                 <select name="id_negocio">
@@ -27,17 +27,17 @@
                     {% endfor %}
                 </select>
             </div>
-
+ 
             <div class="filtro-item">
                 <label>Desde</label>
                 <input type="date" name="fecha_inicio" value="{{ fecha_inicio or '' }}">
             </div>
-
+ 
             <div class="filtro-item">
                 <label>Hasta</label>
                 <input type="date" name="fecha_fin" value="{{ fecha_fin or '' }}">
             </div>
-
+ 
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm">🔍 Filtrar</button>
                 {% if id_negocio or fecha_inicio or fecha_fin %}
@@ -52,28 +52,28 @@
                     ⬇ Exportar Excel
                 </a>
             </div>
-
+ 
         </div>
     </div>
 </form>
-
+ 
 {% if ventas %}
-
+ 
 <div id="toast-container"></div>
 <div id="tabla-ventas">
-
+ 
 {% set meses = {
     1:'enero', 2:'febrero', 3:'marzo', 4:'abril',
     5:'mayo', 6:'junio', 7:'julio', 8:'agosto',
     9:'septiembre', 10:'octubre', 11:'noviembre', 12:'diciembre'
 } %}
-
+ 
 {% call table([
     "Recibo", "Negocio", "Cliente", "Teléfono",
-    "Fecha recibo", "Fecha estimada", "Fecha entrega",
-    "Total", "Estado", "Detalles"
+    "Fecha recibo", "Fecha estimada", "Fecha lista",
+    "Fecha entrega", "Total", "Estado", "Detalles"
 ]) %}
-
+ 
 {% for v in ventas %}
 <tr>
     <td>#{{ v.id_venta }}</td>
@@ -90,6 +90,12 @@
     <td>
         {{ v.fecha_estimada.day }} {{ meses[v.fecha_estimada.month] }}
         {{ "%02d:%02d" | format(v.fecha_estimada.hour, v.fecha_estimada.minute) }}
+    </td>
+    <td>
+        {% if v.fecha_lista %}
+            {{ v.fecha_lista.day }} {{ meses[v.fecha_lista.month] }}
+            {{ "%02d:%02d" | format(v.fecha_lista.hour, v.fecha_lista.minute) }}
+        {% else %}<span style="opacity:.4;">—</span>{% endif %}
     </td>
     <td>
         {% if v.fecha_entrega %}
@@ -109,16 +115,16 @@
         <button class="btn btn--info btn--sm" data-id="{{ v.id_venta }}">ℹ️ Info</button>
     </td>
 </tr>
-
+ 
 <tr id="detalles-{{ v.id_venta }}" class="table--details" style="display:none;">
-    <td colspan="10">
+    <td colspan="11">
         <div class="detalles-box">
             <div class="detalles-title">🧾 Detalles de la venta</div>
-
+ 
             <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}">
                 <li style="opacity:0.6;">Cargando detalles...</li>
             </ul>
-
+ 
             <div class="pagos-title">💳 Pagos registrados</div>
             {% if v.pagos %}
                 {% for p in v.pagos %}
@@ -135,24 +141,21 @@
             {% else %}
                 <div style="opacity:.55; font-size:13px; font-style:italic; margin-bottom:10px;">Sin pagos registrados</div>
             {% endif %}
-
-            <div class="detalles-info-extra">
+ 
+            <div class="pagos-title">👤 Usuarios</div>
                 {% if v.usuario_creo %}
-                <div class="detalles-info-row">
-                    <strong>Registrada por:</strong> {{ v.usuario_creo }}
+                <div class="pago-fila">
+                    <span class="pago-tipo">Registrada por</span>
+                    <span class="pago-monto" style="color:#1e7fd6;">{{ v.usuario_creo }}</span>
                 </div>
                 {% endif %}
                 {% if v.usuario_entrego %}
-                <div class="detalles-info-row">
-                    <strong>Entregada por:</strong> {{ v.usuario_entrego }}
-                    {% if v.fecha_entrega %}
-                        — {{ v.fecha_entrega.day }} {{ meses[v.fecha_entrega.month] }}
-                        {{ "%02d:%02d" | format(v.fecha_entrega.hour, v.fecha_entrega.minute) }}
-                    {% endif %}
+                <div class="pago-fila">
+                    <span class="pago-tipo">Entregada por</span>
+                    <span class="pago-monto" style="color:#1e7fd6;">{{ v.usuario_entrego }}</span>
                 </div>
                 {% endif %}
-            </div>
-
+ 
             <div class="btn-row">
                 <button type="button"
                         class="btn btn--info btn--sm"
@@ -164,10 +167,10 @@
     </td>
 </tr>
 {% endfor %}
-
+ 
 {% endcall %}
 </div>
-
+ 
 {{ pagination(
     pagina,
     total_paginas,
@@ -178,7 +181,7 @@
         "fecha_fin":    fecha_fin
     }
 ) }}
-
+ 
 {% else %}
 <div style="
     margin-top: 30px; padding: 20px; text-align: center;
@@ -188,8 +191,9 @@
     📭 No se encontraron ventas con los filtros seleccionados
 </div>
 {% endif %}
-
+ 
 {% endblock %}
+ 
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/detalles_venta.js') }}"></script>
