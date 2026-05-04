@@ -86,7 +86,6 @@ window.restaurarCliente = function (idCliente) {
 };
 
 document.addEventListener("click", function (e) {
-    // Ignore clicks inside modals
     if (e.target.closest(".modal")) return;
 
     const row = e.target.closest("tr[data-href]");
@@ -99,12 +98,10 @@ document.addEventListener("click", function (e) {
 });
 
 
-/* ── Filtro en tiempo real por nombre de cliente ── */
 (function () {
     const input = document.getElementById("buscar-cliente-input");
     if (!input) return;
 
-    // Only filter rows that are actual client rows (have data-href)
     const filas = document.querySelectorAll("tr[data-href]");
 
     function normalizar(txt) {
