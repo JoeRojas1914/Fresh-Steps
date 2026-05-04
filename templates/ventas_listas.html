@@ -12,6 +12,15 @@
                 <input type="text" id="buscador-cliente"
                        placeholder="Nombre o apellido...">
             </div>
+            <div class="filtro-item" style="max-width:220px; margin-left:12px;">
+                <label>Negocio</label>
+                <select id="filtro-negocio">
+                    <option value="">Todos los negocios</option>
+                    {% for n in negocios %}
+                        <option value="{{ n.nombre | lower }}">{{ n.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
     </div>
 
