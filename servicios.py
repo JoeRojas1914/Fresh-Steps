@@ -102,50 +102,54 @@ def eliminar_servicio(id_servicio, id_usuario):
 def obtener_servicio_por_id(id_servicio):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    cursor.execute("""
-        SELECT s.id_servicio,
-               s.id_negocio,
-               n.nombre AS negocio,
-               s.nombre,
-               s.precio
-        FROM servicio s
-        JOIN Negocio n ON s.id_negocio = n.id_negocio
-        WHERE s.id_servicio = %s
-          AND s.activo = 1
-    """, (id_servicio,))
+        cursor.execute("""
+            SELECT s.id_servicio,
+                   s.id_negocio,
+                   n.nombre AS negocio,
+                   s.nombre,
+                   s.precio
+            FROM servicio s
+            JOIN Negocio n ON s.id_negocio = n.id_negocio
+            WHERE s.id_servicio = %s
+              AND s.activo = 1
+        """, (id_servicio,))
 
-    servicio = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return servicio
+        servicio = cursor.fetchone()
+        return servicio
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def contar_servicios(id_negocio=None, q=None, incluir_eliminados=False):
 
     conn = get_connection()
     cursor = conn.cursor()
+    try:
 
-    sql = "SELECT COUNT(*) FROM servicio WHERE 1=1"
-    params = []
+        sql = "SELECT COUNT(*) FROM servicio WHERE 1=1"
+        params = []
 
-    if id_negocio:
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+        if id_negocio:
+            sql += " AND id_negocio = %s"
+            params.append(id_negocio)
 
-    if q:
-        sql += " AND nombre LIKE %s"
-        params.append(f"%{q}%")
+        if q:
+            sql += " AND nombre LIKE %s"
+            params.append(f"%{q}%")
 
-    if not incluir_eliminados:
-        sql += " AND activo = 1"
+        if not incluir_eliminados:
+            sql += " AND activo = 1"
 
-    cursor.execute(sql, params)
-    total = cursor.fetchone()[0]
+        cursor.execute(sql, params)
+        total = cursor.fetchone()[0]
 
-    cursor.close()
-    conn.close()
-    return total
+        return total
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
@@ -153,40 +157,42 @@ def obtener_servicios(id_negocio=None, q=None, incluir_eliminados=False, limit=1
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    sql = """
-        SELECT s.id_servicio,
-            s.nombre,
-            s.precio,
-            s.id_negocio,
-            s.activo,
-            n.nombre AS negocio
-        FROM servicio s
-        JOIN negocio n ON n.id_negocio = s.id_negocio
-        WHERE 1=1
-    """
-    params = []
+        sql = """
+            SELECT s.id_servicio,
+                s.nombre,
+                s.precio,
+                s.id_negocio,
+                s.activo,
+                n.nombre AS negocio
+            FROM servicio s
+            JOIN negocio n ON n.id_negocio = s.id_negocio
+            WHERE 1=1
+        """
+        params = []
 
-    if id_negocio:
-        sql += " AND s.id_negocio = %s"
-        params.append(id_negocio)
+        if id_negocio:
+            sql += " AND s.id_negocio = %s"
+            params.append(id_negocio)
 
-    if q:
-        sql += " AND s.nombre LIKE %s"
-        params.append(f"%{q}%")
+        if q:
+            sql += " AND s.nombre LIKE %s"
+            params.append(f"%{q}%")
 
-    if not incluir_eliminados:
-        sql += " AND s.activo = 1"
+        if not incluir_eliminados:
+            sql += " AND s.activo = 1"
 
-    sql += " ORDER BY s.nombre ASC LIMIT %s OFFSET %s"
-    params.extend([limit, offset])
+        sql += " ORDER BY s.nombre ASC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
 
-    cursor.execute(sql, params)
-    servicios = cursor.fetchall()
+        cursor.execute(sql, params)
+        servicios = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
-    return servicios
+        return servicios
+    finally:
+        cursor.close()
+        conn.close()
 
 def servicio_tiene_ventas(cursor, id_servicio):
 
@@ -243,20 +249,22 @@ def registrar_historial(cursor, id_servicio, accion, id_usuario, antes=None, des
 def obtener_historial_servicio(id_servicio):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    cursor.execute("""
-        SELECT h.*, u.usuario AS usuario
-        FROM servicios_historial h
-        JOIN usuario u ON u.id_usuario = h.id_usuario
-        WHERE id_servicio=%s
-        ORDER BY fecha DESC
-    """, (id_servicio,))
+        cursor.execute("""
+            SELECT h.*, u.usuario AS usuario
+            FROM servicios_historial h
+            JOIN usuario u ON u.id_usuario = h.id_usuario
+            WHERE id_servicio=%s
+            ORDER BY fecha DESC
+        """, (id_servicio,))
 
-    data = cursor.fetchall()
+        data = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
-    return data
+        return data
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def restaurar_servicio(id_servicio, id_usuario):

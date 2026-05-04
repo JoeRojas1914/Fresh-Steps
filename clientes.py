@@ -111,59 +111,65 @@ def actualizar_cliente(id_cliente, nombre, apellido, correo, telefono, direccion
 def contar_clientes(q=None, incluir_eliminados=False):
     conn = get_connection()
     cursor = conn.cursor()
+    try:
 
-    sql = "SELECT COUNT(*) FROM cliente WHERE 1=1"
-    params = []
+        sql = "SELECT COUNT(*) FROM cliente WHERE 1=1"
+        params = []
 
-    if not incluir_eliminados:
-        sql += " AND activo = 1"
+        if not incluir_eliminados:
+            sql += " AND activo = 1"
 
-    if q:
-        sql += " AND (nombre LIKE %s OR apellido LIKE %s)"
-        params.extend([f"%{q}%", f"%{q}%"])
+        if q:
+            sql += " AND (nombre LIKE %s OR apellido LIKE %s)"
+            params.extend([f"%{q}%", f"%{q}%"])
 
-    cursor.execute(sql, params)
-    total = cursor.fetchone()[0]
+        cursor.execute(sql, params)
+        total = cursor.fetchone()[0]
 
-    cursor.close()
-    conn.close()
-    return total
+        return total
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
 def buscar_clientes_por_nombre(texto):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    cursor.execute("""
-        SELECT *
-        FROM cliente
-        WHERE nombre LIKE %s OR apellido LIKE %s
-    """, (f"%{texto}%", f"%{texto}%"))
+        cursor.execute("""
+            SELECT *
+            FROM cliente
+            WHERE nombre LIKE %s OR apellido LIKE %s
+        """, (f"%{texto}%", f"%{texto}%"))
 
-    resultados = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return resultados
+        resultados = cursor.fetchall()
+        return resultados
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
 def obtener_cliente_por_id(id_cliente):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    cursor.execute("""
-        SELECT *,
-               DATE_FORMAT(fecha_registro, '%d/%m/%Y') as fecha_registro_fmt
-        FROM cliente
-        WHERE id_cliente = %s
-    """, (id_cliente,))
+        cursor.execute("""
+            SELECT *,
+                   DATE_FORMAT(fecha_registro, '%d/%m/%Y') as fecha_registro_fmt
+            FROM cliente
+            WHERE id_cliente = %s
+        """, (id_cliente,))
 
-    data = cursor.fetchone()
+        data = cursor.fetchone()
 
-    cursor.close()
-    conn.close()
-    return data
+        return data
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
@@ -226,38 +232,40 @@ def restaurar_cliente(id_cliente, id_usuario):
 def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    sql = """
-        SELECT
-            id_cliente,
-            nombre,
-            apellido,
-            telefono,
-            correo,
-            direccion,
-            activo
-        FROM cliente
-        WHERE 1=1
-    """
+        sql = """
+            SELECT
+                id_cliente,
+                nombre,
+                apellido,
+                telefono,
+                correo,
+                direccion,
+                activo
+            FROM cliente
+            WHERE 1=1
+        """
 
-    params = []
+        params = []
 
-    if not incluir_eliminados:
-        sql += " AND activo = 1"
+        if not incluir_eliminados:
+            sql += " AND activo = 1"
 
-    if q:
-        sql += " AND (nombre LIKE %s OR apellido LIKE %s)"
-        params.extend([f"%{q}%", f"%{q}%"])
+        if q:
+            sql += " AND (nombre LIKE %s OR apellido LIKE %s)"
+            params.extend([f"%{q}%", f"%{q}%"])
 
-    sql += " ORDER BY nombre ASC, apellido ASC LIMIT %s OFFSET %s"
-    params.extend([limit, offset])
+        sql += " ORDER BY nombre ASC, apellido ASC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
 
-    cursor.execute(sql, params)
-    data = cursor.fetchall()
+        cursor.execute(sql, params)
+        data = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
-    return data
+        return data
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
@@ -265,19 +273,18 @@ def obtener_historial_cliente(id_cliente):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("""
-        SELECT 
-            h.*,
-            u.usuario AS usuario
-        FROM clientes_historial h
-        JOIN usuario u ON u.id_usuario = h.id_usuario
-        WHERE h.id_cliente = %s
-        ORDER BY h.fecha DESC
-    """, (id_cliente,))
+    try:
+        cursor.execute("""
+            SELECT 
+                h.*,
+                u.usuario AS usuario
+            FROM clientes_historial h
+            JOIN usuario u ON u.id_usuario = h.id_usuario
+            WHERE h.id_cliente = %s
+            ORDER BY h.fecha DESC
+        """, (id_cliente,))
 
-    data = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return data
+        return cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()

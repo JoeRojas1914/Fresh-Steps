@@ -34,43 +34,47 @@ def obtener_pagos_venta(ids_venta):
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    format_strings = ','.join(['%s'] * len(ids_venta))
+        format_strings = ','.join(['%s'] * len(ids_venta))
 
-    cursor.execute(f"""
-        SELECT id_venta, monto, tipo_pago, tipo_pago_venta
-        FROM pago_venta
-        WHERE id_venta IN ({format_strings})
-    """, ids_venta)
+        cursor.execute(f"""
+            SELECT id_venta, monto, tipo_pago, tipo_pago_venta
+            FROM pago_venta
+            WHERE id_venta IN ({format_strings})
+        """, ids_venta)
 
-    pagos = cursor.fetchall()
+        pagos = cursor.fetchall()
 
-    pagos_por_venta = {}
-    for p in pagos:
-        pagos_por_venta.setdefault(p["id_venta"], []).append(p)
+        pagos_por_venta = {}
+        for p in pagos:
+            pagos_por_venta.setdefault(p["id_venta"], []).append(p)
 
-    cursor.close()
-    conn.close()
 
-    return pagos_por_venta
+        return pagos_por_venta
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def obtener_pagos_por_venta(id_venta):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    cursor.execute("""
-        SELECT tipo_pago_venta, tipo_pago, monto, fecha_pago
-        FROM pago_venta
-        WHERE id_venta=%s
-        ORDER BY fecha_pago
-    """, (id_venta,))
+        cursor.execute("""
+            SELECT tipo_pago_venta, tipo_pago, monto, fecha_pago
+            FROM pago_venta
+            WHERE id_venta=%s
+            ORDER BY fecha_pago
+        """, (id_venta,))
 
-    data = cursor.fetchall()
+        data = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
-    return data
+        return data
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def registrar_pago_final_db(id_venta, monto, metodo_pago, id_usuario):

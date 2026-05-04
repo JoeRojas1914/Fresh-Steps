@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     const form = document.querySelector(".modal-form");
-    if (!form) return;
 
-    form.addEventListener("submit", function (e) {
+    if (form) form.addEventListener("submit", function (e) {
         const nombre = document.querySelector("[name=nombre]").value.trim();
         const apellido = document.querySelector("[name=apellido]").value.trim();
         const telefono = document.querySelector("[name=telefono]").value.trim();
@@ -100,7 +99,7 @@ document.addEventListener("click", function (e) {
     const input = document.getElementById("buscar-cliente-input");
     if (!input) return;
 
-    const filas = document.querySelectorAll(".table tbody tr");
+    const filas = document.querySelectorAll("tr[data-href]");
 
     function normalizar(txt) {
         return txt.toLowerCase()

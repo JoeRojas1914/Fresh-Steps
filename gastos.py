@@ -118,21 +118,25 @@ def actualizar_gasto(
 def eliminar_gasto(id_gasto, id_usuario):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    cursor.execute("SELECT * FROM gastos WHERE id_gasto=%s", (id_gasto,))
-    antes = cursor.fetchone()
+        cursor.execute("SELECT * FROM gastos WHERE id_gasto=%s", (id_gasto,))
+        antes = cursor.fetchone()
 
-    cursor.execute("""
-        UPDATE gastos
-        SET activo = 0
-        WHERE id_gasto=%s
-    """, (id_gasto,))
+        cursor.execute("""
+            UPDATE gastos
+            SET activo = 0
+            WHERE id_gasto=%s
+        """, (id_gasto,))
 
-    registrar_historial(cursor, id_gasto, "ELIMINADO", id_usuario, antes, None)
+        registrar_historial(cursor, id_gasto, "ELIMINADO", id_usuario, antes, None)
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
@@ -140,53 +144,55 @@ def eliminar_gasto(id_gasto, id_usuario):
 def obtener_gastos(id_negocio=None, fecha_inicio=None, fecha_fin=None, limit=10, offset=0,  incluir_eliminados=False):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    sql = """
-        SELECT 
-            g.id_gasto,
-            g.id_negocio,
-            n.nombre AS negocio,
-            g.descripcion,
-            g.proveedor,
-            g.total,
-            g.fecha_registro,
-            g.tipo_comprobante,
-            g.tipo_pago,
-            u.usuario AS creado_por,
-            g.activo
-        FROM gastos g
-        JOIN negocio n ON g.id_negocio = n.id_negocio
-        JOIN usuario u ON g.id_usuario = u.id_usuario
-        WHERE 1=1
-    """
+        sql = """
+            SELECT 
+                g.id_gasto,
+                g.id_negocio,
+                n.nombre AS negocio,
+                g.descripcion,
+                g.proveedor,
+                g.total,
+                g.fecha_registro,
+                g.tipo_comprobante,
+                g.tipo_pago,
+                u.usuario AS creado_por,
+                g.activo
+            FROM gastos g
+            JOIN negocio n ON g.id_negocio = n.id_negocio
+            JOIN usuario u ON g.id_usuario = u.id_usuario
+            WHERE 1=1
+        """
 
-    params = []
+        params = []
 
-    if id_negocio:
-        sql += " AND g.id_negocio = %s"
-        params.append(id_negocio)
+        if id_negocio:
+            sql += " AND g.id_negocio = %s"
+            params.append(id_negocio)
 
-    if fecha_inicio:
-        sql += " AND g.fecha_registro >= %s"
-        params.append(fecha_inicio)
+        if fecha_inicio:
+            sql += " AND g.fecha_registro >= %s"
+            params.append(fecha_inicio)
 
-    if fecha_fin:
-        sql += " AND g.fecha_registro <= %s"
-        params.append(fecha_fin)
+        if fecha_fin:
+            sql += " AND g.fecha_registro <= %s"
+            params.append(fecha_fin)
     
-    if not incluir_eliminados:
-     sql += " AND g.activo = 1"
+        if not incluir_eliminados:
+         sql += " AND g.activo = 1"
 
 
-    sql += " ORDER BY g.fecha_registro DESC LIMIT %s OFFSET %s"
-    params.extend([limit, offset])
+        sql += " ORDER BY g.fecha_registro DESC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
 
-    cursor.execute(sql, params)
-    gastos = cursor.fetchall()
+        cursor.execute(sql, params)
+        gastos = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
-    return gastos
+        return gastos
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
@@ -195,50 +201,54 @@ def obtener_gastos(id_negocio=None, fecha_inicio=None, fecha_fin=None, limit=10,
 def obtener_gastos_por_proveedor(id_negocio, fecha_inicio, fecha_fin):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    cursor.execute("""
-        SELECT proveedor, SUM(total) AS total
-        FROM gastos
-        WHERE id_negocio = %s
-          AND fecha_registro BETWEEN %s AND %s
-        GROUP BY proveedor
-        ORDER BY total DESC
-    """, (id_negocio, fecha_inicio, fecha_fin))
+        cursor.execute("""
+            SELECT proveedor, SUM(total) AS total
+            FROM gastos
+            WHERE id_negocio = %s
+              AND fecha_registro BETWEEN %s AND %s
+            GROUP BY proveedor
+            ORDER BY total DESC
+        """, (id_negocio, fecha_inicio, fecha_fin))
 
-    resultados = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return resultados
+        resultados = cursor.fetchall()
+        return resultados
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def contar_gastos(id_negocio=None, fecha_inicio=None, fecha_fin=None, incluir_eliminados=False):
     conn = get_connection()
     cursor = conn.cursor()
+    try:
 
-    sql = "SELECT COUNT(*) FROM gastos WHERE 1=1"
-    params = []
+        sql = "SELECT COUNT(*) FROM gastos WHERE 1=1"
+        params = []
 
-    if not incluir_eliminados:
-        sql += " AND activo = 1"
+        if not incluir_eliminados:
+            sql += " AND activo = 1"
 
-    if id_negocio:
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+        if id_negocio:
+            sql += " AND id_negocio = %s"
+            params.append(id_negocio)
 
-    if fecha_inicio:
-        sql += " AND fecha_registro >= %s"
-        params.append(fecha_inicio)
+        if fecha_inicio:
+            sql += " AND fecha_registro >= %s"
+            params.append(fecha_inicio)
 
-    if fecha_fin:
-        sql += " AND fecha_registro <= %s"
-        params.append(fecha_fin)
+        if fecha_fin:
+            sql += " AND fecha_registro <= %s"
+            params.append(fecha_fin)
 
-    cursor.execute(sql, params)
-    total = cursor.fetchone()[0]
+        cursor.execute(sql, params)
+        total = cursor.fetchone()[0]
 
-    cursor.close()
-    conn.close()
-    return total
+        return total
+    finally:
+        cursor.close()
+        conn.close()
 
 
 
@@ -263,20 +273,22 @@ def registrar_historial(cursor, id_gasto, accion, id_usuario, antes=None, despue
 def obtener_historial_gasto(id_gasto):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    cursor.execute("""
-        SELECT h.*, u.usuario AS usuario
-        FROM gastos_historial h
-        JOIN usuario u ON h.id_usuario = u.id_usuario
-        WHERE id_gasto=%s
-        ORDER BY fecha DESC
-    """, (id_gasto,))
+        cursor.execute("""
+            SELECT h.*, u.usuario AS usuario
+            FROM gastos_historial h
+            JOIN usuario u ON h.id_usuario = u.id_usuario
+            WHERE id_gasto=%s
+            ORDER BY fecha DESC
+        """, (id_gasto,))
 
-    data = cursor.fetchall()
+        data = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
-    return data
+        return data
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def to_json_safe(data):
@@ -299,18 +311,22 @@ def to_json_safe(data):
 def restaurar_gasto(id_gasto, id_usuario):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
+    try:
 
-    cursor.execute("SELECT * FROM gastos WHERE id_gasto=%s", (id_gasto,))
-    antes = cursor.fetchone()
+        cursor.execute("SELECT * FROM gastos WHERE id_gasto=%s", (id_gasto,))
+        antes = cursor.fetchone()
 
-    cursor.execute("""
-        UPDATE gastos
-        SET activo = 1
-        WHERE id_gasto=%s
-    """, (id_gasto,))
+        cursor.execute("""
+            UPDATE gastos
+            SET activo = 1
+            WHERE id_gasto=%s
+        """, (id_gasto,))
 
-    registrar_historial(cursor, id_gasto, "RESTAURADO", id_usuario, antes, None)
+        registrar_historial(cursor, id_gasto, "RESTAURADO", id_usuario, antes, None)
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()

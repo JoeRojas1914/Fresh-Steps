@@ -8,7 +8,7 @@ load_dotenv()
 
 _pool = pooling.MySQLConnectionPool(
     pool_name="freshsteps_pool",
-    pool_size=10,
+    pool_size=20,
     host=os.getenv("DB_HOST"),
     user=os.getenv("DB_USER"),
     password=os.getenv("DB_PASSWORD"),
@@ -19,3 +19,20 @@ _pool = pooling.MySQLConnectionPool(
 
 def get_connection():
     return _pool.get_connection()
+
+
+from contextlib import contextmanager
+
+@contextmanager
+def get_db():
+    conn   = _pool.get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        yield conn, cursor
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cursor.close()
+        conn.close()

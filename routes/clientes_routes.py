@@ -97,6 +97,105 @@ def api_clientes():
     return jsonify(buscar_clientes_service(q))
 
 
+@clientes_bp.route("/clientes/exportar")
+def exportar_clientes_excel():
+    import io
+    from datetime import datetime
+    from flask import send_file
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from clientes import obtener_clientes
+
+    incluir_eliminados = request.args.get("eliminados") == "1"
+
+    clientes = obtener_clientes(limit=99999, offset=0,
+                                incluir_eliminados=True)
+
+    C = {
+        "azul":    "1E7FD6", "azul_cl": "E6F3FF",
+        "blanco":  "FFFFFF", "gris":    "F8FBFF",
+        "verde":   "22C55E", "verde_cl":"DCFCE7",
+        "rojo":    "E53935", "rojo_cl": "FEE2E2",
+        "gris_txt":"6B7280", "dark":    "1F2937",
+    }
+    borde = Border(
+        left=Side(style="thin", color="CFD8E3"),
+        right=Side(style="thin", color="CFD8E3"),
+        top=Side(style="thin", color="CFD8E3"),
+        bottom=Side(style="thin", color="CFD8E3"),
+    )
+
+    def cell(ws, r, col, value="", bold=False, fg=None, color=None,
+             align="left", num_fmt=None, size=9):
+        c = ws.cell(row=r, column=col, value=value)
+        c.font      = Font(bold=bold, color=color or C["dark"], name="Arial", size=size)
+        if fg: c.fill = PatternFill("solid", fgColor=fg)
+        c.alignment = Alignment(horizontal=align, vertical="center")
+        c.border    = borde
+        if num_fmt: c.number_format = num_fmt
+        return c
+
+    def head(ws, r, col, value):
+        return cell(ws, r, col, value, bold=True, fg=C["azul"],
+                    color=C["blanco"], align="center")
+
+    def row_bg(i): return C["gris"] if i % 2 == 0 else C["blanco"]
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Clientes"
+    ws.freeze_panes = "A4"
+
+    NCOLS = 6
+    ws.merge_cells(f"A1:{get_column_letter(NCOLS)}1")
+    t = ws["A1"]
+    t.value     = "Clientes — Fresh Steps"
+    t.font      = Font(bold=True, color=C["blanco"], name="Arial", size=13)
+    t.fill      = PatternFill("solid", fgColor=C["azul"])
+    t.alignment = Alignment(horizontal="center", vertical="center")
+    ws.row_dimensions[1].height = 30
+
+    ws.merge_cells(f"A2:{get_column_letter(NCOLS)}2")
+    s = ws["A2"]
+    s.value     = "Incluye eliminados" if incluir_eliminados else "Solo clientes activos"
+    s.font      = Font(italic=True, color=C["gris_txt"], name="Arial", size=9)
+    s.fill      = PatternFill("solid", fgColor=C["azul_cl"])
+    s.alignment = Alignment(horizontal="left", vertical="center")
+    ws.row_dimensions[2].height = 16
+
+    HEADERS = ["Nombre", "Apellido", "Teléfono", "Correo", "Dirección", "Estado"]
+    for ci, h in enumerate(HEADERS, 1): head(ws, 3, ci, h)
+    ws.row_dimensions[3].height = 22
+
+    for i, cl in enumerate(clientes):
+        r  = i + 4
+        bg = row_bg(i)
+        cell(ws, r, 1, cl.get("nombre", ""),    fg=bg, bold=True)
+        cell(ws, r, 2, cl.get("apellido", ""),  fg=bg, bold=True)
+        cell(ws, r, 3, cl.get("telefono", "—"), fg=bg)
+        cell(ws, r, 4, cl.get("correo", "—"),   fg=bg)
+        cell(ws, r, 5, cl.get("direccion", "—"),fg=bg)
+        activo = 1 if cl.get("activo", 1) else 0
+        ce = ws.cell(row=r, column=6, value=activo)
+        ce.font      = Font(bold=True, color=C["verde"] if activo else C["rojo"],
+                            name="Arial", size=9)
+        ce.fill      = PatternFill("solid", fgColor=C["verde_cl"] if activo else C["rojo_cl"])
+        ce.alignment = Alignment(horizontal="center", vertical="center")
+        ce.border    = borde
+        ws.row_dimensions[r].height = 16
+
+    for ci, w in enumerate([20, 20, 14, 28, 30, 11], 1):
+        ws.column_dimensions[get_column_letter(ci)].width = w
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    nombre = f"clientes_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    return send_file(buf, as_attachment=True, download_name=nombre,
+                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
 @clientes_bp.route("/clientes/<int:id_cliente>")
 def ver_cliente(id_cliente):
     filtros = request.args
@@ -203,7 +302,6 @@ def exportar_cliente_excel(id_cliente):
 
     wb = Workbook()
 
-
     ws1 = wb.active
     ws1.title = "Resumen pedidos"
     ws1.freeze_panes = "A4"
@@ -264,7 +362,6 @@ def exportar_cliente_excel(id_cliente):
 
     for ci, w in enumerate([10, 18, 20, 20, 18, 18, 13, 13, 13, 13], 1):
         ws1.column_dimensions[get_column_letter(ci)].width = w
-
 
     ws2 = wb.create_sheet("Artículos")
     ws2.freeze_panes = "A4"
@@ -385,102 +482,3 @@ def exportar_cliente_excel(id_cliente):
         download_name=nombre_archivo,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
-
-@clientes_bp.route("/clientes/exportar")
-def exportar_clientes_excel():
-    import io
-    from datetime import datetime
-    from flask import send_file
-    from openpyxl import Workbook
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    from openpyxl.utils import get_column_letter
-    from clientes import obtener_clientes
-
-    incluir_eliminados = request.args.get("eliminados") == "1"
-
-    clientes = obtener_clientes(limit=99999, offset=0,
-                                incluir_eliminados=True)
-
-    C = {
-        "azul":    "1E7FD6", "azul_cl": "E6F3FF",
-        "blanco":  "FFFFFF", "gris":    "F8FBFF",
-        "verde":   "22C55E", "verde_cl":"DCFCE7",
-        "rojo":    "E53935", "rojo_cl": "FEE2E2",
-        "gris_txt":"6B7280", "dark":    "1F2937",
-    }
-    borde = Border(
-        left=Side(style="thin", color="CFD8E3"),
-        right=Side(style="thin", color="CFD8E3"),
-        top=Side(style="thin", color="CFD8E3"),
-        bottom=Side(style="thin", color="CFD8E3"),
-    )
-
-    def cell(ws, r, col, value="", bold=False, fg=None, color=None,
-             align="left", num_fmt=None, size=9):
-        c = ws.cell(row=r, column=col, value=value)
-        c.font      = Font(bold=bold, color=color or C["dark"], name="Arial", size=size)
-        if fg: c.fill = PatternFill("solid", fgColor=fg)
-        c.alignment = Alignment(horizontal=align, vertical="center")
-        c.border    = borde
-        if num_fmt: c.number_format = num_fmt
-        return c
-
-    def head(ws, r, col, value):
-        return cell(ws, r, col, value, bold=True, fg=C["azul"],
-                    color=C["blanco"], align="center")
-
-    def row_bg(i): return C["gris"] if i % 2 == 0 else C["blanco"]
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Clientes"
-    ws.freeze_panes = "A4"
-
-    NCOLS = 6
-    ws.merge_cells(f"A1:{get_column_letter(NCOLS)}1")
-    t = ws["A1"]
-    t.value     = "Clientes — Fresh Steps"
-    t.font      = Font(bold=True, color=C["blanco"], name="Arial", size=13)
-    t.fill      = PatternFill("solid", fgColor=C["azul"])
-    t.alignment = Alignment(horizontal="center", vertical="center")
-    ws.row_dimensions[1].height = 30
-
-    ws.merge_cells(f"A2:{get_column_letter(NCOLS)}2")
-    s = ws["A2"]
-    s.value     = "Incluye eliminados" if incluir_eliminados else "Solo clientes activos"
-    s.font      = Font(italic=True, color=C["gris_txt"], name="Arial", size=9)
-    s.fill      = PatternFill("solid", fgColor=C["azul_cl"])
-    s.alignment = Alignment(horizontal="left", vertical="center")
-    ws.row_dimensions[2].height = 16
-
-    HEADERS = ["Nombre", "Apellido", "Teléfono", "Correo", "Dirección", "Estado"]
-    for ci, h in enumerate(HEADERS, 1): head(ws, 3, ci, h)
-    ws.row_dimensions[3].height = 22
-
-    for i, cl in enumerate(clientes):
-        r  = i + 4
-        bg = row_bg(i)
-        cell(ws, r, 1, cl.get("nombre", ""),    fg=bg, bold=True)
-        cell(ws, r, 2, cl.get("apellido", ""),  fg=bg, bold=True)
-        cell(ws, r, 3, cl.get("telefono", "—"), fg=bg)
-        cell(ws, r, 4, cl.get("correo", "—"),   fg=bg)
-        cell(ws, r, 5, cl.get("direccion", "—"),fg=bg)
-        activo = 1 if cl.get("activo", 1) else 0
-        ce = ws.cell(row=r, column=6, value=activo)
-        ce.font      = Font(bold=True, color=C["verde"] if activo else C["rojo"],
-                            name="Arial", size=9)
-        ce.fill      = PatternFill("solid", fgColor=C["verde_cl"] if activo else C["rojo_cl"])
-        ce.alignment = Alignment(horizontal="center", vertical="center")
-        ce.border    = borde
-        ws.row_dimensions[r].height = 16
-
-    for ci, w in enumerate([20, 20, 14, 28, 30, 11], 1):
-        ws.column_dimensions[get_column_letter(ci)].width = w
-
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
-    nombre = f"clientes_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
-    return send_file(buf, as_attachment=True, download_name=nombre,
-                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
