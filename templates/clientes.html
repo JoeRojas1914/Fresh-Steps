@@ -12,39 +12,36 @@
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
-<form method="GET" action="/clientes" class="search-bar">
-    <input 
-        type="text" 
-        name="q" 
-        placeholder="Buscar cliente por nombre o apellido"
-        value="{{ q or '' }}"
-    >
-    <button type="submit" class="btn btn--primary btn--sm">
-        Buscar
-    </button>
-
-</form>
-
-<form method="GET" action="{{ url_for('clientes.clientes') }}" class="filtro-toggle">
-
-    <input type="hidden" name="q" value="{{ q or '' }}">
-
-    <label class="switch">
-        <input type="checkbox"
-               name="eliminados"
-               value="1"
-               onchange="this.form.submit()"
-               {% if incluir_eliminados %}checked{% endif %}>
-        <span class="slider"></span>
-    </label>
-
-    <span class="toggle-text">Mostrar eliminados</span>
-</form>
-
-
-<button onclick="abrirModal('modalCliente')" class="btn btn--primary">
-    ➕ Agregar cliente
-</button>
+<div class="filtro-box">
+    <div class="filtro-row">
+        <div class="filtro-item" style="max-width:280px;">
+            <label>Buscar cliente</label>
+            <input type="text" id="buscar-cliente-input"
+                   placeholder="Nombre o apellido..."
+                   value="{{ q or '' }}"
+                   autocomplete="off">
+        </div>
+        <div style="margin-left:auto; display:flex; align-items:flex-end; gap:12px;">
+            <div class="filtro-toggle" style="margin:0; gap:10px;">
+                <label class="switch">
+                    <input type="checkbox"
+                           id="toggle-eliminados"
+                           {% if incluir_eliminados %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+                <span class="toggle-text">Mostrar eliminados</span>
+            </div>
+            <a href="{{ url_for('clientes.exportar_clientes_excel',
+                        eliminados='1' if incluir_eliminados else '') }}"
+               class="btn btn--success btn--sm" style="text-decoration:none;">
+                ⬇ Exportar Excel
+            </a>
+            <button type="button" onclick="abrirModal('modalCliente')" class="btn btn--primary btn--sm">
+                ➕ Agregar cliente
+            </button>
+        </div>
+    </div>
+</div>
 
 
 {% call(section) modal("modalCliente", "Agregar cliente", "md") %}
@@ -205,7 +202,6 @@
     total_paginas,
     'clientes.clientes',
     {
-      "q": q,
       "eliminados": request.args.get('eliminados')
     }
 ) }}
@@ -216,4 +212,3 @@
   <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
   <script src="{{ url_for('static', filename='js/clientes.js') }}"></script>
 {% endblock %}
-

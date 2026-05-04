@@ -94,3 +94,24 @@ document.addEventListener("click", function (e) {
 
     window.location.href = row.dataset.href;
 });
+
+
+(function () {
+    const input = document.getElementById("buscar-cliente-input");
+    if (!input) return;
+
+    const filas = document.querySelectorAll(".table tbody tr");
+
+    function normalizar(txt) {
+        return txt.toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    }
+
+    input.addEventListener("input", () => {
+        const q = normalizar(input.value);
+        filas.forEach(fila => {
+            const nombre = normalizar(fila.querySelector("td")?.innerText || "");
+            fila.style.display = nombre.includes(q) ? "" : "none";
+        });
+    });
+}());

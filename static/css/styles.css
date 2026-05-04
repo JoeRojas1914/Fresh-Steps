@@ -645,14 +645,18 @@ select:focus {
 }
 
 
-.filtro-actions a {
+.filtro-actions a:not(.btn) {
     font-weight: 600;
     text-decoration: none;
     color: #1e7fd6;
 }
 
-.filtro-actions a:hover {
+.filtro-actions a:not(.btn):hover {
     text-decoration: underline;
+}
+
+.filtro-actions a.btn {
+    color: #fff;
 }
 
 .filtro-item input[type="date"] {
