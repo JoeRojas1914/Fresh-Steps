@@ -1,245 +1,267 @@
 {% extends "base.html" %}
+{% from "macros/badges.html" import badge_negocio %}
+{% from "components/table.html" import table %}
+{% from "components/pagination.html" import pagination %}
+
+{% block head %}
+<style>
+.badge-estado {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-block;
+    white-space: nowrap;
+}
+.badge-estado.pendiente { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+.badge-estado.lista     { background-color: #fef9c3; color: #854d0e; border: 1px solid #facc15; }
+.badge-estado.entregada { background-color: #dcfce7; color: #166534; border: 1px solid #22c55e; }
+
+/* Pagos en detalles */
+.pagos-title {
+    font-size: 13px; font-weight: 700; color: #1e3a8a;
+    margin: 14px 0 8px; padding-top: 12px;
+    border-top: 1px solid #e2eaf4;
+}
+.pago-fila {
+    display: flex; justify-content: space-between; align-items: center;
+    background: white; padding: 9px 14px; border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    font-size: 13px; margin-bottom: 6px;
+}
+.pago-fila .pago-tipo  { font-weight: 600; color: #374151; text-transform: capitalize; }
+.pago-fila .pago-monto { font-weight: 700; color: #22c55e; }
+.pago-fila .pago-tag   {
+    font-size: 11px; background: #e6f3ff; color: #1e7fd6;
+    padding: 2px 7px; border-radius: 999px; font-weight: 600; margin-left: 8px;
+}
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="page-content">
 
-{% from "components/alerts.html" import alerts %}
-{% from "components/pagination.html" import pagination %}
-{% from "components/table.html" import table %}
-{% from "components/modal.html" import modal %}
-
-
-<h1>👥 Clientes</h1>
-
-{{ alerts(get_flashed_messages(with_categories=true)) }}
-
-<div class="filtro-box">
-    <div class="filtro-row">
-        <div class="filtro-item">
-            <label>Buscar cliente</label>
-            <input type="text" id="buscar-cliente-input"
-                   placeholder="Nombre o apellido..."
-                   value="{{ q or '' }}"
-                   autocomplete="off">
+  {# ── Cabecera del cliente ───────────────────────────────── #}
+  <div class="cliente-header" style="display:flex; gap:30px; align-items:center; flex-wrap:wrap; margin-bottom:30px;">
+    <div class="cliente-avatar">
+      {% if cliente.avatar_url %}
+        <img src="{{ cliente.avatar_url }}" alt="Avatar" class="avatar-img">
+      {% else %}
+        <div class="avatar-placeholder">
+          {{ cliente.nombre[0] }}{{ cliente.apellido[0] }}
         </div>
-        <div class="filtro-item" style="flex:0 0 auto; min-width:auto;">
-            <label>&nbsp;</label>
-            <div class="filtro-toggle" style="margin:0; gap:10px;">
-                <label class="switch">
-                    <input type="checkbox"
-                           id="toggle-eliminados"
-                           {% if incluir_eliminados %}checked{% endif %}>
-                    <span class="slider"></span>
-                </label>
-                <span class="toggle-text">Mostrar eliminados</span>
-            </div>
-        </div>
-        <div class="filtro-actions">
-            <button type="button" onclick="abrirModal('modalCliente')" class="btn btn--primary btn--sm">
-                ➕ Agregar cliente
-            </button>
-        </div>
+      {% endif %}
     </div>
-</div>
 
-
-{% call(section) modal("modalCliente", "Agregar cliente", "md") %}
-
-{% if section == 'body' %}
-<form id="modalClienteForm" method="POST" action="/clientes/guardar" class="modal-form">
-  <input type="hidden" name="id_cliente" id="id_cliente">
-
-  <div class="modal-field">
-    <label for="cliente_nombre">Nombre</label>
-    <input id="cliente_nombre" type="text" name="nombre" required>
+    <div class="cliente-info" style="flex:1; display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px;">
+      <div><strong>Nombre:</strong> {{ cliente.nombre }} {{ cliente.apellido }}</div>
+      <div><strong>Teléfono:</strong> {{ cliente.telefono or 'N/A' }}</div>
+      <div><strong>Correo:</strong> {{ cliente.correo or 'N/A' }}</div>
+      <div><strong>Dirección:</strong> {{ cliente.direccion or 'N/A' }}</div>
+      <div><strong>Fecha registro:</strong> {{ cliente.fecha_registro_fmt }}</div>
+      <div><strong>Total pedidos:</strong> {{ total_pedidos }}</div>
+    </div>
   </div>
 
-  <div class="modal-field">
-    <label for="cliente_apellido">Apellido</label>
-    <input id="cliente_apellido" type="text" name="apellido" required>
-  </div>
+  <h2 style="margin-bottom:20px;">📦 Historial de pedidos</h2>
 
-  <div class="modal-field">
-    <label for="cliente_telefono">Teléfono</label>
-    <input id="cliente_telefono"
-           type="text"
-           name="telefono"
-           required
-           pattern="[0-9]{10}">
-  </div>
-
-  <div class="modal-field">
-    <label for="cliente_correo">Correo (opcional)</label>
-    <input id="cliente_correo" type="email" name="correo">
-  </div>
-
-  <div class="modal-field">
-    <label for="cliente_direccion">Código Postal (opcional)</label>
-    <input id="cliente_direccion" type="text" name="direccion">
-  </div>
-
-</form>
-{% endif %}
-
-
-{% if section == 'footer' %}
-<button type="button"
-        class="btn btn--danger btn--sm"
-        onclick="cerrarModal('modalCliente')">
-  Cancelar
-</button>
-
-<button type="submit"
-        form="modalClienteForm"
-        class="btn btn--primary btn--lg">
-  Guardar cliente
-</button>
-{% endif %}
-
-{% endcall %}
-
-
-
-
-<hr>
-
-
-{% call table([
-    "Nombre",
-    "Teléfono",
-    "Estado",
-    "Acciones"
-]) %}
-
-    {% for c in clientes %}
-    <tr
-        data-href="{{ url_for('clientes.ver_cliente', id_cliente=c.id_cliente) }}"
-        class="clickable-row"
-    >
-
-        <td>{{ c.nombre }} {{ c.apellido }}</td>
-
-        <td>{{ c.telefono }}</td>
-
-        <td>
-            {% if c.activo %}
-                <span class="status status-completado">Activo</span>
-            {% else %}
-                <span class="status status-pendiente">Eliminado</span>
-            {% endif %}
-        </td>
-
-        <td>
-        {% if c.activo %}
-
-            <button type="button"
-                class="btn btn--success btn--sm no-row-click"
-                data-id="{{ c.id_cliente }}"
-                data-nombre="{{ c.nombre }}"
-                data-apellido="{{ c.apellido }}"
-                data-correo="{{ c.correo or '' }}"
-                data-telefono="{{ c.telefono }}"
-                data-direccion="{{ c.direccion or '' }}"
-                onclick="editarClienteBtn(event, this)">
-                Editar
-            </button>
-
-            <button type="button"
-                    class="btn btn--info btn--sm no-row-click"
-                    onclick="verHistorialCliente(event, {{ c.id_cliente }})">
-                Historial
-            </button>
-
-            <button type="button"
-                    class="btn btn--danger btn--sm no-row-click"
-                    onclick="confirmarEliminarCliente({{ c.id_cliente }})">
-                Eliminar
-            </button>
-
-        {% else %}
-
-            <button type="button"
-                    class="btn btn--primary btn--sm no-row-click"
-                    onclick="restaurarCliente({{ c.id_cliente }})">
-                Restaurar
-            </button>
-
+  {# ── Filtros ────────────────────────────────────────────── #}
+  <form method="GET"
+        action="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}"
+        class="filtro-box">
+    <div class="filtro-row">
+      <div class="filtro-item">
+        <label>Negocio</label>
+        <select name="id_negocio">
+          <option value="">Todos</option>
+          {% for n in negocios %}
+            <option value="{{ n.id_negocio }}"
+              {% if request.args.get('id_negocio') == n.id_negocio|string %}selected{% endif %}>
+              {{ n.nombre }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filtro-item">
+        <label>Desde</label>
+        <input type="date" name="fecha_inicio"
+               value="{{ request.args.get('fecha_inicio', '') }}">
+      </div>
+      <div class="filtro-item">
+        <label>Hasta</label>
+        <input type="date" name="fecha_fin"
+               value="{{ request.args.get('fecha_fin', '') }}">
+      </div>
+      <div class="filtro-actions">
+        <button type="submit" class="btn btn--primary btn--sm">🔍 Filtrar</button>
+        {% if request.args.get('id_negocio') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
+          <a href="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}"
+             class="btn btn--danger btn--sm" style="text-decoration:none;">✕ Limpiar</a>
         {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
+        <a href="{{ url_for('clientes.exportar_cliente_excel', id_cliente=cliente.id_cliente,
+                    id_negocio=request.args.get('id_negocio') or '',
+                    fecha_inicio=request.args.get('fecha_inicio') or '',
+                    fecha_fin=request.args.get('fecha_fin') or '') }}"
+           class="btn btn--success btn--sm"
+           style="text-decoration:none;">
+            ⬇ Exportar Excel
+        </a>
+      </div>
+    </div>
+  </form>
 
-{% endcall %}
+  {# ── Tabla ──────────────────────────────────────────────── #}
+  {% if pedidos %}
 
+  {% set meses = {
+      1:'enero', 2:'febrero', 3:'marzo', 4:'abril',
+      5:'mayo', 6:'junio', 7:'julio', 8:'agosto',
+      9:'septiembre', 10:'octubre', 11:'noviembre', 12:'diciembre'
+  } %}
 
+  <div id="toast-container"></div>
 
-{% call(section) modal("modalHistorialCliente", "Historial del cliente", "lg") %}
+  {% call table([
+      "Recibo", "Negocio",
+      "Fecha recibo", "Fecha estimada", "Fecha lista",
+      "Fecha entrega", "Total", "Estado", "Detalles"
+  ]) %}
 
-{% if section == 'body' %}
-<table id="tablaHistorialCliente"
-       class="table table--striped table--hover">
-  <thead>
+  {% for p in pedidos %}
+    {% if p.fecha_entrega %}
+      {% set estado = "entregada" %}
+    {% elif p.fecha_lista %}
+      {% set estado = "lista" %}
+    {% else %}
+      {% set estado = "pendiente" %}
+    {% endif %}
+
     <tr>
-      <th>Acción</th>
-      <th>Usuario</th>
-      <th>Fecha</th>
-      <th>Cambios</th>
+      <td>#{{ p.id_venta }}</td>
+      <td>{{ badge_negocio(p.negocio) }}</td>
+
+      <td>
+        {{ p.fecha_recibo.day }} {{ meses[p.fecha_recibo.month] }}
+        {{ "%02d:%02d" | format(p.fecha_recibo.hour, p.fecha_recibo.minute) }}
+      </td>
+      <td>
+        {{ p.fecha_estimada.day }} {{ meses[p.fecha_estimada.month] }}
+        {{ "%02d:%02d" | format(p.fecha_estimada.hour, p.fecha_estimada.minute) }}
+      </td>
+      <td>
+        {% if p.fecha_lista %}
+          {{ p.fecha_lista.day }} {{ meses[p.fecha_lista.month] }}
+          {{ "%02d:%02d" | format(p.fecha_lista.hour, p.fecha_lista.minute) }}
+        {% else %}<span style="opacity:.4;">—</span>{% endif %}
+      </td>
+      <td>
+        {% if p.fecha_entrega %}
+          {{ p.fecha_entrega.day }} {{ meses[p.fecha_entrega.month] }}
+          {{ "%02d:%02d" | format(p.fecha_entrega.hour, p.fecha_entrega.minute) }}
+        {% else %}<span style="opacity:.4;">—</span>{% endif %}
+      </td>
+
+      <td>${{ "%.2f" | format(p.total) }}</td>
+
+      <td>
+        <span class="badge-estado {{ estado }}">
+          {% if estado == 'pendiente' %}Pendiente
+          {% elif estado == 'lista' %}Lista
+          {% else %}Entregada{% endif %}
+        </span>
+      </td>
+
+      <td>
+        <button class="btn btn--info btn--sm" data-id="{{ p.id_venta }}">
+          ℹ️ Info
+        </button>
+      </td>
     </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-{% endif %}
 
-{% endcall %}
+    {# ── Fila expandible ── #}
+    <tr id="detalles-{{ p.id_venta }}" class="table--details" style="display:none;">
+      <td colspan="9">
+        <div class="detalles-box">
+          <div class="detalles-title">🧾 Detalles del pedido</div>
 
+          <ul class="detalles-list" id="lista-detalles-{{ p.id_venta }}">
+            <li style="opacity:0.6;">Cargando detalles...</li>
+          </ul>
 
+          <div class="pagos-title">💳 Pagos registrados</div>
+          {% if p.pagos %}
+            {% for pg in p.pagos %}
+            <div class="pago-fila">
+              <span class="pago-tipo">
+                {{ pg.tipo_pago or '—' }}
+                {% if pg.tipo_pago_venta %}
+                  <span class="pago-tag">{{ pg.tipo_pago_venta }}</span>
+                {% endif %}
+              </span>
+              <span class="pago-monto">${{ "%.2f" | format(pg.monto | float) }}</span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div style="opacity:.55; font-size:13px; font-style:italic; margin-bottom:10px;">
+              Sin pagos registrados
+            </div>
+          {% endif %}
 
-{% from "components/pagination.html" import pagination %}
+          {% if p.saldo_pendiente > 0 %}
+          <div style="margin-top:10px; font-size:13px; font-weight:700; color:#b91c1c;">
+            Saldo pendiente: ${{ "%.2f" | format(p.saldo_pendiente) }}
+          </div>
+          {% else %}
+          <div style="margin-top:10px; font-size:13px; font-weight:700; color:#15803d;">
+            ✔ Pedido liquidado
+          </div>
+          {% endif %}
 
-{{ pagination(
-    pagina,
-    total_paginas,
-    'clientes.clientes',
-    {
-      "q": q,
-      "eliminados": request.args.get('eliminados')
-    }
-) }}
+          <div class="btn-row">
+            <button type="button"
+                    class="btn btn--info btn--sm"
+                    onclick="window.open('{{ url_for('ventas.venta_ticket', id_venta=p.id_venta) }}', '_blank')">
+              🧾 Ver ticket
+            </button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  {% endfor %}
 
+  {% endcall %}
+
+  {{ pagination(
+      pagina,
+      total_paginas,
+      'clientes.ver_cliente',
+      {
+        "id_cliente":   cliente.id_cliente,
+        "id_negocio":   request.args.get('id_negocio'),
+        "fecha_inicio": request.args.get('fecha_inicio'),
+        "fecha_fin":    request.args.get('fecha_fin')
+      }
+  ) }}
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📦</div>
+    <h3>Sin pedidos registrados</h3>
+    <p>Este cliente aún no tiene pedidos.<br>
+       Cuando se registre alguno, se mostrará aquí.</p>
+  </div>
+  {% endif %}
+
+</div>
 {% endblock %}
 
 {% block scripts %}
-  <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/clientes.js') }}"></script>
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-      const input  = document.getElementById("buscar-cliente-input");
-      const toggle = document.getElementById("toggle-eliminados");
-      const tabla  = document.querySelector(".table tbody");
-
-      function normalizar(txt) {
-          return txt.toLowerCase()
-              .normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
-      }
-
-      function filtrar() {
-          const q = normalizar(input ? input.value : "");
-          const filas = tabla ? tabla.querySelectorAll("tr") : [];
-
-          filas.forEach(fila => {
-              const nombre = normalizar(fila.querySelector("td")?.innerText || "");
-              fila.style.display = nombre.includes(q) ? "" : "none";
-          });
-      }
-
-      if (input)  input.addEventListener("input", filtrar);
-
-      if (toggle) toggle.addEventListener("change", () => {
-          const params = new URLSearchParams(window.location.search);
-          if (toggle.checked) params.set("eliminados", "1");
-          else params.delete("eliminados");
-          params.delete("q");
-          window.location.href = "/clientes" + (params.toString() ? "?" + params : "");
-      });
-  });
-  </script>
+<script src="{{ url_for('static', filename='js/detalles_venta.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".btn--info[data-id]").forEach(btn => {
+        btn.addEventListener("click", () => toggleDetalles(btn.dataset.id));
+    });
+});
+</script>
 {% endblock %}
