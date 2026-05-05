@@ -131,6 +131,8 @@ def eliminar_gasto(id_gasto, id_usuario):
 
         registrar_historial(cursor, id_gasto, "ELIMINADO", id_usuario, antes, None)
 
+        conn.commit()
+
     except Exception:
         conn.rollback()
         raise
@@ -323,6 +325,8 @@ def restaurar_gasto(id_gasto, id_usuario):
         """, (id_gasto,))
 
         registrar_historial(cursor, id_gasto, "RESTAURADO", id_usuario, antes, None)
+
+        conn.commit()
 
     except Exception:
         conn.rollback()

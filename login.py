@@ -72,6 +72,8 @@ def registrar_login_log(
             user_agent
         ))
 
+        conn.commit()
+
     except Exception:
         conn.rollback()
         raise
@@ -163,6 +165,8 @@ def limpiar_intentos(usuario, ip):
             DELETE FROM login_intentos
             WHERE usuario=%s AND ip=%s
         """, (usuario, ip))
+
+        conn.commit()
 
     except Exception:
         conn.rollback()
