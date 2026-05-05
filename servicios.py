@@ -24,6 +24,9 @@ def crear_servicio(id_negocio, nombre, precio, id_usuario):
         registrar_historial(cursor, id_servicio, "CREADO", id_usuario, None, despues)
 
         conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         cursor.close()
         conn.close()
@@ -51,6 +54,9 @@ def actualizar_servicio(id_servicio, id_negocio, nombre, precio, id_usuario):
         registrar_historial(cursor, id_servicio, "EDITADO", id_usuario, antes, despues)
 
         conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         cursor.close()
         conn.close()
@@ -91,6 +97,9 @@ def eliminar_servicio(id_servicio, id_usuario):
         conn.commit()
         return True
 
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         cursor.close()
         conn.close()
@@ -291,6 +300,9 @@ def restaurar_servicio(id_servicio, id_usuario):
         )
 
         conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         cursor.close()
         conn.close()

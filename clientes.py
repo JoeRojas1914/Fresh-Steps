@@ -29,6 +29,9 @@ def crear_cliente(nombre, apellido, correo, telefono, direccion, id_usuario):
         conn.commit()
         return id_cliente
 
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         cursor.close()
         conn.close()
@@ -65,6 +68,9 @@ def eliminar_cliente(id_cliente, id_usuario):
         conn.commit()
         return True
 
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         cursor.close()
         conn.close()
@@ -101,6 +107,10 @@ def actualizar_cliente(id_cliente, nombre, apellido, correo, telefono, direccion
         registrar_historial(cursor, id_cliente, "EDITADO", id_usuario, antes, despues)
 
         conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
 
     finally:
         cursor.close()
@@ -222,6 +232,10 @@ def restaurar_cliente(id_cliente, id_usuario):
         registrar_historial(cursor, id_cliente, "RESTAURADO", id_usuario, antes, None)
 
         conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
 
     finally:
         cursor.close()

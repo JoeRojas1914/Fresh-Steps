@@ -49,6 +49,10 @@ def crear_gasto(
 
         conn.commit()
 
+    except Exception:
+        conn.rollback()
+        raise
+
     finally:
         cursor.close()
         conn.close()
@@ -107,6 +111,10 @@ def actualizar_gasto(
         registrar_historial(cursor, id_gasto, "EDITADO", id_usuario, antes, despues)
 
         conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
 
     finally:
         cursor.close()
