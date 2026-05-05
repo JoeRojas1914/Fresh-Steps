@@ -1,0 +1,117 @@
+.filtro-box {
+  margin-bottom: 30px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, var(--color-bg-blue), var(--color-bg-light));
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-blue);
+}
+
+.filtro-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.filtro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.filtro-item label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-navy-mid);
+}
+
+.filtro-item select,
+.filtro-item input[type="date"] {
+  width: 100%;
+  height: 42px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+.filtro-item input[type="date"]::-webkit-datetime-edit { padding: 0; }
+.filtro-item input[type="date"]::-webkit-calendar-picker-indicator {
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.filtro-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.filtro-actions a:not(.btn) {
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--color-primary-dark);
+}
+.filtro-actions a:not(.btn):hover { text-decoration: underline; }
+.filtro-actions a.btn { color: #fff; }
+
+.date-selector {
+  background: var(--color-bg-blue);
+  border: 2px solid var(--color-primary);
+  padding: 14px 18px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-blue);
+}
+
+.date-selector select {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+  cursor: pointer;
+  background-color: #f8fafc;
+  color: var(--color-text);
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: border var(--transition-base), box-shadow var(--transition-base), transform var(--transition-fast);
+  min-width: 140px;
+  max-width: none;
+}
+
+.date-selector select option { text-align: center; padding: 6px 10px; }
+
+.date-selector select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(47, 164, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.date-selector select:hover { border-color: var(--color-primary-dark); }
+
+.date-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-group input { width: 160px; }
+
+.month-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}

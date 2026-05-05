@@ -1,84 +1,48 @@
-.badge-estado {
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    display: inline-block;
-    white-space: nowrap;
-}
-
-.badge-estado.pendiente {
-    background-color: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #f87171;
-}
-
-.badge-estado.lista {
-    background-color: #fef9c3;
-    color: #854d0e;
-    border: 1px solid #facc15;
-}
-
-.badge-estado.entregada {
-    background-color: #dcfce7;
-    color: #166534;
-    border: 1px solid #22c55e;
-}
-
 .detalles-info-extra {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid #e2eaf4;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e2eaf4;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .detalles-info-row {
-    font-size: 13px;
-    color: #374151;
+  font-size: 13px;
+  color: #374151;
 }
 
-.detalles-info-row strong { color: #1e3a8a; }
+.detalles-info-row strong { color: var(--color-navy-mid); }
 
 .pagos-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #1e3a8a;
-    margin: 14px 0 8px;
-    padding-top: 12px;
-    border-top: 1px solid #e2eaf4;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-navy-mid);
+  margin: 14px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid #e2eaf4;
 }
 
 .pago-fila {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: white;
-    padding: 9px 14px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.07);
-    font-size: 13px;
-    margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 9px 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  font-size: 13px;
+  margin-bottom: 6px;
 }
 
-.pago-fila .pago-tipo {
-    font-weight: 600;
-    color: #374151;
-    text-transform: capitalize;
-}
-
-.pago-fila .pago-monto {
-    font-weight: 700;
-    color: #22c55e;
-}
-
+.pago-fila .pago-tipo  { font-weight: 600; color: #374151; text-transform: capitalize; }
+.pago-fila .pago-monto { font-weight: 700; color: #22c55e; }
 .pago-fila .pago-tag {
-    font-size: 11px;
-    background: #e6f3ff;
-    color: #1e7fd6;
-    padding: 2px 7px;
-    border-radius: 999px;
-    font-weight: 600;
-    margin-left: 8px;
+  font-size: 11px;
+  background: var(--color-bg-blue);
+  color: var(--color-primary-dark);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  margin-left: 8px;
 }

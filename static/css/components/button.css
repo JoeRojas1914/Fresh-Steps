@@ -15,6 +15,9 @@
   color: #fff;
   background: #2fa4ff;
 
+  position: relative;
+  isolation: isolate;
+
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease,
@@ -43,12 +46,25 @@
   background: linear-gradient(to right, #4ade80, #22c55e);
 }
 
+.btn--success:hover {
+  background: linear-gradient(to right, #22c55e, #16a34a);
+}
+
 .btn--danger {
   background: linear-gradient(to right, #f87171, #ef4444);
 }
 
+.btn--danger:hover {
+  background: linear-gradient(to right, #ef4444, #dc2626);
+}
+
 .btn--info {
   background: #3498db;
+}
+
+.btn--info:hover,
+.table--hover tbody tr:hover .btn--info {
+  background: #2176b5;
 }
 
 
