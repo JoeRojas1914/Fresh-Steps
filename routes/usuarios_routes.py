@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, session, jsonify
+from flask import Blueprint, render_template, request, redirect, session, jsonify, flash, url_for
 from services.usuarios_service import (
     listar_usuarios_service,
     guardar_usuario_service,
@@ -15,53 +15,74 @@ def admin_required():
 
 @usuarios_bp.route("/usuarios")
 def listar_usuarios():
-
     if not admin_required():
         return redirect("/")
 
-    usuarios = listar_usuarios_service()
+    q      = request.args.get("q", "").strip()
+    rol    = request.args.get("rol", "")
+    activo = request.args.get("activo", "")
 
-    return render_template("usuarios.html", usuarios=usuarios)
+    activo_val = None
+    if activo == "1":   activo_val = 1
+    elif activo == "0": activo_val = 0
 
+    usuarios = listar_usuarios_service(
+        q=q or None,
+        rol=rol or None,
+        activo=activo_val
+    )
 
+    return render_template(
+        "usuarios.html",
+        usuarios=usuarios,
+        q=q, rol=rol, activo=activo
+    )
 
 
 @usuarios_bp.route("/usuarios/guardar", methods=["POST"])
 def guardar_usuario():
-
     if not admin_required():
         return redirect("/")
 
-    guardar_usuario_service(
-        request.form.get("id_usuario"),
-        request.form.get("usuario"),
-        request.form.get("password"),
-        request.form.get("rol"),
-        request.form.get("pin")
-    )
+    try:
+        id_usuario_raw = request.form.get("id_usuario", "").strip()
+        id_usuario     = int(id_usuario_raw) if id_usuario_raw else None
 
-    return redirect("/usuarios")
+        guardar_usuario_service(
+            id_usuario,
+            request.form.get("usuario"),
+            request.form.get("password"),
+            request.form.get("rol"),
+            request.form.get("pin"),
+            nombre   = request.form.get("nombre")   or None,
+            apellido = request.form.get("apellido") or None,
+            telefono = request.form.get("telefono") or None,
+            correo   = request.form.get("correo")   or None,
+            cp       = request.form.get("cp")       or None,
+        )
+        flash("✅ Usuario editado correctamente." if id_usuario else "✅ Usuario creado correctamente.", "success")
+    except ValueError as e:
+        flash(f"❌ {e}", "error")
 
+    return redirect(url_for("usuarios.listar_usuarios"))
 
 
 @usuarios_bp.route("/usuarios/toggle/<int:id>")
 def toggle_usuario(id):
-
     if not admin_required():
         return redirect("/")
-
-    toggle_usuario_service(id)
-
-    return redirect("/usuarios")
+    nuevo_activo = toggle_usuario_service(id)
+    if nuevo_activo is None:
+        flash("⚠️ No se puede cambiar el estado de este usuario.", "error")
+    elif nuevo_activo:
+        flash("✅ Usuario activado correctamente.", "success")
+    else:
+        flash("🔒 Usuario desactivado correctamente.", "success")
+    return redirect(url_for("usuarios.listar_usuarios"))
 
 
 @usuarios_bp.route("/usuarios/<int:id>/historial")
 def historial_usuario(id):
-
     if not admin_required():
         return jsonify([])
-
-    historial = obtener_historial_usuario_service(id)
-
-    return jsonify(historial)
-
+    return jsonify(obtener_historial_usuario_service(id))

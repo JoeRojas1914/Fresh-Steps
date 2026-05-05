@@ -1,195 +1,253 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-{% from "components/alerts.html" import alerts %}
-{% from "components/table.html" import table %}
+{% from "components/alerts.html"     import alerts %}
+{% from "components/table.html"      import table %}
+{% from "components/modal.html"      import modal %}
+{% from "components/pagination.html" import pagination %}
 
+<h1>👤 Usuarios</h1>
 
-    <h1>👤 Usuarios</h1>
+{{ alerts(get_flashed_messages(with_categories=true)) }}
 
-    {{ alerts(get_flashed_messages(with_categories=true)) }}
+{# ── Filtros ── #}
+<div class="filtro-box">
+    <div class="filtro-row">
 
+        <div class="filtro-item" style="max-width:260px;">
+            <label>Buscar</label>
+            <input type="text" id="buscar-input"
+                   placeholder="Usuario, nombre, apellido o teléfono..."
+                   value="{{ q or '' }}"
+                   autocomplete="off">
+        </div>
 
-    <button onclick="abrirModalUsuario()" class="btn btn--primary">
-        ➕ Agregar usuario
-    </button>
+        <div class="filtro-item" style="max-width:160px;">
+            <label>Rol</label>
+            <div class="select-wrapper">
+                <select id="filtro-rol">
+                    <option value="">Todos</option>
+                    <option value="admin"  {% if rol == 'admin'  %}selected{% endif %}>Admin</option>
+                    <option value="caja"   {% if rol == 'caja'   %}selected{% endif %}>Caja</option>
+                </select>
+            </div>
+        </div>
 
-    <hr>
+        <div class="filtro-item" style="max-width:160px;">
+            <label>Estado</label>
+            <div class="select-wrapper">
+                <select id="filtro-activo">
+                    <option value="">Todos</option>
+                    <option value="1" {% if activo == '1' %}selected{% endif %}>Activo</option>
+                    <option value="0" {% if activo == '0' %}selected{% endif %}>Inactivo</option>
+                </select>
+            </div>
+        </div>
 
-    {% call table([
-        "Usuario",
-        "Rol",
-        "Estado",
-        "Creado",
-        "Acciones"
-    ]) %}
+        <div style="margin-left:auto; display:flex; align-items:flex-end;">
+            <button onclick="abrirModalUsuario()" class="btn btn--primary btn--sm">
+                ➕ Agregar usuario
+            </button>
+        </div>
 
-        {% for u in usuarios %}
-        <tr>
+    </div>
+</div>
 
-            <td>{{ u.usuario }}</td>
+<hr>
 
-            <td>
-                {% if u.rol == "admin" %}
-                    <span class="status status-completado">Admin</span>
-                {% else %}
-                    <span class="status status-pendiente">Caja</span>
-                {% endif %}
-            </td>
+{# ── Tabla ── #}
+{% call table([
+    "Usuario", "Nombre completo", "Teléfono", "Correo",
+    "Rol", "Estado", "Creado", "Acciones"
+]) %}
+    {% for u in usuarios %}
+    <tr data-id="{{ u.id_usuario }}"
+        data-rol="{{ u.rol }}"
+        data-activo="{{ '1' if u.activo else '0' }}"
+        data-buscar="{{ u.usuario }} {{ u.nombre or '' }} {{ u.apellido or '' }} {{ u.telefono or '' }}">
+        <td><strong>{{ u.usuario }}</strong></td>
 
-            <td>
-                {% if u.activo %}
-                    <span class="status status-completado">Activo</span>
-                {% else %}
-                    <span class="status status-pendiente">Inactivo</span>
-                {% endif %}
-            </td>
-
-            <td>{{ u.creado_en }}</td>
-
-            <td>
-            {% if u.rol != "admin" %}
-
-                <button class="btn btn--success btn--sm"
-                    onclick='editarUsuario(event,
-                        {{ u.id_usuario }},
-                        {{ u.usuario|tojson }},
-                        {{ u.rol|tojson }}
-                    )'>
-                    Editar
-                </button>
-
-                <a href="/usuarios/toggle/{{ u.id_usuario }}"
-                class="btn btn--danger btn--sm"
-                onclick="return confirm('¿Cambiar estado del usuario?')">
-                    Activar/Desactivar
-                </a>
-                
-                <button class="btn btn--info btn--sm"
-                    onclick="verHistorialUsuario(event, {{ u.id_usuario }})">
-                    Historial
-                </button>
-
+        <td>
+            {% if u.nombre or u.apellido %}
+                {{ u.nombre or '' }} {{ u.apellido or '' }}
             {% else %}
-                <span style="opacity:.5;">Protegido</span>
+                <span style="opacity:.45;">—</span>
             {% endif %}
-            </td>
+        </td>
 
-        </tr>
-        {% endfor %}
+        <td>{{ u.telefono or '—' }}</td>
+        <td>{{ u.correo   or '—' }}</td>
 
-    {% endcall %}
+        <td>
+            {% if u.rol == 'admin' %}
+                <span class="status status-completado">Admin</span>
+            {% else %}
+                <span class="status status-pendiente">Caja</span>
+            {% endif %}
+        </td>
+
+        <td>
+            {% if u.activo %}
+                <span class="status status-completado">Activo</span>
+            {% else %}
+                <span class="status status-pendiente">Inactivo</span>
+            {% endif %}
+        </td>
+
+        <td>{{ u.creado_en.strftime('%d/%m/%Y') if u.creado_en else '—' }}</td>
+
+        <td>
+        {% if u.rol != 'admin' %}
+            <button class="btn btn--success btn--sm no-row-click"
+                onclick='editarUsuario(event, {{ u|tojson }})'>
+                Editar
+            </button>
+
+            <a href="/usuarios/toggle/{{ u.id_usuario }}"
+               class="btn btn--danger btn--sm no-row-click"
+               onclick="return confirm('¿Cambiar estado del usuario?')">
+                {{ 'Desactivar' if u.activo else 'Activar' }}
+            </a>
+
+            <button class="btn btn--info btn--sm no-row-click"
+                onclick="verHistorialUsuario(event, {{ u.id_usuario }})">
+                Historial
+            </button>
+        {% else %}
+            <span style="opacity:.45; font-size:13px;">Protegido</span>
+        {% endif %}
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="8" style="text-align:center; padding:2rem; opacity:.5;">
+            No se encontraron usuarios con esos filtros.
+        </td>
+    </tr>
+    {% endfor %}
+{% endcall %}
 
 
+{# ── Modal crear/editar ── #}
+<div id="modalUsuario" class="modal">
+    <div class="modal__dialog modal--md">
 
-    <div id="modalUsuario" class="modal">
-        <div class="modal__dialog modal--sm">
-
-            <div class="modal__header">
+        <div class="modal__header">
             <h2 id="modalTitulo" class="modal__title">Agregar usuario</h2>
             <button class="modal__close" onclick="cerrarModal('modalUsuario')">&times;</button>
-            </div>
-
-            <form method="POST" action="/usuarios/guardar">
-
-            <div class="modal__body">
-
-            <input type="hidden" name="id_usuario" id="id_usuario">
-            <input type="hidden" name="rol" id="rol" value="caja">
-
-            <div class="modal-field">
-                <label>Usuario</label>
-                <input 
-                type="text"
-                name="usuario"
-                id="usuario"
-                required
-                minlength="3"
-                pattern="^[a-zA-Z0-9_]+$"
-                >
-            </div>
-
-            <div class="modal-field">
-                <label>Contraseña</label>
-                <input 
-                type="password"
-                name="password"
-                id="password"
-                minlength="6"
-                pattern="^(?=.*\d).{6,}$"
-                placeholder="Mínimo 6 caracteres y 1 número"
-                >
-            </div>
-
-            <div class="modal-field">
-                <label>PIN (4 dígitos)</label>
-                <input 
-                type="password"
-                name="pin"
-                id="pin"
-                maxlength="4"
-                pattern="\d{4}"
-                placeholder="1234"
-                required
-                >
-            </div>
-
-            </div>
-
-
-            <div class="modal__footer">
-                <button type="button" class="btn btn--danger"
-                onclick="cerrarModal('modalUsuario')">
-                Cancelar
-                </button>
-
-                <button type="submit" class="btn btn--primary">
-                Guardar usuario
-                </button>
-            </div>
-
-            </form>
         </div>
+
+        <form method="POST" action="/usuarios/guardar" id="formUsuario">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="id_usuario" id="id_usuario">
+
+        <div class="modal__body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+
+            <div class="modal-field">
+                <label>Nombre</label>
+                <input type="text" name="nombre" id="u_nombre" placeholder="Juan">
+            </div>
+
+            <div class="modal-field">
+                <label>Apellido</label>
+                <input type="text" name="apellido" id="u_apellido" placeholder="Pérez">
+            </div>
+
+            <div class="modal-field">
+                <label>Teléfono</label>
+                <input type="text" name="telefono" id="u_telefono"
+                       placeholder="10 dígitos" pattern="[0-9]{10}" maxlength="10">
+            </div>
+
+            <div class="modal-field">
+                <label>Correo</label>
+                <input type="email" name="correo" id="u_correo" placeholder="correo@ejemplo.com">
+            </div>
+
+            <div class="modal-field">
+                <label>Código postal</label>
+                <input type="text" name="cp" id="u_cp" placeholder="78000" maxlength="10">
+            </div>
+
+            <div class="modal-field">
+                <label>Rol</label>
+                <div class="select-wrapper">
+                    <select name="rol" id="u_rol">
+                        <option value="caja">Caja</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-field">
+                <label>Usuario <span style="color:#e53935;">*</span></label>
+                <input type="text" name="usuario" id="usuario" required
+                       minlength="3" pattern="^[a-zA-Z0-9_]+$"
+                       placeholder="letras, números y _">
+            </div>
+
+            <div class="modal-field">
+                <label>PIN (4 dígitos) <span id="pin-requerido" style="color:#e53935;">*</span></label>
+                <input type="password" name="pin" id="pin"
+                       maxlength="4" pattern="\d{4}" placeholder="1234">
+            </div>
+
+            <div class="modal-field" style="grid-column:1/-1;">
+                <label>
+                    Contraseña
+                    <span id="pass-requerido" style="color:#e53935;">*</span>
+                    <span id="pass-opcional" style="opacity:.5; font-size:12px; display:none;">(dejar vacío para no cambiar)</span>
+                </label>
+                <input type="password" name="password" id="password"
+                       minlength="6" placeholder="Mínimo 6 caracteres y 1 número">
+            </div>
+
+        </div>
+
+        <div class="modal__footer">
+            <button type="button" class="btn btn--danger"
+                    onclick="cerrarModal('modalUsuario')">Cancelar</button>
+            <button type="submit" class="btn btn--primary">Guardar usuario</button>
+        </div>
+
+        </form>
     </div>
+</div>
 
 
+{# ── Modal historial ── #}
+<div id="modalHistorialUsuario" class="modal">
+    <div class="modal__dialog modal--lg">
 
-    <div id="modalHistorialUsuario" class="modal">
-        <div class="modal__dialog modal--lg">
-
-            <div class="modal__header">
+        <div class="modal__header">
             <h2 class="modal__title">Historial del usuario</h2>
             <button class="modal__close" onclick="cerrarModal('modalHistorialUsuario')">&times;</button>
-            </div>
+        </div>
 
-            <div class="modal__body">
+        <div class="modal__body">
             <table id="tablaHistorialUsuario" class="table table--striped table--hover">
                 <thead>
-                <tr>
-                    <th>Acción</th>
-                    <th>Admin</th>
-                    <th>Fecha</th>
-                    <th>Cambios</th>
-                </tr>
+                    <tr>
+                        <th>Acción</th>
+                        <th>Admin</th>
+                        <th>Fecha</th>
+                        <th>Detalle</th>
+                    </tr>
                 </thead>
                 <tbody></tbody>
             </table>
-            </div>
-
-            <div class="modal__footer">
-            <button class="btn btn--primary"
-                onclick="cerrarModal('modalHistorialUsuario')">
-                Cerrar
-            </button>
-            </div>
-
         </div>
-    </div>
 
+        <div class="modal__footer">
+            <button class="btn btn--primary" onclick="cerrarModal('modalHistorialUsuario')">Cerrar</button>
+        </div>
+
+    </div>
+</div>
 
 {% endblock %}
 
 {% block scripts %}
+    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
     <script src="{{ url_for('static', filename='js/usuarios.js') }}"></script>
 {% endblock %}
