@@ -15,24 +15,24 @@ def generar_semanas_rango(inicio: date, fin: date):
 
     semanas = []
     actual = inicio_lunes
-    num_semana = 1
 
     while actual <= fin:
-        semana_fin = actual + timedelta(days=6)
+        semana_fin  = actual + timedelta(days=6)
+        num_semana  = actual.isocalendar()[1]   # semana ISO del año (1–53)
+        anio        = actual.isocalendar()[0]   # año ISO (puede diferir en sem 52/53)
 
         label = [
-            f"Semana {num_semana}",
+            f"Sem {num_semana} ({anio})",
             f"{fecha_bonita(actual)} - {fecha_bonita(semana_fin)}"
         ]
 
         semanas.append({
             "inicio": actual,
-            "fin": semana_fin,
-            "label": label
+            "fin":    semana_fin,
+            "label":  label
         })
 
         actual += timedelta(days=7)
-        num_semana += 1
 
     return semanas
 
