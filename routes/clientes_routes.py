@@ -42,7 +42,7 @@ def clientes():
 @clientes_bp.route("/clientes/guardar", methods=["POST"])
 def guardar_cliente():
 
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
 
     resultado = guardar_cliente_service(request.form, id_usuario)
 
@@ -59,7 +59,7 @@ def guardar_cliente():
 @clientes_bp.route("/clientes/eliminar/<int:id_cliente>")
 def eliminar_cliente(id_cliente):
 
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
 
     ok = eliminar_cliente_service(id_cliente, id_usuario)
 
@@ -75,7 +75,7 @@ def eliminar_cliente(id_cliente):
 @clientes_bp.route("/clientes/restaurar/<int:id_cliente>")
 def restaurar_cliente(id_cliente):
 
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
 
     restaurar_cliente_service(id_cliente, id_usuario)
 
@@ -205,7 +205,7 @@ def ver_cliente(id_cliente):
 
 @clientes_bp.route("/api/clientes/crear", methods=["POST"])
 def api_crear_cliente():
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
     cliente = guardar_cliente_service(request.form, id_usuario, api=True)
     return jsonify(cliente)
 

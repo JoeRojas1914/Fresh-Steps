@@ -48,7 +48,7 @@ def guardar_gasto():
 
     id_gasto = request.form.get("id_gasto")
 
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
 
     datos = (
         request.form["id_negocio"],
@@ -74,7 +74,7 @@ def guardar_gasto():
 @gastos_bp.route("/gastos/eliminar/<int:id_gasto>")
 def eliminar_gasto(id_gasto):
 
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
 
     eliminar_gasto_service(id_gasto, id_usuario)
 
@@ -91,7 +91,7 @@ def historial_gasto(id_gasto):
 @gastos_bp.route("/gastos/restaurar/<int:id_gasto>")
 def restaurar_gasto_route(id_gasto):
 
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
 
     restaurar_gasto_service(id_gasto, id_usuario)
 

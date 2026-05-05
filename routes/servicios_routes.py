@@ -49,7 +49,7 @@ def guardar_servicio():
     id_negocio = request.form["id_negocio"]
     nombre = request.form["nombre"]
     precio = request.form["precio"]
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
 
     resultado = guardar_servicio_service(
         id_servicio,
@@ -71,7 +71,7 @@ def guardar_servicio():
 @servicios_bp.route("/servicios/eliminar/<int:id_servicio>")
 def eliminar_servicio(id_servicio):
 
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
     ok = eliminar_servicio_service(id_servicio, id_usuario)
 
 
@@ -107,7 +107,7 @@ def historial_servicio(id_servicio):
 
 @servicios_bp.route("/servicios/restaurar/<int:id_servicio>")
 def restaurar_servicio(id_servicio):
-    id_usuario = session["id_usuario"]
+    id_usuario = session.get("id_usuario")
 
     restaurar_servicio_service(id_servicio, id_usuario)
 
