@@ -1,122 +1,202 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="dashboard-header">
-    <h1>📊 Estadísticas</h1>
+
+<h1>📊 Estadísticas</h1>
+
+{# ── Selector de modo ── #}
+<div class="modo-selector">
+    <button class="modo-btn" onclick="setModo('dia', this)">📅 Día</button>
+    <button class="modo-btn" onclick="setModo('semana', this)">📆 Semana</button>
+    <button class="modo-btn active" onclick="setModo('mes', this)">🗓️ Mes</button>
+    <button class="modo-btn" onclick="setModo('personalizado', this)">🔍 Personalizado</button>
 </div>
 
-<div class="summary-cards">
+{# ── Paneles de filtro por modo ── #}
+<div class="filtro-box" style="margin-top:16px;">
 
-    <div class="summary-card kpi-card clientes">
-        <div class="kpi-icon">👥</div>
-        <h3>Total de clientes</h3>
-        <div class="card-number">{{ total_clientes }}</div>
-        <span class="kpi-sub">Registrados</span>
+    <div id="panel-dia" class="modo-panel" style="display:none;">
+        <div class="filtro-row">
+            <div class="filtro-item"><label>Fecha</label><input type="date" id="fecha-dia"></div>
+            <div class="filtro-item"><label>Negocio</label><div class="select-wrapper"><select id="negocio-dia"><option value="all">Todos</option>{% for n in negocios %}<option value="{{ n.id_negocio }}">{{ n.nombre }}</option>{% endfor %}</select></div></div>
+            <div class="filtro-actions">
+                <button class="btn btn--info btn--sm" onclick="verVentasRelacionadas()">📋 Ver ventas</button>
+            </div>
+        </div>
     </div>
 
-    <div class="summary-card kpi-card services">
-        <div class="kpi-icon">🏬</div>
-        <h3>Total de servicios</h3>
-        <div class="card-number">{{ total_servicios }}</div>
-        <span class="kpi-sub">Registrados</span>
+    <div id="panel-semana" class="modo-panel" style="display:none;">
+        <div class="filtro-row">
+            <div class="filtro-item"><label>Semana</label><input type="week" id="fecha-semana"></div>
+            <div class="filtro-item"><label>Negocio</label><div class="select-wrapper"><select id="negocio-semana"><option value="all">Todos</option>{% for n in negocios %}<option value="{{ n.id_negocio }}">{{ n.nombre }}</option>{% endfor %}</select></div></div>
+            <div class="filtro-actions">
+                <button class="btn btn--info btn--sm" onclick="verVentasRelacionadas()">📋 Ver ventas</button>
+            </div>
+        </div>
     </div>
 
+    <div id="panel-mes" class="modo-panel">
+        <div class="filtro-row">
+            <div class="filtro-item"><label>Mes</label><input type="month" id="fecha-mes" value="{{ fecha_inicio[:7] }}"></div>
+            <div class="filtro-item"><label>Negocio</label><div class="select-wrapper"><select id="negocio-mes"><option value="all">Todos</option>{% for n in negocios %}<option value="{{ n.id_negocio }}">{{ n.nombre }}</option>{% endfor %}</select></div></div>
+            <div class="filtro-actions">
+                <button class="btn btn--info btn--sm" onclick="verVentasRelacionadas()">📋 Ver ventas</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="panel-personalizado" class="modo-panel" style="display:none;">
+        <div class="filtro-row">
+            <div class="filtro-item"><label>Desde</label><input type="date" id="fecha-inicio-custom" value="{{ fecha_inicio }}"></div>
+            <div class="filtro-item"><label>Hasta</label><input type="date" id="fecha-fin-custom" value="{{ fecha_fin }}"></div>
+            <div class="filtro-item"><label>Negocio</label><div class="select-wrapper"><select id="negocio-custom"><option value="all">Todos</option>{% for n in negocios %}<option value="{{ n.id_negocio }}">{{ n.nombre }}</option>{% endfor %}</select></div></div>
+            <div class="filtro-actions">
+                <button class="btn btn--info btn--sm" onclick="verVentasRelacionadas()">📋 Ver ventas</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="comparativaBox" style="display:none;margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:.05em;">Comparando</span>
+        <span id="comparativaPeriodoActual"
+              style="background:var(--color-bg-blue);color:var(--color-primary-dark);font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid var(--color-primary);">
+        </span>
+        <span style="font-size:14px;color:var(--color-muted);">vs</span>
+        <span id="comparativaPeriodoAnterior"
+              style="background:#f3f4f6;color:var(--color-muted);font-size:12px;font-weight:500;padding:4px 10px;border-radius:999px;border:1px solid #e5e7eb;">
+        </span>
+        <span id="comparativaNota" style="font-size:11px;color:var(--color-muted);opacity:.7;"></span>
+    </div>
 </div>
 
-<div class="date-selector" style="margin: 20px 0;">
-    <form onsubmit="return false;" style="display:flex; gap:15px; align-items:center;">
-        <label>Desde:</label>
-        <input type="date" id="fecha_inicio" value="{{ fecha_inicio }}">
-
-        <label>Hasta:</label>
-        <input type="date" id="fecha_fin" value="{{ fecha_fin }}">
-
-        <label>Negocio:</label>
-        <select id="negocio_select">
-            <option value="all">Todos</option>
-            {% for n in negocios %}
-                <option value="{{ n.id_negocio }}">{{ n.nombre }}</option>
-            {% endfor %}
-        </select>
-
-        <button type="button" class="btn btn--primary btn--sm" onclick="cargarDashboard()">Aplicar</button>
-        <button type="button" class="btn btn--info btn--sm" onclick="verVentasRelacionadas()" title="Ver las ventas del período en el historial">
-            📋 Ver ventas
-        </button>
-    </form>
-</div>
-
-
-
+{# ── KPI Cards ── #}
 <div class="monthly-cards">
-    <div class="monthly-card ventas">
-        <h4>💰 Ingresos</h4>
-        <p id="ventasMes">$0</p>
-    </div>
-
-    <div class="monthly-card gastos">
-        <h4>💸 Gastos</h4>
-        <p id="gastosMes">$0</p>
-    </div>
-
-    <div class="monthly-card ganancia">
-        <h4>📈 Ganancia</h4>
-        <p id="gananciaMes">$0</p>
-    </div>
-
-    <div class="monthly-card" style="border-left: 4px solid #6366f1;">
+    <div class="monthly-card ventas"><h4>💰 Ingresos</h4><p id="ventasMes">$0</p></div>
+    <div class="monthly-card gastos"><h4>💸 Gastos</h4><p id="gastosMes">$0</p></div>
+    <div class="monthly-card ganancia"><h4>📈 Ganancia</h4><p id="gananciaMes">$0</p></div>
+    <div class="monthly-card total-ventas"><h4>🛒 Total ventas</h4><p id="totalVentas">0</p></div>
+    <div class="monthly-card ticket">
         <h4>🧾 Ticket promedio</h4>
         <p id="ticketPromedio">$0</p>
         <span class="kpi-sub" id="ticketVentas" style="font-size:11px;opacity:.6;">0 ventas</span>
     </div>
-
-    <div class="monthly-card" style="border-left: 4px solid #f59e0b;">
+    <div class="monthly-card cobrar">
         <h4>⏳ Por cobrar</h4>
         <p id="saldoCobrar">$0</p>
         <span class="kpi-sub" style="font-size:11px;opacity:.6;">Saldo pendiente</span>
     </div>
 </div>
 
-<div class="stats-page">
-    <div class="card stats-card">
-        <h2 class="stats-title">Ingresos</h2>
-        <canvas id="ingresosChart"></canvas>
-    </div>
+{# ── Pestañas ── #}
+<div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('financiero', this)">📊 Financiero</button>
+    <button class="tab-btn" onclick="switchTab('operacional', this)">🛍️ Operacional</button>
+    <button class="tab-btn" onclick="switchTab('clientes', this)">👥 Clientes</button>
+</div>
 
-    <div class="card stats-card">
-        <h2 class="stats-title">Gastos</h2>
-        <canvas id="gastosChart"></canvas>
+{# ── Financiero ── #}
+<div id="tab-financiero" class="tab-panel">
+    <div class="stats-page">
+        <div class="card stats-card">
+            <h2 class="stats-title" id="titulo-ingresos">Ingresos</h2>
+            <canvas id="ingresosChart"></canvas>
+        </div>
+        <div class="card stats-card">
+            <h2 class="stats-title" id="titulo-gastos">Gastos</h2>
+            <canvas id="gastosChart"></canvas>
+        </div>
+    </div>
+    <div class="stats-page">
+        <div class="card stats-card">
+            <h2 class="stats-title">Prepago vs Sin prepago</h2>
+            <canvas id="tipoPagoChart"></canvas>
+        </div>
+        <div class="card stats-card">
+            <h2 class="stats-title">Métodos de pago</h2>
+            <canvas id="metodosPagoChart"></canvas>
+        </div>
+    </div>
+    <div class="stats-page">
+        <div class="card stats-card" id="card-ingresos-negocio">
+            <h2 class="stats-title">Ingresos por negocio</h2>
+            <canvas id="ingresosNegocioChart"></canvas>
+        </div>
     </div>
 </div>
 
-<div class="stats-page">
-    <div class="card stats-card">
-        <h2 class="stats-title">Numero de Ventas</h2>
-        <canvas id="ventasSemanaChart"></canvas>
+{# ── Operacional ── #}
+<div id="tab-operacional" class="tab-panel" style="display:none;">
+    <div class="stats-page">
+        <div class="card stats-card">
+            <h2 class="stats-title" id="titulo-ventas">Número de ventas</h2>
+            <canvas id="ventasSemanaChart"></canvas>
+        </div>
+        <div class="card stats-card">
+            <h2 class="stats-title" id="titulo-unidades">Unidades recibidas</h2>
+            <canvas id="unidadesSemanaChart"></canvas>
+        </div>
     </div>
 
-    <div class="card stats-card">
-        <h2 class="stats-title">Unidades recibidas</h2>
-        <canvas id="unidadesSemanaChart"></canvas>
+    {# Ocultar ventas por día en modo "día" — no tiene sentido #}
+    <div id="card-ventas-por-dia" class="stats-page">
+        <div class="card stats-card full-width">
+            <h2 class="stats-title">Ventas por día de la semana</h2>
+            <canvas id="ventasPorDiaChart"></canvas>
+        </div>
+    </div>
+
+    <div class="stats-page">
+        <div class="card stats-card">
+            <h2 class="stats-title">🕐 Hora pico — Recepciones</h2>
+            <canvas id="horaPicoRecepcionChart"></canvas>
+        </div>
+        <div class="card stats-card">
+            <h2 class="stats-title">🕐 Hora pico — Entregas</h2>
+            <canvas id="horaPicoEntregaChart"></canvas>
+        </div>
+    </div>
+
+    <div class="stats-page">
+        <div class="card stats-card full-width">
+            <h2 class="stats-title">Uso de servicios</h2>
+            <canvas id="serviciosChart"></canvas>
+        </div>
     </div>
 </div>
 
-<div class="stats-page">
-    <div class="card stats-card full-width">
-        <h2 class="stats-title">Ventas por día</h2>
-        <canvas id="ventasPorDiaChart"></canvas>
-    </div>
-</div>
+{# ── Clientes ── #}
+<div id="tab-clientes" class="tab-panel" style="display:none;">
 
-<div class="stats-page">
-    <div class="card stats-card">
-        <h2 class="stats-title">Prepago vs Sin prepago</h2>
-        <canvas id="tipoPagoChart"></canvas>
+    <div class="monthly-cards" style="margin-top:16px;">
+        <div class="monthly-card small" style="border-left-color:#6366f1;">
+            <h4>👤 Clientes únicos</h4>
+            <p id="clientesUnicos" style="color:#6366f1;">0</p>
+            <span class="kpi-sub" style="font-size:11px;opacity:.6;">Visitaron el negocio</span>
+        </div>
+        <div class="monthly-card small" style="border-left-color:#22c55e;">
+            <h4>🆕 Clientes nuevos</h4>
+            <p id="clientesNuevos" style="color:#22c55e;">0</p>
+            <span class="kpi-sub" style="font-size:11px;opacity:.6;">Primera visita</span>
+        </div>
+        <div class="monthly-card small" style="border-left-color:#f59e0b;">
+            <h4>🔄 Tasa de retorno</h4>
+            <p id="tasaRetorno" style="color:#f59e0b;">0%</p>
+            <span class="kpi-sub" id="tasaRetornoSub" style="font-size:11px;opacity:.6;">Clientes recurrentes</span>
+        </div>
+        <div class="monthly-card small" style="border-left-color:#14b8a6;">
+            <h4>💵 Gasto promedio por cliente</h4>
+            <p id="gastoPorCliente" style="color:#14b8a6;">$0</p>
+            <span class="kpi-sub" style="font-size:11px;opacity:.6;">Promedio por visita única</span>
+        </div>
     </div>
 
-    <div class="card stats-card">
-        <h2 class="stats-title">Uso de servicios</h2>
-        <canvas id="serviciosChart"></canvas>
+    <div class="stats-page">
+        <div class="card stats-card full-width">
+            <h2 class="stats-title">🏆 Top 5 clientes del período</h2>
+            <div id="topClientesContainer">
+                <p style="opacity:.5;text-align:center;padding:2rem;">Cargando...</p>
+            </div>
+        </div>
     </div>
 </div>
 

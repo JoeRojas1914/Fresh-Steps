@@ -80,7 +80,6 @@
 .monthly-card h4 { font-size: 15px; color: #9ca3af; margin-bottom: 10px; }
 .monthly-card p  { font-size: 26px; font-weight: bold; color: #6b7280; }
 
-/* Cada card tiene su color de acento en la orilla y en el número */
 .monthly-card.ventas   { border-left-color: #22c55e; }
 .monthly-card.ventas p { color: #22c55e; }
 
@@ -90,14 +89,16 @@
 .monthly-card.ganancia   { border-left-color: #3b82f6; }
 .monthly-card.ganancia p { color: #3b82f6; }
 
-.monthly-card.total-ventas   { border-left-color: #f59e0b; }
-.monthly-card.total-ventas p { color: #f59e0b; }
+.monthly-card.total-ventas   { border-left-color: #8b5cf6; }
+.monthly-card.total-ventas p { color: #8b5cf6; }
 
 .monthly-card.ticket   { border-left-color: #6366f1; }
 .monthly-card.ticket p { color: #6366f1; }
 
-.monthly-card.cobrar   { border-left-color: #f59e0b; }
-.monthly-card.cobrar p { color: #f59e0b; }
+.monthly-card.cobrar   { border-left-color: #f97316; }
+.monthly-card.cobrar p { color: #f97316; }
+
+.monthly-card.small p   { font-size: 20px; }
 
 .summary-cards {
   display: flex;
@@ -120,3 +121,128 @@
   color: var(--color-navy);
   margin-bottom: 10px;
 }
+
+
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin: 24px 0 0;
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s ease;
+}
+
+.tab-btn:hover { background: var(--color-bg-light); color: var(--color-navy); }
+
+.tab-btn.active {
+  color: var(--color-primary-dark);
+  border-bottom-color: var(--color-primary-dark);
+  background: var(--color-bg-blue);
+}
+
+.tab-panel { padding-top: 8px; }
+
+
+.periodo-btn {
+  background: var(--color-bg-light);
+  color: var(--color-muted);
+  border: 1px solid var(--color-border);
+  font-weight: 500;
+}
+
+.periodo-btn:hover,
+.periodo-btn.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  transform: none;
+  box-shadow: none;
+}
+
+
+.top-clientes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.top-clientes-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted);
+  border-bottom: 1px solid var(--color-border);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.top-clientes-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-bg-light);
+  color: var(--color-text);
+}
+
+.top-clientes-table tr:last-child td { border-bottom: none; }
+
+.top-clientes-table tr:hover td { background: var(--color-bg-blue); }
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+}
+
+
+.modo-selector {
+  display: flex;
+  gap: 6px;
+  margin: 20px 0 0;
+  flex-wrap: wrap;
+}
+
+.modo-btn {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-light);
+  color: var(--color-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modo-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  background: var(--color-bg-blue);
+}
+
+.modo-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: var(--shadow-blue);
+}
+
+.modo-panel { width: 100%; }

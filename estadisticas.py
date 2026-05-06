@@ -18,8 +18,8 @@ def generar_semanas_rango(inicio: date, fin: date):
 
     while actual <= fin:
         semana_fin  = actual + timedelta(days=6)
-        num_semana  = actual.isocalendar()[1]  
-        anio        = actual.isocalendar()[0]
+        num_semana  = actual.isocalendar()[1]   # semana ISO del año (1–53)
+        anio        = actual.isocalendar()[0]   # año ISO (puede diferir en sem 52/53)
 
         label = [
             f"Sem {num_semana} ({anio})",
@@ -157,6 +157,9 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str):
         for s in semanas:
             semana_inicio = max(s["inicio"], inicio)
             semana_fin    = min(s["fin"],    fin)
+
+            # Una sola query que suma las unidades de los 3 negocios
+            # según el filtro activo, usando UNION ALL internamente
             partes  = []
             params  = []
 
@@ -287,7 +290,6 @@ def obtener_ingresos_por_semana(inicio, fin, id_negocio):
 
 
 def ejecutar_query(sql, params=None):
-    """Abre su propia conexión. Usar solo para queries simples de una sola llamada."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
@@ -444,6 +446,390 @@ def obtener_saldo_por_cobrar(inicio, fin, id_negocio):
     try:
         cursor.execute(sql, params)
         return float(cursor.fetchone()["saldo"] or 0)
+    finally:
+        cursor.close()
+        conn.close()
+
+def obtener_top_clientes(inicio, fin, id_negocio, limit=5):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    sql = """
+        SELECT
+            c.id_cliente,
+            c.nombre,
+            c.apellido,
+            COUNT(v.id_venta)  AS visitas,
+            SUM(v.total)       AS total_gastado
+        FROM venta v
+        JOIN cliente c ON c.id_cliente = v.id_cliente
+        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+          AND v.eliminado = 0
+    """
+    params = [inicio, fin]
+
+    if id_negocio != "all":
+        sql += " AND v.id_negocio = %s"
+        params.append(id_negocio)
+
+    sql += " GROUP BY c.id_cliente ORDER BY visitas DESC, total_gastado DESC LIMIT %s"
+    params.append(limit)
+
+    try:
+        cursor.execute(sql, params)
+        rows = cursor.fetchall()
+        return [
+            {
+                "nombre":        f"{r['nombre']} {r['apellido']}",
+                "visitas":       int(r["visitas"] or 0),
+                "total_gastado": float(r["total_gastado"] or 0),
+            }
+            for r in rows
+        ]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_tiempo_promedio_entrega(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    sql = """
+        SELECT ROUND(AVG(DATEDIFF(fecha_lista, fecha_recibo)), 1) AS dias_promedio,
+               COUNT(*) AS ventas_completadas
+        FROM venta
+        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+          AND fecha_lista IS NOT NULL
+          AND eliminado   = 0
+    """
+    params = [inicio, fin]
+
+    if id_negocio != "all":
+        sql += " AND id_negocio = %s"
+        params.append(id_negocio)
+
+    try:
+        cursor.execute(sql, params)
+        row = cursor.fetchone()
+        return {
+            "dias":      float(row["dias_promedio"] or 0),
+            "completadas": int(row["ventas_completadas"] or 0),
+        }
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_ingresos_por_negocio(inicio, fin):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT n.nombre, COALESCE(SUM(v.total), 0) AS total
+            FROM venta v
+            JOIN negocio n ON n.id_negocio = v.id_negocio
+            WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+              AND v.eliminado = 0
+            GROUP BY v.id_negocio
+            ORDER BY total DESC
+        """, [inicio, fin])
+        rows = cursor.fetchall()
+        return [{"nombre": r["nombre"], "total": float(r["total"])} for r in rows]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_ventas_por_mes(anio, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT MONTH(fecha_recibo) AS mes, COUNT(*) AS total
+        FROM venta
+        WHERE YEAR(fecha_recibo) = %s AND eliminado = 0
+    """
+    params = [anio]
+    if id_negocio != "all":
+        sql += " AND id_negocio = %s"
+        params.append(id_negocio)
+    sql += " GROUP BY mes ORDER BY mes"
+    try:
+        cursor.execute(sql, params)
+        rows = {r["mes"]: r["total"] for r in cursor.fetchall()}
+        meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+        return [{"label": meses[i], "total": rows.get(i+1, 0)} for i in range(12)]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_ingresos_por_mes(anio, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT MONTH(pv.fecha_pago) AS mes, COALESCE(SUM(pv.monto), 0) AS total
+        FROM pago_venta pv
+        JOIN venta v ON v.id_venta = pv.id_venta
+        WHERE YEAR(pv.fecha_pago) = %s AND v.eliminado = 0
+    """
+    params = [anio]
+    if id_negocio != "all":
+        sql += " AND v.id_negocio = %s"
+        params.append(id_negocio)
+    sql += " GROUP BY mes ORDER BY mes"
+    try:
+        cursor.execute(sql, params)
+        rows = {r["mes"]: float(r["total"]) for r in cursor.fetchall()}
+        meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+        return [{"label": meses[i], "total": rows.get(i+1, 0.0)} for i in range(12)]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_gastos_por_mes(anio, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT MONTH(fecha_registro) AS mes, COALESCE(SUM(total), 0) AS total
+        FROM gastos
+        WHERE YEAR(fecha_registro) = %s AND activo = 1
+    """
+    params = [anio]
+    if id_negocio != "all":
+        sql += " AND id_negocio = %s"
+        params.append(id_negocio)
+    sql += " GROUP BY mes ORDER BY mes"
+    try:
+        cursor.execute(sql, params)
+        rows = {r["mes"]: float(r["total"]) for r in cursor.fetchall()}
+        meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+        return [{"label": meses[i], "total": rows.get(i+1, 0.0)} for i in range(12)]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_unidades_por_mes(anio, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT MONTH(v.fecha_recibo) AS mes,
+               COALESCE(
+                   (SELECT COUNT(*) FROM articulo a
+                    JOIN articulo_calzado ac ON ac.id_articulo = a.id_articulo
+                    WHERE a.id_venta = v.id_venta) +
+                   (SELECT COALESCE(SUM(ac2.cantidad),0) FROM articulo a2
+                    JOIN articulo_confeccion ac2 ON ac2.id_articulo = a2.id_articulo
+                    WHERE a2.id_venta = v.id_venta) +
+                   (SELECT COALESCE(SUM(am.cantidad),0) FROM articulo a3
+                    JOIN articulo_maquila am ON am.id_articulo = a3.id_articulo
+                    WHERE a3.id_venta = v.id_venta)
+               , 0) AS unidades
+        FROM venta v
+        WHERE YEAR(v.fecha_recibo) = %s AND v.eliminado = 0
+    """
+    params = [anio]
+    if id_negocio != "all":
+        sql += " AND v.id_negocio = %s"
+        params.append(id_negocio)
+
+    try:
+        cursor.execute(sql, params)
+        rows_raw = cursor.fetchall()
+        acumulado = {}
+        for r in rows_raw:
+            m = r["mes"]
+            acumulado[m] = acumulado.get(m, 0) + int(r["unidades"] or 0)
+        meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"]
+        return [{"label": meses[i], "total": acumulado.get(i+1, 0)} for i in range(12)]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_metodos_pago(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT pv.tipo_pago AS metodo, COUNT(*) AS total, COALESCE(SUM(pv.monto),0) AS monto
+        FROM pago_venta pv
+        JOIN venta v ON v.id_venta = pv.id_venta
+        WHERE DATE(pv.fecha_pago) BETWEEN %s AND %s
+          AND v.eliminado = 0
+    """
+    params = [inicio, fin]
+    if id_negocio != "all":
+        sql += " AND v.id_negocio = %s"
+        params.append(id_negocio)
+    sql += " GROUP BY pv.tipo_pago ORDER BY total DESC"
+    try:
+        cursor.execute(sql, params)
+        rows = cursor.fetchall()
+        return [{"metodo": r["metodo"] or "Otro", "total": int(r["total"]), "monto": float(r["monto"])} for r in rows]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_hora_pico_recepcion(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT HOUR(fecha_recibo) AS hora, COUNT(*) AS total
+        FROM venta
+        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+          AND eliminado = 0
+          AND HOUR(fecha_recibo) BETWEEN 7 AND 21
+    """
+    params = [inicio, fin]
+    if id_negocio != "all":
+        sql += " AND id_negocio = %s"
+        params.append(id_negocio)
+    sql += " GROUP BY hora ORDER BY hora"
+    try:
+        cursor.execute(sql, params)
+        rows = {r["hora"]: r["total"] for r in cursor.fetchall()}
+        return [{"hora": f"{h}:00", "total": rows.get(h, 0)} for h in range(7, 22)]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_hora_pico_entrega(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT HOUR(fecha_entrega) AS hora, COUNT(*) AS total
+        FROM venta
+        WHERE DATE(fecha_entrega) BETWEEN %s AND %s
+          AND fecha_entrega IS NOT NULL
+          AND eliminado = 0
+          AND HOUR(fecha_entrega) BETWEEN 7 AND 21
+    """
+    params = [inicio, fin]
+    if id_negocio != "all":
+        sql += " AND id_negocio = %s"
+        params.append(id_negocio)
+    sql += " GROUP BY hora ORDER BY hora"
+    try:
+        cursor.execute(sql, params)
+        rows = {r["hora"]: r["total"] for r in cursor.fetchall()}
+        return [{"hora": f"{h}:00", "total": rows.get(h, 0)} for h in range(7, 22)]
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_clientes_unicos(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT COUNT(DISTINCT id_cliente) AS total
+        FROM venta
+        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+          AND eliminado = 0
+          AND id_cliente IS NOT NULL
+    """
+    params = [inicio, fin]
+    if id_negocio != "all":
+        sql += " AND id_negocio = %s"
+        params.append(id_negocio)
+    try:
+        cursor.execute(sql, params)
+        return int(cursor.fetchone()["total"] or 0)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_clientes_nuevos(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT COUNT(DISTINCT v.id_cliente) AS total
+        FROM venta v
+        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+          AND v.eliminado = 0
+          AND v.id_cliente IS NOT NULL
+          AND NOT EXISTS (
+              SELECT 1 FROM venta v2
+              WHERE v2.id_cliente = v.id_cliente
+                AND v2.eliminado  = 0
+                AND v2.fecha_recibo < v.fecha_recibo
+          )
+    """
+    params = [inicio, fin]
+    if id_negocio != "all":
+        sql += " AND v.id_negocio = %s"
+        params.append(id_negocio)
+    try:
+        cursor.execute(sql, params)
+        return int(cursor.fetchone()["total"] or 0)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_tasa_retorno(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT
+            COUNT(DISTINCT v.id_cliente) AS total,
+            COUNT(DISTINCT CASE
+                WHEN EXISTS (
+                    SELECT 1 FROM venta v2
+                    WHERE v2.id_cliente = v.id_cliente
+                      AND v2.eliminado  = 0
+                      AND DATE(v2.fecha_recibo) < %s
+                ) THEN v.id_cliente
+            END) AS recurrentes
+        FROM venta v
+        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+          AND v.eliminado = 0
+          AND v.id_cliente IS NOT NULL
+    """
+    params = [inicio, inicio, fin]
+    if id_negocio != "all":
+        sql += " AND v.id_negocio = %s"
+        params.append(id_negocio)
+    try:
+        cursor.execute(sql, params)
+        row = cursor.fetchone()
+        total      = int(row["total"] or 0)
+        recurrentes = int(row["recurrentes"] or 0)
+        tasa = round(recurrentes / total * 100, 1) if total > 0 else 0
+        return {"total": total, "recurrentes": recurrentes, "tasa": tasa}
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_gasto_promedio_cliente(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    sql = """
+        SELECT
+            COALESCE(SUM(v.total), 0)        AS total_ingresos,
+            COUNT(DISTINCT v.id_cliente)      AS clientes_unicos
+        FROM venta v
+        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+          AND v.eliminado = 0
+          AND v.id_cliente IS NOT NULL
+    """
+    params = [inicio, fin]
+    if id_negocio != "all":
+        sql += " AND v.id_negocio = %s"
+        params.append(id_negocio)
+    try:
+        cursor.execute(sql, params)
+        row = cursor.fetchone()
+        total    = float(row["total_ingresos"] or 0)
+        clientes = int(row["clientes_unicos"] or 0)
+        return round(total / clientes, 2) if clientes > 0 else 0.0
     finally:
         cursor.close()
         conn.close()
