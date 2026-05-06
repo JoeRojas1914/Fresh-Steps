@@ -56,12 +56,18 @@ def index():
 
         return redirect(url_for("auth.login"))
 
+    dias   = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
+    meses  = ["enero","febrero","marzo","abril","mayo","junio",
+               "julio","agosto","septiembre","octubre","noviembre","diciembre"]
+    hoy_dt = date.today()
+    fecha_bonita = f"{dias[hoy_dt.weekday()]} {hoy_dt.day} de {meses[hoy_dt.month-1]}, {hoy_dt.year}"
 
     return render_template(
         "index.html",
-        total_entregas = contar_entregas_listas(),
+        total_entregas   = contar_entregas_listas(),
         total_pendientes = contar_entregas_pendientes(),
-        nombre_usuario=session.get("usuario")
+        nombre_usuario   = session.get("nombre") or session.get("usuario", "").capitalize(),
+        fecha_bonita     = fecha_bonita,
     )
 
 

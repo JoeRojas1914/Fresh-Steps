@@ -41,8 +41,9 @@ def login():
         if admin_mode:
 
             session["id_usuario"] = usuario["id_usuario"]
-            session["usuario"] = usuario["usuario"]
-            session["rol"] = usuario["rol"]
+            session["usuario"]    = usuario["usuario"]
+            session["nombre"]     = usuario.get("nombre") or usuario["usuario"].capitalize()
+            session["rol"]        = usuario["rol"]
             session["ultima_actividad"] = datetime.now().isoformat()
 
             return redirect(url_for("index"))
@@ -80,8 +81,9 @@ def pin_login():
 
 
     session["id_usuario"] = usuario["id_usuario"]
-    session["usuario"] = usuario["usuario"]
-    session["rol"] = "caja"
+    session["usuario"]    = usuario["usuario"]
+    session["nombre"]     = usuario.get("nombre") or usuario["usuario"].capitalize()
+    session["rol"]        = "caja"
     session["ultima_actividad"] = datetime.now().isoformat()
 
     return redirect(url_for("index"))

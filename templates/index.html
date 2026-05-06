@@ -1,68 +1,57 @@
 {% extends "base.html" %}
-{% block content %}
 
-{% block styles %}
+{% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/index.css') }}">
 {% endblock %}
 
-<section class="dashboard-header">
-    <div class="dashboard-title">
-        <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}"
-             alt="Fresh Steps"
-             class="dashboard-logo">
+{% block content %}
 
-        <div>
-            <h1>Fresh Steps 👟 / Fer's Shop ✂️</h1>
-            <p>Sistema de control de ventas</p>
-        </div>
+{# ── Header ── #}
+<div class="home-header">
+    <div class="home-greeting">
+        <h1>Buen día, {{ nombre_usuario }} 👋</h1>
+        <p>Aquí está el resumen de hoy</p>
     </div>
-</section>
+    <span class="home-fecha">{{ fecha_bonita }}</span>
+</div>
 
-<section class="dashboard-cards">
-
-    {% if session.rol == "admin" %}
-
-        <a href="/usuarios" class="card card-link card-gradient">
-            <h3>🛠️ Usuarios</h3>
-            <p class="card-number">Gestión de Usuarios</p>
-        </a>
-
-        <a href="/clientes" class="card card-link card-gradient">
-            <h3>👥 Clientes</h3>
-            <p class="card-number">Gestión de Clientes</p>
-        </a>
-        
-        <a href="/servicios" class="card card-link card-gradient">
-            <h3>🏬 Servicios</h3>
-            <p class="card-number">Gestión de Servicios</p>
-        </a>
-
-        <a href="/gastos" class="card card-link card-gradient">
-            <h3>💸 Gastos</h3>
-            <p class="card-number">Registrar Gasto</p>
-        </a>
-
-        <a href="/estadisticas" class="card card-link card-gradient">
-            <h3>📊 Estadísticas</h3>
-            <p class="card-number">Ver reportes</p>
-        </a>
-    {% endif %}
-
-    <a href="/ventas/pendientes" class="card card-link card-gradient">
-        <h3>📦 Entregas pendientes</h3>
-    <p class="card-number">{{ total_pendientes }}</p>
-
-    <a href="/ventas/listas" class="card card-link card-gradient">
-        <h3>📦 Entregas Procesadas</h3>
-        <p class="card-number">{{ total_entregas }}</p>
+{# ── Acciones rápidas ── #}
+<p class="home-section-label">Acciones rápidas</p>
+<div class="acciones-grid">
+    <a class="accion-card nueva-venta" href="/ventas">
+        <div class="accion-icon">🧾</div>
+        <div>
+            <div class="accion-label">Nueva venta</div>
+            <div class="accion-sub">Registrar recibo</div>
+        </div>
     </a>
-
-    <a href="/ventas" class="card card-link card-gradient">
-        <h3>🧾 Venta</h3>
-        <p class="card-number">Registrar Venta</p>
+    <a class="accion-card pendientes" href="/ventas/pendientes">
+        <div class="accion-icon">📦</div>
+        <div>
+            <div class="accion-label">Pendientes</div>
+            <div class="accion-num" style="color:#1e7fd6;">{{ total_pendientes }}</div>
+        </div>
     </a>
+    <a class="accion-card procesadas" href="/ventas/listas">
+        <div class="accion-icon">✅</div>
+        <div>
+            <div class="accion-label">Listas para recoger</div>
+            <div class="accion-num" style="color:#22c55e;">{{ total_entregas }}</div>
+        </div>
+    </a>
+</div>
 
-
-</section>
+{# ── Administración — solo admin ── #}
+{% if session.rol == "admin" %}
+<p class="home-section-label">Administración</p>
+<div class="admin-grid">
+    <a class="admin-card" href="/clientes"><span class="admin-icon">👥</span><span class="admin-label">Clientes</span></a>
+    <a class="admin-card" href="/servicios"><span class="admin-icon">🏬</span><span class="admin-label">Servicios</span></a>
+    <a class="admin-card" href="/gastos"><span class="admin-icon">💸</span><span class="admin-label">Gastos</span></a>
+    <a class="admin-card" href="/usuarios"><span class="admin-icon">👤</span><span class="admin-label">Usuarios</span></a>
+    <a class="admin-card" href="/ventas/historial"><span class="admin-icon">📋</span><span class="admin-label">Historial</span></a>
+    <a class="admin-card" href="/estadisticas"><span class="admin-icon">📊</span><span class="admin-label">Estadísticas</span></a>
+</div>
+{% endif %}
 
 {% endblock %}
