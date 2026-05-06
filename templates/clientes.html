@@ -12,6 +12,14 @@
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
+{# ── KPI cards ── #}
+<div class="monthly-cards" style="margin-bottom:20px;">
+    <div class="monthly-card small" style="border-left-color:#1e7fd6;">
+        <h4>👥 Total clientes</h4>
+        <p style="color:#1e7fd6;">{{ total_clientes }}</p>
+    </div>
+</div>
+
 <div class="filtro-box">
     <div class="filtro-row">
         <div class="filtro-item" style="max-width:280px;">

@@ -30,7 +30,9 @@ def clientes():
     return render_template(
         "clientes.html",
         clientes=data["clientes"], q=q, pagina=pagina,
-        total_paginas=data["total_paginas"], incluir_eliminados=incluir_eliminados
+        total_paginas=data["total_paginas"],
+        total_clientes=data["total_clientes"],
+        incluir_eliminados=incluir_eliminados
     )
 
 

@@ -25,8 +25,9 @@ def listar_clientes_service(q="", pagina=1, por_pagina=10, incluir_eliminados=Fa
     total_paginas = (total + por_pagina - 1) // por_pagina
 
     return {
-        "clientes": clientes,
-        "total_paginas": total_paginas
+        "clientes":       clientes,
+        "total_paginas":  total_paginas,
+        "total_clientes": total,
     }
 
 
