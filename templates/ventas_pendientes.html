@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 {% from "macros/badges.html" import badge_negocio %}
+{% from "components/alerts.html" import alerts %}
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal %}
     <h1>🧾 Entregas pendientes</h1>
+
+    {{ alerts(get_flashed_messages(with_categories=true)) }}
 
     <div class="filtro-box">
         <div class="filtro-row">
