@@ -1,4 +1,3 @@
-
 .card-number {
   font-size: 28px;
   font-weight: bold;
@@ -64,7 +63,7 @@
 
 .monthly-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin: 25px 0;
 }
@@ -75,14 +74,30 @@
   padding: 20px;
   text-align: center;
   box-shadow: 0 8px 20px rgba(0,0,0,.25);
+  border-left: 4px solid #e5e7eb;
 }
 
 .monthly-card h4 { font-size: 15px; color: #9ca3af; margin-bottom: 10px; }
-.monthly-card p  { font-size: 26px; font-weight: bold; }
+.monthly-card p  { font-size: 26px; font-weight: bold; color: #6b7280; }
 
-.monthly-card.ventas p   { color: #22c55e; }
-.monthly-card.gastos p   { color: #ef4444; }
+/* Cada card tiene su color de acento en la orilla y en el número */
+.monthly-card.ventas   { border-left-color: #22c55e; }
+.monthly-card.ventas p { color: #22c55e; }
+
+.monthly-card.gastos   { border-left-color: #ef4444; }
+.monthly-card.gastos p { color: #ef4444; }
+
+.monthly-card.ganancia   { border-left-color: #3b82f6; }
 .monthly-card.ganancia p { color: #3b82f6; }
+
+.monthly-card.total-ventas   { border-left-color: #f59e0b; }
+.monthly-card.total-ventas p { color: #f59e0b; }
+
+.monthly-card.ticket   { border-left-color: #6366f1; }
+.monthly-card.ticket p { color: #6366f1; }
+
+.monthly-card.cobrar   { border-left-color: #f59e0b; }
+.monthly-card.cobrar p { color: #f59e0b; }
 
 .summary-cards {
   display: flex;

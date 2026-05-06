@@ -18,7 +18,7 @@ def generar_semanas_rango(inicio: date, fin: date):
 
     while actual <= fin:
         semana_fin  = actual + timedelta(days=6)
-        num_semana  = actual.isocalendar()[1]   
+        num_semana  = actual.isocalendar()[1]  
         anio        = actual.isocalendar()[0]
 
         label = [
@@ -157,7 +157,6 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str):
         for s in semanas:
             semana_inicio = max(s["inicio"], inicio)
             semana_fin    = min(s["fin"],    fin)
-
             partes  = []
             params  = []
 
@@ -288,6 +287,7 @@ def obtener_ingresos_por_semana(inicio, fin, id_negocio):
 
 
 def ejecutar_query(sql, params=None):
+    """Abre su propia conexión. Usar solo para queries simples de una sola llamada."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
@@ -389,3 +389,61 @@ def obtener_ventas_por_dia(inicio, fin, id_negocio):
         dias[r["dia"]] = r["total"]
 
     return dias
+
+
+def obtener_ticket_promedio(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    sql = """
+        SELECT COALESCE(AVG(total), 0) AS promedio,
+               COUNT(*)               AS num_ventas
+        FROM venta
+        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+          AND eliminado = 0
+    """
+    params = [inicio, fin]
+
+    if id_negocio != "all":
+        sql += " AND id_negocio = %s"
+        params.append(id_negocio)
+
+    try:
+        cursor.execute(sql, params)
+        row = cursor.fetchone()
+        return float(row["promedio"] or 0), int(row["num_ventas"] or 0)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def obtener_saldo_por_cobrar(inicio, fin, id_negocio):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    sql = """
+        SELECT COALESCE(
+            SUM(v.total - COALESCE(p.pagado, 0)), 0
+        ) AS saldo
+        FROM venta v
+        LEFT JOIN (
+            SELECT id_venta, SUM(monto) AS pagado
+            FROM pago_venta
+            GROUP BY id_venta
+        ) p ON p.id_venta = v.id_venta
+        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+          AND v.eliminado = 0
+          AND (v.total - COALESCE(p.pagado, 0)) > 0
+    """
+    params = [inicio, fin]
+
+    if id_negocio != "all":
+        sql += " AND v.id_negocio = %s"
+        params.append(id_negocio)
+
+    try:
+        cursor.execute(sql, params)
+        return float(cursor.fetchone()["saldo"] or 0)
+    finally:
+        cursor.close()
+        conn.close()

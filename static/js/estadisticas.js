@@ -191,9 +191,17 @@ async function cargarDashboard() {
         const data = await res.json();
 
         const k = data.kpis || {};
-        setKpi("ventasMes",   k.ingresos,  k.ingresos_pct);
-        setKpi("gastosMes",   k.gastos,    k.gastos_pct);
-        setKpi("gananciaMes", k.ganancia,  k.ganancia_pct);
+        setKpi("ventasMes",     k.ingresos,         k.ingresos_pct);
+        setKpi("gastosMes",     k.gastos,            k.gastos_pct);
+        setKpi("gananciaMes",   k.ganancia,          k.ganancia_pct);
+        setKpi("ticketPromedio",k.ticket_promedio,   k.ticket_pct);
+        setKpi("saldoCobrar",   k.saldo_por_cobrar,  k.saldo_pct);
+
+        const elTotal = document.getElementById("totalVentas");
+        if (elTotal) elTotal.innerHTML = fmtN(k.total_ventas) + badgePct(k.ventas_pct);
+
+        const elVentas = document.getElementById("ticketVentas");
+        if (elVentas) elVentas.textContent = `${fmtN(k.num_ventas)} ventas`;
 
         if (data.ventas_semanales) {
             ventasSemanaChart.data.labels   = data.ventas_semanales.map(x => x.label);
@@ -259,6 +267,22 @@ function mostrarError(msg) {
 function ocultarError() {
     const el = document.getElementById("dashboard-error");
     if (el) el.style.display = "none";
+}
+
+function verVentasRelacionadas() {
+    const inicio  = document.getElementById("fecha_inicio").value;
+    const fin     = document.getElementById("fecha_fin").value;
+    const negocio = document.getElementById("negocio_select").value;
+
+    if (!inicio || !fin) {
+        mostrarError("Selecciona un rango de fechas antes de ver las ventas.");
+        return;
+    }
+
+    const params = new URLSearchParams({ fecha_inicio: inicio, fecha_fin: fin });
+    if (negocio && negocio !== "all") params.set("id_negocio", negocio);
+
+    window.open(`/ventas/historial?${params.toString()}`, "_blank");
 }
 
 document.addEventListener("DOMContentLoaded", () => {

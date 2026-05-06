@@ -12,7 +12,9 @@ from estadisticas import (
     obtener_ingresos_por_semana,
     obtener_ventas_con_y_sin_prepago,
     obtener_uso_servicios,
-    obtener_ventas_por_dia
+    obtener_ventas_por_dia,
+    obtener_ticket_promedio,
+    obtener_saldo_por_cobrar,
 )
 
 MAX_DIAS_RANGO = 186  
@@ -59,12 +61,17 @@ def dashboard_api_service(args):
     if (fin - inicio).days > MAX_DIAS_RANGO:
         return None, f"El rango máximo permitido es {MAX_DIAS_RANGO} días (~6 meses)"
 
-    total_ingresos = obtener_total_ingresos(inicio, fin, id_negocio)
-    total_gastos   = obtener_total_gastos(inicio,   fin, id_negocio)
+    total_ingresos              = obtener_total_ingresos(inicio, fin, id_negocio)
+    total_gastos                = obtener_total_gastos(inicio,   fin, id_negocio)
+    ticket_promedio, num_ventas = obtener_ticket_promedio(inicio, fin, id_negocio)
+    saldo_por_cobrar            = obtener_saldo_por_cobrar(inicio, fin, id_negocio)
+    total_ventas                = num_ventas  
 
-    inicio_ant, fin_ant    = _periodo_anterior(inicio, fin)
-    ingresos_ant = obtener_total_ingresos(inicio_ant, fin_ant, id_negocio)
-    gastos_ant   = obtener_total_gastos(inicio_ant,   fin_ant, id_negocio)
+    inicio_ant, fin_ant              = _periodo_anterior(inicio, fin)
+    ingresos_ant                     = obtener_total_ingresos(inicio_ant, fin_ant, id_negocio)
+    gastos_ant                       = obtener_total_gastos(inicio_ant,   fin_ant, id_negocio)
+    ticket_ant, ventas_ant           = obtener_ticket_promedio(inicio_ant, fin_ant, id_negocio)
+    saldo_ant                        = obtener_saldo_por_cobrar(inicio_ant, fin_ant, id_negocio)
 
     def pct_cambio(actual, anterior):
         """Devuelve % de cambio redondeado a 1 decimal, o None si no hay base."""
@@ -93,11 +100,18 @@ def dashboard_api_service(args):
         "uso_servicios":      uso_servicios,
         "ventas_por_dia":     ventas_por_dia,
         "kpis": {
-            "ingresos":      total_ingresos,
-            "gastos":        total_gastos,
-            "ganancia":      ganancia,
-            "ingresos_pct":  pct_cambio(total_ingresos, ingresos_ant),
-            "gastos_pct":    pct_cambio(total_gastos,   gastos_ant),
-            "ganancia_pct":  pct_cambio(ganancia,       ganancia_ant),
+            "ingresos":         total_ingresos,
+            "gastos":           total_gastos,
+            "ganancia":         ganancia,
+            "ticket_promedio":  ticket_promedio,
+            "num_ventas":       num_ventas,
+            "total_ventas":     num_ventas,
+            "saldo_por_cobrar": saldo_por_cobrar,
+            "ingresos_pct":     pct_cambio(total_ingresos,    ingresos_ant),
+            "gastos_pct":       pct_cambio(total_gastos,      gastos_ant),
+            "ganancia_pct":     pct_cambio(ganancia,          ganancia_ant),
+            "ticket_pct":       pct_cambio(ticket_promedio,   ticket_ant),
+            "ventas_pct":       pct_cambio(num_ventas,        ventas_ant),
+            "saldo_pct":        pct_cambio(saldo_por_cobrar,  saldo_ant),
         }
     }, None
