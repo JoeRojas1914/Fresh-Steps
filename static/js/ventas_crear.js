@@ -656,18 +656,15 @@ function validarFormulario() {
     const descuento = parseFloat(document.getElementById("cantidad_descuento")?.value || 0);
 
 
-    /* ---------- Negocio y fecha ---------- */
     if (!negocio || !fechaEstimada) {
         valido = false;
     }
 
-    /* ---------- Artículos ---------- */
     const articulos = document.querySelectorAll(".articulo-item");
     if (articulos.length === 0 || !articulosCompletos()) {
         valido = false;
     }
 
-    /* ---------- Servicios obligatorios ---------- */
     if (negocio === "1" || negocio === "2") {
         document.querySelectorAll(".servicios-box").forEach(box => {
             const selects = box.querySelectorAll("select");
@@ -689,7 +686,6 @@ function validarFormulario() {
         });
     }
 
-    /* ---------- Prepago ---------- */
     if (prepago === "si") {
         if (!tipoPago || montoPrepago <= 0) {
             valido = false;
@@ -705,7 +701,6 @@ function validarFormulario() {
         document.getElementById("errorPrepago").style.display = "none";
     }
 
-    /* ---------- Descuento ---------- */
     if (aplicaDesc) {
         const totalBruto = calcularTotal(true);
 
@@ -719,7 +714,6 @@ function validarFormulario() {
         document.getElementById("errorDescuento").style.display = "none";
     }
 
-    /* ---------- MENSAJE DE BLOQUEO ---------- */
     const motivos = obtenerMotivosBloqueo();
     const btn = document.getElementById("btnCrear");
     const msg = document.getElementById("mensajeBloqueo");
@@ -910,11 +904,9 @@ function generarResumenArticulo(item){
     const partes = [color, mat, cant ? `x${cant}` : ""].filter(Boolean);
     const detalle = partes.join(" · ");
 
-    // Obtener nombre del negocio para el badge
     const negSel = document.getElementById("id_negocio");
     const negNombre = negSel?.selectedOptions[0]?.text || "";
 
-    // Numero de articulo
     const titulo = item.querySelector(".zapato-titulo")?.innerText || "Artículo";
 
     resumen.innerHTML = `
@@ -1048,7 +1040,6 @@ function abrirArticuloDesdeResumen(resumenDiv) {
     detalle.style.display = "block";
     resumen.style.display = "none";
 
-    // ── NUEVO ──
     item.classList.remove("compactado");
     item.classList.add("abierto");
 }

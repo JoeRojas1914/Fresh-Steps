@@ -27,7 +27,7 @@ def login():
             return render_template("login.html")
 
         if not usuario:
-            flash("❌ Usuario o contraseña incorrectos", "error")
+            flash("Usuario o contraseña incorrectos", "error")
             return render_template("login.html")
 
 
@@ -76,7 +76,7 @@ def pin_login():
         return render_template("pin.html")
 
     if not usuario:
-        flash("❌ PIN incorrecto", "error")
+        flash("PIN incorrecto", "error")
         return render_template("pin.html")
 
 
