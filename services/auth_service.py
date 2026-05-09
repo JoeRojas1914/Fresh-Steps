@@ -5,6 +5,7 @@ from flask import request
 from login import (
     obtener_usuario_por_username,
     obtener_usuario_caja_activo,
+    obtener_usuarios_caja_activos,
     registrar_login_log,
     obtener_intentos,
     registrar_fallo,
@@ -78,19 +79,26 @@ def login_password_service(username, password, ip):
 
 def login_pin_service(pin, ip):
 
-    usuario = obtener_usuario_caja_activo()
+    usuarios = obtener_usuarios_caja_activos()
 
-    if not usuario:
+    if not usuarios:
         return None
 
-    username = usuario["usuario"]
+    for usuario in usuarios:
+        username = usuario["usuario"]
 
-    if _esta_bloqueado(username, ip, "pin_caja", usuario["id_usuario"]):
-        return "LOCKED"
+        if _esta_bloqueado(username, ip, "pin_caja", usuario["id_usuario"]):
+            continue
 
-    if not check_password_hash(usuario["pin_hash"], pin):
+        if check_password_hash(usuario["pin_hash"], pin):
+            _exito(usuario, "pin_caja", ip)
+            return usuario
+
         _fallo(username, "pin_caja", ip)
-        return None
 
-    _exito(usuario, "pin_caja", ip)
-    return usuario
+    # Verificar si todos están bloqueados
+    for usuario in usuarios:
+        if _esta_bloqueado(usuario["usuario"], ip, "pin_caja", usuario["id_usuario"]):
+            return "LOCKED"
+
+    return None

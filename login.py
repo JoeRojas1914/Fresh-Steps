@@ -25,17 +25,28 @@ def obtener_usuario_caja_activo():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-
         cursor.execute("""
             SELECT *
             FROM usuario
             WHERE rol = 'caja' AND activo = 1
             LIMIT 1
         """)
+        return cursor.fetchone()
+    finally:
+        cursor.close()
+        conn.close()
 
-        usuario = cursor.fetchone()
 
-        return usuario
+def obtener_usuarios_caja_activos():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT *
+            FROM usuario
+            WHERE rol = 'caja' AND activo = 1
+        """)
+        return cursor.fetchall()
     finally:
         cursor.close()
         conn.close()
