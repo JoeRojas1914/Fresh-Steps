@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", () => confirmarEliminarVenta(btn.dataset.id));
     });
 
-    // Delegación para botones dentro del detalles-box (aparecen dinámicamente)
     document.addEventListener("click", function(e) {
         const btn = e.target.closest(".btn-eliminar");
         if (!btn) return;
