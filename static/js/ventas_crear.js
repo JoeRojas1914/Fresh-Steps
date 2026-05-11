@@ -92,6 +92,16 @@ if (typeof contadorArticulos === "undefined") {
     document.getElementById("clienteBox").style.display = "none";
     document.getElementById("busquedaCliente").style.display = "block";
 
+    document.getElementById("togglePrepago").addEventListener("change", () => {
+        togglePrepago();
+        validarFormulario();
+        actualizarTotal();
+    });
+
+    document.getElementById("toggleDescuento").addEventListener("change", () => {
+        toggleDescuento();
+    });
+
     bloquearFechaMinima();
     togglePrepago();
     toggleDescuento();

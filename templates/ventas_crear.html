@@ -130,12 +130,12 @@
                 <div class="form-group">
                     <label class="form-label">Fecha</label>
                     <input type="date" id="fecha_estimada_fecha"
-                           onchange="validarFormulario(); actualizarFechaEstimadaCompleta();">
+                           onchange="actualizarFechaEstimadaCompleta(); validarFormulario();">
                 </div>
                 <div class="form-group" style="margin-top:10px;">
                     <label class="form-label">Hora</label>
                     <input type="time" id="fecha_estimada_hora"
-                           onchange="validarFormulario(); actualizarFechaEstimadaCompleta();">
+                           onchange="actualizarFechaEstimadaCompleta(); validarFormulario();">
                 </div>
                 <input type="hidden" name="fecha_estimada" id="fecha_estimada">
                 <div id="errorFecha" style="color:red;font-size:.9em;display:none;margin-top:4px;">
