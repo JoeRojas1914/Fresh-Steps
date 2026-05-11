@@ -126,6 +126,13 @@
                             onclick="window.open('{{ url_for('ventas.venta_ticket', id_venta=v.id_venta) }}', '_blank')">
                         🧾 Ver ticket
                     </button>
+                    {% if session.get("rol") == "admin" %}
+                    <button type="button"
+                            class="btn btn--danger btn--sm btn-eliminar"
+                            data-id="{{ v.id_venta }}">
+                        Eliminar
+                    </button>
+                    {% endif %}
                 </div>
             </div>
         </td>

@@ -221,6 +221,13 @@ def crear_venta(
             (str(total), id_venta)
         )
 
+        registrar_historial_venta(cursor, id_venta, "CREADO", id_usuario_creo, None, {
+            "id_negocio": id_negocio,
+            "id_cliente": id_cliente,
+            "fecha_estimada": str(fecha_estimada),
+            "total": float(total),
+        })
+
         conn.commit()
         return id_venta
 
@@ -277,9 +284,13 @@ def marcar_entregada(id_venta, id_usuario):
               AND fecha_entrega IS NULL
         """, (id_usuario, id_venta))
 
+        afectadas = cursor.rowcount
+        if afectadas > 0:
+            registrar_historial_venta(cursor, id_venta, "ENTREGADO", id_usuario)
+
         conn.commit()
 
-        return cursor.rowcount > 0
+        return afectadas > 0
 
     except Exception:
         conn.rollback()
@@ -606,7 +617,7 @@ def contar_entregas_pendientes(id_negocio=None):
         conn.close()
 
 
-def marcar_como_lista(id_venta):
+def marcar_como_lista(id_venta, id_usuario=None):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -619,9 +630,13 @@ def marcar_como_lista(id_venta):
               AND fecha_entrega IS NULL
         """, (id_venta,))
 
+        afectadas = cursor.rowcount
+        if afectadas > 0 and id_usuario:
+            registrar_historial_venta(cursor, id_venta, "LISTA", id_usuario)
+
         conn.commit()
 
-        return cursor.rowcount > 0
+        return afectadas > 0
 
     except Exception:
         conn.rollback()
@@ -632,7 +647,7 @@ def marcar_como_lista(id_venta):
         conn.close()
 
 
-def eliminar_venta(id_venta):
+def eliminar_venta(id_venta, id_usuario=None):
     """
     Soft delete: marca la venta como eliminada en lugar de borrarla físicamente.
     Los datos se conservan para auditoría e historial de estadísticas.
@@ -651,6 +666,9 @@ def eliminar_venta(id_venta):
         """, (id_venta,))
 
         afectadas = cursor.rowcount
+        if afectadas > 0 and id_usuario:
+            registrar_historial_venta(cursor, id_venta, "ELIMINADO", id_usuario)
+
         conn.commit()
 
         return afectadas > 0
@@ -663,12 +681,12 @@ def eliminar_venta(id_venta):
         cursor.close()
         conn.close()
 
-def contar_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None):
+def contar_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None, mostrar_eliminadas=False):
     """Cuenta el total de ventas para la paginacion del historial."""
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        query = "SELECT COUNT(DISTINCT v.id_venta) FROM venta v WHERE v.eliminado = 0"
+        query = "SELECT COUNT(DISTINCT v.id_venta) FROM venta v WHERE (1=1)" + ("" if mostrar_eliminadas else " AND v.eliminado = 0")
         params = []
         if id_negocio:
             query += " AND v.id_negocio = %s"
@@ -688,7 +706,7 @@ def contar_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None):
 
 
 def obtener_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None,
-                             limit=20, offset=0):
+                             limit=20, offset=0, mostrar_eliminadas=False):
     """Historial paginado de ventas para admin."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -700,6 +718,7 @@ def obtener_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None,
             v.fecha_estimada,
             v.fecha_lista,
             v.fecha_entrega,
+            v.eliminado,
             v.total,
             v.aplica_descuento,
             v.cantidad_descuento,
@@ -717,8 +736,11 @@ def obtener_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None,
         LEFT JOIN usuario u  ON u.id_usuario  = v.id_usuario_creo
         LEFT JOIN usuario ue ON ue.id_usuario = v.id_usuario_entrego
         LEFT JOIN pago_venta p ON p.id_venta = v.id_venta
-        WHERE v.eliminado = 0
+        WHERE 1=1
     """
+
+    if not mostrar_eliminadas:
+        query += " AND v.eliminado = 0"
 
     params = []
 
@@ -737,6 +759,49 @@ def obtener_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None,
 
     try:
         cursor.execute(query, params)
+        return cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
+
+def registrar_historial_venta(cursor, id_venta, accion, id_usuario, antes=None, despues=None):
+    import json as _json
+    from decimal import Decimal
+    from datetime import date, datetime
+
+    def safe(d):
+        if not d:
+            return None
+        out = {}
+        for k, v in d.items():
+            if isinstance(v, Decimal):   out[k] = float(v)
+            elif isinstance(v, (date, datetime)): out[k] = v.isoformat()
+            else: out[k] = v
+        return out
+
+    cursor.execute("""
+        INSERT INTO venta_historial
+            (id_venta, accion, id_usuario, datos_antes, datos_despues)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (
+        id_venta, accion, id_usuario,
+        _json.dumps(safe(antes)) if antes else None,
+        _json.dumps(safe(despues)) if despues else None,
+    ))
+
+
+def obtener_historial_venta(id_venta):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("""
+            SELECT h.id_historial, h.accion, h.datos_antes,
+                   h.datos_despues, h.fecha, u.usuario
+            FROM venta_historial h
+            JOIN usuario u ON u.id_usuario = h.id_usuario
+            WHERE h.id_venta = %s
+            ORDER BY h.fecha ASC
+        """, (id_venta,))
         return cursor.fetchall()
     finally:
         cursor.close()

@@ -112,7 +112,8 @@ def marcar_lista(id_venta):
     from ventas import marcar_como_lista
 
     try:
-        if marcar_como_lista(id_venta):
+        id_usuario = session.get('id_usuario')
+        if marcar_como_lista(id_venta, id_usuario):
             return jsonify({
                 "ok": True,
                 "message": "Venta marcada como lista correctamente"
@@ -182,7 +183,7 @@ def eliminar_venta_route(id_venta):
         }), 403
 
     try:
-        ok, mensaje = eliminar_venta_service(id_venta)
+        ok, mensaje = eliminar_venta_service(id_venta, id_usuario)
 
         if not ok:
             return jsonify({
@@ -215,7 +216,8 @@ def historial_ventas():
     fecha_fin    = request.args.get("fecha_fin")    or None
     pagina       = request.args.get("pagina", 1,    type=int)
 
-    data = historial_ventas_service(id_negocio, fecha_inicio, fecha_fin, pagina)
+    mostrar_eliminadas = request.args.get('eliminadas') == '1'
+    data = historial_ventas_service(id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas)
 
     return render_template("historial_ventas.html", **data)
 
@@ -339,3 +341,18 @@ def exportar_historial_excel():
     xl_col_widths(ws3,[10,16,26,16,16,14,14,18,18])
 
     return send_excel(wb, "historial_ventas")
+
+@ventas_bp.route("/ventas/<int:id_venta>/historial")
+def historial_venta_por_id(id_venta):
+    from ventas import obtener_historial_venta
+    data = obtener_historial_venta(id_venta)
+    # Serializar fechas
+    from datetime import datetime, date
+    result = []
+    for row in data:
+        r = dict(row)
+        for k, v in r.items():
+            if isinstance(v, (datetime, date)):
+                r[k] = v.isoformat()
+        result.append(r)
+    return jsonify(result)

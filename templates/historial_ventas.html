@@ -38,6 +38,22 @@
                 <input type="date" name="fecha_fin" value="{{ fecha_fin or '' }}">
             </div>
  
+            <div class="filtro-item" style="flex:0 0 auto; min-width:auto;">
+                <label>&nbsp;</label>
+                <div class="filtro-toggle" style="margin:0; gap:10px;">
+                    <label class="switch">
+                        <input type="checkbox"
+                               name="eliminadas"
+                               value="1"
+                               id="toggle-eliminadas"
+                               onchange="this.form.submit()"
+                               {% if mostrar_eliminadas %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="toggle-text">Mostrar eliminadas</span>
+                </div>
+            </div>
+
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm">🔍 Filtrar</button>
                 {% if id_negocio or fecha_inicio or fecha_fin %}
@@ -108,6 +124,7 @@
         <span class="badge-estado {{ v.estado }}">
             {% if v.estado == 'pendiente' %}Pendiente
             {% elif v.estado == 'lista' %}Lista
+            {% elif v.estado == 'eliminada' %}Eliminada
             {% else %}Entregada{% endif %}
         </span>
     </td>
@@ -162,6 +179,11 @@
                         onclick="window.open('{{ url_for('ventas.venta_ticket', id_venta=v.id_venta) }}', '_blank')">
                     🧾 Ver ticket
                 </button>
+                <button type="button"
+                        class="btn btn--primary btn--sm btn-historial-venta"
+                        data-id="{{ v.id_venta }}">
+                    📋 Historial
+                </button>
             </div>
         </div>
     </td>
@@ -192,10 +214,31 @@
 </div>
 {% endif %}
  
+
+{% from "components/modal.html" import modal %}
+{% call(section) modal("modalHistorialVenta", "Historial de la venta", "lg") %}
+{% if section == 'body' %}
+<table class="table table--striped table--hover" id="tablaHistorialVenta">
+    <thead>
+        <tr>
+            <th>Acción</th>
+            <th>Usuario</th>
+            <th>Fecha</th>
+            <th>Detalle</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+{% endif %}
+{% if section == 'footer' %}
+<button class="btn btn--primary btn--sm" onclick="cerrarModal('modalHistorialVenta')">Cerrar</button>
+{% endif %}
+{% endcall %}
+
 {% endblock %}
- 
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/detalles_venta.js') }}"></script>
 <script src="{{ url_for('static', filename='js/historial_ventas.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modal.js') }}"></script>
 {% endblock %}
