@@ -127,19 +127,6 @@ window.confirmarPagoYEntrega = function () {
 };
 
 
-window.mostrarFeedback = function (texto, tipo = "success") {
-
-    const div = document.createElement("div");
-    div.className = `alert ${tipo}`;
-    div.innerText = texto;
-
-    document.body.prepend(div);
-
-    setTimeout(() => {
-        div.remove();
-    }, 3000);
-};
-
 
 window.cerrarModalEntrega = function () {
     cerrarModal("modalEntrega");

@@ -648,11 +648,6 @@ def marcar_como_lista(id_venta, id_usuario=None):
 
 
 def eliminar_venta(id_venta, id_usuario=None):
-    """
-    Soft delete: marca la venta como eliminada en lugar de borrarla físicamente.
-    Los datos se conservan para auditoría e historial de estadísticas.
-    Solo un admin puede llamar esta función (validación en la ruta).
-    """
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -707,7 +702,6 @@ def contar_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None, 
 
 def obtener_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None,
                              limit=20, offset=0, mostrar_eliminadas=False):
-    """Historial paginado de ventas para admin."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 

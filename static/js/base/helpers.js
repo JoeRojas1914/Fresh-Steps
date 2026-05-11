@@ -18,6 +18,33 @@ window.csrfFetch = function (url, options = {}) {
 };
 
 
+window.mostrarFeedback = function (texto, tipo = "success") {
+    const anchor =
+        document.querySelector(".page-content > .filtro-box") ||
+        document.querySelector(".page-content > h1") ||
+        document.querySelector(".page-content");
+
+    const div = document.createElement("div");
+    div.className = `alert ${tipo}`;
+    div.textContent = texto;
+    div.style.animation = "slideIn 0.25s ease";
+
+    if (anchor && anchor.parentNode) {
+        anchor.parentNode.insertBefore(div, anchor);
+    } else {
+        document.body.prepend(div);
+    }
+
+    setTimeout(() => {
+        div.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+        div.style.opacity    = "0";
+        div.style.transform  = "translateX(10px)";
+    }, 4500);
+
+    setTimeout(() => div.remove(), 5000);
+};
+
+
 document.addEventListener("DOMContentLoaded", () => {
     const alerts = document.querySelectorAll(".alert");
 
