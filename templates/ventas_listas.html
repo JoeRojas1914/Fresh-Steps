@@ -138,17 +138,10 @@
 
 
     {% else %}
-    <div style=" margin-top:30px;
-            padding:20px;
-            text-align:center;
-            font-size:1.2rem;
-            font-weight:bold;
-            background-color:#2fa4ff;
-            color:#ffffff;
-            border:1px solid #ffffff;
-            border-radius:10px;
-        ">
-            🎉 No hay entregas pendientes
+    <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>Sin entregas procesadas</h3>
+        <p>No hay ventas listas para entregar en este momento.</p>
     </div>
     {% endif %}
 
