@@ -29,26 +29,12 @@
                    autocomplete="off">
         </div>
 
-        <div class="filtro-item" style="max-width:160px;">
-            <label>Rol</label>
-            <div class="select-wrapper">
-                <select id="filtro-rol">
-                    <option value="">Todos</option>
-                    <option value="admin"  {% if rol == 'admin'  %}selected{% endif %}>Admin</option>
-                    <option value="caja"   {% if rol == 'caja'   %}selected{% endif %}>Caja</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="filtro-item" style="max-width:160px;">
-            <label>Estado</label>
-            <div class="select-wrapper">
-                <select id="filtro-activo">
-                    <option value="">Todos</option>
-                    <option value="1" {% if activo == '1' %}selected{% endif %}>Activo</option>
-                    <option value="0" {% if activo == '0' %}selected{% endif %}>Inactivo</option>
-                </select>
-            </div>
+        <div class="filtro-toggle" style="margin:0;">
+            <label class="switch">
+                <input type="checkbox" id="toggle-inactivos">
+                <span class="slider"></span>
+            </label>
+            <span class="toggle-text">Mostrar inactivos</span>
         </div>
 
         <div style="margin-left:auto; display:flex; align-items:flex-end;">

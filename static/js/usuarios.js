@@ -1,7 +1,7 @@
 (function () {
-    const input  = document.getElementById("buscar-input");
-    const selRol = document.getElementById("filtro-rol");
-    const selAct = document.getElementById("filtro-activo");
+    const input         = document.getElementById("buscar-input");
+    const toggleInact   = document.getElementById("toggle-inactivos");
+    const tbody         = document.querySelector("tbody");
 
     if (!input) return;
 
@@ -11,27 +11,34 @@
     }
 
     function aplicarFiltros() {
-        const q   = normalizar(input.value);
-        const rol = selRol.value;
-        const act = selAct.value;
+        const q            = normalizar(input.value);
+        const verInactivos = toggleInact.checked;
 
-        document.querySelectorAll("tbody tr[data-id]").forEach(fila => {
-            const texto   = normalizar(fila.dataset.buscar || "");
-            const filRol  = fila.dataset.rol    || "";
-            const filAct  = fila.dataset.activo || "";
+        const filas = Array.from(document.querySelectorAll("tbody tr[data-id]"));
 
-            const okQ   = !q   || texto.includes(q);
-            const okRol = !rol || filRol === rol;
-            const okAct = !act || filAct === act;
+        filas.forEach(fila => {
+            const texto  = normalizar(fila.dataset.buscar || "");
+            const activo = fila.dataset.activo === "1";
+            const esAdmin = fila.dataset.rol === "admin";
 
-            fila.style.display = (okQ && okRol && okAct) ? "" : "none";
+            const okQ      = !q || texto.includes(q);
+            const okActivo = esAdmin || activo || verInactivos;
+
+            fila.style.display = (okQ && okActivo) ? "" : "none";
         });
+
+        const adminFila = filas.find(f => f.dataset.rol === "admin");
+        if (adminFila && tbody) {
+            tbody.prepend(adminFila);
+        }
     }
 
     input.addEventListener("input", aplicarFiltros);
-    selRol.addEventListener("change", aplicarFiltros);
-    selAct.addEventListener("change", aplicarFiltros);
+    toggleInact.addEventListener("change", aplicarFiltros);
+
+    aplicarFiltros();
 }());
+
 
 
 window.abrirModalUsuario = function () {
