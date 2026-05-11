@@ -13,29 +13,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.querySelectorAll(".btn-eliminar").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const idVenta = btn.dataset.id;
-            if (!confirm("¿Seguro que deseas eliminar esta venta?\n\nEsta acción NO se puede deshacer.")) return;
-            csrfFetch(`/ventas/eliminar/${idVenta}`, { method: "POST" })
-                .then(r => r.json())
-                .then(res => {
-                    if (res.ok) { mostrarFeedback(res.message || "Venta eliminada", "success"); setTimeout(() => location.reload(), 800); }
-                    else { mostrarFeedback(res.error || "Error al eliminar", "error"); }
-                }).catch(() => mostrarFeedback("Error de conexión", "error"));
-        });
+        btn.addEventListener("click", () => confirmarEliminarVenta(btn.dataset.id));
     });
 
+    // Delegación para botones dentro del detalles-box (aparecen dinámicamente)
     document.addEventListener("click", function(e) {
         const btn = e.target.closest(".btn-eliminar");
         if (!btn) return;
-        const idVenta = btn.dataset.id;
-        if (!confirm("¿Seguro que deseas eliminar esta venta?\n\nEsta acción NO se puede deshacer.")) return;
-        csrfFetch(`/ventas/eliminar/${idVenta}`, { method: "POST" })
-            .then(r => r.json())
-            .then(res => {
-                if (res.ok) { mostrarFeedback(res.message || "Venta eliminada", "success"); setTimeout(() => location.reload(), 800); }
-                else { mostrarFeedback(res.error || "Error al eliminar", "error"); }
-            }).catch(() => mostrarFeedback("Error de conexión", "error"));
+        confirmarEliminarVenta(btn.dataset.id);
     });
 
     document.querySelectorAll(".btn-entregar").forEach(btn => {

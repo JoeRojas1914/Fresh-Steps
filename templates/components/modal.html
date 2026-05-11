@@ -20,3 +20,28 @@
   </div>
 </div>
 {% endmacro %}
+
+
+{% macro modal_eliminar_venta() %}
+<div id="modalEliminarVenta" class="modal">
+  <div class="modal__dialog modal--sm">
+    <div class="modal__header">
+      <h2 class="modal__title">Eliminar venta</h2>
+      <button class="modal__close" onclick="cerrarModal('modalEliminarVenta')">&times;</button>
+    </div>
+    <div class="modal__body">
+      <p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0b3c5d;">
+        ¿Seguro que deseas eliminar esta venta?
+      </p>
+      <p style="margin:0;font-size:13px;color:#64748b;line-height:1.6;">
+        Se eliminarán los artículos y pagos relacionados.<br>
+        Esta acción <strong>no se puede deshacer</strong>.
+      </p>
+    </div>
+    <div class="modal__footer">
+      <button class="btn btn--primary btn--sm" onclick="cerrarModal('modalEliminarVenta')">Cancelar</button>
+      <button id="btnConfirmarEliminar" class="btn btn--danger btn--sm">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+{% endmacro %}

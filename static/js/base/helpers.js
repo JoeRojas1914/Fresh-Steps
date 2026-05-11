@@ -45,6 +45,35 @@ window.mostrarFeedback = function (texto, tipo = "success") {
 };
 
 
+window.confirmarEliminarVenta = function (idVenta) {
+    const modal   = document.getElementById("modalEliminarVenta");
+    const btnConf = document.getElementById("btnConfirmarEliminar");
+
+    if (!modal || !btnConf) return;
+
+    abrirModal("modalEliminarVenta");
+
+    const nuevo = btnConf.cloneNode(true);
+    btnConf.parentNode.replaceChild(nuevo, btnConf);
+
+    nuevo.addEventListener("click", () => {
+        cerrarModal("modalEliminarVenta");
+
+        csrfFetch(`/ventas/eliminar/${idVenta}`, { method: "POST" })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    mostrarFeedback("Venta eliminada correctamente.", "success");
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    mostrarFeedback(res.error || "No se pudo eliminar la venta.", "error");
+                }
+            })
+            .catch(() => mostrarFeedback("Error de conexión.", "error"));
+    });
+};
+
+
 document.addEventListener("DOMContentLoaded", () => {
     const alerts = document.querySelectorAll(".alert");
 

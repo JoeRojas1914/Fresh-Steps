@@ -3,7 +3,7 @@
 {% from "macros/badges.html" import badge_negocio %}
 {% from "components/alerts.html" import alerts %}
 {% from "components/table.html" import table %}
-{% from "components/modal.html" import modal %}
+{% from "components/modal.html" import modal, modal_eliminar_venta %}
     <h1>🧾 Entregas pendientes</h1>
 
     {{ alerts(get_flashed_messages(with_categories=true)) }}
@@ -178,6 +178,8 @@
 {% endcall %}
 
 
+
+{{ modal_eliminar_venta() }}
 {% endblock %}
 
 {% block scripts %}
