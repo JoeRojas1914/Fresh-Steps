@@ -179,3 +179,49 @@ def test_pago_final_sin_datos_retorna_error(app):
         ok, mensaje = registrar_pago_final_service({}, id_usuario=1)
     assert ok is False
     assert "incompleto" in mensaje.lower()
+
+
+def test_venta_confeccion_valida_crea_registro(app, db_conn, cliente_test, servicio_confeccion, usuario_admin):
+    form = {
+        "id_negocio": "2",
+        "id_cliente": str(cliente_test["id_cliente"]),
+        "fecha_estimada": FECHA,
+        "articulos[0][tipo_articulo]": "confeccion",
+        "articulos[0][tipo]": "Camisa",
+        "articulos[0][marca]": "Levis",
+        "articulos[0][material]": "Algodón",
+        "articulos[0][color_base]": "Blanco",
+        "articulos[0][cantidad]": "3",
+        f"articulos[0][servicios][0][id_servicio]": str(servicio_confeccion["id_servicio"]),
+        f"articulos[0][servicios][0][precio_aplicado]": "200.00",
+    }
+    with app.test_request_context("/"):
+        id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
+
+    assert error is None
+    assert isinstance(id_venta, int) and id_venta > 0
+
+    cleanup_venta(db_conn, id_venta)
+
+
+def test_venta_maquila_multiples_articulos(app, db_conn, cliente_test, usuario_admin):
+    form = {
+        "id_negocio": "3",
+        "id_cliente": str(cliente_test["id_cliente"]),
+        "fecha_estimada": FECHA,
+        "articulos[0][tipo_articulo]": "maquila",
+        "articulos[0][tipo]": "Mandil",
+        "articulos[0][cantidad]": "5",
+        "articulos[0][precio_unitario]": "50.00",
+        "articulos[1][tipo_articulo]": "maquila",
+        "articulos[1][tipo]": "Delantal",
+        "articulos[1][cantidad]": "3",
+        "articulos[1][precio_unitario]": "80.00",
+    }
+    with app.test_request_context("/"):
+        id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
+
+    assert error is None
+    assert isinstance(id_venta, int) and id_venta > 0
+
+    cleanup_venta(db_conn, id_venta)

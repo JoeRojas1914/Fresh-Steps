@@ -95,3 +95,49 @@ def test_eliminar_cliente_sin_ventas(db_conn, usuario_admin):
     cursor.execute("DELETE FROM cliente           WHERE id_cliente = %s", (cid,))
     db_conn.commit()
     cursor.close()
+
+
+def test_eliminar_cliente_con_ventas_activas_retorna_false(db_conn, cliente_test, usuario_admin):
+    """Un cliente con ventas activas no puede ser eliminado."""
+    cursor = db_conn.cursor()
+    cursor.execute(
+        "INSERT INTO venta (id_negocio, id_cliente, id_usuario_creo, eliminado) VALUES (1, %s, %s, 0)",
+        (cliente_test["id_cliente"], usuario_admin["id_usuario"]),
+    )
+    db_conn.commit()
+    id_venta = cursor.lastrowid
+    cursor.close()
+
+    resultado = eliminar_cliente_service(
+        cliente_test["id_cliente"], id_usuario=usuario_admin["id_usuario"]
+    )
+    assert resultado is False
+
+    # Cleanup venta creada
+    cursor = db_conn.cursor()
+    cursor.execute("DELETE FROM venta WHERE id_venta = %s", (id_venta,))
+    db_conn.commit()
+    cursor.close()
+
+
+def test_buscar_cliente_con_acento(db_conn, usuario_admin):
+    """Buscar por nombre con acento encuentra al cliente."""
+    cursor = db_conn.cursor()
+    cursor.execute(
+        """INSERT INTO cliente (nombre, apellido, telefono, activo, id_usuario)
+           VALUES ('José', 'Pérez', '5511223355', 1, %s)""",
+        (usuario_admin["id_usuario"],),
+    )
+    db_conn.commit()
+    cid = cursor.lastrowid
+    cursor.close()
+
+    resultados = buscar_clientes_service("Pérez")
+    ids = [r["id_cliente"] for r in resultados]
+    assert cid in ids
+
+    cursor = db_conn.cursor()
+    cursor.execute("DELETE FROM clientes_historial WHERE id_cliente = %s", (cid,))
+    cursor.execute("DELETE FROM cliente           WHERE id_cliente = %s", (cid,))
+    db_conn.commit()
+    cursor.close()

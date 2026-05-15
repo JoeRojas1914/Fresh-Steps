@@ -157,6 +157,8 @@ def registrar_fallo(usuario, ip, max_intentos=5, bloqueo_min=10):
                     WHERE usuario=%s AND ip=%s
                 """, (intentos, usuario, ip))
 
+        conn.commit()
+
     except Exception:
         conn.rollback()
         raise

@@ -172,7 +172,7 @@ def eliminar_venta_route(id_venta):
         }), 403
 
     try:
-        ok, mensaje = eliminar_venta_service(id_venta, id_usuario)  # noqa: F811
+        ok, mensaje = eliminar_venta_service(id_venta, id_usuario)
 
         if not ok:
             return jsonify({

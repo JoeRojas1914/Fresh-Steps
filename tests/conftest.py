@@ -139,6 +139,25 @@ def servicio_calzado(db_conn):
     cursor.close()
 
 
+@pytest.fixture
+def servicio_confeccion(db_conn):
+    cursor = db_conn.cursor(dictionary=True)
+    cursor.execute(
+        "INSERT INTO servicio (id_negocio, nombre, precio, activo) VALUES (2, 'Bordado Test', 200.00, 1)"
+    )
+    db_conn.commit()
+    sid = cursor.lastrowid
+    cursor.close()
+
+    yield {"id_servicio": sid, "precio": 200.00}
+
+    cursor = db_conn.cursor()
+    cursor.execute("DELETE FROM servicios_historial WHERE id_servicio = %s", (sid,))
+    cursor.execute("DELETE FROM servicio            WHERE id_servicio = %s", (sid,))
+    db_conn.commit()
+    cursor.close()
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
