@@ -77,16 +77,32 @@
     <div class="footer-container">
         <div class="footer-brand">
             <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
-            <p>Fresh Steps</p>
+            <div class="footer-brand-text">
+                <span class="footer-brand-name">Fresh Steps</span>
+                <span class="footer-brand-secondary">Fer's Shop</span>
+                <span class="footer-brand-tagline">Lavandería · Sastrería · Maquila</span>
+            </div>
         </div>
         <div class="footer-info">
-            <p><strong>Dirección:</strong> Alfredo M. Terrazas #935 A</p>
-            <p><strong>Teléfono:</strong> 440 200 0320</p>
-            <p><strong>Correo:</strong> freshsteps.terrazas@gmail.com</p>
+            <span class="footer-section-title">Contacto</span>
+            <div class="footer-info-item">
+                <i data-lucide="map-pin" width="15" height="15"></i>
+                <span><strong>Dirección:</strong> Alfredo M. Terrazas #935 A</span>
+            </div>
+            <div class="footer-info-item">
+                <i data-lucide="phone" width="15" height="15"></i>
+                <span><strong>Teléfono:</strong> 440 200 0320</span>
+            </div>
+            <div class="footer-info-item">
+                <i data-lucide="mail" width="15" height="15"></i>
+                <span><strong>Correo:</strong> freshsteps.terrazas@gmail.com</span>
+            </div>
         </div>
         <div class="footer-social">
+            <span class="footer-section-title">Síguenos</span>
             <a href="https://www.instagram.com/freshsteps.slp/" target="_blank">
-                <i data-lucide="instagram" width="16" height="16"></i> Fresh Steps
+                <i data-lucide="instagram" width="18" height="18"></i>
+                <span>Instagram · Fresh Steps</span>
             </a>
         </div>
     </div>
