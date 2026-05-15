@@ -7,7 +7,15 @@ if (typeof ventaState === "undefined") {
     };
 
     document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("buscarCliente").addEventListener("input", buscarClientes);
+    let _buscarTimer;
+    document.getElementById("buscarCliente").addEventListener("input", () => {
+        clearTimeout(_buscarTimer);
+        const q = document.getElementById("buscarCliente").value.trim();
+        const lista = document.getElementById("listaClientes");
+        if (q.length < 2) { lista.innerHTML = ""; return; }
+        lista.innerHTML = `<div class="result-item" style="opacity:0.55;grid-column:1/-1;justify-content:center;">Buscando...</div>`;
+        _buscarTimer = setTimeout(buscarClientes, 350);
+    });
 
     document.getElementById("btnCambiarCliente").addEventListener("click", () => {
         document.getElementById("id_cliente").value = "";
@@ -125,7 +133,7 @@ function bloquearFechaMinima() {
 }
 
 async function buscarClientes() {
-    const q = this.value.trim();
+    const q = document.getElementById("buscarCliente").value.trim();
     const lista = document.getElementById("listaClientes");
     lista.innerHTML = "";
     if (q.length < 2) return;
@@ -293,7 +301,7 @@ function agregarArticulo() {
     <div class="articulo-detalle">
     <div class="zapato-header">
         <div class="zapato-titulo"><i data-lucide="receipt" width="14" height="14"></i> Artículo ${index + 1}${negocioNombre ? `<span class="zapato-titulo-badge">${negocioNombre}</span>` : ""}</div>
-        <button type="button" class="btn btn--danger btn--sm" onclick="eliminarArticulo(this)">✕</button>
+        <button type="button" class="btn btn--danger btn--sm" onclick="eliminarArticulo(this)"><i data-lucide="x" width="14" height="14"></i></button>
     </div>
         <input type="hidden" name="articulos[${index}][tipo_articulo]" value="${tipoArticulo}">
         ${crearCamposArticulo(index, tipoArticulo)}
@@ -303,6 +311,7 @@ function agregarArticulo() {
 
 
     document.getElementById("articulosContainer").appendChild(div);
+    actualizarEmptyState();
     if (window.lucide) lucide.createIcons();
     const resumenDiv = div.querySelector(".articulo-resumen");
     resumenDiv.addEventListener("click", () => abrirArticuloDesdeResumen(resumenDiv));
@@ -327,9 +336,16 @@ function agregarArticulo() {
     actualizarTotal();
 }
 
+function actualizarEmptyState() {
+    const empty = document.getElementById("emptyArticulos");
+    if (!empty) return;
+    empty.style.display = document.querySelectorAll(".articulo-item").length ? "none" : "flex";
+}
+
 function eliminarArticulo(btn) {
     btn.closest(".articulo-item").remove();
     renumerarArticulos();
+    actualizarEmptyState();
     validarFormulario();
     actualizarTotal();
 }
@@ -473,7 +489,7 @@ function crearFilaServicio(indexArticulo, indexServicio, opcionesHTML) {
             <button type="button"
                     class="btn btn--danger btn--sm"
                     onclick="eliminarServicioPro(this, ${indexArticulo})">
-                ✕
+                <i data-lucide="x" width="14" height="14"></i>
             </button>
         </div>
     `;
@@ -496,6 +512,7 @@ function agregarServicio(indexArticulo) {
 
     const indexServicio = contenedor.querySelectorAll(".servicio-item").length;
     contenedor.insertAdjacentHTML("beforeend", crearFilaServicio(indexArticulo, indexServicio, opciones));
+    if (window.lucide) lucide.createIcons();
 
     actualizarOpcionesServiciosDelArticulo(indexArticulo);
     validarFormulario();
@@ -601,7 +618,7 @@ function togglePrepago() {
     const checked = document.getElementById("togglePrepago").checked;
     document.getElementById("prepago").value = checked ? "si" : "no";
     const fields = document.getElementById("prepago-fields");
-    fields.style.display = checked ? "flex" : "none";
+    fields.classList.toggle("visible", checked);
     if (checked) {
         setTimeout(() => fields.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
     } else {
@@ -617,7 +634,7 @@ function toggleDescuento() {
     const checked = document.getElementById("toggleDescuento").checked;
     document.getElementById("aplica_descuento").value = checked ? "si" : "no";
     const fields = document.getElementById("descuento-fields");
-    fields.style.display = checked ? "flex" : "none";
+    fields.classList.toggle("visible", checked);
     if (checked) {
         setTimeout(() => fields.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
     } else {
@@ -1018,6 +1035,7 @@ function cerrarArticulo(item){
     generarResumenArticulo(item);
     detalle.style.display = "none";
     resumen.style.display = "block";
+    if (window.lucide) lucide.createIcons();
 
     item.classList.remove("abierto");
     validarArticuloVisual(item);
