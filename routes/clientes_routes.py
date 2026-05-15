@@ -39,30 +39,39 @@ def clientes():
 @clientes_bp.route("/clientes/guardar", methods=["POST"])
 def guardar_cliente():
     id_usuario = session.get("id_usuario")
-    resultado  = guardar_cliente_service(request.form, id_usuario)
-    flash(
-        "✅ Cliente actualizado correctamente." if resultado == "actualizado"
-        else "✅ Cliente creado correctamente.", "success"
-    )
+    try:
+        resultado = guardar_cliente_service(request.form, id_usuario)
+        flash(
+            "✅ Cliente actualizado correctamente." if resultado == "actualizado"
+            else "✅ Cliente creado correctamente.", "success"
+        )
+    except Exception:
+        flash("❌ Error al guardar el cliente. Verifica los datos.", "error")
     return redirect(url_for("clientes.clientes"))
 
 
 @clientes_bp.route("/clientes/eliminar/<int:id_cliente>")
 def eliminar_cliente(id_cliente):
     id_usuario = session.get("id_usuario")
-    ok = eliminar_cliente_service(id_cliente, id_usuario)
-    if not ok:
-        flash("❌ No puedes eliminar el cliente porque ya tiene ventas registradas.", "error")
-    else:
-        flash("🗑️ Cliente eliminado correctamente.", "success")
+    try:
+        ok = eliminar_cliente_service(id_cliente, id_usuario)
+        if not ok:
+            flash("❌ No puedes eliminar el cliente porque ya tiene ventas registradas.", "error")
+        else:
+            flash("🗑️ Cliente eliminado correctamente.", "success")
+    except Exception:
+        flash("❌ Error al eliminar el cliente.", "error")
     return redirect(url_for("clientes.clientes"))
 
 
 @clientes_bp.route("/clientes/restaurar/<int:id_cliente>")
 def restaurar_cliente(id_cliente):
     id_usuario = session.get("id_usuario")
-    restaurar_cliente_service(id_cliente, id_usuario)
-    flash("♻️ Cliente restaurado correctamente.", "success")
+    try:
+        restaurar_cliente_service(id_cliente, id_usuario)
+        flash("♻️ Cliente restaurado correctamente.", "success")
+    except Exception:
+        flash("❌ Error al restaurar el cliente.", "error")
     return redirect(url_for("clientes.clientes"))
 
 

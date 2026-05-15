@@ -204,6 +204,31 @@ def test_venta_confeccion_valida_crea_registro(app, db_conn, cliente_test, servi
     cleanup_venta(db_conn, id_venta)
 
 
+def test_pago_final_valido_registra_y_marca_entregada(app, db_conn, cliente_test, servicio_calzado, usuario_admin):
+    form = _form_calzado(
+        id_cliente=cliente_test["id_cliente"],
+        id_servicio=servicio_calzado["id_servicio"],
+    )
+    with app.test_request_context("/"):
+        id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
+    assert error is None
+
+    try:
+        ok, _ = registrar_pago_final_service(
+            {"id_venta": id_venta, "monto": "150.00", "metodo_pago": "efectivo"},
+            id_usuario=usuario_admin["id_usuario"],
+        )
+        assert ok is True
+
+        cursor = db_conn.cursor(dictionary=True)
+        cursor.execute("SELECT fecha_entrega FROM venta WHERE id_venta = %s", (id_venta,))
+        row = cursor.fetchone()
+        cursor.close()
+        assert row["fecha_entrega"] is not None
+    finally:
+        cleanup_venta(db_conn, id_venta)
+
+
 def test_venta_maquila_multiples_articulos(app, db_conn, cliente_test, usuario_admin):
     form = {
         "id_negocio": "3",

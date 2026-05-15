@@ -54,42 +54,36 @@ def servicios():
 
 @servicios_bp.route("/servicios/guardar", methods=["POST"])
 def guardar_servicio():
+    if session.get("rol") != "admin":
+        return render_template("403.html"), 403
     id_servicio = request.form.get("id_servicio")
     id_negocio = request.form["id_negocio"]
     nombre = request.form["nombre"]
     precio = request.form["precio"]
     id_usuario = session.get("id_usuario")
-
-    resultado = guardar_servicio_service(
-        id_servicio,
-        id_negocio,
-        nombre,
-        precio,
-        id_usuario
-    )
-
-
-    if resultado == "actualizado":
-        flash("✅ Servicio actualizado correctamente.", "success")
-    else:
-        flash("✅ Servicio creado correctamente.", "success")
-
-    return redirect("/servicios")
+    try:
+        resultado = guardar_servicio_service(id_servicio, id_negocio, nombre, precio, id_usuario)
+        flash("✅ Servicio actualizado correctamente." if resultado == "actualizado"
+              else "✅ Servicio creado correctamente.", "success")
+    except Exception:
+        flash("❌ Error al guardar el servicio.", "error")
+    return redirect(url_for("servicios.servicios"))
 
 
 @servicios_bp.route("/servicios/eliminar/<int:id_servicio>")
 def eliminar_servicio(id_servicio):
-
+    if session.get("rol") != "admin":
+        return render_template("403.html"), 403
     id_usuario = session.get("id_usuario")
-    ok = eliminar_servicio_service(id_servicio, id_usuario)
-
-
-    if not ok:
-        flash("❌ No puedes eliminar el servicio porque ya tiene ventas.", "error")
-    else:
-        flash("✅ Servicio eliminado correctamente.", "success")
-
-    return redirect("/servicios")
+    try:
+        ok = eliminar_servicio_service(id_servicio, id_usuario)
+        if not ok:
+            flash("❌ No puedes eliminar el servicio porque ya tiene ventas.", "error")
+        else:
+            flash("✅ Servicio eliminado correctamente.", "success")
+    except Exception:
+        flash("❌ Error al eliminar el servicio.", "error")
+    return redirect(url_for("servicios.servicios"))
 
 
 
@@ -116,17 +110,18 @@ def historial_servicio(id_servicio):
 
 @servicios_bp.route("/servicios/restaurar/<int:id_servicio>")
 def restaurar_servicio(id_servicio):
+    if session.get("rol") != "admin":
+        return render_template("403.html"), 403
     id_usuario = session.get("id_usuario")
-
     restaurar_servicio_service(id_servicio, id_usuario)
-
     flash("♻️ Servicio restaurado correctamente.", "success")
     return redirect(url_for("servicios.servicios"))
 
 
-
 @servicios_bp.route("/servicios/exportar")
 def exportar_servicios_excel():
+    if session.get("rol") != "admin":
+        return render_template("403.html"), 403
     from servicios import obtener_servicios
 
     id_negocio         = request.args.get("id_negocio") or None
