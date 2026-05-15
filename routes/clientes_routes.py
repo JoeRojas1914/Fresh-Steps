@@ -93,6 +93,8 @@ def api_crear_cliente():
 
 @clientes_bp.route("/clientes/exportar")
 def exportar_clientes_excel():
+    if session.get("rol") != "admin":
+        return render_template("403.html"), 403
     from clientes import obtener_clientes
 
     incluir_eliminados = request.args.get("eliminados") == "1"

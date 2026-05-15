@@ -54,8 +54,8 @@ async function verHistorialVenta(idVenta) {
         }
 
         return `<tr>
-            <td><span style="font-weight:700;color:${color}">${h.accion}</span></td>
-            <td>${h.usuario || "—"}</td>
+            <td><span style="font-weight:700;color:${color}">${escapeHtml(h.accion)}</span></td>
+            <td>${escapeHtml(h.usuario || "—")}</td>
             <td>${fecha}</td>
             <td>${detalle}</td>
         </tr>`;

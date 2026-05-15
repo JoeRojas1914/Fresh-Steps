@@ -92,10 +92,10 @@ window.verHistorialServicio = async function (id) {
                 if (antes[k] !== despues[k]) {
                     cambios += `
                         <div>
-                            <b>${k}</b>:
-                            <span style="color:#ef4444">${antes[k]}</span>
+                            <b>${escapeHtml(k)}</b>:
+                            <span style="color:#ef4444">${escapeHtml(antes[k])}</span>
                             →
-                            <span style="color:#22c55e">${despues[k]}</span>
+                            <span style="color:#22c55e">${escapeHtml(despues[k])}</span>
                         </div>
                     `;
                 }
@@ -110,8 +110,8 @@ window.verHistorialServicio = async function (id) {
 
         tbody.innerHTML += `
             <tr>
-                <td><b>${h.accion}</b></td>
-                <td>${h.usuario}</td>
+                <td><b>${escapeHtml(h.accion)}</b></td>
+                <td>${escapeHtml(h.usuario)}</td>
                 <td>${new Date(h.fecha).toLocaleString()}</td>
                 <td>${cambios}</td>
             </tr>

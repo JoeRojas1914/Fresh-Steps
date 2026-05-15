@@ -1,3 +1,14 @@
+window.escapeHtml = function (str) {
+    const d = document.createElement("div");
+    d.appendChild(document.createTextNode(String(str ?? "")));
+    return d.innerHTML;
+};
+
+window.normalizar = function (txt) {
+    return (txt || "").toLowerCase()
+        .normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+};
+
 window.csrfFetch = function (url, options = {}) {
 
     const tokenMeta = document.querySelector('meta[name="csrf-token"]');

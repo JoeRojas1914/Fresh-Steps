@@ -68,10 +68,10 @@ window.verHistorialCliente = async function (e, id) {
     data.forEach(h => {
       tbody.innerHTML += `
         <tr>
-          <td><b>${h.accion}</b></td>
-          <td>${h.usuario}</td>
+          <td><b>${escapeHtml(h.accion)}</b></td>
+          <td>${escapeHtml(h.usuario)}</td>
           <td>${new Date(h.fecha).toLocaleString()}</td>
-          <td>${h.datos_despues ? "Modificación" : h.accion}</td>
+          <td>${h.datos_despues ? "Modificación" : escapeHtml(h.accion)}</td>
         </tr>
       `;
     });
@@ -108,11 +108,6 @@ document.addEventListener("click", function (e) {
     if (!input) return;
 
     const filas = document.querySelectorAll("tr[data-href]");
-
-    function normalizar(txt) {
-        return txt.toLowerCase()
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-    }
 
     input.addEventListener("input", () => {
         const q = normalizar(input.value);

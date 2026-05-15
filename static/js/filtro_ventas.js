@@ -8,14 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const filas = tabla.querySelectorAll("tbody tr");
 
-    function normalizar(texto) {
-        return texto
-            .toLowerCase()
-            .normalize("NFD")                 
-            .replace(/[\u0300-\u036f]/g, "")  
-            .trim();
-    }
-
     function aplicarFiltro() {
 
         const textoBusqueda = normalizar(inputBusqueda.value);

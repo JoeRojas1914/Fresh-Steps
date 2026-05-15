@@ -117,60 +117,69 @@ def guardar_venta_service(form, id_usuario_creo):
     fecha_estimada = form.get("fecha_estimada") or None
     tipo_pago     = form.get("tipo_pago")
 
-    prepago       = form.get("prepago") == "si"
-    monto_prepago = float(form.get("monto_prepago") or 0) if prepago else 0
+    prepago = form.get("prepago") == "si"
+    try:
+        monto_prepago = float(form.get("monto_prepago") or 0) if prepago else 0
+    except (ValueError, TypeError):
+        return None, "El monto del prepago no es válido."
 
-    aplica_descuento   = form.get("aplica_descuento") == "si"
-    cantidad_descuento = float(form.get("cantidad_descuento") or 0) if aplica_descuento else 0
+    aplica_descuento = form.get("aplica_descuento") == "si"
+    try:
+        cantidad_descuento = float(form.get("cantidad_descuento") or 0) if aplica_descuento else 0
+    except (ValueError, TypeError):
+        return None, "El monto del descuento no es válido."
 
     tipo_permitido = TIPOS_POR_NEGOCIO.get(id_negocio)
 
-    articulos = []
-    i = 0
-    while True:
-        tipo_articulo = form.get(f"articulos[{i}][tipo_articulo]")
-        if not tipo_articulo:
-            break
+    try:
+        articulos = []
+        i = 0
+        while True:
+            tipo_articulo = form.get(f"articulos[{i}][tipo_articulo]")
+            if not tipo_articulo:
+                break
 
-        if tipo_permitido and tipo_articulo != tipo_permitido:
-            return None, f"Este negocio solo permite artículos tipo: {tipo_permitido}"
+            if tipo_permitido and tipo_articulo != tipo_permitido:
+                return None, f"Este negocio solo permite artículos tipo: {tipo_permitido}"
 
-        comentario = form.get(f"articulos[{i}][comentario]")
+            comentario = form.get(f"articulos[{i}][comentario]")
 
-        if tipo_articulo == "calzado":
-            datos = {
-                "tipo":             form.get(f"articulos[{i}][tipo]"),
-                "marca":            form.get(f"articulos[{i}][marca]"),
-                "material":         form.get(f"articulos[{i}][material]"),
-                "color_base":       form.get(f"articulos[{i}][color_base]"),
-                "color_secundario": form.get(f"articulos[{i}][color_secundario]"),
-                "color_agujetas":   form.get(f"articulos[{i}][color_agujetas]"),
-            }
-            servicios = _parsear_servicios(form, i)
-            articulos.append({"tipo_articulo": "calzado", "datos": datos, "servicios": servicios, "comentario": comentario})
+            if tipo_articulo == "calzado":
+                datos = {
+                    "tipo":             form.get(f"articulos[{i}][tipo]"),
+                    "marca":            form.get(f"articulos[{i}][marca]"),
+                    "material":         form.get(f"articulos[{i}][material]"),
+                    "color_base":       form.get(f"articulos[{i}][color_base]"),
+                    "color_secundario": form.get(f"articulos[{i}][color_secundario]"),
+                    "color_agujetas":   form.get(f"articulos[{i}][color_agujetas]"),
+                }
+                servicios = _parsear_servicios(form, i)
+                articulos.append({"tipo_articulo": "calzado", "datos": datos, "servicios": servicios, "comentario": comentario})
 
-        elif tipo_articulo == "confeccion":
-            datos = {
-                "tipo":             form.get(f"articulos[{i}][tipo]"),
-                "marca":            form.get(f"articulos[{i}][marca]"),
-                "material":         form.get(f"articulos[{i}][material]"),
-                "color_base":       form.get(f"articulos[{i}][color_base]"),
-                "color_secundario": form.get(f"articulos[{i}][color_secundario]"),
-                "cantidad":         int(form.get(f"articulos[{i}][cantidad]") or 1),
-                "agujetas":         form.get(f"articulos[{i}][agujetas]") == "1",
-            }
-            servicios = _parsear_servicios(form, i)
-            articulos.append({"tipo_articulo": "confeccion", "datos": datos, "servicios": servicios, "comentario": comentario})
+            elif tipo_articulo == "confeccion":
+                datos = {
+                    "tipo":             form.get(f"articulos[{i}][tipo]"),
+                    "marca":            form.get(f"articulos[{i}][marca]"),
+                    "material":         form.get(f"articulos[{i}][material]"),
+                    "color_base":       form.get(f"articulos[{i}][color_base]"),
+                    "color_secundario": form.get(f"articulos[{i}][color_secundario]"),
+                    "cantidad":         int(form.get(f"articulos[{i}][cantidad]") or 1),
+                    "agujetas":         form.get(f"articulos[{i}][agujetas]") == "1",
+                }
+                servicios = _parsear_servicios(form, i)
+                articulos.append({"tipo_articulo": "confeccion", "datos": datos, "servicios": servicios, "comentario": comentario})
 
-        elif tipo_articulo == "maquila":
-            datos = {
-                "tipo":             form.get(f"articulos[{i}][tipo]"),
-                "cantidad":         int(form.get(f"articulos[{i}][cantidad]") or 1),
-                "precio_unitario":  float(form.get(f"articulos[{i}][precio_unitario]") or 0),
-            }
-            articulos.append({"tipo_articulo": "maquila", "datos": datos, "comentario": comentario})
+            elif tipo_articulo == "maquila":
+                datos = {
+                    "tipo":             form.get(f"articulos[{i}][tipo]"),
+                    "cantidad":         int(form.get(f"articulos[{i}][cantidad]") or 1),
+                    "precio_unitario":  float(form.get(f"articulos[{i}][precio_unitario]") or 0),
+                }
+                articulos.append({"tipo_articulo": "maquila", "datos": datos, "comentario": comentario})
 
-        i += 1
+            i += 1
+    except (ValueError, TypeError):
+        return None, "Datos de artículos inválidos (cantidad o precio no numérico)."
 
     if not id_cliente or not fecha_estimada:
         return None, "Faltan datos obligatorios (cliente, negocio, fecha estimada o tipo de pago)."

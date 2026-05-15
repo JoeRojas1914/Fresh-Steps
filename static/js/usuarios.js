@@ -5,11 +5,6 @@
 
     if (!input) return;
 
-    function normalizar(txt) {
-        return (txt || "").toLowerCase()
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-    }
-
     function aplicarFiltros() {
         const q            = normalizar(input.value);
         const verInactivos = toggleInact.checked;
@@ -146,8 +141,8 @@ window.verHistorialUsuario = async function (e, id) {
 
     tbody.innerHTML = data.map(h => `
         <tr>
-            <td><strong>${h.accion}</strong></td>
-            <td>${h.usuario_admin || "—"}</td>
+            <td><strong>${escapeHtml(h.accion)}</strong></td>
+            <td>${escapeHtml(h.usuario_admin || "—")}</td>
             <td>${new Date(h.fecha).toLocaleString("es-MX")}</td>
             <td>${_detalleHistorial(h)}</td>
         </tr>
@@ -173,7 +168,7 @@ function _detalleHistorial(h) {
             const campos = ["usuario","rol","nombre","apellido","telefono","correo","cp"];
             campos.forEach(c => {
                 if ((a[c] || "") !== (d[c] || ""))
-                    cambios.push(`${c}: <em>${a[c] || "—"}</em> → <strong>${d[c] || "—"}</strong>`);
+                    cambios.push(`${escapeHtml(c)}: <em>${escapeHtml(a[c] || "—")}</em> → <strong>${escapeHtml(d[c] || "—")}</strong>`);
             });
             return cambios.length ? cambios.join(" | ") : "Sin cambios visibles";
         } catch { return "Editado"; }
