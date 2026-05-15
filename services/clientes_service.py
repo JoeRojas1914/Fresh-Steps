@@ -9,7 +9,7 @@ from clientes import (
     obtener_historial_cliente
 )
 
-from pagos import obtener_pagos_por_venta
+from pagos import obtener_pagos_venta
 from negocio import obtener_negocios
 from ventas import contar_ventas_cliente, obtener_detalles_venta, obtener_ventas_cliente
 
@@ -129,9 +129,7 @@ def obtener_cliente_detalle_service(id_cliente, filtros, pedidos_por_pagina=5):
 
     detalles_map = obtener_detalles_venta(ids_venta)
 
-    pagos_map = {}
-    for p in pedidos:
-        pagos_map[p["id_venta"]] = obtener_pagos_por_venta(p["id_venta"])
+    pagos_map = obtener_pagos_venta(ids_venta)
 
     for p in pedidos:
         detalles = detalles_map.get(p["id_venta"], [])

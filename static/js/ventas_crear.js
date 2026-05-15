@@ -46,7 +46,8 @@ if (typeof ventaState === "undefined") {
         ventaState.enProceso = true;
 
         const btnCrear = document.getElementById("btnCrear");
-        if (btnCrear) btnCrear.disabled = true;
+        const textoOriginal = btnCrear?.textContent;
+        if (btnCrear) { btnCrear.disabled = true; btnCrear.textContent = "Guardando..."; }
 
         const form = e.target;
         const formData = new FormData(form);
@@ -68,7 +69,7 @@ if (typeof ventaState === "undefined") {
             if (!data.ok) {
                 if (nuevaPestana) nuevaPestana.close();
                 ventaState.enProceso = false;
-                if (btnCrear) btnCrear.disabled = false;
+                if (btnCrear) { btnCrear.disabled = false; btnCrear.textContent = textoOriginal; }
                 mostrarFeedback("❌ Error: " + (data.error || "No se pudo guardar la venta"), "error");
                 return;
             }
@@ -84,7 +85,7 @@ if (typeof ventaState === "undefined") {
         } catch (err) {
             if (nuevaPestana) nuevaPestana.close();
             ventaState.enProceso = false;
-            if (btnCrear) btnCrear.disabled = false;
+            if (btnCrear) { btnCrear.disabled = false; btnCrear.textContent = textoOriginal; }
             mostrarFeedback("❌ Error inesperado al guardar la venta.", "error");
             console.error(err);
         }

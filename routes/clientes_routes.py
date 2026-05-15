@@ -127,7 +127,7 @@ def exportar_clientes_excel():
 @clientes_bp.route("/clientes/<int:id_cliente>/exportar")
 def exportar_cliente_excel(id_cliente):
     from ventas import obtener_ventas_cliente, obtener_detalles_venta
-    from pagos import obtener_pagos_por_venta
+    from pagos import obtener_pagos_venta
     from clientes import obtener_cliente_por_id
 
     id_negocio   = request.args.get("id_negocio")  or None
@@ -138,7 +138,7 @@ def exportar_cliente_excel(id_cliente):
     pedidos      = obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limit=99999, offset=0)
     ids_venta    = [p["id_venta"] for p in pedidos]
     detalles_map = obtener_detalles_venta(ids_venta)
-    pagos_map    = {p["id_venta"]: obtener_pagos_por_venta(p["id_venta"]) for p in pedidos}
+    pagos_map    = obtener_pagos_venta(ids_venta)
 
     nombre_cliente = f"{cliente['nombre']} {cliente['apellido']}"
     filtro_txt = "  ".join(filter(None, [

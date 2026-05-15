@@ -53,17 +53,23 @@ def guardar_gasto():
         request.form["fecha_registro"], request.form["tipo_comprobante"],
         request.form["tipo_pago"]
     )
-    resultado = guardar_gasto_service(id_gasto, datos, id_usuario)
-    flash("✅ Gasto editado correctamente."  if resultado == "actualizado"
-          else "✅ Gasto creado correctamente.", "success")
+    try:
+        resultado = guardar_gasto_service(id_gasto, datos, id_usuario)
+        flash("✅ Gasto editado correctamente."  if resultado == "actualizado"
+              else "✅ Gasto creado correctamente.", "success")
+    except Exception:
+        flash("❌ Error al guardar el gasto. Verifica los datos ingresados.", "error")
     return redirect(url_for("gastos.gastos"))
 
 
 @gastos_bp.route("/gastos/eliminar/<int:id_gasto>")
 def eliminar_gasto(id_gasto):
     id_usuario = session.get("id_usuario")
-    eliminar_gasto_service(id_gasto, id_usuario)
-    flash("✅ Gasto eliminado correctamente.", "success")
+    try:
+        eliminar_gasto_service(id_gasto, id_usuario)
+        flash("✅ Gasto eliminado correctamente.", "success")
+    except Exception:
+        flash("❌ Error al eliminar el gasto.", "error")
     return redirect(url_for("gastos.gastos"))
 
 

@@ -194,3 +194,15 @@ def logged_client(client, usuario_admin):
         sess["rol"] = "admin"
         sess["ultima_actividad"] = datetime.now().isoformat()
     return client
+
+
+@pytest.fixture
+def logged_client_caja(client, usuario_caja):
+    """Flask test client con sesión de rol caja inyectada."""
+    with client.session_transaction() as sess:
+        sess["id_usuario"] = usuario_caja["id_usuario"]
+        sess["usuario"] = usuario_caja["usuario"]
+        sess["nombre"] = "Caja Test"
+        sess["rol"] = "caja"
+        sess["ultima_actividad"] = datetime.now().isoformat()
+    return client
