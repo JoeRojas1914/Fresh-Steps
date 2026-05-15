@@ -225,15 +225,14 @@ CREATE TABLE IF NOT EXISTS gastos_historial (
 -- Historial de usuarios
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS historial_usuario (
-    id_historial         INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario_modificado INT NOT NULL,
-    accion               VARCHAR(50) NOT NULL,
-    id_usuario_ejecuto   INT,
-    datos_antes          JSON,
-    datos_despues        JSON,
-    fecha                DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_usuario_modificado) REFERENCES usuario(id_usuario),
-    FOREIGN KEY (id_usuario_ejecuto)    REFERENCES usuario(id_usuario)
+    id_historial  INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario    INT NOT NULL,
+    accion        VARCHAR(50) NOT NULL,
+    datos_antes   JSON,
+    datos_despues JSON,
+    usuario_admin VARCHAR(100),
+    fecha         DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
 -- -------------------------------------------------------------
