@@ -9,7 +9,7 @@
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
  
-<h1>📋 Historial de ventas</h1>
+<h1><i data-lucide="clipboard-list" width="24" height="24"></i> Historial de ventas</h1>
  
 <form method="GET" action="/ventas/historial">
     <div class="filtro-box">
@@ -55,7 +55,7 @@
             </div>
 
             <div class="filtro-actions">
-                <button type="submit" class="btn btn--primary btn--sm">🔍 Filtrar</button>
+                <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
                 {% if id_negocio or fecha_inicio or fecha_fin %}
                 <a href="/ventas/historial" class="btn btn--danger btn--sm" style="text-decoration:none;">✕ Limpiar</a>
                 {% endif %}
@@ -65,7 +65,7 @@
                             fecha_fin=fecha_fin or '') }}"
                    class="btn btn--success btn--sm"
                    style="text-decoration:none;">
-                    ⬇ Exportar Excel
+                    <i data-lucide="download" width="14" height="14"></i> Exportar Excel
                 </a>
             </div>
  
@@ -129,20 +129,20 @@
         </span>
     </td>
     <td>
-        <button class="btn btn--info btn--sm" data-id="{{ v.id_venta }}">ℹ️ Info</button>
+        <button class="btn btn--info btn--sm" data-id="{{ v.id_venta }}"><i data-lucide="info" width="14" height="14"></i> Info</button>
     </td>
 </tr>
  
 <tr id="detalles-{{ v.id_venta }}" class="table--details" style="display:none;">
     <td colspan="11">
         <div class="detalles-box">
-            <div class="detalles-title">🧾 Detalles de la venta</div>
+            <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta</div>
  
             <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}">
                 <li style="opacity:0.6;">Cargando detalles...</li>
             </ul>
  
-            <div class="pagos-title">💳 Pagos registrados</div>
+            <div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
             {% if v.pagos %}
                 {% for p in v.pagos %}
                 <div class="pago-fila">
@@ -159,7 +159,7 @@
                 <div style="opacity:.55; font-size:13px; font-style:italic; margin-bottom:10px;">Sin pagos registrados</div>
             {% endif %}
  
-            <div class="pagos-title">👤 Usuarios</div>
+            <div class="pagos-title"><i data-lucide="user" width="14" height="14"></i> Usuarios</div>
                 {% if v.usuario_creo %}
                 <div class="pago-fila">
                     <span class="pago-tipo">Registrada por</span>
@@ -177,12 +177,12 @@
                 <button type="button"
                         class="btn btn--info btn--sm"
                         onclick="window.open('{{ url_for('ventas.venta_ticket', id_venta=v.id_venta) }}', '_blank')">
-                    🧾 Ver ticket
+                    <i data-lucide="receipt" width="14" height="14"></i> Ver ticket
                 </button>
                 <button type="button"
                         class="btn btn--primary btn--sm btn-historial-venta"
                         data-id="{{ v.id_venta }}">
-                    📋 Historial
+                    <i data-lucide="clock" width="14" height="14"></i> Historial
                 </button>
             </div>
         </div>
@@ -210,7 +210,7 @@
     font-size: 1.2rem; font-weight: bold;
     background-color: #2fa4ff; color: #ffffff;
     border: 1px solid #ffffff; border-radius: 10px;">
-    📭 No se encontraron ventas con los filtros seleccionados
+    <i data-lucide="inbox" width="18" height="18"></i> No se encontraron ventas con los filtros seleccionados
 </div>
 {% endif %}
  

@@ -3,3 +3,11 @@
 .text-success { color: var(--color-success); }
 .text-muted   { color: var(--color-muted); }
 .text-navy    { color: var(--color-navy); }
+
+/* ── Lucide icon helpers ── */
+.lucide {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  stroke: currentColor;
+}

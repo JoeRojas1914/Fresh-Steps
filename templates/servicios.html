@@ -8,13 +8,13 @@
 {% from "components/modal.html" import modal %}
 
 
-<h1>🏬 Servicios</h1>
+<h1><i data-lucide="store" width="24" height="24"></i> Servicios</h1>
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
 <div class="monthly-cards" style="margin-bottom:20px;">
     <div class="monthly-card small" style="border-left-color:#1e7fd6;">
-        <h4>🏬 Total servicios</h4>
+        <h4><i data-lucide="store" width="14" height="14"></i> Total servicios</h4>
         <p class="text-primary">{{ total_servicios }}</p>
     </div>
 </div>
@@ -53,10 +53,10 @@
                             id_negocio=request.args.get('id_negocio') or '',
                             eliminados='1' if incluir_eliminados else '') }}"
                    class="btn btn--success btn--sm" style="text-decoration:none;">
-                    ⬇ Exportar Excel
+                    <i data-lucide="download" width="14" height="14"></i> Exportar Excel
                 </a>
                 <button type="button" onclick="abrirNuevoServicio()" class="btn btn--primary btn--sm">
-                    ➕ Agregar servicio
+                    <i data-lucide="plus" width="14" height="14"></i> Agregar servicio
                 </button>
             </div>
         </div>

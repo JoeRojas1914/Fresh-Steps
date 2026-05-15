@@ -70,7 +70,7 @@ if (typeof ventaState === "undefined") {
                 if (nuevaPestana) nuevaPestana.close();
                 ventaState.enProceso = false;
                 if (btnCrear) { btnCrear.disabled = false; btnCrear.textContent = textoOriginal; }
-                mostrarFeedback("❌ Error: " + (data.error || "No se pudo guardar la venta"), "error");
+                mostrarFeedback("Error: " + (data.error || "No se pudo guardar la venta"), "error");
                 return;
             }
 
@@ -86,7 +86,7 @@ if (typeof ventaState === "undefined") {
             if (nuevaPestana) nuevaPestana.close();
             ventaState.enProceso = false;
             if (btnCrear) { btnCrear.disabled = false; btnCrear.textContent = textoOriginal; }
-            mostrarFeedback("❌ Error inesperado al guardar la venta.", "error");
+            mostrarFeedback("Error inesperado al guardar la venta.", "error");
             console.error(err);
         }
     });
@@ -220,7 +220,7 @@ async function crearCliente(e) {
     });
 
     if (!res.ok) {
-        errorBox.innerText = "❌ Error al crear el cliente.";
+        errorBox.innerText = "Error al crear el cliente.";
         errorBox.style.display = "block";
         return;
     }
@@ -292,7 +292,7 @@ function agregarArticulo() {
 
     <div class="articulo-detalle">
     <div class="zapato-header">
-        <div class="zapato-titulo">🧾 Artículo ${index + 1}${negocioNombre ? `<span class="zapato-titulo-badge">${negocioNombre}</span>` : ""}</div>
+        <div class="zapato-titulo"><i data-lucide="receipt" width="14" height="14"></i> Artículo ${index + 1}${negocioNombre ? `<span class="zapato-titulo-badge">${negocioNombre}</span>` : ""}</div>
         <button type="button" class="btn btn--danger btn--sm" onclick="eliminarArticulo(this)">✕</button>
     </div>
         <input type="hidden" name="articulos[${index}][tipo_articulo]" value="${tipoArticulo}">
@@ -303,6 +303,7 @@ function agregarArticulo() {
 
 
     document.getElementById("articulosContainer").appendChild(div);
+    if (window.lucide) lucide.createIcons();
     const resumenDiv = div.querySelector(".articulo-resumen");
     resumenDiv.addEventListener("click", () => abrirArticuloDesdeResumen(resumenDiv));
 
@@ -335,7 +336,7 @@ function eliminarArticulo(btn) {
 
 function renumerarArticulos() {
     document.querySelectorAll(".articulo-item").forEach((item, i) => {
-        item.querySelector(".zapato-titulo").innerText = `🧾 Artículo ${i + 1}`;
+        item.querySelector(".zapato-titulo").innerHTML = `<i data-lucide="receipt" width="14" height="14"></i> Artículo ${i + 1}`;
     });
     ventaState.contadorArticulos = document.querySelectorAll(".articulo-item").length;
 
@@ -435,7 +436,7 @@ function crearServiciosSelect(indexArticulo) {
                 <button type="button"
                         class="btn btn--info btn--sm"
                         onclick="agregarServicio(${indexArticulo})">
-                    ➕ Agregar servicio
+                    <i data-lucide="plus" width="14" height="14"></i> Agregar servicio
                 </button>
 
             </div>
@@ -956,11 +957,11 @@ function generarResumenArticulo(item){
                 <div>
                     <div class="resumen-nombre">${tipo} ${marca}</div>
                     ${detalle ? `<div class="resumen-detalle">${detalle}</div>` : ""}
-                    ${svcs ? `<div class="resumen-detalle resumen-svcs">🔧 ${svcs}</div>` : ""}
+                    ${svcs ? `<div class="resumen-detalle resumen-svcs"><i data-lucide="wrench" width="12" height="12"></i> ${svcs}</div>` : ""}
                 </div>
                 <div class="resumen-precio">$${precio.toFixed(2)}</div>
             </div>
-            <div class="resumen-hint">✏️ Toca para editar</div>
+            <div class="resumen-hint"><i data-lucide="pencil" width="11" height="11"></i> Toca para editar</div>
         </div>
     `;
 }

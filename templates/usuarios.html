@@ -6,13 +6,13 @@
 {% from "components/modal.html"      import modal %}
 {% from "components/pagination.html" import pagination %}
 
-<h1>👤 Usuarios</h1>
+<h1><i data-lucide="user" width="24" height="24"></i> Usuarios</h1>
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
 <div class="monthly-cards" style="margin-bottom:20px;">
     <div class="monthly-card small" style="border-left-color:#1e7fd6;">
-        <h4>👤 Total usuarios</h4>
+        <h4><i data-lucide="user" width="14" height="14"></i> Total usuarios</h4>
         <p class="text-primary">{{ total_usuarios }}</p>
     </div>
 </div>
@@ -39,7 +39,7 @@
 
         <div style="margin-left:auto; display:flex; align-items:flex-end;">
             <button onclick="abrirModalUsuario()" class="btn btn--primary btn--sm">
-                ➕ Agregar usuario
+                <i data-lucide="plus" width="14" height="14"></i> Agregar usuario
             </button>
         </div>
 

@@ -32,12 +32,14 @@ function toggleDetalles(idVenta) {
 
             lista.innerHTML = detalles.map(item => {
 
+
                 let html = "";
 
                 if (item.tipo_articulo === "calzado") {
                     html += `
                         <div class="detalle-zapato">
-                            👟 ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
+                            <i data-lucide="footprints" width="14" height="14"></i>
+                            ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
                         </div>
                     `;
 
@@ -54,7 +56,8 @@ function toggleDetalles(idVenta) {
                 else if (item.tipo_articulo === "confeccion") {
                     html += `
                         <div class="detalle-zapato">
-                            🧵 ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
+                            <i data-lucide="scissors" width="14" height="14"></i>
+                            ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
                         </div>
                         <div>
                             Cantidad: <b>${escapeHtml(item.datos.cantidad)}</b>
@@ -74,7 +77,8 @@ function toggleDetalles(idVenta) {
                 else if (item.tipo_articulo === "maquila") {
                     html += `
                         <div class="detalle-zapato">
-                            🏭 ${escapeHtml(item.datos.tipo)}
+                            <i data-lucide="factory" width="14" height="14"></i>
+                            ${escapeHtml(item.datos.tipo)}
                         </div>
                         <div>
                             Cantidad: <b>${escapeHtml(item.datos.cantidad)}</b> |
@@ -86,13 +90,15 @@ function toggleDetalles(idVenta) {
                 if (item.comentario) {
                     html += `
                         <div style="margin-top:6px; font-style:italic; opacity:0.8;">
-                            💬 ${escapeHtml(item.comentario)}
+                            <i data-lucide="message-circle" width="13" height="13"></i>
+                            ${escapeHtml(item.comentario)}
                         </div>
                     `;
                 }
 
                 return `<li class="detalle-item">${html}</li>`;
             }).join("");
+            if (window.lucide) lucide.createIcons();
         })
         .catch(() => {
             lista.innerHTML = `<li>Error al cargar detalles</li>`;

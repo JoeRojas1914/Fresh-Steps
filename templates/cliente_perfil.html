@@ -63,7 +63,7 @@
     </div>
   </div>
 
-  <h2 style="margin-bottom:20px;">📦 Historial de pedidos</h2>
+  <h2 style="margin-bottom:20px;"><i data-lucide="package" width="22" height="22"></i> Historial de pedidos</h2>
 
   {# ── Filtros ────────────────────────────────────────────── #}
   <form method="GET"
@@ -93,7 +93,7 @@
                value="{{ request.args.get('fecha_fin', '') }}">
       </div>
       <div class="filtro-actions">
-        <button type="submit" class="btn btn--primary btn--sm">🔍 Filtrar</button>
+        <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
         {% if request.args.get('id_negocio') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
           <a href="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}"
              class="btn btn--danger btn--sm" style="text-decoration:none;">✕ Limpiar</a>
@@ -104,7 +104,7 @@
                     fecha_fin=request.args.get('fecha_fin') or '') }}"
            class="btn btn--success btn--sm"
            style="text-decoration:none;">
-            ⬇ Exportar Excel
+            <i data-lucide="download" width="14" height="14"></i> Exportar Excel
         </a>
       </div>
     </div>
@@ -173,7 +173,7 @@
 
       <td>
         <button class="btn btn--info btn--sm" data-id="{{ p.id_venta }}">
-          ℹ️ Info
+          <i data-lucide="info" width="14" height="14"></i> Info
         </button>
       </td>
     </tr>
@@ -182,13 +182,13 @@
     <tr id="detalles-{{ p.id_venta }}" class="table--details" style="display:none;">
       <td colspan="9">
         <div class="detalles-box">
-          <div class="detalles-title">🧾 Detalles del pedido</div>
+          <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles del pedido</div>
 
           <ul class="detalles-list" id="lista-detalles-{{ p.id_venta }}">
             <li style="opacity:0.6;">Cargando detalles...</li>
           </ul>
 
-          <div class="pagos-title">💳 Pagos registrados</div>
+          <div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
           {% if p.pagos %}
             {% for pg in p.pagos %}
             <div class="pago-fila">
@@ -213,7 +213,7 @@
           </div>
           {% else %}
           <div style="margin-top:10px; font-size:13px; font-weight:700; color:#15803d;">
-            ✔ Pedido liquidado
+            <i data-lucide="check" width="14" height="14"></i> Pedido liquidado
           </div>
           {% endif %}
 
@@ -221,7 +221,7 @@
             <button type="button"
                     class="btn btn--info btn--sm"
                     onclick="window.open('{{ url_for('ventas.venta_ticket', id_venta=p.id_venta) }}', '_blank')">
-              🧾 Ver ticket
+              <i data-lucide="receipt" width="14" height="14"></i> Ver ticket
             </button>
           </div>
         </div>
@@ -245,7 +245,7 @@
 
   {% else %}
   <div class="empty-state">
-    <div class="empty-icon">📦</div>
+    <div class="empty-icon"><i data-lucide="package" width="48" height="48"></i></div>
     <h3>Sin pedidos registrados</h3>
     <p>Este cliente aún no tiene pedidos.<br>
        Cuando se registre alguno, se mostrará aquí.</p>

@@ -4,7 +4,7 @@
 {% from "components/alerts.html" import alerts %}
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal, modal_eliminar_venta %}
-    <h1>🧾 Entregas procesadas</h1>
+    <h1><i data-lucide="check-circle" width="24" height="24"></i> Entregas procesadas</h1>
 
     {{ alerts(get_flashed_messages(with_categories=true)) }}
 
@@ -95,7 +95,7 @@
 
         <td>
             <button class="btn btn--info btn--sm" data-id="{{ v.id_venta }}">
-                ℹ️ Info
+                <i data-lucide="info" width="14" height="14"></i> Info
             </button>
         </td>
 
@@ -106,7 +106,7 @@
                 data-deuda="{{ deuda }}"
                 data-pagado="{{ pagado }}"
                 data-total="{{ total }}">
-                ✅ Entregar
+                <i data-lucide="check-circle" width="14" height="14"></i> Entregar
             </button>
         </td>
     </tr>
@@ -114,7 +114,7 @@
     <tr id="detalles-{{ v.id_venta }}" class="table--details" style="display:none;">
         <td colspan="11">
             <div class="detalles-box">
-                <div class="detalles-title">🧾 Detalles de la venta</div>
+                <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta</div>
 
                 <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}">
                     <li style="opacity:0.6;">Cargando detalles...</li>
@@ -124,7 +124,7 @@
                     <button type="button"
                             class="btn btn--info btn--sm"
                             onclick="window.open('{{ url_for('ventas.venta_ticket', id_venta=v.id_venta) }}', '_blank')">
-                        🧾 Ver ticket
+                        <i data-lucide="receipt" width="14" height="14"></i> Ver ticket
                     </button>
                     {% if session.get("rol") == "admin" %}
                     <button type="button"
@@ -146,7 +146,7 @@
 
     {% else %}
     <div class="empty-state">
-        <div class="empty-icon">📦</div>
+        <div class="empty-icon"><i data-lucide="package" width="48" height="48"></i></div>
         <h3>Sin entregas procesadas</h3>
         <p>No hay ventas listas para entregar en este momento.</p>
     </div>
@@ -157,7 +157,7 @@
   {% if section == 'body' %}
   
       <p id="textoSinDeuda" style="display:none;">
-        ✅ Esta venta ya está totalmente pagada.<br>
+        <i data-lucide="check-circle" width="16" height="16"></i> Esta venta ya está totalmente pagada.<br>
         ¿Deseas marcarla como entregada?
       </p>
 

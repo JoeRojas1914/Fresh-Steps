@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Fresh Steps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FreshStepsLogo.png') }}">
     {% block head %}{% endblock %}
 </head>
@@ -19,7 +23,7 @@
         </div>
 
         <button class="nav-toggle" id="navToggle">
-            <i class="fas fa-bars"></i>
+            <i data-lucide="menu" width="22" height="22"></i>
         </button>
 
         {# ── Operación diaria — todos los roles ── #}
@@ -49,12 +53,13 @@
         <div class="nav-right">
             <div class="nav-user-dropdown" id="userDropdown">
                 <button class="nav-user-btn" id="userBtn">
+                    <span class="nav-user-avatar">{{ session.usuario[0].upper() if session.usuario else '?' }}</span>
                     {{ session.get("usuario") }}
-                    <i class="fas fa-chevron-down"></i>
+                    <i data-lucide="chevron-down" width="14" height="14"></i>
                 </button>
                 <div class="nav-user-menu" id="userMenu">
                     <a href="{{ url_for('auth.logout') }}">
-                        <i class="fas fa-sign-out-alt"></i>
+                        <i data-lucide="log-out" width="16" height="16"></i>
                         Cerrar sesión
                     </a>
                 </div>
@@ -81,7 +86,7 @@
         </div>
         <div class="footer-social">
             <a href="https://www.instagram.com/freshsteps.slp/" target="_blank">
-                <i class="fab fa-instagram"></i> Fresh Steps
+                <i data-lucide="instagram" width="16" height="16"></i> Fresh Steps
             </a>
         </div>
     </div>
@@ -92,6 +97,6 @@
 <script src="{{ url_for('static', filename='js/base/helpers.js') }}"></script>
 
 {% block scripts %}{% endblock %}
-
+<script>lucide.createIcons();</script>
 </body>
 </html>

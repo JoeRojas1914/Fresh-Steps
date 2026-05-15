@@ -9,7 +9,7 @@
 {# ── Header ── #}
 <div class="home-header">
     <div class="home-greeting">
-        <h1>Buen día, {{ nombre_usuario }} 👋</h1>
+        <h1>Buen día, {{ nombre_usuario }}</h1>
         <p>Aquí está el resumen de hoy</p>
     </div>
     <span class="home-fecha">{{ fecha_bonita }}</span>
@@ -19,21 +19,21 @@
 <p class="home-section-label">Acciones rápidas</p>
 <div class="acciones-grid">
     <a class="accion-card nueva-venta" href="/ventas">
-        <div class="accion-icon">🧾</div>
+        <div class="accion-icon"><i data-lucide="receipt" width="32" height="32"></i></div>
         <div>
             <div class="accion-label">Nueva venta</div>
             <div class="accion-sub">Registrar recibo</div>
         </div>
     </a>
     <a class="accion-card pendientes" href="/ventas/pendientes">
-        <div class="accion-icon">📦</div>
+        <div class="accion-icon"><i data-lucide="package" width="32" height="32"></i></div>
         <div>
             <div class="accion-label">Pendientes</div>
             <div class="accion-num text-primary">{{ total_pendientes }}</div>
         </div>
     </a>
     <a class="accion-card procesadas" href="/ventas/listas">
-        <div class="accion-icon">✅</div>
+        <div class="accion-icon"><i data-lucide="check-circle" width="32" height="32"></i></div>
         <div>
             <div class="accion-label">Listas para recoger</div>
             <div class="accion-num" style="color:#22c55e;">{{ total_entregas }}</div>
@@ -45,12 +45,12 @@
 {% if session.rol == "admin" %}
 <p class="home-section-label">Administración</p>
 <div class="admin-grid">
-    <a class="admin-card" href="/clientes"><span class="admin-icon">👥</span><span class="admin-label">Clientes</span></a>
-    <a class="admin-card" href="/servicios"><span class="admin-icon">🏬</span><span class="admin-label">Servicios</span></a>
-    <a class="admin-card" href="/gastos"><span class="admin-icon">💸</span><span class="admin-label">Gastos</span></a>
-    <a class="admin-card" href="/usuarios"><span class="admin-icon">👤</span><span class="admin-label">Usuarios</span></a>
-    <a class="admin-card" href="/ventas/historial"><span class="admin-icon">📋</span><span class="admin-label">Historial</span></a>
-    <a class="admin-card" href="/estadisticas"><span class="admin-icon">📊</span><span class="admin-label">Estadísticas</span></a>
+    <a class="admin-card" href="/clientes"><span class="admin-icon"><i data-lucide="users" width="28" height="28"></i></span><span class="admin-label">Clientes</span></a>
+    <a class="admin-card" href="/servicios"><span class="admin-icon"><i data-lucide="store" width="28" height="28"></i></span><span class="admin-label">Servicios</span></a>
+    <a class="admin-card" href="/gastos"><span class="admin-icon"><i data-lucide="banknote" width="28" height="28"></i></span><span class="admin-label">Gastos</span></a>
+    <a class="admin-card" href="/usuarios"><span class="admin-icon"><i data-lucide="user" width="28" height="28"></i></span><span class="admin-label">Usuarios</span></a>
+    <a class="admin-card" href="/ventas/historial"><span class="admin-icon"><i data-lucide="clipboard-list" width="28" height="28"></i></span><span class="admin-label">Historial</span></a>
+    <a class="admin-card" href="/estadisticas"><span class="admin-icon"><i data-lucide="bar-chart-2" width="28" height="28"></i></span><span class="admin-label">Estadísticas</span></a>
 </div>
 {% endif %}
 

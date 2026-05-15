@@ -8,7 +8,7 @@
 {% from "components/modal.html" import modal %}
 
 
-<h1>💸 Gastos</h1>
+<h1><i data-lucide="banknote" width="24" height="24"></i> Gastos</h1>
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
@@ -60,7 +60,7 @@
     </div>
 
     <div class="filtro-actions">
-      <button type="submit" class="btn btn--primary btn--sm">🔍 Filtrar</button>
+      <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
       {% if request.args.get('id_negocio') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
         <a href="{{ url_for('gastos.gastos') }}"
            class="btn btn--danger btn--sm" style="text-decoration:none;">✕ Limpiar</a>
@@ -71,10 +71,10 @@
                   fecha_fin=request.args.get('fecha_fin') or '',
                   eliminados='1' if incluir_eliminados else '') }}"
          class="btn btn--success btn--sm" style="text-decoration:none;">
-        ⬇ Exportar Excel
+        <i data-lucide="download" width="14" height="14"></i> Exportar Excel
       </a>
       <button type="button" onclick="abrirModal('modalGasto')" class="btn btn--primary btn--sm">
-        ➕ Agregar gasto
+        <i data-lucide="plus" width="14" height="14"></i> Agregar gasto
       </button>
     </div>
   </div>

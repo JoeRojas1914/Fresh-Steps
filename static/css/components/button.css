@@ -67,6 +67,12 @@
   background: #2176b5;
 }
 
+.btn--info:active {
+  transform: scale(0.93);
+  box-shadow: 0 2px 8px rgba(33, 118, 181, 0.35);
+  background: #1a68a8;
+}
+
 
 .btn--sm {
   padding: 6px 12px;

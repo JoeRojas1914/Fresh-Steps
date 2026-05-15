@@ -8,14 +8,14 @@
 {% from "components/modal.html" import modal %}
 
 
-<h1>👥 Clientes</h1>
+<h1><i data-lucide="users" width="24" height="24"></i> Clientes</h1>
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
 {# ── KPI cards ── #}
 <div class="monthly-cards" style="margin-bottom:20px;">
     <div class="monthly-card small" style="border-left-color:#1e7fd6;">
-        <h4>👥 Total clientes</h4>
+        <h4><i data-lucide="users" width="14" height="14"></i> Total clientes</h4>
         <p class="text-primary">{{ total_clientes }}</p>
     </div>
 </div>
@@ -42,10 +42,10 @@
             <a href="{{ url_for('clientes.exportar_clientes_excel',
                         eliminados='1' if incluir_eliminados else '') }}"
                class="btn btn--success btn--sm" style="text-decoration:none;">
-                ⬇ Exportar Excel
+                <i data-lucide="download" width="14" height="14"></i> Exportar Excel
             </a>
             <button type="button" onclick="abrirModal('modalCliente')" class="btn btn--primary btn--sm">
-                ➕ Agregar cliente
+                <i data-lucide="plus" width="14" height="14"></i> Agregar cliente
             </button>
         </div>
     </div>

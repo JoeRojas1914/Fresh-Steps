@@ -302,7 +302,7 @@ function setKpi(id,valor,pct) { const el=document.getElementById(id); if(el) el.
 function mostrarError(msg) {
     let el=document.getElementById("dashboard-error");
     if (!el) { el=document.createElement("div"); el.id="dashboard-error"; el.style.cssText="background:#fee2e2;color:#b91c1c;padding:10px 16px;border-radius:8px;margin:12px 0;font-size:13px;font-weight:500;"; document.querySelector(".filtro-box").after(el); }
-    el.textContent="⚠️ "+msg; el.style.display="block";
+    el.textContent=msg; el.style.display="block";
 }
 function ocultarError() { const el=document.getElementById("dashboard-error"); if(el) el.style.display="none"; }
 function verVentasRelacionadas() {
