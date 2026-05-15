@@ -275,8 +275,9 @@ async function seleccionarNegocio() {
     await cargarServicios();
 
     if (!hayArticulos) {
-        document.getElementById("articulosContainer").innerHTML = "";
+        document.querySelectorAll("#articulosContainer .articulo-item").forEach(el => el.remove());
         ventaState.contadorArticulos = 0;
+        actualizarEmptyState();
         actualizarTotal();
         validarFormulario();
     }
@@ -339,7 +340,21 @@ function agregarArticulo() {
 function actualizarEmptyState() {
     const empty = document.getElementById("emptyArticulos");
     if (!empty) return;
-    empty.style.display = document.querySelectorAll(".articulo-item").length ? "none" : "flex";
+    if (document.querySelectorAll(".articulo-item").length) {
+        empty.style.display = "none";
+        return;
+    }
+    empty.style.display = "flex";
+    const msg  = document.getElementById("emptyArticulosMsg");
+    const icon = document.getElementById("emptyArticulosIcon");
+    if (ventaState.negocioSeleccionado) {
+        if (msg)  msg.textContent = "Agrega el primer artículo para comenzar";
+        if (icon) icon.setAttribute("data-lucide", "package");
+    } else {
+        if (msg)  msg.textContent = "Selecciona un negocio para comenzar";
+        if (icon) icon.setAttribute("data-lucide", "store");
+    }
+    if (window.lucide) lucide.createIcons();
 }
 
 function eliminarArticulo(btn) {

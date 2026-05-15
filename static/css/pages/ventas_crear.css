@@ -112,7 +112,7 @@
 .venta-seccion-header {
   overflow: hidden;
   border-radius: 14px 14px 0 0;
-  background: linear-gradient(135deg, #0b3c5d, #1e7fd6);
+  background: linear-gradient(135deg, #1e7fd6, #0b3c5d);
   padding: 14px 20px;
   display: flex;
   align-items: center;
