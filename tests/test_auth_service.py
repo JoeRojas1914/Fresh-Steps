@@ -30,10 +30,22 @@ def test_login_password_incorrecto(app, usuario_admin):
     assert resultado is None
 
 
-def test_login_usuario_inexistente(app):
+def test_login_usuario_inexistente(app, db_conn):
+    username = "usuario_que_no_existe_xyz"
+
+    cursor = db_conn.cursor()
+    cursor.execute("DELETE FROM login_intentos WHERE usuario = %s AND ip = %s", (username, IP))
+    db_conn.commit()
+    cursor.close()
+
     with app.test_request_context("/"):
-        resultado = login_password_service("usuario_que_no_existe_xyz", "pass", IP)
+        resultado = login_password_service(username, "pass", IP)
     assert resultado is None
+
+    cursor = db_conn.cursor()
+    cursor.execute("DELETE FROM login_intentos WHERE usuario = %s AND ip = %s", (username, IP))
+    db_conn.commit()
+    cursor.close()
 
 
 def test_login_pin_correcto(app, usuario_caja):

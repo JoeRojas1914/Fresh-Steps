@@ -76,7 +76,8 @@ window.confirmarEntregaSinPago = function () {
             } else {
                 mostrarFeedback(res.error || "Error al entregar", "error");
             }
-        });
+        })
+        .catch(() => mostrarFeedback("Error de conexión al entregar la venta.", "error"));
 };
 
 
@@ -85,7 +86,7 @@ window.confirmarPagoYEntrega = function () {
     const metodo = document.getElementById("metodoPagoFinal").value;
 
     if (!metodo) {
-        alert("Selecciona un método de pago");
+        mostrarFeedback("Selecciona un método de pago.", "error");
         return;
     }
 
@@ -107,7 +108,8 @@ window.confirmarPagoYEntrega = function () {
         } else {
             mostrarFeedback(res.error || "Error al registrar pago", "error");
         }
-    });
+    })
+    .catch(() => mostrarFeedback("Error de conexión al registrar el pago.", "error"));
 };
 
 

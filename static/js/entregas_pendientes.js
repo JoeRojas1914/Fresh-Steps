@@ -41,7 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     mostrarFeedback(res.error || "Error al marcar como lista", "error");
                 }
 
-            });
+            })
+            .catch(() => mostrarFeedback("Error de conexión al marcar la venta.", "error"));
         });
     }
 
