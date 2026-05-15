@@ -54,25 +54,30 @@ window.verHistorialCliente = async function (e, id) {
 
   abrirModal("modalHistorialCliente");
 
-  const res = await fetch(`/clientes/${id}/historial`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`/clientes/${id}/historial`);
+    if (!res.ok) throw new Error("Error de red");
+    const data = await res.json();
 
-  if (!data.length) {
-    tbody.innerHTML = "<tr><td colspan='4'>Sin historial</td></tr>";
-    return;
+    if (!data.length) {
+      tbody.innerHTML = "<tr><td colspan='4'>Sin historial</td></tr>";
+      return;
+    }
+
+    tbody.innerHTML = "";
+    data.forEach(h => {
+      tbody.innerHTML += `
+        <tr>
+          <td><b>${h.accion}</b></td>
+          <td>${h.usuario}</td>
+          <td>${new Date(h.fecha).toLocaleString()}</td>
+          <td>${h.datos_despues ? "Modificación" : h.accion}</td>
+        </tr>
+      `;
+    });
+  } catch {
+    tbody.innerHTML = "<tr><td colspan='4'>Error al cargar historial.</td></tr>";
   }
-
-  tbody.innerHTML = "";
-  data.forEach(h => {
-    tbody.innerHTML += `
-      <tr>
-        <td><b>${h.accion}</b></td>
-        <td>${h.usuario}</td>
-        <td>${new Date(h.fecha).toLocaleString()}</td>
-        <td>${h.datos_despues ? "Modificación" : h.accion}</td>
-      </tr>
-    `;
-  });
 };
 
 

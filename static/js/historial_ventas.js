@@ -16,7 +16,9 @@ async function verHistorialVenta(idVenta) {
     const tbody = document.querySelector("#tablaHistorialVenta tbody");
     tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;opacity:.5;'>Cargando...</td></tr>";
 
+    try {
     const res  = await fetch(`/ventas/${idVenta}/historial`);
+    if (!res.ok) throw new Error("Error de red");
     const data = await res.json();
 
     if (!data.length) {
@@ -58,4 +60,7 @@ async function verHistorialVenta(idVenta) {
             <td>${detalle}</td>
         </tr>`;
     }).join("");
+    } catch {
+        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;opacity:.5;'>Error al cargar historial.</td></tr>";
+    }
 }

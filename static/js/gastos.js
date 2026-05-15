@@ -58,7 +58,9 @@ window.verHistorial = async function (id) {
     tbody.innerHTML = "<tr><td colspan='4'>Cargando...</td></tr>";
     abrirModal("modalHistorial");
 
+    try {
     const res = await fetch(`/gastos/${id}/historial`);
+    if (!res.ok) throw new Error("Error de red");
     const data = await res.json();
 
     if (!data.length) {
@@ -108,4 +110,7 @@ window.verHistorial = async function (id) {
             </tr>
         `;
     });
+    } catch {
+        tbody.innerHTML = "<tr><td colspan='4'>Error al cargar historial.</td></tr>";
+    }
 };

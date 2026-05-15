@@ -65,7 +65,9 @@ window.verHistorialServicio = async function (id) {
 
     tbody.innerHTML = "<tr><td colspan='4'>Cargando...</td></tr>";
 
+    try {
     const res = await fetch(`/servicios/${id}/historial`);
+    if (!res.ok) throw new Error("Error de red");
     const data = await res.json();
 
     if (!data.length) {
@@ -115,4 +117,7 @@ window.verHistorialServicio = async function (id) {
             </tr>
         `;
     });
+    } catch {
+        tbody.innerHTML = "<tr><td colspan='4'>Error al cargar historial.</td></tr>";
+    }
 };

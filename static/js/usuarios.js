@@ -134,7 +134,9 @@ window.verHistorialUsuario = async function (e, id) {
     const tbody = document.querySelector("#tablaHistorialUsuario tbody");
     tbody.innerHTML = "<tr><td colspan='4'>Cargando...</td></tr>";
 
+    try {
     const res  = await fetch(`/usuarios/${id}/historial`);
+    if (!res.ok) throw new Error("Error de red");
     const data = await res.json();
 
     if (!data.length) {
@@ -150,6 +152,9 @@ window.verHistorialUsuario = async function (e, id) {
             <td>${_detalleHistorial(h)}</td>
         </tr>
     `).join("");
+    } catch {
+        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;opacity:.5;'>Error al cargar historial.</td></tr>";
+    }
 };
 
 function _detalleHistorial(h) {

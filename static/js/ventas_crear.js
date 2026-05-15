@@ -69,7 +69,7 @@ if (typeof ventaState === "undefined") {
                 if (nuevaPestana) nuevaPestana.close();
                 ventaState.enProceso = false;
                 if (btnCrear) btnCrear.disabled = false;
-                alert("❌ Error: " + (data.error || "No se pudo guardar la venta"));
+                mostrarFeedback("❌ Error: " + (data.error || "No se pudo guardar la venta"), "error");
                 return;
             }
 
@@ -85,7 +85,7 @@ if (typeof ventaState === "undefined") {
             if (nuevaPestana) nuevaPestana.close();
             ventaState.enProceso = false;
             if (btnCrear) btnCrear.disabled = false;
-            alert("❌ Error inesperado al guardar la venta.");
+            mostrarFeedback("❌ Error inesperado al guardar la venta.", "error");
             console.error(err);
         }
     });
@@ -129,8 +129,15 @@ async function buscarClientes() {
     lista.innerHTML = "";
     if (q.length < 2) return;
 
-    const res = await fetch(`/api/clientes?q=${q}`);
-    const clientes = await res.json();
+    let clientes;
+    try {
+        const res = await fetch(`/api/clientes?q=${q}`);
+        if (!res.ok) throw new Error("Error de red");
+        clientes = await res.json();
+    } catch {
+        lista.innerHTML = "<div class='result-item'>Error al buscar clientes.</div>";
+        return;
+    }
 
     clientes.forEach(c => {
         const item = document.createElement("div");
@@ -232,8 +239,13 @@ async function cargarServicios() {
         return;
     }
 
-    const res = await fetch(`/api/servicios?id_negocio=${idNegocio}`);
-    ventaState.serviciosGlobales = await res.json();
+    try {
+        const res = await fetch(`/api/servicios?id_negocio=${idNegocio}`);
+        if (!res.ok) throw new Error("Error de red");
+        ventaState.serviciosGlobales = await res.json();
+    } catch {
+        ventaState.serviciosGlobales = [];
+    }
 }
 
 async function seleccionarNegocio() {
