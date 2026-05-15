@@ -14,8 +14,7 @@ from services.ventas_service import (
     registrar_pago_final_service,
     listar_entregas_pendientes_service,
     guardar_venta_service,
-)
-from ventas import (
+    marcar_lista_service,
     marcar_entregada,
     obtener_venta,
     obtener_detalles_venta,
@@ -109,11 +108,9 @@ def ventas_pendientes():
 
 @ventas_bp.route("/ventas/marcar-lista/<int:id_venta>", methods=["POST"])
 def marcar_lista(id_venta):
-    from ventas import marcar_como_lista
-
     try:
         id_usuario = session.get('id_usuario')
-        if marcar_como_lista(id_venta, id_usuario):
+        if marcar_lista_service(id_venta, id_usuario):
             return jsonify({
                 "ok": True,
                 "message": "Venta marcada como lista correctamente"
@@ -132,8 +129,6 @@ def marcar_lista(id_venta):
 
 @ventas_bp.route("/ventas/detalles/<int:id_venta>")
 def detalles_venta(id_venta):
-    from ventas import obtener_detalles_venta
-
     detalles = obtener_detalles_venta([id_venta])  
     return jsonify(detalles.get(id_venta, []))
 
@@ -225,7 +220,7 @@ def historial_ventas():
 
 @ventas_bp.route("/ventas/historial/exportar")
 def exportar_historial_excel():
-    from ventas import obtener_historial_ventas, obtener_detalles_venta
+    from ventas import obtener_historial_ventas
     from pagos import obtener_pagos_venta
 
     if session.get("rol") != "admin":

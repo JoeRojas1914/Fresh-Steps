@@ -1,8 +1,10 @@
-if (typeof contadorArticulos === "undefined") {
-    var contadorArticulos = 0;
-    var serviciosGlobales = [];
-    var negocioSeleccionado = "";
-    var ventaEnProceso = false;
+if (typeof ventaState === "undefined") {
+    var ventaState = {
+        contadorArticulos: 0,
+        serviciosGlobales: [],
+        negocioSeleccionado: "",
+        enProceso: false,
+    };
 
     document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("buscarCliente").addEventListener("input", buscarClientes);
@@ -40,8 +42,8 @@ if (typeof contadorArticulos === "undefined") {
     document.getElementById("formVenta").addEventListener("submit", async function(e) {
         e.preventDefault();
 
-        if (ventaEnProceso) return;
-        ventaEnProceso = true;
+        if (ventaState.enProceso) return;
+        ventaState.enProceso = true;
 
         const btnCrear = document.getElementById("btnCrear");
         if (btnCrear) btnCrear.disabled = true;
@@ -65,7 +67,7 @@ if (typeof contadorArticulos === "undefined") {
 
             if (!data.ok) {
                 if (nuevaPestana) nuevaPestana.close();
-                ventaEnProceso = false;
+                ventaState.enProceso = false;
                 if (btnCrear) btnCrear.disabled = false;
                 alert("❌ Error: " + (data.error || "No se pudo guardar la venta"));
                 return;
@@ -81,7 +83,7 @@ if (typeof contadorArticulos === "undefined") {
 
         } catch (err) {
             if (nuevaPestana) nuevaPestana.close();
-            ventaEnProceso = false;
+            ventaState.enProceso = false;
             if (btnCrear) btnCrear.disabled = false;
             alert("❌ Error inesperado al guardar la venta.");
             console.error(err);
@@ -226,12 +228,12 @@ async function cargarServicios() {
     const idNegocio = document.getElementById("id_negocio").value;
 
     if (!idNegocio) {
-        serviciosGlobales = [];
+        ventaState.serviciosGlobales = [];
         return;
     }
 
     const res = await fetch(`/api/servicios?id_negocio=${idNegocio}`);
-    serviciosGlobales = await res.json();
+    ventaState.serviciosGlobales = await res.json();
 }
 
 async function seleccionarNegocio() {
@@ -240,20 +242,20 @@ async function seleccionarNegocio() {
 
     const hayArticulos = document.querySelectorAll(".articulo-item").length > 0;
 
-    if (hayArticulos && negocioSeleccionado && nuevoNegocio !== negocioSeleccionado) {
-        select.value = negocioSeleccionado;
+    if (hayArticulos && ventaState.negocioSeleccionado && nuevoNegocio !== ventaState.negocioSeleccionado) {
+        select.value = ventaState.negocioSeleccionado;
         document.getElementById("errorNegocio").style.display = "block";
         return;
     }
 
     document.getElementById("errorNegocio").style.display = "none";
-    negocioSeleccionado = nuevoNegocio;
+    ventaState.negocioSeleccionado = nuevoNegocio;
 
     await cargarServicios();
 
     if (!hayArticulos) {
         document.getElementById("articulosContainer").innerHTML = "";
-        contadorArticulos = 0;
+        ventaState.contadorArticulos = 0;
         actualizarTotal();
         validarFormulario();
     }
@@ -266,7 +268,7 @@ function agregarArticulo() {
         return;
     }
 
-    const index = contadorArticulos;
+    const index = ventaState.contadorArticulos;
     const tipoArticulo = obtenerTipoArticuloPorNegocio(idNegocio);
 
     const div = document.createElement("div");
@@ -291,7 +293,7 @@ function agregarArticulo() {
     const resumenDiv = div.querySelector(".articulo-resumen");
     resumenDiv.addEventListener("click", () => abrirArticuloDesdeResumen(resumenDiv));
 
-    contadorArticulos++;
+    ventaState.contadorArticulos++;
 
     document.querySelectorAll(".articulo-item.abierto").forEach(a=>{
         cerrarArticulo(a);
@@ -322,9 +324,9 @@ function renumerarArticulos() {
     document.querySelectorAll(".articulo-item").forEach((item, i) => {
         item.querySelector(".zapato-titulo").innerText = `🧾 Artículo ${i + 1}`;
     });
-    contadorArticulos = document.querySelectorAll(".articulo-item").length;
+    ventaState.contadorArticulos = document.querySelectorAll(".articulo-item").length;
 
-    if (contadorArticulos === 0) {
+    if (ventaState.contadorArticulos === 0) {
         document.getElementById("errorNegocio").style.display = "none";
     }
 }
@@ -404,7 +406,7 @@ function crearCamposArticulo(index, tipoArticulo) {
 
 function crearServiciosSelect(indexArticulo) {
     let opciones = `<option value="">-- Selecciona servicio --</option>`;
-    serviciosGlobales.forEach(s => {
+    ventaState.serviciosGlobales.forEach(s => {
         const precio = s.precio_base ?? s.precio ?? 0;
         opciones += `<option value="${s.id_servicio}" data-precio="${precio}">
             ${s.nombre} ($${precio})
@@ -471,7 +473,7 @@ function agregarServicio(indexArticulo) {
     const contenedor = document.getElementById(`serviciosLista_${indexArticulo}`);
 
     let opciones = `<option value="">-- Selecciona servicio --</option>`;
-    serviciosGlobales.forEach(s => {
+    ventaState.serviciosGlobales.forEach(s => {
         const precio = s.precio_base ?? s.precio ?? 0;
         opciones += `<option value="${s.id_servicio}" data-precio="${precio}">
             ${s.nombre} ($${precio})
@@ -494,7 +496,7 @@ function eliminarServicioPro(btn, indexArticulo) {
 
     if (contenedor.querySelectorAll(".servicio-item").length === 0) {
         let opciones = `<option value="">-- Selecciona servicio --</option>`;
-        serviciosGlobales.forEach(s => {
+        ventaState.serviciosGlobales.forEach(s => {
             const precio = s.precio_base ?? s.precio ?? 0;
             opciones += `<option value="${s.id_servicio}" data-precio="${precio}">
                 ${s.nombre} ($${precio})
