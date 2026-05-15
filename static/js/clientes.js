@@ -8,13 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const telefono = document.querySelector("[name=telefono]").value.trim();
 
         if (!nombre || !apellido || !telefono) {
-            alert("Nombre, apellido y teléfono son obligatorios.");
+            mostrarFeedback("Nombre, apellido y teléfono son obligatorios.", "error");
             e.preventDefault();
             return;
         }
 
         if (!/^\d{10}$/.test(telefono)) {
-            alert("El teléfono debe tener exactamente 10 dígitos.");
+            mostrarFeedback("El teléfono debe tener exactamente 10 dígitos.", "error");
             e.preventDefault();
         }
     });

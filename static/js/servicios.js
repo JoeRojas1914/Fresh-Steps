@@ -7,13 +7,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const precio = document.querySelector("[name=precio]").value;
 
             if (!negocio || !nombre || precio === "") {
-                alert("Negocio, nombre y precio son obligatorios.");
+                mostrarFeedback("Negocio, nombre y precio son obligatorios.", "error");
                 e.preventDefault();
                 return;
             }
 
             if (parseFloat(precio) < 0) {
-                alert("El precio no puede ser negativo.");
+                mostrarFeedback("El precio no puede ser negativo.", "error");
                 e.preventDefault();
             }
         });

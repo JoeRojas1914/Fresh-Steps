@@ -19,9 +19,9 @@ def registrar_pago(id_venta, monto, tipo_pago, id_usuario_cobro):
 
         conn.commit()
 
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        raise e
+        raise
 
     finally:
         cursor.close()

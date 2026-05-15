@@ -150,7 +150,8 @@ def buscar_clientes_por_nombre(texto):
         cursor.execute("""
             SELECT *
             FROM cliente
-            WHERE nombre LIKE %s OR apellido LIKE %s
+            WHERE activo = 1
+              AND (nombre LIKE %s OR apellido LIKE %s)
         """, (f"%{texto}%", f"%{texto}%"))
 
         resultados = cursor.fetchall()

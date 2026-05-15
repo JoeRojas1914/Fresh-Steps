@@ -9,13 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const total = document.querySelector("[name=total]").value;
 
         if (!descripcion || !proveedor || total === "") {
-            alert("Descripción, proveedor y total son obligatorios.");
+            mostrarFeedback("Descripción, proveedor y total son obligatorios.", "error");
             e.preventDefault();
             return;
         }
 
         if (parseFloat(total) < 0) {
-            alert("El total no puede ser negativo.");
+            mostrarFeedback("El total no puede ser negativo.", "error");
             e.preventDefault();
         }
     });
