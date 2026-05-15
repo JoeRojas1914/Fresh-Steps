@@ -107,7 +107,7 @@ def exportar_clientes_excel():
     from clientes import obtener_clientes
 
     incluir_eliminados = request.args.get("eliminados") == "1"
-    clientes = obtener_clientes(limit=99999, offset=0, incluir_eliminados=True)
+    clientes = obtener_clientes(limit=99999, offset=0, incluir_eliminados=incluir_eliminados)
 
     wb = Workbook()
     ws = wb.active

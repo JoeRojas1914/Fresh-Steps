@@ -136,7 +136,7 @@ def detalles_venta(id_venta):
 
 @ventas_bp.route("/ventas/pago-final", methods=["POST"])
 def registrar_pago_final():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     id_usuario = session.get("id_usuario")
 
     try:

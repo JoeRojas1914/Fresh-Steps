@@ -169,8 +169,8 @@ function seleccionarCliente(cliente) {
         : 'Cliente nuevo';
 
     document.getElementById("clienteSeleccionado").innerHTML =
-        `<span>${cliente.nombre} ${cliente.apellido}</span>`
-        + `<span class="cliente-ventas-badge ${ventas > 0 ? 'has-ventas' : 'no-ventas'}">${ventasText}</span>`;
+        `<span>${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</span>`
+        + `<span class="cliente-ventas-badge ${ventas > 0 ? 'has-ventas' : 'no-ventas'}">${escapeHtml(ventasText)}</span>`;
 
     document.getElementById("listaClientes").innerHTML = "";
 
@@ -277,7 +277,7 @@ async function seleccionarNegocio() {
 function agregarArticulo() {
     const idNegocio = document.getElementById("id_negocio").value;
     if (!idNegocio) {
-        alert("Primero selecciona un negocio.");
+        mostrarFeedback("Primero selecciona un negocio.", "error");
         return;
     }
 
@@ -545,7 +545,7 @@ function onChangeServicio(select, indexArticulo) {
     }
 
     if (hayServicioRepetidoEnArticulo(indexArticulo)) {
-        alert("No puedes repetir el mismo servicio en el mismo artículo.");
+        mostrarFeedback("No puedes repetir el mismo servicio en el mismo artículo.", "error");
         select.value = "";
         inputPrecio.value = "";
         inputPrecio.disabled = true;
