@@ -676,12 +676,17 @@ def eliminar_venta(id_venta, id_usuario=None):
         cursor.close()
         conn.close()
 
-def contar_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None, mostrar_eliminadas=False):
+def contar_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None, mostrar_eliminadas=False, q=None):
     """Cuenta el total de ventas para la paginacion del historial."""
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        query = "SELECT COUNT(DISTINCT v.id_venta) FROM venta v WHERE (1=1)" + ("" if mostrar_eliminadas else " AND v.eliminado = 0")
+        query = """
+            SELECT COUNT(DISTINCT v.id_venta)
+            FROM venta v
+            JOIN cliente c ON c.id_cliente = v.id_cliente
+            WHERE (1=1)
+        """ + ("" if mostrar_eliminadas else " AND v.eliminado = 0")
         params = []
         if id_negocio:
             query += " AND v.id_negocio = %s"
@@ -692,6 +697,10 @@ def contar_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None, 
         if fecha_fin:
             query += " AND DATE(v.fecha_recibo) <= %s"
             params.append(fecha_fin)
+        if q:
+            query += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"
+            like = f"%{q}%"
+            params.extend([like, like, like])
         cursor.execute(query, params)
         total = cursor.fetchone()[0]
         return total
@@ -701,7 +710,7 @@ def contar_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None, 
 
 
 def obtener_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None,
-                             limit=20, offset=0, mostrar_eliminadas=False):
+                             limit=20, offset=0, mostrar_eliminadas=False, q=None):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -747,6 +756,10 @@ def obtener_historial_ventas(id_negocio=None, fecha_inicio=None, fecha_fin=None,
     if fecha_fin:
         query += " AND DATE(v.fecha_recibo) <= %s"
         params.append(fecha_fin)
+    if q:
+        query += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"
+        like = f"%{q}%"
+        params.extend([like, like, like])
 
     query += " GROUP BY v.id_venta ORDER BY v.id_venta DESC LIMIT %s OFFSET %s"
     params.extend([limit, offset])

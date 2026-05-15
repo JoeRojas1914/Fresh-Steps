@@ -107,14 +107,20 @@ document.addEventListener("click", function (e) {
     const input = document.getElementById("buscar-cliente-input");
     if (!input) return;
 
-    const filas = document.querySelectorAll("tr[data-href]");
-
+    let debounceTimer;
     input.addEventListener("input", () => {
-        const q = normalizar(input.value);
-        filas.forEach(fila => {
-            const nombre = normalizar(fila.querySelector("td")?.innerText || "");
-            fila.style.display = nombre.includes(q) ? "" : "none";
-        });
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const url = new URL(window.location.href);
+            const q = input.value.trim();
+            if (q) {
+                url.searchParams.set("q", q);
+            } else {
+                url.searchParams.delete("q");
+            }
+            url.searchParams.delete("pagina");
+            window.location.href = url.toString();
+        }, 400);
     });
 }());
 

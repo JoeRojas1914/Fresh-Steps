@@ -240,17 +240,17 @@ def _parsear_servicios(form, i):
 
 POR_PAGINA_HISTORIAL = 20
 
-def historial_ventas_service(id_negocio=None, fecha_inicio=None, fecha_fin=None, pagina=1, mostrar_eliminadas=False):
+def historial_ventas_service(id_negocio=None, fecha_inicio=None, fecha_fin=None, pagina=1, mostrar_eliminadas=False, q=None):
     from ventas import obtener_historial_ventas, contar_historial_ventas
     from pagos import obtener_pagos_venta
 
     offset = (pagina - 1) * POR_PAGINA_HISTORIAL
-    total_registros = contar_historial_ventas(id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas)
+    total_registros = contar_historial_ventas(id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas, q=q)
     total_paginas   = max(1, (total_registros + POR_PAGINA_HISTORIAL - 1) // POR_PAGINA_HISTORIAL)
 
     ventas = obtener_historial_ventas(id_negocio, fecha_inicio, fecha_fin,
                                       limit=POR_PAGINA_HISTORIAL, offset=offset,
-                                      mostrar_eliminadas=mostrar_eliminadas)
+                                      mostrar_eliminadas=mostrar_eliminadas, q=q)
     negocios = obtener_negocios()
 
     ids_venta    = [v["id_venta"] for v in ventas]
@@ -291,6 +291,7 @@ def historial_ventas_service(id_negocio=None, fecha_inicio=None, fecha_fin=None,
         "total_paginas":   total_paginas,
         "total_registros": total_registros,
         "mostrar_eliminadas": mostrar_eliminadas,
+        "q":               q,
     }
 
 def marcar_lista_service(id_venta, id_usuario=None):
