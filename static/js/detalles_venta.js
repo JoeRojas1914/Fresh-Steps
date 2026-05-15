@@ -37,13 +37,13 @@ function toggleDetalles(idVenta) {
                 if (item.tipo_articulo === "calzado") {
                     html += `
                         <div class="detalle-zapato">
-                            👟 ${item.datos.tipo} ${item.datos.marca}
+                            👟 ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
                         </div>
                     `;
 
                     html += item.servicios.map(s => `
                         <div class="detalle-servicio">
-                            ${s.nombre}
+                            ${escapeHtml(s.nombre)}
                             <span class="detalle-precio">
                                 $${parseFloat(s.precio_aplicado).toFixed(2)}
                             </span>
@@ -54,16 +54,16 @@ function toggleDetalles(idVenta) {
                 else if (item.tipo_articulo === "confeccion") {
                     html += `
                         <div class="detalle-zapato">
-                            🧵 ${item.datos.tipo} ${item.datos.marca}
+                            🧵 ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
                         </div>
                         <div>
-                            Cantidad: <b>${item.datos.cantidad}</b>
+                            Cantidad: <b>${escapeHtml(item.datos.cantidad)}</b>
                         </div>
                     `;
 
                     html += item.servicios.map(s => `
                         <div class="detalle-servicio">
-                            ${s.nombre}
+                            ${escapeHtml(s.nombre)}
                             <span class="detalle-precio">
                                 $${parseFloat(s.precio_aplicado).toFixed(2)}
                             </span>
@@ -74,10 +74,10 @@ function toggleDetalles(idVenta) {
                 else if (item.tipo_articulo === "maquila") {
                     html += `
                         <div class="detalle-zapato">
-                            🏭 ${item.datos.tipo}
+                            🏭 ${escapeHtml(item.datos.tipo)}
                         </div>
                         <div>
-                            Cantidad: <b>${item.datos.cantidad}</b> |
+                            Cantidad: <b>${escapeHtml(item.datos.cantidad)}</b> |
                             Precio: <b>$${parseFloat(item.datos.precio_unitario).toFixed(2)}</b>
                         </div>
                     `;
@@ -86,7 +86,7 @@ function toggleDetalles(idVenta) {
                 if (item.comentario) {
                     html += `
                         <div style="margin-top:6px; font-style:italic; opacity:0.8;">
-                            💬 ${item.comentario}
+                            💬 ${escapeHtml(item.comentario)}
                         </div>
                     `;
                 }

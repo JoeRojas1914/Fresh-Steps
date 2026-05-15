@@ -30,6 +30,8 @@ ventas_bp = Blueprint("ventas", __name__)
 @ventas_bp.route("/ventas/guardar", methods=["POST"])
 def guardar_venta():
     id_usuario = session.get("id_usuario")
+    if not id_usuario:
+        return jsonify({"ok": False, "error": "Sesión expirada. Vuelve a iniciar sesión."}), 401
     id_venta, error = guardar_venta_service(request.form, id_usuario)
 
     if error:
@@ -60,16 +62,18 @@ def entregar_venta(id_venta):
             })
 
     except Exception as e:
-        logger.error("Error en guardar_venta: %s", e, exc_info=True)
+        logger.error("Error en entregar_venta: %s", e, exc_info=True)
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
 
 
 @ventas_bp.route("/ventas/ticket/<int:id_venta>")
 def venta_ticket(id_venta):
     venta = obtener_venta(id_venta)
+    if not venta:
+        return render_template("404.html"), 404
 
     detalles_dict = obtener_detalles_venta([id_venta])
-    detalles = detalles_dict.get(id_venta, [])  
+    detalles = detalles_dict.get(id_venta, [])
 
     return render_template(
         "ticket_venta.html",

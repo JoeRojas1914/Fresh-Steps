@@ -110,3 +110,31 @@ def test_api_clientes_query_vacia_retorna_lista_vacia(logged_client):
     res = logged_client.get("/api/clientes?q=")
     assert res.status_code == 200
     assert res.get_json() == []
+
+
+# ---------------------------------------------------------------------------
+# Ventas: ticket y guardar_venta
+# ---------------------------------------------------------------------------
+
+def test_ticket_venta_inexistente_retorna_404(logged_client):
+    res = logged_client.get("/ventas/ticket/999999999")
+    assert res.status_code == 404
+
+
+def test_guardar_venta_sin_sesion_retorna_401(client):
+    res = client.post("/ventas/guardar", data={"id_negocio": "1"})
+    # El middleware puede redirigir (302) antes de llegar a la ruta,
+    # o la ruta devuelve 401 si la sesión expiró.
+    assert res.status_code in (302, 401)
+
+
+def test_exportar_servicios_con_rol_caja_retorna_403(logged_client_caja):
+    res = logged_client_caja.get("/servicios/exportar")
+    assert res.status_code == 403
+
+
+def test_guardar_servicio_con_rol_caja_retorna_403(logged_client_caja):
+    res = logged_client_caja.post("/servicios/guardar", data={
+        "id_negocio": "1", "nombre": "X", "precio": "10"
+    })
+    assert res.status_code == 403
