@@ -149,11 +149,11 @@
                 Historial
             </button>
 
-            <a href="/servicios/eliminar/{{ s.id_servicio }}"
-               class="btn btn--danger btn--sm"
-               onclick="return confirm('¿Eliminar servicio?')">
-               Eliminar
-            </a>
+            <button type="button"
+                    class="btn btn--danger btn--sm"
+                    onclick="confirmarEliminarServicio({{ s.id_servicio }})">
+                Eliminar
+            </button>
 
         {% else %}
 
@@ -183,6 +183,23 @@
   {% endcall %}
 {% endif %}
 
+{% endcall %}
+
+
+{# ── Modal confirmar eliminar servicio ── #}
+{% call(section) modal("modalConfirmarEliminarServicio", "Eliminar servicio", "sm") %}
+{% if section == 'body' %}
+<p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0b3c5d;">
+    ¿Seguro que deseas eliminar este servicio?
+</p>
+<p style="margin:0;font-size:13px;color:#64748b;line-height:1.6;">
+    Esta acción <strong>no se puede deshacer</strong>.
+</p>
+{% endif %}
+{% if section == 'footer' %}
+<button class="btn btn--primary btn--sm" onclick="cerrarModal('modalConfirmarEliminarServicio')">Cancelar</button>
+<button class="btn btn--danger btn--sm" onclick="ejecutarEliminarServicio()">Sí, eliminar</button>
+{% endif %}
 {% endcall %}
 
 

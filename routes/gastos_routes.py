@@ -1,6 +1,9 @@
 import io
+import logging
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, flash, url_for, session, jsonify, send_file
+
+logger = logging.getLogger(__name__)
 from openpyxl import Workbook
 from services.excel_helpers import (
     C, xl_cell, xl_row_bg,
@@ -47,17 +50,20 @@ def gastos():
 def guardar_gasto():
     id_gasto   = request.form.get("id_gasto")
     id_usuario = session.get("id_usuario")
-    datos = (
-        request.form["id_negocio"], request.form["descripcion"],
-        request.form["proveedor"],  request.form["total"],
-        request.form["fecha_registro"], request.form["tipo_comprobante"],
-        request.form["tipo_pago"]
-    )
     try:
+        datos = (
+            int(request.form["id_negocio"]),   request.form["descripcion"],
+            request.form["proveedor"],          float(request.form["total"]),
+            request.form["fecha_registro"],     request.form["tipo_comprobante"],
+            request.form["tipo_pago"]
+        )
         resultado = guardar_gasto_service(id_gasto, datos, id_usuario)
         flash("Gasto editado correctamente." if resultado == "actualizado"
               else "Gasto creado correctamente.", "success")
+    except (ValueError, KeyError):
+        flash("Datos inválidos. Verifica los campos ingresados.", "error")
     except Exception:
+        logger.exception("Error al guardar gasto id_gasto=%s", id_gasto)
         flash("Error al guardar el gasto. Verifica los datos ingresados.", "error")
     return redirect(url_for("gastos.gastos"))
 
@@ -69,6 +75,7 @@ def eliminar_gasto(id_gasto):
         eliminar_gasto_service(id_gasto, id_usuario)
         flash("Gasto eliminado correctamente.", "success")
     except Exception:
+        logger.exception("Error al eliminar gasto id_gasto=%s", id_gasto)
         flash("Error al eliminar el gasto.", "error")
     return redirect(url_for("gastos.gastos"))
 

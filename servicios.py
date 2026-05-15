@@ -4,6 +4,22 @@ from db import get_connection
 from utils import to_json_safe
 
 
+def existe_servicio_activo(id_negocio, nombre, excluir_id=None):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        sql = "SELECT id_servicio FROM servicio WHERE id_negocio=%s AND nombre=%s AND activo=1"
+        params = [id_negocio, nombre]
+        if excluir_id:
+            sql += " AND id_servicio != %s"
+            params.append(excluir_id)
+        cursor.execute(sql, params)
+        return cursor.fetchone() is not None
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def crear_servicio(id_negocio, nombre, precio, id_usuario):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)

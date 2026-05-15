@@ -237,6 +237,7 @@ async function crearCliente(e) {
 
     cerrarModalCliente();
     seleccionarCliente(cliente);
+    mostrarFeedback("Cliente creado correctamente.", "success");
 }
 
 

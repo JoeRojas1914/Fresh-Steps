@@ -227,11 +227,11 @@
                 Historial
             </button>
 
-            <a href="/gastos/eliminar/{{ g.id_gasto }}"
-               class="btn btn--danger btn--sm"
-               onclick="return confirm('¿Seguro que desea eliminar el gasto?')">
-               Eliminar
-            </a>
+            <button type="button"
+                    class="btn btn--danger btn--sm"
+                    onclick="confirmarEliminarGasto({{ g.id_gasto }})">
+                Eliminar
+            </button>
 
         {% else %}
 
@@ -264,6 +264,21 @@
 {% endcall %}
 
 
+{# ── Modal confirmar eliminar gasto ── #}
+{% call(section) modal("modalConfirmarEliminarGasto", "Eliminar gasto", "sm") %}
+{% if section == 'body' %}
+<p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0b3c5d;">
+    ¿Seguro que deseas eliminar este gasto?
+</p>
+<p style="margin:0;font-size:13px;color:#64748b;line-height:1.6;">
+    Esta acción <strong>no se puede deshacer</strong>.
+</p>
+{% endif %}
+{% if section == 'footer' %}
+<button class="btn btn--primary btn--sm" onclick="cerrarModal('modalConfirmarEliminarGasto')">Cancelar</button>
+<button class="btn btn--danger btn--sm" onclick="ejecutarEliminarGasto()">Sí, eliminar</button>
+{% endif %}
+{% endcall %}
 
 
 {% from "components/pagination.html" import pagination %}

@@ -36,6 +36,20 @@
 
 
 
+let _pendingToggleUrl = null;
+
+window.confirmarToggleUsuario = function (id, accion) {
+    _pendingToggleUrl = `/usuarios/toggle/${id}`;
+    document.getElementById("modalToggleTitulo").innerText = `${accion} usuario`;
+    document.getElementById("modalToggleMensaje").innerText = `¿Seguro que deseas ${accion.toLowerCase()} este usuario?`;
+    abrirModal("modalConfirmarToggleUsuario");
+};
+
+window.ejecutarToggleUsuario = function () {
+    if (_pendingToggleUrl) location.href = _pendingToggleUrl;
+};
+
+
 window.abrirModalUsuario = function () {
     abrirModal("modalUsuario");
 

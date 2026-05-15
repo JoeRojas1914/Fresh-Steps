@@ -23,6 +23,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+let _pendingGastoUrl = null;
+
+window.confirmarEliminarGasto = function (id) {
+    _pendingGastoUrl = `/gastos/eliminar/${id}`;
+    abrirModal("modalConfirmarEliminarGasto");
+};
+
+window.ejecutarEliminarGasto = function () {
+    if (_pendingGastoUrl) location.href = _pendingGastoUrl;
+};
+
+
 window.editarGasto = function (
     id,
     id_negocio,

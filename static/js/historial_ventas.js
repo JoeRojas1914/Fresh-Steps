@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    document.querySelectorAll(".btn--info[data-id]").forEach(btn => {
-        btn.addEventListener("click", () => toggleDetalles(btn.dataset.id));
+    document.querySelectorAll(".btn-detalles[data-id]").forEach(btn => {
+        btn.addEventListener("click", () => toggleDetalles(btn.dataset.id, btn));
     });
 
     document.querySelectorAll(".btn-historial-venta").forEach(btn => {

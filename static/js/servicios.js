@@ -35,6 +35,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+let _pendingServicioUrl = null;
+
+window.confirmarEliminarServicio = function (id) {
+    _pendingServicioUrl = `/servicios/eliminar/${id}`;
+    abrirModal("modalConfirmarEliminarServicio");
+};
+
+window.ejecutarEliminarServicio = function () {
+    if (_pendingServicioUrl) location.href = _pendingServicioUrl;
+};
+
+
 window.abrirNuevoServicio = function () {
     abrirModal("modalServicio");
 

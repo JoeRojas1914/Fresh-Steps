@@ -5,7 +5,8 @@ from servicios import (
     actualizar_servicio,
     eliminar_servicio,
     obtener_historial_servicio,
-    restaurar_servicio
+    restaurar_servicio,
+    existe_servicio_activo
 )
 
 def listar_servicios(id_negocio=None, q="", pagina=1, por_pagina=10, incluir_eliminados=False):
@@ -35,12 +36,13 @@ def listar_servicios(id_negocio=None, q="", pagina=1, por_pagina=10, incluir_eli
 
 
 def guardar_servicio_service(id_servicio, id_negocio, nombre, precio, id_usuario):
+    if existe_servicio_activo(id_negocio, nombre, excluir_id=id_servicio or None):
+        raise ValueError(f"Ya existe un servicio activo con el nombre '{nombre}' en este negocio.")
     if id_servicio:
         actualizar_servicio(id_servicio, id_negocio, nombre, precio, id_usuario)
         return "actualizado"
-    else:
-        crear_servicio(id_negocio, nombre, precio, id_usuario)
-        return "creado"
+    crear_servicio(id_negocio, nombre, precio, id_usuario)
+    return "creado"
 
 
 def eliminar_servicio_service(id_servicio, id_usuario):

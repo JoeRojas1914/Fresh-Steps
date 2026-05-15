@@ -1,6 +1,9 @@
 import io
+import logging
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, send_file
+
+logger = logging.getLogger(__name__)
 from openpyxl import Workbook
 from services.excel_helpers import (
     C, xl_cell, xl_row_bg, fmt_dt, estado_venta,
@@ -46,6 +49,7 @@ def guardar_cliente():
             else "Cliente creado correctamente.", "success"
         )
     except Exception:
+        logger.exception("Error al guardar cliente id_usuario=%s", id_usuario)
         flash("Error al guardar el cliente. Verifica los datos.", "error")
     return redirect(url_for("clientes.clientes"))
 
@@ -60,6 +64,7 @@ def eliminar_cliente(id_cliente):
         else:
             flash("Cliente eliminado correctamente.", "success")
     except Exception:
+        logger.exception("Error al eliminar cliente id_cliente=%s", id_cliente)
         flash("Error al eliminar el cliente.", "error")
     return redirect(url_for("clientes.clientes"))
 
@@ -71,6 +76,7 @@ def restaurar_cliente(id_cliente):
         restaurar_cliente_service(id_cliente, id_usuario)
         flash("Cliente restaurado correctamente.", "success")
     except Exception:
+        logger.exception("Error al restaurar cliente id_cliente=%s", id_cliente)
         flash("Error al restaurar el cliente.", "error")
     return redirect(url_for("clientes.clientes"))
 

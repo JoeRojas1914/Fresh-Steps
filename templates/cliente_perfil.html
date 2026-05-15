@@ -172,8 +172,8 @@
       </td>
 
       <td>
-        <button class="btn btn--info btn--sm" data-id="{{ p.id_venta }}">
-          <i data-lucide="info" width="14" height="14"></i> Info
+        <button class="btn btn--info btn--sm btn-detalles" data-id="{{ p.id_venta }}">
+          <i data-lucide="chevron-down" width="14" height="14" class="chevron-icon" style="transition:transform .2s;"></i> Detalles
         </button>
       </td>
     </tr>
@@ -259,8 +259,8 @@
 <script src="{{ url_for('static', filename='js/detalles_venta.js') }}"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".btn--info[data-id]").forEach(btn => {
-        btn.addEventListener("click", () => toggleDetalles(btn.dataset.id));
+    document.querySelectorAll(".btn-detalles[data-id]").forEach(btn => {
+        btn.addEventListener("click", () => toggleDetalles(btn.dataset.id, btn));
     });
 });
 </script>

@@ -1,6 +1,9 @@
 import io
+import logging
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, flash, jsonify, session, send_file, url_for
+
+logger = logging.getLogger(__name__)
 from openpyxl import Workbook
 from services.excel_helpers import (
     C, xl_cell, xl_row_bg,
@@ -56,16 +59,21 @@ def servicios():
 def guardar_servicio():
     if session.get("rol") != "admin":
         return render_template("403.html"), 403
-    id_servicio = request.form.get("id_servicio")
-    id_negocio = request.form["id_negocio"]
-    nombre = request.form["nombre"]
-    precio = request.form["precio"]
+    id_servicio = request.form.get("id_servicio") or None
     id_usuario = session.get("id_usuario")
     try:
+        id_negocio = int(request.form["id_negocio"])
+        nombre = request.form["nombre"]
+        precio = float(request.form["precio"])
         resultado = guardar_servicio_service(id_servicio, id_negocio, nombre, precio, id_usuario)
         flash("Servicio actualizado correctamente." if resultado == "actualizado"
               else "Servicio creado correctamente.", "success")
+    except ValueError as e:
+        flash(str(e), "error")
+    except (KeyError, TypeError):
+        flash("Datos inválidos. Verifica los campos ingresados.", "error")
     except Exception:
+        logger.exception("Error al guardar servicio id_servicio=%s", id_servicio)
         flash("Error al guardar el servicio.", "error")
     return redirect(url_for("servicios.servicios"))
 
@@ -79,6 +87,7 @@ def eliminar_servicio(id_servicio):
         eliminar_servicio_service(id_servicio, id_usuario)
         flash("Servicio eliminado correctamente.", "success")
     except Exception:
+        logger.exception("Error al eliminar servicio id_servicio=%s", id_servicio)
         flash("Error al eliminar el servicio.", "error")
     return redirect(url_for("servicios.servicios"))
 

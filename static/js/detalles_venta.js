@@ -1,19 +1,22 @@
 const detallesCargados = {};
 
-function toggleDetalles(idVenta) {
+function toggleDetalles(idVenta, btn) {
     const fila = document.getElementById(`detalles-${idVenta}`);
     const lista = document.getElementById(`lista-detalles-${idVenta}`);
 
     if (!fila || !lista) return;
 
     const visible = fila.style.display === "table-row";
+    const chevron = btn ? btn.querySelector(".chevron-icon") : null;
 
     if (visible) {
         fila.style.display = "none";
+        if (chevron) chevron.style.transform = "";
         return;
     }
 
     fila.style.display = "table-row";
+    if (chevron) chevron.style.transform = "rotate(180deg)";
 
     if (detallesCargados[idVenta]) return;
 

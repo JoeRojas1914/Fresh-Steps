@@ -5,9 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const detallesCargados = {};
 
 
-    document.querySelectorAll(".btn--info").forEach(btn => {
+    document.querySelectorAll(".btn-detalles[data-id]").forEach(btn => {
         btn.addEventListener("click", () => {
-            toggleDetalles(btn.dataset.id);
+            toggleDetalles(btn.dataset.id, btn);
         });
     });
 
