@@ -15,6 +15,8 @@
   --color-danger:         #ef4444;
   --color-danger-light:   #f87171;
   --color-info:           #3498db;
+  --color-warning:        #ff9800;
+  --color-atrasado:       #e53935;
   --color-disabled-bg:    #cbd5e1;
   --color-disabled-text:  #64748b;
 
@@ -28,6 +30,11 @@
   --shadow-md:   0 8px 20px rgba(0,0,0,0.08);
   --shadow-lg:   0 12px 30px rgba(0,0,0,0.12);
   --shadow-blue: 0 6px 18px rgba(47, 164, 255, 0.25);
+  --shadow-auth: 0 30px 60px rgba(30, 127, 214, 0.25);
+  --shadow-focus: 0 0 0 3px rgba(47, 164, 255, 0.18), 0 8px 20px rgba(30, 127, 214, 0.15);
+
+  --gradient-primary: linear-gradient(to right, #2fa4ff, #1e7fd6);
+  --gradient-bg-auth: linear-gradient(135deg, #e6f3ff, #ffffff);
 
   --transition-fast: 0.15s ease;
   --transition-base: 0.2s ease;

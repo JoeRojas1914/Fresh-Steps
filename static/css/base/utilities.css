@@ -1,0 +1,5 @@
+.text-primary { color: var(--color-primary-dark); }
+.text-danger  { color: var(--color-danger); }
+.text-success { color: var(--color-success); }
+.text-muted   { color: var(--color-muted); }
+.text-navy    { color: var(--color-navy); }

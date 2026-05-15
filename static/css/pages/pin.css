@@ -9,7 +9,7 @@
 
 body {
     min-height: 100dvh;
-    background: linear-gradient(135deg, #e6f3ff, #ffffff);
+    background: var(--gradient-bg-auth);
 
     display: flex;
     align-items: center;
@@ -33,7 +33,7 @@ body {
 
     text-align: center;
 
-    box-shadow: 0 30px 60px rgba(30, 127, 214, 0.25);
+    box-shadow: var(--shadow-auth);
 
     animation: fadeIn 0.35s ease;
 }
@@ -45,7 +45,7 @@ body {
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: #0b3c5d;
+    color: var(--color-navy);
 }
 
 
@@ -82,9 +82,7 @@ body {
     background: #ffffff;
     border-color: #2fa4ff;
 
-    box-shadow:
-        0 0 0 3px rgba(47, 164, 255, 0.18),
-        0 8px 20px rgba(30, 127, 214, 0.15);
+    box-shadow: var(--shadow-focus);
 }
 
 
@@ -97,7 +95,7 @@ body {
     font-size: 15px;
     font-weight: 700;
 
-    background: linear-gradient(to right, #2fa4ff, #1e7fd6);
+    background: var(--gradient-primary);
     color: white;
 
     border: none;
@@ -120,7 +118,7 @@ body {
     font-weight: 600;
 
     text-decoration: none;
-    color: #1e7fd6;
+    color: var(--color-primary-dark);
 }
 
 .link-login:hover {

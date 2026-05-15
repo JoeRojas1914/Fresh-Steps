@@ -13,7 +13,7 @@
 <div class="monthly-cards" style="margin-bottom:20px;">
     <div class="monthly-card small" style="border-left-color:#1e7fd6;">
         <h4>👤 Total usuarios</h4>
-        <p style="color:#1e7fd6;">{{ total_usuarios }}</p>
+        <p class="text-primary">{{ total_usuarios }}</p>
     </div>
 </div>
 
@@ -172,14 +172,14 @@
             </div>
 
             <div class="modal-field">
-                <label>Usuario <span style="color:#e53935;">*</span></label>
+                <label>Usuario <span class="text-danger">*</span></label>
                 <input type="text" name="usuario" id="usuario" required
                        minlength="3" pattern="^[a-zA-Z0-9_]+$"
                        placeholder="letras, números y _">
             </div>
 
             <div class="modal-field">
-                <label>PIN (4 dígitos) <span id="pin-requerido" style="color:#e53935;">*</span></label>
+                <label>PIN (4 dígitos) <span id="pin-requerido" class="text-danger">*</span></label>
                 <input type="password" name="pin" id="pin"
                        maxlength="4" pattern="\d{4}" placeholder="1234">
             </div>
@@ -187,7 +187,7 @@
             <div class="modal-field" style="grid-column:1/-1;">
                 <label>
                     Contraseña
-                    <span id="pass-requerido" style="color:#e53935;">*</span>
+                    <span id="pass-requerido" class="text-danger">*</span>
                     <span id="pass-opcional" style="opacity:.5; font-size:12px; display:none;">(dejar vacío para no cambiar)</span>
                 </label>
                 <input type="password" name="password" id="password"

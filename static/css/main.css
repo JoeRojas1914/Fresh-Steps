@@ -1,5 +1,6 @@
 @import "base/variables.css";
 @import "base/reset.css";
+@import "base/utilities.css";
 @import "base/navbar.css";
 @import "base/footer.css";
 

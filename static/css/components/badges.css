@@ -48,19 +48,19 @@
   white-space: nowrap;
 }
 
-.negocio-fresh      { background-color: #1e7fd6; }
+.negocio-fresh      { background-color: var(--color-primary-dark); }
 .negocio-confeccion { background-color: #F1A7B1; }
 .negocio-maquila    { background-color: #89C8D4; }
 
 .badge-hoy {
-  background: #ff9800;
+  background: var(--color-warning);
   color: white;
   font-size: 0.75rem;
   margin-left: 6px;
 }
 
 .badge-atrasado {
-  background: #e53935;
+  background: var(--color-atrasado);
   color: white;
   font-size: 0.75rem;
   margin-left: 6px;
