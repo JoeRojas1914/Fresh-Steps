@@ -202,6 +202,10 @@
 
 {% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/estadisticas.css') }}">
+{% endblock %}
+
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ url_for('static', filename='js/estadisticas.js') }}"></script>
