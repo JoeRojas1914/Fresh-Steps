@@ -1,7 +1,6 @@
 import json
-from decimal import Decimal
-from datetime import date, datetime
 from db import get_connection
+from utils import to_json_safe
 
 def crear_cliente(nombre, apellido, correo, telefono, direccion, id_usuario):
     conn = get_connection()
@@ -185,21 +184,6 @@ def obtener_cliente_por_id(id_cliente):
 
 
 
-def to_json_safe(data):
-    if not data:
-        return None
-
-    safe = {}
-
-    for k, v in data.items():
-        if isinstance(v, Decimal):
-            safe[k] = float(v)
-        elif isinstance(v, (date, datetime)):
-            safe[k] = v.isoformat()
-        else:
-            safe[k] = v
-
-    return safe
 
 
 def registrar_historial(cursor, id_cliente, accion, id_usuario, antes=None, despues=None):

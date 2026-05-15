@@ -1,7 +1,7 @@
 import datetime
-from decimal import Decimal
 import json
 from db import get_connection
+from utils import to_json_safe
 
 
 def crear_servicio(id_negocio, nombre, precio, id_usuario):
@@ -221,24 +221,6 @@ def servicio_tiene_ventas(cursor, id_servicio):
 
 
 
-def to_json_safe(data):
-    if not data:
-        return None
-
-    safe = {}
-
-    for k, v in data.items():
-
-        if isinstance(v, Decimal):
-            safe[k] = float(v)
-
-        elif isinstance(v, (datetime.date, datetime.datetime)):
-            safe[k] = str(v)
-
-        else:
-            safe[k] = v
-
-    return safe
 
 
 

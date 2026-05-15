@@ -18,6 +18,8 @@ from services.ventas_service import (
     marcar_entregada,
     obtener_venta,
     obtener_detalles_venta,
+    eliminar_venta_service,
+    historial_ventas_service,
 )
 
 logger = logging.getLogger(__name__)
@@ -154,8 +156,6 @@ def registrar_pago_final():
 
 @ventas_bp.route("/ventas/eliminar/<int:id_venta>", methods=["POST"])
 def eliminar_venta_route(id_venta):
-    from services.ventas_service import eliminar_venta_service
-
     id_usuario = session.get("id_usuario")
     rol = session.get("rol")
 
@@ -172,7 +172,7 @@ def eliminar_venta_route(id_venta):
         }), 403
 
     try:
-        ok, mensaje = eliminar_venta_service(id_venta, id_usuario)
+        ok, mensaje = eliminar_venta_service(id_venta, id_usuario)  # noqa: F811
 
         if not ok:
             return jsonify({
@@ -191,12 +191,9 @@ def eliminar_venta_route(id_venta):
 
 @ventas_bp.route("/ventas/historial")
 def historial_ventas():
-    from services.ventas_service import historial_ventas_service
-
     rol = session.get("rol")
     if rol != "admin":
-        from flask import render_template as rt
-        return rt("403.html"), 403
+        return render_template("403.html"), 403
 
     id_negocio   = request.args.get("id_negocio",  type=int)
     fecha_inicio = request.args.get("fecha_inicio") or None

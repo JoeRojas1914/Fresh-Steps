@@ -1,7 +1,6 @@
 from db import get_connection
 import json
-from decimal import Decimal
-from datetime import date, datetime
+from utils import to_json_safe
 
 
 
@@ -301,21 +300,6 @@ def obtener_historial_gasto(id_gasto):
         conn.close()
 
 
-def to_json_safe(data):
-    if not data:
-        return None
-
-    safe = {}
-
-    for k, v in data.items():
-        if isinstance(v, Decimal):
-            safe[k] = float(v)
-        elif isinstance(v, (date, datetime)):
-            safe[k] = v.isoformat()
-        else:
-            safe[k] = v
-
-    return safe
 
 
 def restaurar_gasto(id_gasto, id_usuario):
