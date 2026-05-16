@@ -3,9 +3,12 @@
 .env
 .bat
 
+.claude/settings.local.json
+
 __pycache__/
 *.pyc
 venv/
 
 scripts/
 backups/
+.claude/settings.local.json

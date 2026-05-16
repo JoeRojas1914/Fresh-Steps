@@ -20,6 +20,7 @@ from services.gastos_service import (
 )
 from negocio import obtener_negocios
 from middleware.auth_middleware import admin_required
+from extensions import limiter
 
 gastos_bp = Blueprint("gastos", __name__)
 
@@ -47,6 +48,7 @@ def gastos():
 
 
 @gastos_bp.route("/gastos/guardar", methods=["POST"])
+@limiter.limit("30 per minute")
 def guardar_gasto():
     id_gasto   = request.form.get("id_gasto")
     id_usuario = session.get("id_usuario")
@@ -69,6 +71,7 @@ def guardar_gasto():
 
 
 @gastos_bp.route("/gastos/eliminar/<int:id_gasto>")
+@limiter.limit("30 per minute")
 def eliminar_gasto(id_gasto):
     id_usuario = session.get("id_usuario")
     try:
@@ -86,6 +89,7 @@ def historial_gasto(id_gasto):
 
 
 @gastos_bp.route("/gastos/restaurar/<int:id_gasto>")
+@limiter.limit("30 per minute")
 def restaurar_gasto_route(id_gasto):
     id_usuario = session.get("id_usuario")
     try:

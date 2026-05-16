@@ -13,6 +13,7 @@ from services.excel_helpers import (
 )
 
 from middleware.auth_middleware import admin_required
+from extensions import limiter
 from services.clientes_service import (
     listar_clientes_service,
     guardar_cliente_service,
@@ -42,6 +43,7 @@ def clientes():
 
 
 @clientes_bp.route("/clientes/guardar", methods=["POST"])
+@limiter.limit("30 per minute")
 def guardar_cliente():
     id_usuario = session.get("id_usuario")
     try:
@@ -105,6 +107,7 @@ def ver_cliente(id_cliente):
 
 
 @clientes_bp.route("/api/clientes/crear", methods=["POST"])
+@limiter.limit("30 per minute")
 def api_crear_cliente():
     id_usuario = session.get("id_usuario")
     cliente = guardar_cliente_service(request.form, id_usuario, api=True)

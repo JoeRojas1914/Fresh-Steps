@@ -40,6 +40,7 @@ app.config.update({
     "SESSION_COOKIE_HTTPONLY": True,
     "SESSION_COOKIE_SAMESITE": "Lax",
     "SESSION_COOKIE_SECURE": os.getenv("FLASK_ENV") != "development",
+    "MAX_CONTENT_LENGTH": 10 * 1024 * 1024,  # 10 MB
 })
 csrf = CSRFProtect()
 csrf.init_app(app)

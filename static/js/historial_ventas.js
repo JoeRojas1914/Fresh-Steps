@@ -31,19 +31,14 @@ async function verHistorialVenta(idVenta) {
         return;
     }
 
-    const iconos = {
-        CREADO:    "",
-        LISTA:     "",
-        ENTREGADO: "",
-        ELIMINADO: "",
-    };
+    const ACCIONES_VALIDAS = new Set(["CREADO", "LISTA", "ENTREGADO", "ELIMINADO"]);
 
     tbody.innerHTML = data.map(h => {
-        const icono  = iconos[h.accion]  || "•";
+        const accion = ACCIONES_VALIDAS.has(h.accion) ? h.accion : "DESCONOCIDO";
         const fecha  = new Date(h.fecha).toLocaleString("es-MX");
 
         let detalle = "—";
-        if (h.accion === "CREADO" && h.datos_despues) {
+        if (accion === "CREADO" && h.datos_despues) {
             try {
                 const d = JSON.parse(h.datos_despues);
                 detalle = `Total: $${parseFloat(d.total || 0).toFixed(2)}`;
@@ -51,7 +46,7 @@ async function verHistorialVenta(idVenta) {
         }
 
         return `<tr>
-            <td><span class="accion-badge accion--${h.accion.toLowerCase()}">${escapeHtml(h.accion)}</span></td>
+            <td><span class="accion-badge accion--${accion.toLowerCase()}">${escapeHtml(accion)}</span></td>
             <td>${escapeHtml(h.usuario || "—")}</td>
             <td>${fecha}</td>
             <td>${detalle}</td>

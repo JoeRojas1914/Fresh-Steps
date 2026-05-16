@@ -23,6 +23,7 @@ from services.ventas_service import (
 )
 
 from middleware.auth_middleware import admin_required
+from extensions import limiter
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ ventas_bp = Blueprint("ventas", __name__)
 
 
 @ventas_bp.route("/ventas/guardar", methods=["POST"])
+@limiter.limit("30 per minute")
 def guardar_venta():
     id_usuario = session.get("id_usuario")
     if not id_usuario:
@@ -48,6 +50,7 @@ def ventas():
 
 
 @ventas_bp.route("/ventas/entregar/<int:id_venta>", methods=["POST"])
+@limiter.limit("30 per minute")
 def entregar_venta(id_venta):
     id_usuario = session.get("id_usuario")
 
@@ -113,6 +116,7 @@ def ventas_pendientes():
 
 
 @ventas_bp.route("/ventas/marcar-lista/<int:id_venta>", methods=["POST"])
+@limiter.limit("30 per minute")
 def marcar_lista(id_venta):
     try:
         id_usuario = session.get('id_usuario')
@@ -137,6 +141,7 @@ def detalles_venta(id_venta):
     return jsonify(detalles.get(id_venta, []))
 
 @ventas_bp.route("/ventas/pago-final", methods=["POST"])
+@limiter.limit("30 per minute")
 def registrar_pago_final():
     data = request.get_json(silent=True) or {}
     id_usuario = session.get("id_usuario")
@@ -162,6 +167,7 @@ def registrar_pago_final():
 
 @ventas_bp.route("/ventas/eliminar/<int:id_venta>", methods=["POST"])
 @admin_required
+@limiter.limit("30 per minute")
 def eliminar_venta_route(id_venta):
     id_usuario = session.get("id_usuario")
 
