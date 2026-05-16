@@ -176,10 +176,10 @@ def cleanup_venta(db_conn, id_venta):
             f"(SELECT id_articulo FROM articulo WHERE id_venta = %s)",
             (id_venta,),
         )
-    cursor.execute("DELETE FROM articulo       WHERE id_venta = %s", (id_venta,))
-    cursor.execute("DELETE FROM pago_venta     WHERE id_venta = %s", (id_venta,))
+    cursor.execute("DELETE FROM articulo        WHERE id_venta = %s", (id_venta,))
+    cursor.execute("DELETE FROM pago_venta      WHERE id_venta = %s", (id_venta,))
     cursor.execute("DELETE FROM venta_historial WHERE id_venta = %s", (id_venta,))
-    cursor.execute("DELETE FROM venta          WHERE id_venta = %s", (id_venta,))
+    cursor.execute("DELETE FROM venta           WHERE id_venta = %s", (id_venta,))
     db_conn.commit()
     cursor.close()
 

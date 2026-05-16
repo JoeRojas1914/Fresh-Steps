@@ -243,6 +243,12 @@
         {% endif %}
         </td>
     </tr>
+    {% else %}
+    <tr>
+        <td colspan="9" class="dim" style="text-align:center; padding:2rem;">
+            No se encontraron gastos con esos filtros.
+        </td>
+    </tr>
     {% endfor %}
 
 {% endcall %}

@@ -154,11 +154,12 @@ def test_venta_calzado_valida_crea_registro(app, db_conn, cliente_test, servicio
     )
     with app.test_request_context("/"):
         id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
-
-    assert error is None
-    assert isinstance(id_venta, int) and id_venta > 0
-
-    cleanup_venta(db_conn, id_venta)
+    try:
+        assert error is None
+        assert isinstance(id_venta, int) and id_venta > 0
+    finally:
+        if id_venta:
+            cleanup_venta(db_conn, id_venta)
 
 
 def test_venta_maquila_valida_crea_registro(app, db_conn, cliente_test, usuario_admin):
@@ -167,11 +168,12 @@ def test_venta_maquila_valida_crea_registro(app, db_conn, cliente_test, usuario_
     )
     with app.test_request_context("/"):
         id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
-
-    assert error is None
-    assert isinstance(id_venta, int) and id_venta > 0
-
-    cleanup_venta(db_conn, id_venta)
+    try:
+        assert error is None
+        assert isinstance(id_venta, int) and id_venta > 0
+    finally:
+        if id_venta:
+            cleanup_venta(db_conn, id_venta)
 
 
 def test_pago_final_sin_datos_retorna_error(app):
@@ -197,11 +199,12 @@ def test_venta_confeccion_valida_crea_registro(app, db_conn, cliente_test, servi
     }
     with app.test_request_context("/"):
         id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
-
-    assert error is None
-    assert isinstance(id_venta, int) and id_venta > 0
-
-    cleanup_venta(db_conn, id_venta)
+    try:
+        assert error is None
+        assert isinstance(id_venta, int) and id_venta > 0
+    finally:
+        if id_venta:
+            cleanup_venta(db_conn, id_venta)
 
 
 def test_pago_final_valido_registra_y_marca_entregada(app, db_conn, cliente_test, servicio_calzado, usuario_admin):
@@ -245,8 +248,9 @@ def test_venta_maquila_multiples_articulos(app, db_conn, cliente_test, usuario_a
     }
     with app.test_request_context("/"):
         id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
-
-    assert error is None
-    assert isinstance(id_venta, int) and id_venta > 0
-
-    cleanup_venta(db_conn, id_venta)
+    try:
+        assert error is None
+        assert isinstance(id_venta, int) and id_venta > 0
+    finally:
+        if id_venta:
+            cleanup_venta(db_conn, id_venta)
