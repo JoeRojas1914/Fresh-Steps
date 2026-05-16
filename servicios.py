@@ -1,6 +1,5 @@
-import json
 from db import get_db
-from utils import to_json_safe
+from utils import build_where, registrar_historial as _registrar_historial
 
 
 def existe_servicio_activo(id_negocio, nombre, excluir_id=None):
@@ -73,53 +72,31 @@ def obtener_servicio_por_id(id_servicio):
 
 
 def contar_servicios(id_negocio=None, q=None, incluir_eliminados=False):
+    where, params = build_where([
+        ("id_negocio = %s", id_negocio),
+        ("nombre LIKE %s", f"%{q}%" if q else None),
+        ("activo = %s", None if incluir_eliminados else 1),
+    ])
     with get_db() as (_, cursor):
-        sql = "SELECT COUNT(*) AS total FROM servicio WHERE 1=1"
-        params = []
-
-        if id_negocio:
-            sql += " AND id_negocio = %s"
-            params.append(id_negocio)
-
-        if q:
-            sql += " AND nombre LIKE %s"
-            params.append(f"%{q}%")
-
-        if not incluir_eliminados:
-            sql += " AND activo = 1"
-
-        cursor.execute(sql, params)
+        cursor.execute(f"SELECT COUNT(*) AS total FROM servicio {where}", params)
         return cursor.fetchone()["total"]
 
 
 def obtener_servicios(id_negocio=None, q=None, incluir_eliminados=False, limit=10, offset=0):
+    where, params = build_where([
+        ("s.id_negocio = %s", id_negocio),
+        ("s.nombre LIKE %s", f"%{q}%" if q else None),
+        ("s.activo = %s", None if incluir_eliminados else 1),
+    ])
+    params.extend([limit, offset])
     with get_db() as (_, cursor):
-        sql = """
-            SELECT s.id_servicio,
-                s.nombre,
-                s.precio,
-                s.id_negocio,
-                s.activo,
-                n.nombre AS negocio
+        sql = f"""
+            SELECT s.id_servicio, s.nombre, s.precio, s.id_negocio, s.activo, n.nombre AS negocio
             FROM servicio s
             JOIN negocio n ON n.id_negocio = s.id_negocio
-            WHERE 1=1
+            {where}
+            ORDER BY s.nombre ASC LIMIT %s OFFSET %s
         """
-        params = []
-
-        if id_negocio:
-            sql += " AND s.id_negocio = %s"
-            params.append(id_negocio)
-
-        if q:
-            sql += " AND s.nombre LIKE %s"
-            params.append(f"%{q}%")
-
-        if not incluir_eliminados:
-            sql += " AND s.activo = 1"
-
-        sql += " ORDER BY s.nombre ASC LIMIT %s OFFSET %s"
-        params.extend([limit, offset])
 
         cursor.execute(sql, params)
         return cursor.fetchall()
@@ -138,17 +115,7 @@ def servicio_tiene_ventas(cursor, id_servicio):
 
 
 def registrar_historial(cursor, id_servicio, accion, id_usuario, antes=None, despues=None):
-    cursor.execute("""
-        INSERT INTO servicios_historial
-        (id_servicio, accion, id_usuario, datos_antes, datos_despues)
-        VALUES (%s, %s, %s, %s, %s)
-    """, (
-        id_servicio,
-        accion,
-        id_usuario,
-        json.dumps(to_json_safe(antes)) if antes else None,
-        json.dumps(to_json_safe(despues)) if despues else None,
-    ))
+    _registrar_historial(cursor, "servicios_historial", "id_servicio", id_servicio, accion, id_usuario, antes, despues)
 
 
 def obtener_historial_servicio(id_servicio):

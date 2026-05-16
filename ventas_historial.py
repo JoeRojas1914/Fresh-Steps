@@ -1,32 +1,9 @@
-import json as _json
-from decimal import Decimal
-from datetime import date, datetime
 from db import get_db
+from utils import registrar_historial as _registrar_historial
 
 
 def registrar_historial_venta(cursor, id_venta, accion, id_usuario, antes=None, despues=None):
-    def safe(d):
-        if not d:
-            return None
-        out = {}
-        for k, v in d.items():
-            if isinstance(v, Decimal):
-                out[k] = float(v)
-            elif isinstance(v, (date, datetime)):
-                out[k] = v.isoformat()
-            else:
-                out[k] = v
-        return out
-
-    cursor.execute("""
-        INSERT INTO venta_historial
-            (id_venta, accion, id_usuario, datos_antes, datos_despues)
-        VALUES (%s, %s, %s, %s, %s)
-    """, (
-        id_venta, accion, id_usuario,
-        _json.dumps(safe(antes)) if antes else None,
-        _json.dumps(safe(despues)) if despues else None,
-    ))
+    _registrar_historial(cursor, "venta_historial", "id_venta", id_venta, accion, id_usuario, antes, despues)
 
 
 def obtener_historial_venta(id_venta):

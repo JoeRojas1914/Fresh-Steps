@@ -1,6 +1,5 @@
-import json
 from db import get_db
-from utils import to_json_safe
+from utils import build_where, registrar_historial as _registrar_historial
 
 
 def crear_gasto(
@@ -100,46 +99,25 @@ def obtener_gastos(
     offset=0,
     incluir_eliminados=False,
 ):
+    where, params = build_where([
+        ("g.id_negocio = %s", id_negocio),
+        ("g.fecha_registro >= %s", fecha_inicio),
+        ("g.fecha_registro <= %s", fecha_fin),
+        ("g.activo = %s", None if incluir_eliminados else 1),
+    ])
+    params.extend([limit, offset])
     with get_db() as (_, cursor):
-        sql = """
+        cursor.execute(f"""
             SELECT
-                g.id_gasto,
-                g.id_negocio,
-                n.nombre AS negocio,
-                g.descripcion,
-                g.proveedor,
-                g.total,
-                g.fecha_registro,
-                g.tipo_comprobante,
-                g.tipo_pago,
-                u.usuario AS creado_por,
-                g.activo
+                g.id_gasto, g.id_negocio, n.nombre AS negocio,
+                g.descripcion, g.proveedor, g.total, g.fecha_registro,
+                g.tipo_comprobante, g.tipo_pago, u.usuario AS creado_por, g.activo
             FROM gastos g
             JOIN negocio n ON g.id_negocio = n.id_negocio
             JOIN usuario u ON g.id_usuario = u.id_usuario
-            WHERE 1=1
-        """
-        params = []
-
-        if id_negocio:
-            sql += " AND g.id_negocio = %s"
-            params.append(id_negocio)
-
-        if fecha_inicio:
-            sql += " AND g.fecha_registro >= %s"
-            params.append(fecha_inicio)
-
-        if fecha_fin:
-            sql += " AND g.fecha_registro <= %s"
-            params.append(fecha_fin)
-
-        if not incluir_eliminados:
-            sql += " AND g.activo = 1"
-
-        sql += " ORDER BY g.fecha_registro DESC LIMIT %s OFFSET %s"
-        params.extend([limit, offset])
-
-        cursor.execute(sql, params)
+            {where}
+            ORDER BY g.fecha_registro DESC LIMIT %s OFFSET %s
+        """, params)
         return cursor.fetchall()
 
 
@@ -162,41 +140,19 @@ def contar_gastos(
     fecha_fin=None,
     incluir_eliminados=False,
 ):
+    where, params = build_where([
+        ("activo = %s", None if incluir_eliminados else 1),
+        ("id_negocio = %s", id_negocio),
+        ("fecha_registro >= %s", fecha_inicio),
+        ("fecha_registro <= %s", fecha_fin),
+    ])
     with get_db() as (_, cursor):
-        sql = "SELECT COUNT(*) AS total FROM gastos WHERE 1=1"
-        params = []
-
-        if not incluir_eliminados:
-            sql += " AND activo = 1"
-
-        if id_negocio:
-            sql += " AND id_negocio = %s"
-            params.append(id_negocio)
-
-        if fecha_inicio:
-            sql += " AND fecha_registro >= %s"
-            params.append(fecha_inicio)
-
-        if fecha_fin:
-            sql += " AND fecha_registro <= %s"
-            params.append(fecha_fin)
-
-        cursor.execute(sql, params)
+        cursor.execute(f"SELECT COUNT(*) AS total FROM gastos {where}", params)
         return cursor.fetchone()["total"]
 
 
 def registrar_historial(cursor, id_gasto, accion, id_usuario, antes=None, despues=None):
-    cursor.execute("""
-        INSERT INTO gastos_historial
-        (id_gasto, accion, id_usuario, datos_antes, datos_despues)
-        VALUES (%s, %s, %s, %s, %s)
-    """, (
-        id_gasto,
-        accion,
-        id_usuario,
-        json.dumps(to_json_safe(antes)) if antes else None,
-        json.dumps(to_json_safe(despues)) if despues else None,
-    ))
+    _registrar_historial(cursor, "gastos_historial", "id_gasto", id_gasto, accion, id_usuario, antes, despues)
 
 
 def obtener_historial_gasto(id_gasto):

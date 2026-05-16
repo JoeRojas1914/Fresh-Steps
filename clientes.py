@@ -1,6 +1,5 @@
-import json
 from db import get_db
-from utils import to_json_safe
+from utils import build_where, registrar_historial as _registrar_historial
 
 
 def crear_cliente(nombre, apellido, correo, telefono, direccion, id_usuario):
@@ -77,18 +76,13 @@ def actualizar_cliente(id_cliente, nombre, apellido, correo, telefono, direccion
 
 
 def contar_clientes(q=None, incluir_eliminados=False):
+    q_like = f"%{q}%" if q else None
+    where, params = build_where([
+        ("activo = %s", None if incluir_eliminados else 1),
+        ("(nombre LIKE %s OR apellido LIKE %s)", q_like, q_like),
+    ])
     with get_db() as (_, cursor):
-        sql = "SELECT COUNT(*) AS total FROM cliente WHERE 1=1"
-        params = []
-
-        if not incluir_eliminados:
-            sql += " AND activo = 1"
-
-        if q:
-            sql += " AND (nombre LIKE %s OR apellido LIKE %s)"
-            params.extend([f"%{q}%", f"%{q}%"])
-
-        cursor.execute(sql, params)
+        cursor.execute(f"SELECT COUNT(*) AS total FROM cliente {where}", params)
         return cursor.fetchone()["total"]
 
 
@@ -100,6 +94,26 @@ def buscar_clientes_por_nombre(texto):
             WHERE activo = 1
               AND (nombre LIKE %s OR apellido LIKE %s)
         """, (f"%{texto}%", f"%{texto}%"))
+        return cursor.fetchall()
+
+
+def buscar_clientes(q):
+    with get_db() as (_, cursor):
+        cursor.execute("""
+            SELECT
+                c.id_cliente,
+                c.nombre,
+                c.apellido,
+                c.telefono,
+                COUNT(v.id_venta) AS total_ventas
+            FROM cliente c
+            LEFT JOIN venta v ON v.id_cliente = c.id_cliente AND v.eliminado = 0
+            WHERE c.activo = 1
+              AND (c.nombre LIKE %s OR c.apellido LIKE %s)
+            GROUP BY c.id_cliente
+            ORDER BY c.nombre ASC
+            LIMIT 50
+        """, (f"%{q}%", f"%{q}%"))
         return cursor.fetchall()
 
 
@@ -115,17 +129,7 @@ def obtener_cliente_por_id(id_cliente):
 
 
 def registrar_historial(cursor, id_cliente, accion, id_usuario, antes=None, despues=None):
-    cursor.execute("""
-        INSERT INTO clientes_historial
-        (id_cliente, accion, id_usuario, datos_antes, datos_despues)
-        VALUES (%s,%s,%s,%s,%s)
-    """, (
-        id_cliente,
-        accion,
-        id_usuario,
-        json.dumps(to_json_safe(antes)) if antes else None,
-        json.dumps(to_json_safe(despues)) if despues else None,
-    ))
+    _registrar_historial(cursor, "clientes_historial", "id_cliente", id_cliente, accion, id_usuario, antes, despues)
 
 
 def restaurar_cliente(id_cliente, id_usuario):
@@ -143,32 +147,19 @@ def restaurar_cliente(id_cliente, id_usuario):
 
 
 def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False):
+    q_like = f"%{q}%" if q else None
+    where, params = build_where([
+        ("activo = %s", None if incluir_eliminados else 1),
+        ("(nombre LIKE %s OR apellido LIKE %s)", q_like, q_like),
+    ])
+    params.extend([limit, offset])
     with get_db() as (_, cursor):
-        sql = """
-            SELECT
-                id_cliente,
-                nombre,
-                apellido,
-                telefono,
-                correo,
-                direccion,
-                activo
+        cursor.execute(f"""
+            SELECT id_cliente, nombre, apellido, telefono, correo, direccion, activo
             FROM cliente
-            WHERE 1=1
-        """
-        params = []
-
-        if not incluir_eliminados:
-            sql += " AND activo = 1"
-
-        if q:
-            sql += " AND (nombre LIKE %s OR apellido LIKE %s)"
-            params.extend([f"%{q}%", f"%{q}%"])
-
-        sql += " ORDER BY nombre ASC, apellido ASC LIMIT %s OFFSET %s"
-        params.extend([limit, offset])
-
-        cursor.execute(sql, params)
+            {where}
+            ORDER BY nombre ASC, apellido ASC LIMIT %s OFFSET %s
+        """, params)
         return cursor.fetchall()
 
 
