@@ -4,7 +4,18 @@
 .text-muted   { color: var(--color-muted); }
 .text-navy    { color: var(--color-navy); }
 
-/* ── Lucide icon helpers ── */
+.dim      { opacity: 0.5; }
+.dim-soft { opacity: 0.6; }
+.text-sm  { font-size: 13px; }
+.text-xs  { font-size: 11px; }
+
+.modal-hint {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
 .lucide {
   display: inline-block;
   vertical-align: middle;

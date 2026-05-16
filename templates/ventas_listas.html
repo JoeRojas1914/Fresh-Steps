@@ -67,7 +67,7 @@
             {% if v.telefono %}
                 {{ v.telefono }}
             {% else %}
-                <span style="opacity:0.5;">Sin teléfono</span>
+                <span class="dim">Sin teléfono</span>
             {% endif %}
         </td>
 
@@ -87,7 +87,7 @@
             {% if v.total_pagado > 0 %}
                 ${{ pagado | round(2) }}
             {% else %}
-                <span style="opacity:0.6;">Sin prepago</span>
+                <span class="dim-soft">Sin prepago</span>
             {% endif %}
         </td>
 
@@ -117,7 +117,7 @@
                 <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta</div>
 
                 <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}">
-                    <li style="opacity:0.6;">Cargando detalles...</li>
+                    <li class="dim-soft">Cargando detalles...</li>
                 </ul>
 
                 <div class="btn-row">

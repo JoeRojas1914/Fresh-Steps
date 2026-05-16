@@ -103,7 +103,7 @@
     <td>{{ v.nombre }} {{ v.apellido }}</td>
     <td>
         {% if v.telefono %}{{ v.telefono }}
-        {% else %}<span style="opacity:.5;">Sin teléfono</span>{% endif %}
+        {% else %}<span class="dim">Sin teléfono</span>{% endif %}
     </td>
     <td>
         {{ v.fecha_recibo.day }} {{ meses[v.fecha_recibo.month] }}
@@ -117,13 +117,13 @@
         {% if v.fecha_lista %}
             {{ v.fecha_lista.day }} {{ meses[v.fecha_lista.month] }}
             {{ "%02d:%02d" | format(v.fecha_lista.hour, v.fecha_lista.minute) }}
-        {% else %}<span style="opacity:.4;">—</span>{% endif %}
+        {% else %}<span class="dim">—</span>{% endif %}
     </td>
     <td>
         {% if v.fecha_entrega %}
             {{ v.fecha_entrega.day }} {{ meses[v.fecha_entrega.month] }}
             {{ "%02d:%02d" | format(v.fecha_entrega.hour, v.fecha_entrega.minute) }}
-        {% else %}<span style="opacity:.4;">—</span>{% endif %}
+        {% else %}<span class="dim">—</span>{% endif %}
     </td>
     <td>${{ "%.2f" | format(v.total) }}</td>
     <td>
@@ -147,7 +147,7 @@
             <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta</div>
  
             <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}">
-                <li style="opacity:0.6;">Cargando detalles...</li>
+                <li class="dim-soft">Cargando detalles...</li>
             </ul>
  
             <div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
@@ -164,7 +164,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div style="opacity:.55; font-size:13px; font-style:italic; margin-bottom:10px;">Sin pagos registrados</div>
+                <div class="dim-soft text-sm" style="font-style:italic; margin-bottom:10px;">Sin pagos registrados</div>
             {% endif %}
  
             <div class="pagos-title"><i data-lucide="user" width="14" height="14"></i> Usuarios</div>

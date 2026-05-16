@@ -75,7 +75,8 @@
 .kpi-sub {
   display: block;
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 11px;
+  opacity: 0.6;
   color: var(--color-muted);
 }
 

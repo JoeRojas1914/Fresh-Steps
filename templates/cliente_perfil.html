@@ -152,13 +152,13 @@
         {% if p.fecha_lista %}
           {{ p.fecha_lista.day }} {{ meses[p.fecha_lista.month] }}
           {{ "%02d:%02d" | format(p.fecha_lista.hour, p.fecha_lista.minute) }}
-        {% else %}<span style="opacity:.4;">—</span>{% endif %}
+        {% else %}<span class="dim">—</span>{% endif %}
       </td>
       <td>
         {% if p.fecha_entrega %}
           {{ p.fecha_entrega.day }} {{ meses[p.fecha_entrega.month] }}
           {{ "%02d:%02d" | format(p.fecha_entrega.hour, p.fecha_entrega.minute) }}
-        {% else %}<span style="opacity:.4;">—</span>{% endif %}
+        {% else %}<span class="dim">—</span>{% endif %}
       </td>
 
       <td>${{ "%.2f" | format(p.total) }}</td>
@@ -185,7 +185,7 @@
           <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles del pedido</div>
 
           <ul class="detalles-list" id="lista-detalles-{{ p.id_venta }}">
-            <li style="opacity:0.6;">Cargando detalles...</li>
+            <li class="dim-soft">Cargando detalles...</li>
           </ul>
 
           <div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
@@ -202,17 +202,17 @@
             </div>
             {% endfor %}
           {% else %}
-            <div style="opacity:.55; font-size:13px; font-style:italic; margin-bottom:10px;">
+            <div class="dim-soft text-sm" style="font-style:italic; margin-bottom:10px;">
               Sin pagos registrados
             </div>
           {% endif %}
 
           {% if p.saldo_pendiente > 0 %}
-          <div style="margin-top:10px; font-size:13px; font-weight:700; color:#b91c1c;">
+          <div class="text-sm" style="margin-top:10px; font-weight:700; color:#b91c1c;">
             Saldo pendiente: ${{ "%.2f" | format(p.saldo_pendiente) }}
           </div>
           {% else %}
-          <div style="margin-top:10px; font-size:13px; font-weight:700; color:#15803d;">
+          <div class="text-sm" style="margin-top:10px; font-weight:700; color:#15803d;">
             <i data-lucide="check" width="14" height="14"></i> Pedido liquidado
           </div>
           {% endif %}

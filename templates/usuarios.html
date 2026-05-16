@@ -64,7 +64,7 @@
             {% if u.nombre or u.apellido %}
                 {{ u.nombre or '' }} {{ u.apellido or '' }}
             {% else %}
-                <span style="opacity:.45;">—</span>
+                <span class="dim">—</span>
             {% endif %}
         </td>
 
@@ -107,13 +107,13 @@
                 Historial
             </button>
         {% else %}
-            <span style="opacity:.45; font-size:13px;">Protegido</span>
+            <span class="dim text-sm">Protegido</span>
         {% endif %}
         </td>
     </tr>
     {% else %}
     <tr>
-        <td colspan="8" style="text-align:center; padding:2rem; opacity:.5;">
+        <td colspan="8" class="dim" style="text-align:center; padding:2rem;">
             No se encontraron usuarios con esos filtros.
         </td>
     </tr>
@@ -188,7 +188,7 @@
                 <label>
                     Contraseña
                     <span id="pass-requerido" class="text-danger">*</span>
-                    <span id="pass-opcional" style="opacity:.5; font-size:12px; display:none;">(dejar vacío para no cambiar)</span>
+                    <span id="pass-opcional" class="dim" style="font-size:12px; display:none;">(dejar vacío para no cambiar)</span>
                 </label>
                 <input type="password" name="password" id="password"
                        minlength="6" placeholder="Mínimo 6 caracteres y 1 número">
@@ -247,7 +247,7 @@
         </div>
         <div class="modal__body">
             <p id="modalToggleMensaje" style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0b3c5d;"></p>
-            <p style="margin:0;font-size:13px;color:#64748b;line-height:1.6;">
+            <p class="modal-hint">
                 Puedes revertir esta acción en cualquier momento.
             </p>
         </div>
