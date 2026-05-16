@@ -57,9 +57,15 @@ window.verHistorialCliente = function (e, id) {
 };
 
 
+let _pendingClienteUrl = null;
+
 window.confirmarEliminarCliente = function (idCliente) {
-    if (!confirm("¿Seguro que desea desactivar al cliente?")) return;
-    window.location.href = `/clientes/eliminar/${idCliente}`;
+    _pendingClienteUrl = `/clientes/eliminar/${idCliente}`;
+    abrirModal("modalConfirmarEliminarCliente");
+};
+
+window.ejecutarEliminarCliente = function () {
+    if (_pendingClienteUrl) location.href = _pendingClienteUrl;
 };
 
 window.restaurarCliente = function (idCliente) {

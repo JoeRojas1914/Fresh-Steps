@@ -203,6 +203,23 @@
 
 
 
+{# ── Modal confirmar eliminar cliente ── #}
+{% call(section) modal("modalConfirmarEliminarCliente", "Eliminar cliente", "sm") %}
+{% if section == 'body' %}
+<p style="margin:0 0 8px;font-size:15px;font-weight:600;color:#0b3c5d;">
+    ¿Seguro que deseas eliminar este cliente?
+</p>
+<p class="modal-hint">
+    Si el cliente tiene ventas registradas, no podrá eliminarse.
+</p>
+{% endif %}
+{% if section == 'footer' %}
+<button class="btn btn--primary btn--sm" onclick="cerrarModal('modalConfirmarEliminarCliente')">Cancelar</button>
+<button class="btn btn--danger btn--sm" onclick="ejecutarEliminarCliente()">Sí, eliminar</button>
+{% endif %}
+{% endcall %}
+
+
 {% from "components/pagination.html" import pagination %}
 
 {{ pagination(
