@@ -117,8 +117,12 @@ def historial_servicio(id_servicio):
 @admin_required
 def restaurar_servicio(id_servicio):
     id_usuario = session.get("id_usuario")
-    restaurar_servicio_service(id_servicio, id_usuario)
-    flash("Servicio restaurado correctamente.", "success")
+    try:
+        restaurar_servicio_service(id_servicio, id_usuario)
+        flash("Servicio restaurado correctamente.", "success")
+    except Exception:
+        logger.exception("Error al restaurar servicio id_servicio=%s id_usuario=%s", id_servicio, id_usuario)
+        flash("Error al restaurar el servicio.", "error")
     return redirect(url_for("servicios.servicios"))
 
 

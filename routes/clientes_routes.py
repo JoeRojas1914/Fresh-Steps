@@ -56,6 +56,7 @@ def guardar_cliente():
 
 
 @clientes_bp.route("/clientes/eliminar/<int:id_cliente>")
+@admin_required
 def eliminar_cliente(id_cliente):
     id_usuario = session.get("id_usuario")
     try:
@@ -71,6 +72,7 @@ def eliminar_cliente(id_cliente):
 
 
 @clientes_bp.route("/clientes/restaurar/<int:id_cliente>")
+@admin_required
 def restaurar_cliente(id_cliente):
     id_usuario = session.get("id_usuario")
     try:
@@ -83,6 +85,7 @@ def restaurar_cliente(id_cliente):
 
 
 @clientes_bp.route("/clientes/<int:id_cliente>/historial")
+@admin_required
 def historial_cliente(id_cliente):
     return jsonify(obtener_historial_cliente_service(id_cliente))
 
@@ -140,6 +143,7 @@ def exportar_clientes_excel():
 
 
 @clientes_bp.route("/clientes/<int:id_cliente>/exportar")
+@admin_required
 def exportar_cliente_excel(id_cliente):
     from ventas import obtener_ventas_cliente, obtener_detalles_venta
     from pagos import obtener_pagos_venta

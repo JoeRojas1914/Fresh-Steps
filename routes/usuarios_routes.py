@@ -1,5 +1,8 @@
+import logging
 from flask import Blueprint, render_template, request, redirect, session, jsonify, flash, url_for
 from middleware.auth_middleware import admin_required
+
+logger = logging.getLogger(__name__)
 from services.usuarios_service import (
     listar_usuarios_service,
     guardar_usuario_service,
@@ -58,6 +61,12 @@ def guardar_usuario():
         flash("Usuario editado correctamente." if id_usuario else "Usuario creado correctamente.", "success")
     except ValueError as e:
         flash(str(e), "error")
+    except Exception:
+        logger.exception(
+            "Error al guardar usuario id_usuario=%s id_solicitante=%s",
+            id_usuario, session.get("id_usuario")
+        )
+        flash("Error inesperado al guardar el usuario.", "error")
 
     return redirect(url_for("usuarios.listar_usuarios"))
 
@@ -65,13 +74,17 @@ def guardar_usuario():
 @usuarios_bp.route("/usuarios/toggle/<int:id>")
 @admin_required
 def toggle_usuario(id):
-    nuevo_activo = toggle_usuario_service(id)
-    if nuevo_activo is None:
-        flash("No se puede cambiar el estado de este usuario.", "error")
-    elif nuevo_activo:
-        flash("Usuario activado correctamente.", "success")
-    else:
-        flash("Usuario desactivado correctamente.", "success")
+    try:
+        nuevo_activo = toggle_usuario_service(id)
+        if nuevo_activo is None:
+            flash("No se puede cambiar el estado de este usuario.", "error")
+        elif nuevo_activo:
+            flash("Usuario activado correctamente.", "success")
+        else:
+            flash("Usuario desactivado correctamente.", "success")
+    except Exception:
+        logger.exception("Error en toggle_usuario id=%s id_solicitante=%s", id, session.get("id_usuario"))
+        flash("Error inesperado al cambiar el estado del usuario.", "error")
     return redirect(url_for("usuarios.listar_usuarios"))
 
 

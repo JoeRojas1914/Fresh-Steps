@@ -63,8 +63,8 @@ def entregar_venta(id_venta):
                 "error": "La venta ya fue entregada o no existe"
             })
 
-    except Exception as e:
-        logger.error("Error en entregar_venta: %s", e, exc_info=True)
+    except Exception:
+        logger.exception("Error en entregar_venta id_venta=%s id_usuario=%s", id_venta, id_usuario)
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
 
 
@@ -107,8 +107,8 @@ def ventas_pendientes():
             **data
         )
 
-    except Exception as e:
-        logger.error("Error en ventas_pendientes: %s", e, exc_info=True)
+    except Exception:
+        logger.exception("Error en ventas_pendientes id_negocio=%s", id_negocio)
         return render_template("403.html"), 500
 
 
@@ -126,8 +126,8 @@ def marcar_lista(id_venta):
                 "ok": False,
                 "error": "La venta ya está lista o fue entregada"
             })
-    except Exception as e:
-        logger.error("Error en marcar_lista: %s", e, exc_info=True)
+    except Exception:
+        logger.exception("Error en marcar_lista id_venta=%s id_usuario=%s", id_venta, id_usuario)
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
 
 
@@ -155,8 +155,8 @@ def registrar_pago_final():
             "message": mensaje
         })
 
-    except Exception as e:
-        logger.error("Error en registrar_pago_final: %s", e, exc_info=True)
+    except Exception:
+        logger.exception("Error en registrar_pago_final id_usuario=%s", id_usuario)
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
 
 
@@ -179,8 +179,8 @@ def eliminar_venta_route(id_venta):
             "message": mensaje
         })
 
-    except Exception as e:
-        logger.error("Error en eliminar_venta: %s", e, exc_info=True)
+    except Exception:
+        logger.exception("Error en eliminar_venta id_venta=%s id_usuario=%s", id_venta, id_usuario)
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
 
 @ventas_bp.route("/ventas/historial")

@@ -88,8 +88,12 @@ def historial_gasto(id_gasto):
 @gastos_bp.route("/gastos/restaurar/<int:id_gasto>")
 def restaurar_gasto_route(id_gasto):
     id_usuario = session.get("id_usuario")
-    restaurar_gasto_service(id_gasto, id_usuario)
-    flash("Gasto restaurado correctamente.", "success")
+    try:
+        restaurar_gasto_service(id_gasto, id_usuario)
+        flash("Gasto restaurado correctamente.", "success")
+    except Exception:
+        logger.exception("Error al restaurar gasto id_gasto=%s id_usuario=%s", id_gasto, id_usuario)
+        flash("Error al restaurar el gasto.", "error")
     return redirect(url_for("gastos.gastos"))
 
 

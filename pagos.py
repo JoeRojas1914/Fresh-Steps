@@ -35,21 +35,19 @@ def obtener_pagos_venta(ids_venta):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-
-        format_strings = ','.join(['%s'] * len(ids_venta))
-
-        cursor.execute(f"""
-            SELECT id_venta, monto, tipo_pago, tipo_pago_venta
-            FROM pago_venta
-            WHERE id_venta IN ({format_strings})
-        """, ids_venta)
+        placeholders = ','.join(['%s'] * len(ids_venta))
+        sql = (
+            "SELECT id_venta, monto, tipo_pago, tipo_pago_venta"
+            " FROM pago_venta"
+            " WHERE id_venta IN (" + placeholders + ")"
+        )
+        cursor.execute(sql, tuple(ids_venta))
 
         pagos = cursor.fetchall()
 
         pagos_por_venta = {}
         for p in pagos:
             pagos_por_venta.setdefault(p["id_venta"], []).append(p)
-
 
         return pagos_por_venta
     finally:
