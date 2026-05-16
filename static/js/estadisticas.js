@@ -157,34 +157,44 @@ function initCharts() {
     });
 
     ventasSemanaChart = new Chart(document.getElementById("ventasSemanaChart"), {
-        type: "bar",
+        type: "line",
         data: {
             labels: [],
             datasets: [{
                 label: "Ventas",
                 data: [],
-                _gradient: ['rgba(245,158,11,0.85)', 'rgba(245,158,11,0.18)'],
-                backgroundColor: 'rgba(245,158,11,0.75)',
-                borderWidth: 0,
-                borderRadius: 8,
-                borderSkipped: false,
+                borderColor: '#f59e0b',
+                borderWidth: 2.5,
+                _gradient: ['rgba(245,158,11,0.30)', 'rgba(245,158,11,0)'],
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#f59e0b',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 7,
             }]
         },
         options: barOpts()
     });
 
     unidadesSemanaChart = new Chart(document.getElementById("unidadesSemanaChart"), {
-        type: "bar",
+        type: "line",
         data: {
             labels: [],
             datasets: [{
                 label: "Unidades",
                 data: [],
-                _gradient: ['rgba(20,184,166,0.85)', 'rgba(20,184,166,0.18)'],
-                backgroundColor: 'rgba(20,184,166,0.75)',
-                borderWidth: 0,
-                borderRadius: 8,
-                borderSkipped: false,
+                borderColor: '#14b8a6',
+                borderWidth: 2.5,
+                _gradient: ['rgba(20,184,166,0.30)', 'rgba(20,184,166,0)'],
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#14b8a6',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 7,
             }]
         },
         options: barOpts()
@@ -250,17 +260,22 @@ function initCharts() {
     });
 
     ventasPorDiaChart = new Chart(document.getElementById("ventasPorDiaChart"), {
-        type: "bar",
+        type: "line",
         data: {
             labels: ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
             datasets: [{
                 label: "Ventas",
                 data: [0,0,0,0,0,0],
-                _gradient: ['rgba(99,102,241,0.85)', 'rgba(99,102,241,0.18)'],
-                backgroundColor: 'rgba(99,102,241,0.75)',
-                borderWidth: 0,
-                borderRadius: 8,
-                borderSkipped: false,
+                borderColor: '#6366f1',
+                borderWidth: 2.5,
+                _gradient: ['rgba(99,102,241,0.30)', 'rgba(99,102,241,0)'],
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#6366f1',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 7,
             }]
         },
         options: barOpts()
