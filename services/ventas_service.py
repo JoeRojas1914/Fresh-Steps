@@ -3,10 +3,13 @@ from datetime import date
 from ventas import (
     eliminar_venta,
     marcar_entregada,
+    marcar_como_lista,
     obtener_venta,
     obtener_ventas_listas,
     obtener_detalles_venta,
     obtener_entregas_pendientes,
+    obtener_historial_ventas,
+    contar_historial_ventas,
     crear_venta,
     TIPOS_POR_NEGOCIO,
 )
@@ -20,48 +23,44 @@ from pagos import (
 from negocio import obtener_negocios
 
 
-def listar_ventas_listas_service(id_negocio=None):
-    ventas = obtener_ventas_listas(id_negocio)
+def listar_ventas_listas_service(id_negocio: int | None = None) -> dict:
+    ventas   = obtener_ventas_listas(id_negocio)
     negocios = obtener_negocios()
 
-    ids_venta = [v["id_venta"] for v in ventas]
-
+    ids_venta    = [v["id_venta"] for v in ventas]
     detalles_map = obtener_detalles_venta(ids_venta)
-    pagos_map = obtener_pagos_venta(ids_venta)
+    pagos_map    = obtener_pagos_venta(ids_venta)
 
     ventas_con_detalles = []
 
     for v in ventas:
-        detalles = detalles_map.get(v["id_venta"], [])
-        pagos = pagos_map.get(v["id_venta"], [])
-
+        detalles     = detalles_map.get(v["id_venta"], [])
+        pagos        = pagos_map.get(v["id_venta"], [])
         total_pagado = sum(float(p["monto"]) for p in pagos)
-        total = float(v.get("total") or 0)
+        total        = float(v.get("total") or 0)
 
-        v["detalles"] = detalles
-        v["pagos"] = pagos
-        v["total"] = total
-        v["total_pagado"] = total_pagado
+        v["detalles"]        = detalles
+        v["pagos"]           = pagos
+        v["total"]           = total
+        v["total_pagado"]    = total_pagado
         v["saldo_pendiente"] = max(total - total_pagado, 0)
-
-        v["tiene_pagos"] = total_pagado > 0
-        v["esta_pagada"] = v["saldo_pendiente"] == 0
+        v["tiene_pagos"]     = total_pagado > 0
+        v["esta_pagada"]     = v["saldo_pendiente"] == 0
 
         ventas_con_detalles.append(v)
 
     return {
-        "ventas": ventas_con_detalles,
+        "ventas":   ventas_con_detalles,
         "negocios": negocios,
-        "hoy": date.today()
+        "hoy":      date.today(),
     }
 
 
-def listar_entregas_pendientes_service(id_negocio=None):
-    ventas = obtener_entregas_pendientes(id_negocio)
+def listar_entregas_pendientes_service(id_negocio: int | None = None) -> dict:
+    ventas   = obtener_entregas_pendientes(id_negocio)
     negocios = obtener_negocios()
 
-    ids_venta = [v["id_venta"] for v in ventas]
-
+    ids_venta    = [v["id_venta"] for v in ventas]
     detalles_map = obtener_detalles_venta(ids_venta)
 
     ventas_con_detalles = []
@@ -71,15 +70,15 @@ def listar_entregas_pendientes_service(id_negocio=None):
         ventas_con_detalles.append(v)
 
     return {
-        "ventas": ventas_con_detalles,
+        "ventas":   ventas_con_detalles,
         "negocios": negocios,
-        "hoy": date.today()
+        "hoy":      date.today(),
     }
 
 
-def registrar_pago_final_service(data, id_usuario):
-    id_venta = data.get("id_venta")
-    monto = data.get("monto")
+def registrar_pago_final_service(data: dict, id_usuario: int) -> tuple[bool, str]:
+    id_venta   = data.get("id_venta")
+    monto      = data.get("monto")
     metodo_pago = data.get("metodo_pago")
 
     if not id_venta or not monto or not metodo_pago:
@@ -97,25 +96,23 @@ def registrar_pago_final_service(data, id_usuario):
     return True, "Pago final registrado y venta marcada como entregada"
 
 
-def eliminar_venta_service(id_venta, id_usuario=None):
-
+def eliminar_venta_service(id_venta: int, id_usuario: int | None = None) -> tuple[bool, str]:
     venta = obtener_venta(id_venta)
     if not venta:
         return False, "La venta no existe"
     eliminar_venta(id_venta, id_usuario)
-
     return True, "Venta eliminada correctamente"
 
 
-def guardar_venta_service(form, id_usuario_creo):
+def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None, str | None]:
     try:
         id_negocio = int(form["id_negocio"])
     except (KeyError, ValueError):
         return None, "Negocio inválido."
 
-    id_cliente    = form.get("id_cliente") or None
+    id_cliente     = form.get("id_cliente") or None
     fecha_estimada = form.get("fecha_estimada") or None
-    tipo_pago     = form.get("tipo_pago")
+    tipo_pago      = form.get("tipo_pago")
 
     prepago = form.get("prepago") == "si"
     try:
@@ -154,7 +151,10 @@ def guardar_venta_service(form, id_usuario_creo):
                     "color_agujetas":   form.get(f"articulos[{i}][color_agujetas]"),
                 }
                 servicios = _parsear_servicios(form, i)
-                articulos.append({"tipo_articulo": "calzado", "datos": datos, "servicios": servicios, "comentario": comentario})
+                articulos.append({
+                    "tipo_articulo": "calzado", "datos": datos,
+                    "servicios": servicios, "comentario": comentario,
+                })
 
             elif tipo_articulo == "confeccion":
                 datos = {
@@ -167,15 +167,21 @@ def guardar_venta_service(form, id_usuario_creo):
                     "agujetas":         form.get(f"articulos[{i}][agujetas]") == "1",
                 }
                 servicios = _parsear_servicios(form, i)
-                articulos.append({"tipo_articulo": "confeccion", "datos": datos, "servicios": servicios, "comentario": comentario})
+                articulos.append({
+                    "tipo_articulo": "confeccion", "datos": datos,
+                    "servicios": servicios, "comentario": comentario,
+                })
 
             elif tipo_articulo == "maquila":
                 datos = {
-                    "tipo":             form.get(f"articulos[{i}][tipo]"),
-                    "cantidad":         int(form.get(f"articulos[{i}][cantidad]") or 1),
-                    "precio_unitario":  float(form.get(f"articulos[{i}][precio_unitario]") or 0),
+                    "tipo":            form.get(f"articulos[{i}][tipo]"),
+                    "cantidad":        int(form.get(f"articulos[{i}][cantidad]") or 1),
+                    "precio_unitario": float(form.get(f"articulos[{i}][precio_unitario]") or 0),
                 }
-                articulos.append({"tipo_articulo": "maquila", "datos": datos, "comentario": comentario})
+                articulos.append({
+                    "tipo_articulo": "maquila", "datos": datos,
+                    "comentario": comentario,
+                })
 
             i += 1
     except (ValueError, TypeError):
@@ -225,8 +231,7 @@ def guardar_venta_service(form, id_usuario_creo):
     return id_venta, None
 
 
-def _parsear_servicios(form, i):
-    """Extrae la lista de servicios del artículo i del formulario."""
+def _parsear_servicios(form: dict, i: int) -> list[dict]:
     servicios = []
     j = 0
     while True:
@@ -238,19 +243,29 @@ def _parsear_servicios(form, i):
         j += 1
     return servicios
 
+
 POR_PAGINA_HISTORIAL = 20
 
-def historial_ventas_service(id_negocio=None, fecha_inicio=None, fecha_fin=None, pagina=1, mostrar_eliminadas=False, q=None):
-    from ventas import obtener_historial_ventas, contar_historial_ventas
-    from pagos import obtener_pagos_venta
 
-    offset = (pagina - 1) * POR_PAGINA_HISTORIAL
-    total_registros = contar_historial_ventas(id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas, q=q)
+def historial_ventas_service(
+    id_negocio: int | None = None,
+    fecha_inicio: str | None = None,
+    fecha_fin: str | None = None,
+    pagina: int = 1,
+    mostrar_eliminadas: bool = False,
+    q: str | None = None,
+) -> dict:
+    offset          = (pagina - 1) * POR_PAGINA_HISTORIAL
+    total_registros = contar_historial_ventas(
+        id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas, q=q
+    )
     total_paginas   = max(1, (total_registros + POR_PAGINA_HISTORIAL - 1) // POR_PAGINA_HISTORIAL)
 
-    ventas = obtener_historial_ventas(id_negocio, fecha_inicio, fecha_fin,
-                                      limit=POR_PAGINA_HISTORIAL, offset=offset,
-                                      mostrar_eliminadas=mostrar_eliminadas, q=q)
+    ventas   = obtener_historial_ventas(
+        id_negocio, fecha_inicio, fecha_fin,
+        limit=POR_PAGINA_HISTORIAL, offset=offset,
+        mostrar_eliminadas=mostrar_eliminadas, q=q,
+    )
     negocios = obtener_negocios()
 
     ids_venta    = [v["id_venta"] for v in ventas]
@@ -281,19 +296,20 @@ def historial_ventas_service(id_negocio=None, fecha_inicio=None, fecha_fin=None,
         resultado.append(v)
 
     return {
-        "ventas":          resultado,
-        "negocios":        negocios,
-        "hoy":             date.today(),
-        "id_negocio":      id_negocio,
-        "fecha_inicio":    fecha_inicio,
-        "fecha_fin":       fecha_fin,
-        "pagina":          pagina,
-        "total_paginas":   total_paginas,
-        "total_registros": total_registros,
+        "ventas":             resultado,
+        "negocios":           negocios,
+        "hoy":                date.today(),
+        "id_negocio":         id_negocio,
+        "fecha_inicio":       fecha_inicio,
+        "fecha_fin":          fecha_fin,
+        "pagina":             pagina,
+        "total_paginas":      total_paginas,
+        "total_registros":    total_registros,
         "mostrar_eliminadas": mostrar_eliminadas,
-        "q":               q,
+        "q":                  q,
     }
 
-def marcar_lista_service(id_venta, id_usuario=None):
-    from ventas import marcar_como_lista
+
+def marcar_lista_service(id_venta: int, id_usuario: int | None = None) -> bool:
     return marcar_como_lista(id_venta, id_usuario)
+

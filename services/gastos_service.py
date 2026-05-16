@@ -9,8 +9,14 @@ from gastos import (
 )
 
 
-def listar_gastos(id_negocio=None, fecha_inicio=None, fecha_fin=None, pagina=1, por_pagina=10, incluir_eliminados=False):
-
+def listar_gastos(
+    id_negocio: str | None = None,
+    fecha_inicio: str | None = None,
+    fecha_fin: str | None = None,
+    pagina: int = 1,
+    por_pagina: int = 10,
+    incluir_eliminados: bool = False,
+) -> dict:
     offset = (pagina - 1) * por_pagina
 
     total = contar_gastos(
@@ -32,14 +38,13 @@ def listar_gastos(id_negocio=None, fecha_inicio=None, fecha_fin=None, pagina=1, 
     total_paginas = (total + por_pagina - 1) // por_pagina
 
     return {
-        "gastos": gastos,
-        "total": total,
-        "total_paginas": total_paginas
+        "gastos":        gastos,
+        "total":         total,
+        "total_paginas": total_paginas,
     }
 
 
-
-def guardar_gasto_service(id_gasto, datos, id_usuario):
+def guardar_gasto_service(id_gasto: str | None, datos: tuple, id_usuario: int) -> str:
     if id_gasto:
         actualizar_gasto(id_gasto, *datos, id_usuario)
         return "actualizado"
@@ -48,14 +53,13 @@ def guardar_gasto_service(id_gasto, datos, id_usuario):
         return "creado"
 
 
-
-def eliminar_gasto_service(id_gasto, id_usuario):
+def eliminar_gasto_service(id_gasto: int, id_usuario: int) -> None:
     eliminar_gasto(id_gasto, id_usuario)
 
-def obtener_historial_gasto_service(id_gasto):
+
+def obtener_historial_gasto_service(id_gasto: int) -> list[dict]:
     return obtener_historial_gasto(id_gasto)
 
 
-
-def restaurar_gasto_service(id_gasto, id_usuario):
+def restaurar_gasto_service(id_gasto: int, id_usuario: int) -> None:
     restaurar_gasto(id_gasto, id_usuario)

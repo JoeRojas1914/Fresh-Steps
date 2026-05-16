@@ -9,7 +9,14 @@ from servicios import (
     existe_servicio_activo
 )
 
-def listar_servicios(id_negocio=None, q="", pagina=1, por_pagina=10, incluir_eliminados=False):
+
+def listar_servicios(
+    id_negocio: int | None = None,
+    q: str = "",
+    pagina: int = 1,
+    por_pagina: int = 10,
+    incluir_eliminados: bool = False,
+) -> dict:
     offset = (pagina - 1) * por_pagina
 
     total = contar_servicios(
@@ -29,13 +36,19 @@ def listar_servicios(id_negocio=None, q="", pagina=1, por_pagina=10, incluir_eli
     )
 
     return {
-        "servicios": servicios,
+        "servicios":     servicios,
         "total_paginas": total_paginas,
-        "total": total
+        "total":         total,
     }
 
 
-def guardar_servicio_service(id_servicio, id_negocio, nombre, precio, id_usuario):
+def guardar_servicio_service(
+    id_servicio: str | None,
+    id_negocio: int,
+    nombre: str,
+    precio: float,
+    id_usuario: int,
+) -> str:
     if existe_servicio_activo(id_negocio, nombre, excluir_id=id_servicio or None):
         raise ValueError(f"Ya existe un servicio activo con el nombre '{nombre}' en este negocio.")
     if id_servicio:
@@ -45,14 +58,13 @@ def guardar_servicio_service(id_servicio, id_negocio, nombre, precio, id_usuario
     return "creado"
 
 
-def eliminar_servicio_service(id_servicio, id_usuario):
+def eliminar_servicio_service(id_servicio: int, id_usuario: int) -> bool:
     return eliminar_servicio(id_servicio, id_usuario)
 
 
-def obtener_historial_servicio_service(id_servicio):
+def obtener_historial_servicio_service(id_servicio: int) -> list[dict]:
     return obtener_historial_servicio(id_servicio)
 
 
-def restaurar_servicio_service(id_servicio, id_usuario):
+def restaurar_servicio_service(id_servicio: int, id_usuario: int) -> None:
     restaurar_servicio(id_servicio, id_usuario)
-

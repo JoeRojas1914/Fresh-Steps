@@ -3,9 +3,18 @@ from flask import session
 import usuario
 
 
-def guardar_usuario_service(id_usuario, username, password, rol, pin,
-                             nombre=None, apellido=None, telefono=None,
-                             correo=None, cp=None):
+def guardar_usuario_service(
+    id_usuario: int | None,
+    username: str,
+    password: str | None,
+    rol: str | None,
+    pin: str | None,
+    nombre: str | None = None,
+    apellido: str | None = None,
+    telefono: str | None = None,
+    correo: str | None = None,
+    cp: str | None = None,
+) -> None:
     admin = session.get("usuario")
 
     if not id_usuario:
@@ -55,7 +64,7 @@ def guardar_usuario_service(id_usuario, username, password, rol, pin,
     )
 
 
-def toggle_usuario_service(id_usuario):
+def toggle_usuario_service(id_usuario: int) -> int | None:
     admin = session.get("usuario")
     antes = usuario.obtener_usuario_por_id(id_usuario)
     if not antes:
@@ -70,9 +79,13 @@ def toggle_usuario_service(id_usuario):
     return despues["activo"]
 
 
-def listar_usuarios_service(q=None, rol=None, activo=None):
+def listar_usuarios_service(
+    q: str | None = None,
+    rol: str | None = None,
+    activo: int | None = None,
+) -> list[dict]:
     return usuario.obtener_usuarios(q=q, rol=rol, activo=activo)
 
 
-def obtener_historial_usuario_service(id_usuario):
+def obtener_historial_usuario_service(id_usuario: int) -> list[dict]:
     return usuario.obtener_historial_usuario(id_usuario)

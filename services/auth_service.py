@@ -13,12 +13,11 @@ from login import (
 )
 
 
-
-def _ua():
+def _ua() -> str | None:
     return request.headers.get("User-Agent")
 
 
-def _esta_bloqueado(username, ip, metodo, id_usuario=None):
+def _esta_bloqueado(username: str, ip: str, metodo: str, id_usuario: int | None = None) -> bool:
     intento = obtener_intentos(username, ip)
 
     if intento and intento["bloqueado_hasta"]:
@@ -37,7 +36,7 @@ def _esta_bloqueado(username, ip, metodo, id_usuario=None):
     return False
 
 
-def _fallo(username, metodo, ip):
+def _fallo(username: str, metodo: str, ip: str) -> None:
     registrar_fallo(username, ip)
 
     registrar_login_log(
@@ -49,7 +48,7 @@ def _fallo(username, metodo, ip):
     )
 
 
-def _exito(usuario, metodo, ip):
+def _exito(usuario: dict, metodo: str, ip: str) -> None:
     limpiar_intentos(usuario["usuario"], ip)
 
     registrar_login_log(
@@ -62,7 +61,7 @@ def _exito(usuario, metodo, ip):
     )
 
 
-def login_password_service(username, password, ip):
+def login_password_service(username: str, password: str, ip: str) -> dict | str | None:
 
     if _esta_bloqueado(username, ip, "password_admin"):
         return "LOCKED"
@@ -77,7 +76,7 @@ def login_password_service(username, password, ip):
     return usuario
 
 
-def login_pin_service(pin, ip):
+def login_pin_service(pin: str, ip: str) -> dict | str | None:
 
     usuarios = obtener_usuarios_caja_activos()
 
