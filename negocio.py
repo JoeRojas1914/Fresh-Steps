@@ -1,17 +1,11 @@
-from db import get_connection
+from db import get_db
+
 
 def obtener_negocios():
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    try:
+    with get_db() as (_, cursor):
         cursor.execute("""
             SELECT id_negocio, nombre
             FROM negocio
             ORDER BY nombre
         """)
         return cursor.fetchall()
-
-    finally:
-        cursor.close()
-        conn.close()

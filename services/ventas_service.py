@@ -262,7 +262,7 @@ def _parsear_servicios(form: dict, i: int) -> list[dict]:
     return servicios
 
 
-POR_PAGINA_HISTORIAL = 20
+from config import POR_PAGINA_HISTORIAL_VENTAS as POR_PAGINA_HISTORIAL
 
 
 def historial_ventas_service(

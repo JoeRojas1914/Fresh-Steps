@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import session, redirect, url_for, flash, render_template, request, jsonify
 from datetime import datetime, timedelta
+from config import TIMEOUT_ADMIN, TIMEOUT_CAJA
 
 
 def admin_required(f):
@@ -45,8 +46,6 @@ RUTAS_CAJA = {
     "auth.logout",
 }
 
-TIMEOUT_CAJA = 20
-TIMEOUT_ADMIN = 15
 
 
 def init_auth_middleware(app):

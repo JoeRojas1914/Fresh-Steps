@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from db import get_db
+from config import MAX_INTENTOS_LOGIN, BLOQUEO_MIN_LOGIN
 
 
 def obtener_usuario_por_username(username):
@@ -58,7 +59,7 @@ def obtener_intentos(usuario, ip):
         return cursor.fetchone()
 
 
-def registrar_fallo(usuario, ip, max_intentos=5, bloqueo_min=10):
+def registrar_fallo(usuario, ip, max_intentos=MAX_INTENTOS_LOGIN, bloqueo_min=BLOQUEO_MIN_LOGIN):
     with get_db() as (_, cursor):
         cursor.execute("""
             SELECT *
