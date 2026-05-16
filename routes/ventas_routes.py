@@ -85,7 +85,7 @@ def venta_ticket(id_venta):
 
 @ventas_bp.route("/ventas/listas")
 def ventas_listas():
-    id_negocio = request.args.get("id_negocio") or None
+    id_negocio = request.args.get("id_negocio", type=int)
 
     data = listar_ventas_listas_service(id_negocio)
 

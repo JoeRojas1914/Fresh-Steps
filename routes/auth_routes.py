@@ -5,11 +5,13 @@ from services.auth_service import (
     login_password_service,
     login_pin_service
 )
+from extensions import limiter
 
 auth_bp = Blueprint("auth", __name__)
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("10 per minute", methods=["POST"])
 def login():
 
     admin_mode = request.args.get("admin")
@@ -55,6 +57,7 @@ def login():
     return render_template("login.html")
 
 @auth_bp.route("/pin", methods=["GET", "POST"])
+@limiter.limit("10 per minute", methods=["POST"])
 def pin_login():
 
     if not session.get("pin_habilitado"):
@@ -80,10 +83,12 @@ def pin_login():
         return render_template("pin.html")
 
 
-    session["id_usuario"] = usuario["id_usuario"]
-    session["usuario"]    = usuario["usuario"]
-    session["nombre"]     = usuario.get("nombre") or usuario["usuario"].capitalize()
-    session["rol"]        = "caja"
+    session.clear()
+    session["pin_habilitado"]   = True 
+    session["id_usuario"]       = usuario["id_usuario"]
+    session["usuario"]          = usuario["usuario"]
+    session["nombre"]           = usuario.get("nombre") or usuario["usuario"].capitalize()
+    session["rol"]              = "caja"
     session["ultima_actividad"] = datetime.now().isoformat()
 
     return redirect(url_for("index"))

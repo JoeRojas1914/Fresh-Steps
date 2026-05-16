@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from flask_wtf import CSRFProtect
 from flask_talisman import Talisman
+from extensions import limiter
 
 # ================= LOGGING =================
 _log_level = logging.DEBUG if os.getenv("FLASK_ENV") == "development" else logging.WARNING
@@ -42,6 +43,7 @@ app.config.update({
 })
 csrf = CSRFProtect()
 csrf.init_app(app)
+limiter.init_app(app)
 
 _is_dev = os.getenv("FLASK_ENV") == "development"
 Talisman(

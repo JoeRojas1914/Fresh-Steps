@@ -76,13 +76,19 @@ def listar_entregas_pendientes_service(id_negocio: int | None = None) -> dict:
     }
 
 
+_METODOS_PAGO_VALIDOS = {"efectivo", "transferencia"}
+
+
 def registrar_pago_final_service(data: dict, id_usuario: int) -> tuple[bool, str]:
-    id_venta   = data.get("id_venta")
-    monto      = data.get("monto")
+    id_venta    = data.get("id_venta")
+    monto       = data.get("monto")
     metodo_pago = data.get("metodo_pago")
 
     if not id_venta or not monto or not metodo_pago:
         return False, "Datos incompletos para el pago final"
+
+    if metodo_pago not in _METODOS_PAGO_VALIDOS:
+        return False, f"Método de pago no válido: '{metodo_pago}'"
 
     registrar_pago_final_db(
         id_venta=id_venta,
