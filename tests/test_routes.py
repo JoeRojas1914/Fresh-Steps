@@ -123,8 +123,6 @@ def test_ticket_venta_inexistente_retorna_404(logged_client):
 
 def test_guardar_venta_sin_sesion_retorna_401(client):
     res = client.post("/ventas/guardar", data={"id_negocio": "1"})
-    # El middleware puede redirigir (302) antes de llegar a la ruta,
-    # o la ruta devuelve 401 si la sesión expiró.
     assert res.status_code in (302, 401)
 
 
