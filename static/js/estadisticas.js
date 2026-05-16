@@ -380,7 +380,7 @@ function getParams() {
     const neg = id => document.getElementById(id)?.value || "all";
     if (modoActual==="dia") {
         const f = document.getElementById("fecha-dia").value;
-        return {inicio:f, fin:f, id_negocio:neg("negocio-dia")};
+        return {inicio:f, fin:f, id_negocio:neg("negocio-dia"), granularidad:"hora"};
     }
     if (modoActual==="semana") {
         const val = document.getElementById("fecha-semana").value;
@@ -390,23 +390,23 @@ function getParams() {
         d.setDate(d.getDate()-((d.getDay()||7)-1));
         const fin = new Date(d); fin.setDate(d.getDate()+6);
         const iso = dd => dd.toISOString().split("T")[0];
-        return {inicio:iso(d), fin:iso(fin), id_negocio:neg("negocio-semana")};
+        return {inicio:iso(d), fin:iso(fin), id_negocio:neg("negocio-semana"), granularidad:"dia"};
     }
     if (modoActual==="mes") {
         const val = document.getElementById("fecha-mes").value;
         if (!val) return null;
         const [y,m] = val.split("-");
         const ultimo = new Date(parseInt(y),parseInt(m),0).getDate();
-        return {inicio:`${y}-${m}-01`, fin:`${y}-${m}-${String(ultimo).padStart(2,"0")}`, id_negocio:neg("negocio-mes")};
+        return {inicio:`${y}-${m}-01`, fin:`${y}-${m}-${String(ultimo).padStart(2,"0")}`, id_negocio:neg("negocio-mes"), granularidad:"semana"};
     }
     if (modoActual==="personalizado") {
-        return {inicio:document.getElementById("fecha-inicio-custom").value, fin:document.getElementById("fecha-fin-custom").value, id_negocio:neg("negocio-custom")};
+        return {inicio:document.getElementById("fecha-inicio-custom").value, fin:document.getElementById("fecha-fin-custom").value, id_negocio:neg("negocio-custom"), granularidad:"semana"};
     }
     return null;
 }
 
 function actualizarTitulos() {
-    const sufijos = {dia:"del día", semana:"de la semana", mes:"por semana", personalizado:"por semana"};
+    const sufijos = {dia:"por hora", semana:"por día", mes:"por semana", personalizado:"por semana"};
     const s = sufijos[modoActual] || "por semana";
     [["titulo-ingresos","Ingresos"],["titulo-gastos","Gastos"],["titulo-ventas","Número de ventas"],["titulo-unidades","Unidades recibidas"]]
         .forEach(([id,base]) => { const el=document.getElementById(id); if(el) el.textContent=`${base} ${s}`; });
@@ -439,7 +439,7 @@ async function cargarDashboard() {
     actualizarTitulos();
 
     try {
-        const url = `/api/estadisticas/dashboard?inicio=${p.inicio}&fin=${p.fin}&id_negocio=${p.id_negocio}`;
+        const url = `/api/estadisticas/dashboard?inicio=${p.inicio}&fin=${p.fin}&id_negocio=${p.id_negocio}&granularidad=${p.granularidad||"semana"}`;
         const res = await fetch(url);
         if (!res.ok) { const j=await res.json().catch(()=>({})); mostrarError(j.error||`Error ${res.status}`); return; }
         const data = await res.json();

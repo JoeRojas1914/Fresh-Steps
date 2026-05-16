@@ -250,6 +250,171 @@ def obtener_total_ingresos(inicio, fin, id_negocio):
 
 
 
+_DIAS_CORTOS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+_MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun",
+                 "jul", "ago", "sep", "oct", "nov", "dic"]
+
+def _label_dia(d: date) -> str:
+    return f"{_DIAS_CORTOS[d.weekday()]} {d.day} {_MESES_CORTOS[d.month - 1]}"
+
+
+def contar_ventas_por_hora(inicio: date, fin: date, id_negocio: str):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        query = """
+            SELECT HOUR(fecha_recibo) AS hora, COUNT(*) AS total
+            FROM venta
+            WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+              AND eliminado = 0
+        """
+        params = [inicio, fin]
+        if id_negocio != "all":
+            query += " AND id_negocio = %s"
+            params.append(id_negocio)
+        query += " GROUP BY hora"
+        cursor.execute(query, params)
+        rows = {r["hora"]: r["total"] for r in cursor.fetchall()}
+    finally:
+        cursor.close()
+        conn.close()
+    return [{"label": f"{h}:00", "total": rows.get(h, 0)} for h in range(7, 22)]
+
+
+def obtener_ingresos_por_hora(inicio: date, fin: date, id_negocio: str):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        sql = """
+            SELECT HOUR(pv.fecha_pago) AS hora, COALESCE(SUM(pv.monto), 0) AS total
+            FROM pago_venta pv
+            JOIN venta v ON v.id_venta = pv.id_venta
+            WHERE DATE(pv.fecha_pago) BETWEEN %s AND %s
+              AND v.eliminado = 0
+        """
+        params = [inicio, fin]
+        if id_negocio != "all":
+            sql += " AND v.id_negocio = %s"
+            params.append(id_negocio)
+        sql += " GROUP BY hora"
+        cursor.execute(sql, params)
+        rows = {r["hora"]: float(r["total"]) for r in cursor.fetchall()}
+    finally:
+        cursor.close()
+        conn.close()
+    return [{"label": f"{h}:00", "total": rows.get(h, 0.0)} for h in range(7, 22)]
+
+
+def obtener_unidades_por_hora(inicio: date, fin: date, id_negocio: str):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        sql = """
+            SELECT HOUR(v.fecha_recibo) AS hora, COUNT(a.id_articulo) AS total
+            FROM venta v
+            JOIN articulo a ON a.id_venta = v.id_venta
+            WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+              AND v.eliminado = 0
+        """
+        params = [inicio, fin]
+        if id_negocio != "all":
+            sql += " AND v.id_negocio = %s"
+            params.append(id_negocio)
+        sql += " GROUP BY hora"
+        cursor.execute(sql, params)
+        rows = {r["hora"]: int(r["total"]) for r in cursor.fetchall()}
+    finally:
+        cursor.close()
+        conn.close()
+    return [{"label": f"{h}:00", "total": rows.get(h, 0)} for h in range(7, 22)]
+
+
+def contar_ventas_por_dia_rango(inicio: date, fin: date, id_negocio: str):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        query = """
+            SELECT DATE(fecha_recibo) AS dia, COUNT(*) AS total
+            FROM venta
+            WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+              AND eliminado = 0
+        """
+        params = [inicio, fin]
+        if id_negocio != "all":
+            query += " AND id_negocio = %s"
+            params.append(id_negocio)
+        query += " GROUP BY dia"
+        cursor.execute(query, params)
+        rows = {r["dia"]: r["total"] for r in cursor.fetchall()}
+    finally:
+        cursor.close()
+        conn.close()
+    resultado = []
+    d = inicio
+    while d <= fin:
+        resultado.append({"label": _label_dia(d), "total": rows.get(d, 0)})
+        d += timedelta(days=1)
+    return resultado
+
+
+def obtener_ingresos_por_dia_rango(inicio: date, fin: date, id_negocio: str):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        sql = """
+            SELECT DATE(pv.fecha_pago) AS dia, COALESCE(SUM(pv.monto), 0) AS total
+            FROM pago_venta pv
+            JOIN venta v ON v.id_venta = pv.id_venta
+            WHERE DATE(pv.fecha_pago) BETWEEN %s AND %s
+              AND v.eliminado = 0
+        """
+        params = [inicio, fin]
+        if id_negocio != "all":
+            sql += " AND v.id_negocio = %s"
+            params.append(id_negocio)
+        sql += " GROUP BY dia"
+        cursor.execute(sql, params)
+        rows = {r["dia"]: float(r["total"]) for r in cursor.fetchall()}
+    finally:
+        cursor.close()
+        conn.close()
+    resultado = []
+    d = inicio
+    while d <= fin:
+        resultado.append({"label": _label_dia(d), "total": rows.get(d, 0.0)})
+        d += timedelta(days=1)
+    return resultado
+
+
+def obtener_unidades_por_dia_rango(inicio: date, fin: date, id_negocio: str):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        sql = """
+            SELECT DATE(v.fecha_recibo) AS dia, COUNT(a.id_articulo) AS total
+            FROM venta v
+            JOIN articulo a ON a.id_venta = v.id_venta
+            WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+              AND v.eliminado = 0
+        """
+        params = [inicio, fin]
+        if id_negocio != "all":
+            sql += " AND v.id_negocio = %s"
+            params.append(id_negocio)
+        sql += " GROUP BY dia"
+        cursor.execute(sql, params)
+        rows = {r["dia"]: int(r["total"]) for r in cursor.fetchall()}
+    finally:
+        cursor.close()
+        conn.close()
+    resultado = []
+    d = inicio
+    while d <= fin:
+        resultado.append({"label": _label_dia(d), "total": rows.get(d, 0)})
+        d += timedelta(days=1)
+    return resultado
+
+
 def obtener_ingresos_por_semana(inicio, fin, id_negocio):
     semanas = generar_semanas_rango(inicio, fin)
 

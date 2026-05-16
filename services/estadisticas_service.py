@@ -25,6 +25,12 @@ from estadisticas import (
     obtener_clientes_nuevos,
     obtener_tasa_retorno,
     obtener_gasto_promedio_cliente,
+    contar_ventas_por_hora,
+    obtener_ingresos_por_hora,
+    obtener_unidades_por_hora,
+    contar_ventas_por_dia_rango,
+    obtener_ingresos_por_dia_rango,
+    obtener_unidades_por_dia_rango,
 )
 
 MAX_DIAS_RANGO = 186 
@@ -90,10 +96,22 @@ def dashboard_api_service(args):
     ganancia     = total_ingresos - total_gastos
     ganancia_ant = ingresos_ant   - gastos_ant
 
-    ventas_semanales   = contar_ventas_por_semana(inicio, fin, id_negocio)
-    gastos_semanales   = obtener_gastos_por_semana_y_proveedor(inicio, fin, id_negocio)
-    ingresos_semanales = obtener_ingresos_por_semana(inicio, fin, id_negocio)
-    unidades_semanales = obtener_unidades_por_semana(inicio, fin, id_negocio)
+    granularidad = args.get("granularidad", "semana")
+
+    if granularidad == "hora":
+        ventas_semanales   = contar_ventas_por_hora(inicio, fin, id_negocio)
+        ingresos_semanales = obtener_ingresos_por_hora(inicio, fin, id_negocio)
+        unidades_semanales = obtener_unidades_por_hora(inicio, fin, id_negocio)
+    elif granularidad == "dia":
+        ventas_semanales   = contar_ventas_por_dia_rango(inicio, fin, id_negocio)
+        ingresos_semanales = obtener_ingresos_por_dia_rango(inicio, fin, id_negocio)
+        unidades_semanales = obtener_unidades_por_dia_rango(inicio, fin, id_negocio)
+    else:
+        ventas_semanales   = contar_ventas_por_semana(inicio, fin, id_negocio)
+        ingresos_semanales = obtener_ingresos_por_semana(inicio, fin, id_negocio)
+        unidades_semanales = obtener_unidades_por_semana(inicio, fin, id_negocio)
+
+    gastos_semanales = obtener_gastos_por_semana_y_proveedor(inicio, fin, id_negocio)
 
     ventas_prepago  = obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio)
     uso_servicios   = obtener_uso_servicios(inicio, fin, id_negocio)
