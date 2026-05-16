@@ -41,63 +41,81 @@ def obtener_detalles_venta(ids_venta):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        format_strings = ','.join(['%s'] * len(ids_venta))
-
-        cursor.execute(f"""
-            SELECT *
-            FROM articulo
-            WHERE id_venta IN ({format_strings})
-        """, ids_venta)
-        articulos = cursor.fetchall()
-
-        ids_articulo = [a["id_articulo"] for a in articulos]
-        if not ids_articulo:
-            return {}
-
-        format_art = ','.join(['%s'] * len(ids_articulo))
-
-        cursor.execute(f"SELECT * FROM articulo_calzado WHERE id_articulo IN ({format_art})", ids_articulo)
-        calzados = {c["id_articulo"]: c for c in cursor.fetchall()}
-
-        cursor.execute(f"SELECT * FROM articulo_confeccion WHERE id_articulo IN ({format_art})", ids_articulo)
-        confecciones = {c["id_articulo"]: c for c in cursor.fetchall()}
-
-        cursor.execute(f"SELECT * FROM articulo_maquila WHERE id_articulo IN ({format_art})", ids_articulo)
-        maquilas = {m["id_articulo"]: m for m in cursor.fetchall()}
+        ph = ','.join(['%s'] * len(ids_venta))
 
         cursor.execute(f"""
             SELECT
-                asv.id_articulo,
-                s.nombre,
-                asv.precio_aplicado
+                a.id_articulo, a.id_venta, a.tipo_articulo, a.comentario,
+                ac.tipo          AS c_tipo,
+                ac.marca         AS c_marca,
+                ac.material      AS c_material,
+                ac.color_base    AS c_color_base,
+                ac.color_secundario AS c_color_secundario,
+                ac.color_agujetas   AS c_color_agujetas,
+                acf.tipo         AS cf_tipo,
+                acf.marca        AS cf_marca,
+                acf.material     AS cf_material,
+                acf.color_base   AS cf_color_base,
+                acf.color_secundario AS cf_color_secundario,
+                acf.cantidad     AS cf_cantidad,
+                acf.agujetas     AS cf_agujetas,
+                am.tipo          AS m_tipo,
+                am.cantidad      AS m_cantidad,
+                am.precio_unitario AS m_precio_unitario
+            FROM articulo a
+            LEFT JOIN articulo_calzado    ac  ON ac.id_articulo  = a.id_articulo
+            LEFT JOIN articulo_confeccion acf ON acf.id_articulo = a.id_articulo
+            LEFT JOIN articulo_maquila    am  ON am.id_articulo  = a.id_articulo
+            WHERE a.id_venta IN ({ph})
+        """, ids_venta)
+        filas = cursor.fetchall()
+
+        if not filas:
+            return {}
+
+        ids_articulo = [f["id_articulo"] for f in filas]
+        ph_art = ','.join(['%s'] * len(ids_articulo))
+
+        cursor.execute(f"""
+            SELECT asv.id_articulo, s.nombre, asv.precio_aplicado
             FROM articulo_servicio asv
             JOIN servicio s ON s.id_servicio = asv.id_servicio
-            WHERE asv.id_articulo IN ({format_art})
+            WHERE asv.id_articulo IN ({ph_art})
         """, ids_articulo)
-        servicios_por_articulo = {}
+        servicios_por_articulo: dict = {}
         for s in cursor.fetchall():
-            servicios_por_articulo.setdefault(s["id_articulo"], []).append(s)
+            servicios_por_articulo.setdefault(s["id_articulo"], []).append({
+                "nombre": s["nombre"], "precio_aplicado": s["precio_aplicado"]
+            })
 
-        detalles_por_venta = {}
-        for art in articulos:
-            id_venta = art["id_venta"]
-            id_articulo = art["id_articulo"]
-            tipo = art["tipo_articulo"]
-
+        detalles_por_venta: dict = {}
+        for f in filas:
+            tipo = f["tipo_articulo"]
             if tipo == "calzado":
-                datos = calzados.get(id_articulo)
+                datos = {
+                    "tipo": f["c_tipo"], "marca": f["c_marca"],
+                    "material": f["c_material"], "color_base": f["c_color_base"],
+                    "color_secundario": f["c_color_secundario"],
+                    "color_agujetas": f["c_color_agujetas"],
+                }
             elif tipo == "confeccion":
-                datos = confecciones.get(id_articulo)
+                datos = {
+                    "tipo": f["cf_tipo"], "marca": f["cf_marca"],
+                    "material": f["cf_material"], "color_base": f["cf_color_base"],
+                    "color_secundario": f["cf_color_secundario"],
+                    "cantidad": f["cf_cantidad"], "agujetas": f["cf_agujetas"],
+                }
             else:
-                datos = maquilas.get(id_articulo)
-
-            detalle = {
+                datos = {
+                    "tipo": f["m_tipo"], "cantidad": f["m_cantidad"],
+                    "precio_unitario": f["m_precio_unitario"],
+                }
+            detalles_por_venta.setdefault(f["id_venta"], []).append({
                 "tipo_articulo": tipo,
                 "datos": datos,
-                "servicios": servicios_por_articulo.get(id_articulo, []),
-                "comentario": art["comentario"]
-            }
-            detalles_por_venta.setdefault(id_venta, []).append(detalle)
+                "servicios": servicios_por_articulo.get(f["id_articulo"], []),
+                "comentario": f["comentario"],
+            })
 
         return detalles_por_venta
     finally:

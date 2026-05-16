@@ -110,43 +110,37 @@ def eliminar_venta_service(id_venta: int, id_usuario: int | None = None) -> tupl
     return True, "Venta eliminada correctamente"
 
 
-def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None, str | None]:
+def _parsear_prepago(form: dict) -> tuple[bool, float, str | None]:
+    if form.get("prepago") != "si":
+        return False, 0, None
     try:
-        id_negocio = int(form["id_negocio"])
-    except (KeyError, ValueError):
-        return None, "Negocio inválido."
-
-    id_cliente     = form.get("id_cliente") or None
-    fecha_estimada = form.get("fecha_estimada") or None
-    tipo_pago      = form.get("tipo_pago")
-
-    prepago = form.get("prepago") == "si"
-    try:
-        monto_prepago = float(form.get("monto_prepago") or 0) if prepago else 0
+        return True, float(form.get("monto_prepago") or 0), None
     except (ValueError, TypeError):
-        return None, "El monto del prepago no es válido."
+        return False, 0, "El monto del prepago no es válido."
 
-    aplica_descuento = form.get("aplica_descuento") == "si"
+
+def _parsear_descuento(form: dict) -> tuple[bool, float, str | None]:
+    if form.get("aplica_descuento") != "si":
+        return False, 0, None
     try:
-        cantidad_descuento = float(form.get("cantidad_descuento") or 0) if aplica_descuento else 0
+        return True, float(form.get("cantidad_descuento") or 0), None
     except (ValueError, TypeError):
-        return None, "El monto del descuento no es válido."
+        return False, 0, "El monto del descuento no es válido."
 
-    tipo_permitido = TIPOS_POR_NEGOCIO.get(id_negocio)
 
+def _parsear_articulos_form(
+    form: dict, id_negocio: int, tipo_permitido: str | None
+) -> tuple[list, str | None]:
+    articulos: list = []
     try:
-        articulos = []
         i = 0
         while True:
             tipo_articulo = form.get(f"articulos[{i}][tipo_articulo]")
             if not tipo_articulo:
                 break
-
             if tipo_permitido and tipo_articulo != tipo_permitido:
-                return None, f"Este negocio solo permite artículos tipo: {tipo_permitido}"
-
+                return [], f"Este negocio solo permite artículos tipo: {tipo_permitido}"
             comentario = form.get(f"articulos[{i}][comentario]")
-
             if tipo_articulo == "calzado":
                 datos = {
                     "tipo":             form.get(f"articulos[{i}][tipo]"),
@@ -156,12 +150,8 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None,
                     "color_secundario": form.get(f"articulos[{i}][color_secundario]"),
                     "color_agujetas":   form.get(f"articulos[{i}][color_agujetas]"),
                 }
-                servicios = _parsear_servicios(form, i)
-                articulos.append({
-                    "tipo_articulo": "calzado", "datos": datos,
-                    "servicios": servicios, "comentario": comentario,
-                })
-
+                articulos.append({"tipo_articulo": "calzado", "datos": datos,
+                                   "servicios": _parsear_servicios(form, i), "comentario": comentario})
             elif tipo_articulo == "confeccion":
                 datos = {
                     "tipo":             form.get(f"articulos[{i}][tipo]"),
@@ -172,26 +162,59 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None,
                     "cantidad":         int(form.get(f"articulos[{i}][cantidad]") or 1),
                     "agujetas":         form.get(f"articulos[{i}][agujetas]") == "1",
                 }
-                servicios = _parsear_servicios(form, i)
-                articulos.append({
-                    "tipo_articulo": "confeccion", "datos": datos,
-                    "servicios": servicios, "comentario": comentario,
-                })
-
+                articulos.append({"tipo_articulo": "confeccion", "datos": datos,
+                                   "servicios": _parsear_servicios(form, i), "comentario": comentario})
             elif tipo_articulo == "maquila":
                 datos = {
                     "tipo":            form.get(f"articulos[{i}][tipo]"),
                     "cantidad":        int(form.get(f"articulos[{i}][cantidad]") or 1),
                     "precio_unitario": float(form.get(f"articulos[{i}][precio_unitario]") or 0),
                 }
-                articulos.append({
-                    "tipo_articulo": "maquila", "datos": datos,
-                    "comentario": comentario,
-                })
-
+                articulos.append({"tipo_articulo": "maquila", "datos": datos, "comentario": comentario})
             i += 1
     except (ValueError, TypeError):
-        return None, "Datos de artículos inválidos (cantidad o precio no numérico)."
+        return [], "Datos de artículos inválidos (cantidad o precio no numérico)."
+    return articulos, None
+
+
+def _validar_reglas_negocio(id_negocio: int, articulos: list) -> str | None:
+    if id_negocio in (1, 2):
+        for a in articulos:
+            if not a.get("servicios"):
+                return "Cada artículo debe tener al menos 1 servicio."
+            for s in a["servicios"]:
+                if not s.get("id_servicio"):
+                    return "Servicio inválido (sin id)."
+                if float(s.get("precio_aplicado") or 0) <= 0:
+                    return "El precio aplicado debe ser mayor a 0."
+    if id_negocio == 3:
+        for a in articulos:
+            if a.get("servicios"):
+                return "Maquila no permite servicios."
+    return None
+
+
+def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None, str | None]:
+    try:
+        id_negocio = int(form["id_negocio"])
+    except (KeyError, ValueError):
+        return None, "Negocio inválido."
+
+    id_cliente     = form.get("id_cliente") or None
+    fecha_estimada = form.get("fecha_estimada") or None
+    tipo_pago      = form.get("tipo_pago")
+
+    prepago, monto_prepago, err = _parsear_prepago(form)
+    if err:
+        return None, err
+
+    aplica_descuento, cantidad_descuento, err = _parsear_descuento(form)
+    if err:
+        return None, err
+
+    articulos, err = _parsear_articulos_form(form, id_negocio, TIPOS_POR_NEGOCIO.get(id_negocio))
+    if err:
+        return None, err
 
     if not id_cliente or not fecha_estimada:
         return None, "Faltan datos obligatorios (cliente, negocio, fecha estimada o tipo de pago)."
@@ -199,20 +222,9 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None,
     if not articulos:
         return None, "Debes agregar al menos 1 artículo."
 
-    if id_negocio in (1, 2):
-        for a in articulos:
-            if not a.get("servicios"):
-                return None, "Cada artículo debe tener al menos 1 servicio."
-            for s in a["servicios"]:
-                if not s.get("id_servicio"):
-                    return None, "Servicio inválido (sin id)."
-                if float(s.get("precio_aplicado") or 0) <= 0:
-                    return None, "El precio aplicado debe ser mayor a 0."
-
-    if id_negocio == 3:
-        for a in articulos:
-            if a.get("servicios"):
-                return None, "Maquila no permite servicios."
+    err = _validar_reglas_negocio(id_negocio, articulos)
+    if err:
+        return None, err
 
     id_venta = crear_venta(
         id_negocio=id_negocio,

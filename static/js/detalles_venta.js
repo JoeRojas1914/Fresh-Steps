@@ -1,5 +1,11 @@
 const detallesCargados = {};
 
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".btn-detalles[data-id]").forEach(function (btn) {
+        btn.addEventListener("click", function () { toggleDetalles(btn.dataset.id, btn); });
+    });
+});
+
 function toggleDetalles(idVenta, btn) {
     const fila = document.getElementById(`detalles-${idVenta}`);
     const lista = document.getElementById(`lista-detalles-${idVenta}`);

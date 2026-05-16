@@ -257,11 +257,4 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/detalles_venta.js') }}"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".btn-detalles[data-id]").forEach(btn => {
-        btn.addEventListener("click", () => toggleDetalles(btn.dataset.id, btn));
-    });
-});
-</script>
 {% endblock %}

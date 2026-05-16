@@ -107,6 +107,8 @@ CREATE TABLE IF NOT EXISTS venta (
     id_usuario_creo    INT,
     id_usuario_entrego INT,
     eliminado          TINYINT(1) NOT NULL DEFAULT 0,
+    CONSTRAINT chk_venta_total      CHECK (total >= 0),
+    CONSTRAINT chk_venta_descuento  CHECK (cantidad_descuento >= 0),
     FOREIGN KEY (id_negocio)         REFERENCES negocio(id_negocio),
     FOREIGN KEY (id_cliente)         REFERENCES cliente(id_cliente),
     FOREIGN KEY (id_usuario_creo)    REFERENCES usuario(id_usuario),
@@ -156,6 +158,7 @@ CREATE TABLE IF NOT EXISTS articulo_confeccion (
     color_secundario VARCHAR(50),
     cantidad         INT NOT NULL DEFAULT 1,
     agujetas         TINYINT(1) DEFAULT 0,
+    CONSTRAINT chk_confeccion_cantidad CHECK (cantidad >= 1),
     FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo)
 );
 
@@ -164,6 +167,8 @@ CREATE TABLE IF NOT EXISTS articulo_maquila (
     tipo           VARCHAR(100),
     cantidad       INT NOT NULL DEFAULT 1,
     precio_unitario DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    CONSTRAINT chk_maquila_cantidad  CHECK (cantidad >= 1),
+    CONSTRAINT chk_maquila_precio    CHECK (precio_unitario >= 0),
     FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo)
 );
 
@@ -172,6 +177,7 @@ CREATE TABLE IF NOT EXISTS articulo_servicio (
     id_articulo          INT NOT NULL,
     id_servicio          INT NOT NULL,
     precio_aplicado      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    CONSTRAINT chk_art_serv_precio   CHECK (precio_aplicado >= 0),
     FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo),
     FOREIGN KEY (id_servicio) REFERENCES servicio(id_servicio)
 );
@@ -187,6 +193,7 @@ CREATE TABLE IF NOT EXISTS pago_venta (
     tipo_pago      VARCHAR(50),        -- efectivo | tarjeta | transferencia
     tipo_pago_venta VARCHAR(50),       -- prepago | final
     id_usuario_cobro INT,
+    CONSTRAINT chk_pago_monto        CHECK (monto >= 0),
     FOREIGN KEY (id_venta)         REFERENCES venta(id_venta),
     FOREIGN KEY (id_usuario_cobro) REFERENCES usuario(id_usuario)
 );
@@ -205,6 +212,7 @@ CREATE TABLE IF NOT EXISTS gastos (
     tipo_pago        VARCHAR(50),
     id_usuario       INT,
     eliminado        TINYINT(1) NOT NULL DEFAULT 0,
+    CONSTRAINT chk_gasto_total       CHECK (total >= 0),
     FOREIGN KEY (id_negocio) REFERENCES negocio(id_negocio),
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
