@@ -22,6 +22,8 @@ from services.ventas_service import (
     historial_ventas_service,
 )
 
+from middleware.auth_middleware import admin_required
+
 logger = logging.getLogger(__name__)
 
 ventas_bp = Blueprint("ventas", __name__)
@@ -159,21 +161,9 @@ def registrar_pago_final():
 
 
 @ventas_bp.route("/ventas/eliminar/<int:id_venta>", methods=["POST"])
+@admin_required
 def eliminar_venta_route(id_venta):
     id_usuario = session.get("id_usuario")
-    rol = session.get("rol")
-
-    if not id_usuario:
-        return jsonify({
-            "ok": False,
-            "error": "No autenticado"
-        }), 401
-
-    if rol != "admin":
-        return jsonify({
-            "ok": False,
-            "error": "No autorizado"
-        }), 403
 
     try:
         ok, mensaje = eliminar_venta_service(id_venta, id_usuario)
@@ -194,10 +184,8 @@ def eliminar_venta_route(id_venta):
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
 
 @ventas_bp.route("/ventas/historial")
+@admin_required
 def historial_ventas():
-    rol = session.get("rol")
-    if rol != "admin":
-        return render_template("403.html"), 403
 
     id_negocio   = request.args.get("id_negocio",  type=int)
     fecha_inicio = request.args.get("fecha_inicio") or None
@@ -213,13 +201,10 @@ def historial_ventas():
 
 
 @ventas_bp.route("/ventas/historial/exportar")
+@admin_required
 def exportar_historial_excel():
     from ventas import obtener_historial_ventas
     from pagos import obtener_pagos_venta
-
-    if session.get("rol") != "admin":
-        from flask import render_template as rt
-        return rt("403.html"), 403
 
     id_negocio   = request.args.get("id_negocio",  type=int)
     fecha_inicio = request.args.get("fecha_inicio") or None

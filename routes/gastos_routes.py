@@ -19,14 +19,14 @@ from services.gastos_service import (
     restaurar_gasto_service
 )
 from negocio import obtener_negocios
+from middleware.auth_middleware import admin_required
 
 gastos_bp = Blueprint("gastos", __name__)
 
 
 @gastos_bp.route("/gastos")
+@admin_required
 def gastos():
-    if session.get("rol") != "admin":
-        return render_template("403.html"), 403
     id_negocio         = request.args.get("id_negocio")
     fecha_inicio       = request.args.get("fecha_inicio")
     fecha_fin          = request.args.get("fecha_fin")
@@ -94,9 +94,8 @@ def restaurar_gasto_route(id_gasto):
 
 
 @gastos_bp.route("/gastos/exportar")
+@admin_required
 def exportar_gastos_excel():
-    if session.get("rol") != "admin":
-        return render_template("403.html"), 403
     from gastos import obtener_gastos
 
     id_negocio         = request.args.get("id_negocio")  or None

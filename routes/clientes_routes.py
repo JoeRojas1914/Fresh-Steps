@@ -11,6 +11,7 @@ from services.excel_helpers import (
     xl_col_widths, xl_badge_estado, xl_badge_activo, send_excel
 )
 
+from middleware.auth_middleware import admin_required
 from services.clientes_service import (
     listar_clientes_service,
     guardar_cliente_service,
@@ -107,9 +108,8 @@ def api_crear_cliente():
 
 
 @clientes_bp.route("/clientes/exportar")
+@admin_required
 def exportar_clientes_excel():
-    if session.get("rol") != "admin":
-        return render_template("403.html"), 403
     from clientes import obtener_clientes
 
     incluir_eliminados = request.args.get("eliminados") == "1"

@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, session, jsonify, flash, url_for
+from middleware.auth_middleware import admin_required
 from services.usuarios_service import (
     listar_usuarios_service,
     guardar_usuario_service,
@@ -9,15 +10,9 @@ from services.usuarios_service import (
 usuarios_bp = Blueprint("usuarios", __name__)
 
 
-def admin_required():
-    return session.get("rol") == "admin"
-
-
 @usuarios_bp.route("/usuarios")
+@admin_required
 def listar_usuarios():
-    if not admin_required():
-        return redirect("/")
-
     q      = request.args.get("q", "").strip()
     rol    = request.args.get("rol", "")
     activo = request.args.get("activo", "")
@@ -41,9 +36,8 @@ def listar_usuarios():
 
 
 @usuarios_bp.route("/usuarios/guardar", methods=["POST"])
+@admin_required
 def guardar_usuario():
-    if not admin_required():
-        return redirect("/")
 
     try:
         id_usuario_raw = request.form.get("id_usuario", "").strip()
@@ -69,9 +63,8 @@ def guardar_usuario():
 
 
 @usuarios_bp.route("/usuarios/toggle/<int:id>")
+@admin_required
 def toggle_usuario(id):
-    if not admin_required():
-        return redirect("/")
     nuevo_activo = toggle_usuario_service(id)
     if nuevo_activo is None:
         flash("No se puede cambiar el estado de este usuario.", "error")
@@ -83,7 +76,6 @@ def toggle_usuario(id):
 
 
 @usuarios_bp.route("/usuarios/<int:id>/historial")
+@admin_required
 def historial_usuario(id):
-    if not admin_required():
-        return jsonify([])
     return jsonify(obtener_historial_usuario_service(id))

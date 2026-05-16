@@ -1,5 +1,22 @@
-from flask import session, redirect, url_for, flash, render_template, request
+from functools import wraps
+from flask import session, redirect, url_for, flash, render_template, request, jsonify
 from datetime import datetime, timedelta
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if session.get("rol") != "admin":
+            wants_json = (
+                request.accept_mimetypes.best_match(
+                    ["application/json", "text/html"]
+                ) == "application/json"
+            )
+            if wants_json:
+                return jsonify({"ok": False, "error": "No autorizado"}), 403
+            return render_template("403.html"), 403
+        return f(*args, **kwargs)
+    return decorated
 
 
 RUTAS_PUBLICAS = [

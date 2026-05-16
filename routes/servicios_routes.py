@@ -12,6 +12,7 @@ from services.excel_helpers import (
 )
 
 
+from middleware.auth_middleware import admin_required
 from services.servicios_service import (
     listar_servicios,
     guardar_servicio_service,
@@ -56,9 +57,8 @@ def servicios():
 
 
 @servicios_bp.route("/servicios/guardar", methods=["POST"])
+@admin_required
 def guardar_servicio():
-    if session.get("rol") != "admin":
-        return render_template("403.html"), 403
     id_servicio = request.form.get("id_servicio") or None
     id_usuario = session.get("id_usuario")
     try:
@@ -79,9 +79,8 @@ def guardar_servicio():
 
 
 @servicios_bp.route("/servicios/eliminar/<int:id_servicio>")
+@admin_required
 def eliminar_servicio(id_servicio):
-    if session.get("rol") != "admin":
-        return render_template("403.html"), 403
     id_usuario = session.get("id_usuario")
     try:
         eliminar_servicio_service(id_servicio, id_usuario)
@@ -115,9 +114,8 @@ def historial_servicio(id_servicio):
 
 
 @servicios_bp.route("/servicios/restaurar/<int:id_servicio>")
+@admin_required
 def restaurar_servicio(id_servicio):
-    if session.get("rol") != "admin":
-        return render_template("403.html"), 403
     id_usuario = session.get("id_usuario")
     restaurar_servicio_service(id_servicio, id_usuario)
     flash("Servicio restaurado correctamente.", "success")
@@ -125,9 +123,8 @@ def restaurar_servicio(id_servicio):
 
 
 @servicios_bp.route("/servicios/exportar")
+@admin_required
 def exportar_servicios_excel():
-    if session.get("rol") != "admin":
-        return render_template("403.html"), 403
     from servicios import obtener_servicios
 
     id_negocio         = request.args.get("id_negocio") or None
