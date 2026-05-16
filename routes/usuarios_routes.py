@@ -1,6 +1,7 @@
 import logging
 from flask import Blueprint, render_template, request, redirect, session, jsonify, flash, url_for
 from middleware.auth_middleware import admin_required
+from extensions import limiter
 
 logger = logging.getLogger(__name__)
 from services.usuarios_service import (
@@ -40,6 +41,7 @@ def listar_usuarios():
 
 @usuarios_bp.route("/usuarios/guardar", methods=["POST"])
 @admin_required
+@limiter.limit("20 per minute")
 def guardar_usuario():
 
     try:
@@ -73,6 +75,7 @@ def guardar_usuario():
 
 @usuarios_bp.route("/usuarios/toggle/<int:id>")
 @admin_required
+@limiter.limit("20 per minute")
 def toggle_usuario(id):
     try:
         nuevo_activo = toggle_usuario_service(id)

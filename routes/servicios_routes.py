@@ -13,6 +13,7 @@ from services.excel_helpers import (
 
 
 from middleware.auth_middleware import admin_required
+from extensions import limiter
 from services.servicios_service import (
     listar_servicios,
     guardar_servicio_service,
@@ -58,6 +59,7 @@ def servicios():
 
 @servicios_bp.route("/servicios/guardar", methods=["POST"])
 @admin_required
+@limiter.limit("30 per minute")
 def guardar_servicio():
     id_servicio = request.form.get("id_servicio") or None
     id_usuario = session.get("id_usuario")
@@ -80,6 +82,7 @@ def guardar_servicio():
 
 @servicios_bp.route("/servicios/eliminar/<int:id_servicio>")
 @admin_required
+@limiter.limit("30 per minute")
 def eliminar_servicio(id_servicio):
     id_usuario = session.get("id_usuario")
     try:
@@ -115,6 +118,7 @@ def historial_servicio(id_servicio):
 
 @servicios_bp.route("/servicios/restaurar/<int:id_servicio>")
 @admin_required
+@limiter.limit("30 per minute")
 def restaurar_servicio(id_servicio):
     id_usuario = session.get("id_usuario")
     try:
