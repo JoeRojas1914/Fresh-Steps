@@ -19,7 +19,7 @@ from services.gastos_service import (
     obtener_historial_gasto,
     restaurar_gasto_service
 )
-from negocio import obtener_negocios
+from models.negocio import obtener_negocios
 from middleware.auth_middleware import admin_required
 from extensions import limiter
 

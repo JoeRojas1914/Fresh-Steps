@@ -1,4 +1,4 @@
-from gastos import (
+from models.gastos import (
     crear_gasto,
     actualizar_gasto,
     obtener_gastos,

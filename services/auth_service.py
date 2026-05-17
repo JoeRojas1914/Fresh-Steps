@@ -3,7 +3,7 @@ from datetime import datetime
 from werkzeug.security import check_password_hash
 from flask import request
 
-from login import (
+from models.login import (
     obtener_usuario_por_username,
     obtener_usuario_caja_activo,
     obtener_usuarios_caja_activos,
@@ -13,7 +13,7 @@ from login import (
     limpiar_intentos
 )
 from config import MAX_INTENTOS_PIN, BLOQUEO_MIN_PIN
-from usuario import actualizar_session_token
+from models.usuario import actualizar_session_token
 
 
 def _ua() -> str | None:

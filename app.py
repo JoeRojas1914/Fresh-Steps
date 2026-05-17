@@ -26,7 +26,7 @@ from routes.auth_routes import auth_bp
 from routes.usuarios_routes import usuarios_bp
 from routes.ventas_routes import ventas_bp
 from middleware.auth_middleware import init_auth_middleware
-from ventas import contar_entregas_pendientes, contar_entregas_listas
+from models.ventas import contar_entregas_pendientes, contar_entregas_listas
 
 
 

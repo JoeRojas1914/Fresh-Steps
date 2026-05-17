@@ -1,7 +1,7 @@
 from db import get_db
 
 # Re-exports — mantienen compatibilidad con todos los `from estadisticas import X` existentes
-from estadisticas_ventas import (
+from .estadisticas_ventas import (
     generar_semanas_rango,
     contar_ventas_por_semana,
     obtener_unidades_por_semana,
@@ -27,12 +27,12 @@ from estadisticas_ventas import (
     obtener_hora_pico_recepcion,
     obtener_hora_pico_entrega,
 )
-from estadisticas_gastos import (
+from .estadisticas_gastos import (
     obtener_gastos_por_semana_y_proveedor,
     obtener_total_gastos,
     obtener_gastos_por_mes,
 )
-from estadisticas_clientes import (
+from .estadisticas_clientes import (
     obtener_top_clientes,
     obtener_clientes_unicos,
     obtener_clientes_nuevos,

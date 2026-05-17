@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash
 from flask import session
-import usuario
+import models.usuario as usuario
 from validators import validar_correo, validar_telefono, validar_pin, validar_password
 
 

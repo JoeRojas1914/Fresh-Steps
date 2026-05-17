@@ -1,9 +1,9 @@
 from datetime import date, datetime, timedelta
-from clientes import contar_clientes
-from servicios import contar_servicios
-from negocio import obtener_negocios
+from models.clientes import contar_clientes
+from models.servicios import contar_servicios
+from models.negocio import obtener_negocios
 
-from estadisticas import (
+from models.estadisticas import (
     contar_ventas_por_semana,
     obtener_gastos_por_semana_y_proveedor,
     obtener_total_gastos,

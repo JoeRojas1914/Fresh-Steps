@@ -1,7 +1,7 @@
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from db import get_db
-from ventas_historial import registrar_historial_venta
+from .ventas_historial import registrar_historial_venta
 
 
 TIPOS_POR_NEGOCIO = {

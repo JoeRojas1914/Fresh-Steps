@@ -1,7 +1,7 @@
 from datetime import date
 
 from config import METODOS_PAGO_VALIDOS
-from ventas import (
+from models.ventas import (
     eliminar_venta,
     marcar_entregada,
     marcar_como_lista,
@@ -15,13 +15,13 @@ from ventas import (
     TIPOS_POR_NEGOCIO,
 )
 
-from pagos import (
+from models.pagos import (
     obtener_pagos_venta,
     registrar_pago_final_db,
     registrar_pago,
 )
 
-from negocio import obtener_negocios
+from models.negocio import obtener_negocios
 
 
 def listar_ventas_listas_service(id_negocio: int | None = None) -> dict:

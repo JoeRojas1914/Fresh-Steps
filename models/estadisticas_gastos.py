@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import date
 from db import get_db
-from estadisticas_ventas import generar_semanas_rango
+from .estadisticas_ventas import generar_semanas_rango
 
 
 def obtener_gastos_por_semana_y_proveedor(inicio: date, fin: date, id_negocio: str):

@@ -2,7 +2,7 @@ from functools import wraps
 from flask import session, redirect, url_for, flash, render_template, request, jsonify
 from datetime import datetime, timedelta
 from config import TIMEOUT_ADMIN, TIMEOUT_CAJA
-from usuario import obtener_session_token
+from models.usuario import obtener_session_token
 
 
 def admin_required(f):

@@ -1,15 +1,15 @@
 from db import get_db
-from ventas_historial import registrar_historial_venta
+from .ventas_historial import registrar_historial_venta
 
 # Re-exports — mantienen compatibilidad con todos los `from ventas import X` existentes
-from ventas_crear import TIPOS_POR_NEGOCIO, crear_venta
-from ventas_historial import (
+from .ventas_crear import TIPOS_POR_NEGOCIO, crear_venta
+from .ventas_historial import (
     registrar_historial_venta,
     obtener_historial_venta,
     contar_historial_ventas,
     obtener_historial_ventas,
 )
-from ventas_detalles import (
+from .ventas_detalles import (
     obtener_venta,
     obtener_detalles_venta,
     obtener_ventas_listas,

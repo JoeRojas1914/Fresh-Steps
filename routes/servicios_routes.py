@@ -22,7 +22,7 @@ from services.servicios_service import (
     obtener_historial_servicio_service,
     restaurar_servicio_service
 )
-from negocio import obtener_negocios
+from models.negocio import obtener_negocios
 
 servicios_bp = Blueprint("servicios", __name__)
 

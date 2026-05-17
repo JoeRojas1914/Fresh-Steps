@@ -6,7 +6,7 @@ from services.auth_service import (
     login_pin_service
 )
 from extensions import limiter
-from usuario import actualizar_session_token
+from models.usuario import actualizar_session_token
 
 auth_bp = Blueprint("auth", __name__)
 

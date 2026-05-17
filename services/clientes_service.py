@@ -1,5 +1,5 @@
 from validators import validar_nombre, validar_correo, validar_telefono
-from clientes import (
+from models.clientes import (
     buscar_clientes,
     contar_clientes,
     obtener_cliente_por_id,
@@ -11,9 +11,9 @@ from clientes import (
     obtener_historial_cliente
 )
 
-from pagos import obtener_pagos_venta
-from negocio import obtener_negocios
-from ventas import contar_ventas_cliente, obtener_detalles_venta, obtener_ventas_cliente
+from models.pagos import obtener_pagos_venta
+from models.negocio import obtener_negocios
+from models.ventas import contar_ventas_cliente, obtener_detalles_venta, obtener_ventas_cliente
 
 
 def listar_clientes_service(
