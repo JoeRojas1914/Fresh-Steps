@@ -103,7 +103,7 @@ def obtener_detalles_venta(ids_venta):
         return detalles_por_venta
 
 
-def obtener_ventas_listas(id_negocio=None):
+def obtener_ventas_listas(id_negocio=None, limit=None, offset=0):
     with get_db() as (_, cursor):
         sql = """
             SELECT
@@ -128,11 +128,14 @@ def obtener_ventas_listas(id_negocio=None):
             sql += " AND v.id_negocio = %s"
             params.append(id_negocio)
         sql += " ORDER BY v.id_venta ASC"
+        if limit is not None:
+            sql += " LIMIT %s OFFSET %s"
+            params.extend([limit, offset])
         cursor.execute(sql, params)
         return cursor.fetchall()
 
 
-def obtener_entregas_pendientes(id_negocio=None):
+def obtener_entregas_pendientes(id_negocio=None, limit=None, offset=0):
     with get_db() as (_, cursor):
         sql = """
             SELECT
@@ -159,6 +162,9 @@ def obtener_entregas_pendientes(id_negocio=None):
             sql += " AND v.id_negocio = %s"
             params.append(id_negocio)
         sql += " GROUP BY v.id_venta ORDER BY v.fecha_estimada ASC"
+        if limit is not None:
+            sql += " LIMIT %s OFFSET %s"
+            params.extend([limit, offset])
         cursor.execute(sql, params)
         return cursor.fetchall()
 

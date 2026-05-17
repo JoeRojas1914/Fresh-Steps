@@ -12,6 +12,7 @@ BLOQUEO_MIN_PIN  = 30
 
 # Paginación
 POR_PAGINA_HISTORIAL_VENTAS = 20
+POR_PAGINA_VENTAS_ACTIVAS   = 30
 
 # Exportaciones Excel: máximo de filas para evitar agotamiento de RAM
 MAX_FILAS_EXPORTAR = 10_000

@@ -1,14 +1,8 @@
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from db import get_db
+from .negocio import cargar_tipos_por_negocio
 from .ventas_historial import registrar_historial_venta
-
-
-TIPOS_POR_NEGOCIO = {
-    1: "calzado",
-    2: "confeccion",
-    3: "maquila",
-}
 
 
 def crear_venta(
@@ -46,9 +40,10 @@ def crear_venta(
         id_venta = cursor.lastrowid
         total = Decimal("0.00")
 
+        tipos_negocio = cargar_tipos_por_negocio()
         for art in articulos:
             tipo_articulo = art["tipo_articulo"]
-            tipo_esperado = TIPOS_POR_NEGOCIO.get(id_negocio)
+            tipo_esperado = tipos_negocio.get(id_negocio)
 
             if tipo_esperado and tipo_articulo != tipo_esperado:
                 raise Exception(

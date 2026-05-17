@@ -11,14 +11,15 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS negocio (
     id_negocio INT AUTO_INCREMENT PRIMARY KEY,
-    nombre     VARCHAR(100) NOT NULL
+    nombre     VARCHAR(100) NOT NULL,
+    tipo       VARCHAR(30)  NULL
 );
 
 -- Datos iniciales (IDs fijos — el código los referencia directamente)
-INSERT IGNORE INTO negocio (id_negocio, nombre) VALUES
-    (1, 'Calzado'),
-    (2, 'Confección'),
-    (3, 'Maquila');
+INSERT IGNORE INTO negocio (id_negocio, nombre, tipo) VALUES
+    (1, 'Calzado',    'calzado'),
+    (2, 'Confección', 'confeccion'),
+    (3, 'Maquila',    'maquila');
 
 -- -------------------------------------------------------------
 -- Usuarios

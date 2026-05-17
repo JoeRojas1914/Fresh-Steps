@@ -1,6 +1,6 @@
 from datetime import date
 
-from config import METODOS_PAGO_VALIDOS
+from config import METODOS_PAGO_VALIDOS, POR_PAGINA_VENTAS_ACTIVAS
 from models.ventas import (
     eliminar_venta,
     marcar_entregada,
@@ -11,8 +11,9 @@ from models.ventas import (
     obtener_entregas_pendientes,
     obtener_historial_ventas,
     contar_historial_ventas,
+    contar_entregas_listas,
+    contar_entregas_pendientes,
     crear_venta,
-    TIPOS_POR_NEGOCIO,
 )
 
 from models.pagos import (
@@ -21,11 +22,18 @@ from models.pagos import (
     registrar_pago,
 )
 
-from models.negocio import obtener_negocios
+from models.negocio import obtener_negocios, cargar_tipos_por_negocio
 
 
-def listar_ventas_listas_service(id_negocio: int | None = None) -> dict:
-    ventas   = obtener_ventas_listas(id_negocio)
+def listar_ventas_listas_service(
+    id_negocio: int | None = None,
+    pagina: int = 1,
+) -> dict:
+    offset          = (pagina - 1) * POR_PAGINA_VENTAS_ACTIVAS
+    total_registros = contar_entregas_listas(id_negocio)
+    total_paginas   = max(1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS)
+
+    ventas   = obtener_ventas_listas(id_negocio, limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset)
     negocios = obtener_negocios()
 
     ids_venta    = [v["id_venta"] for v in ventas]
@@ -33,7 +41,6 @@ def listar_ventas_listas_service(id_negocio: int | None = None) -> dict:
     pagos_map    = obtener_pagos_venta(ids_venta)
 
     ventas_con_detalles = []
-
     for v in ventas:
         detalles     = detalles_map.get(v["id_venta"], [])
         pagos        = pagos_map.get(v["id_venta"], [])
@@ -51,29 +58,43 @@ def listar_ventas_listas_service(id_negocio: int | None = None) -> dict:
         ventas_con_detalles.append(v)
 
     return {
-        "ventas":   ventas_con_detalles,
-        "negocios": negocios,
-        "hoy":      date.today(),
+        "ventas":          ventas_con_detalles,
+        "negocios":        negocios,
+        "hoy":             date.today(),
+        "id_negocio":      id_negocio,
+        "pagina":          pagina,
+        "total_paginas":   total_paginas,
+        "total_registros": total_registros,
     }
 
 
-def listar_entregas_pendientes_service(id_negocio: int | None = None) -> dict:
-    ventas   = obtener_entregas_pendientes(id_negocio)
+def listar_entregas_pendientes_service(
+    id_negocio: int | None = None,
+    pagina: int = 1,
+) -> dict:
+    offset          = (pagina - 1) * POR_PAGINA_VENTAS_ACTIVAS
+    total_registros = contar_entregas_pendientes(id_negocio)
+    total_paginas   = max(1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS)
+
+    ventas   = obtener_entregas_pendientes(id_negocio, limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset)
     negocios = obtener_negocios()
 
     ids_venta    = [v["id_venta"] for v in ventas]
     detalles_map = obtener_detalles_venta(ids_venta)
 
     ventas_con_detalles = []
-
     for v in ventas:
         v["detalles"] = detalles_map.get(v["id_venta"], [])
         ventas_con_detalles.append(v)
 
     return {
-        "ventas":   ventas_con_detalles,
-        "negocios": negocios,
-        "hoy":      date.today(),
+        "ventas":          ventas_con_detalles,
+        "negocios":        negocios,
+        "hoy":             date.today(),
+        "id_negocio":      id_negocio,
+        "pagina":          pagina,
+        "total_paginas":   total_paginas,
+        "total_registros": total_registros,
     }
 
 
@@ -182,8 +203,8 @@ def _parsear_articulos_form(form: dict, tipo_permitido: str | None) -> list:
     return articulos
 
 
-def _validar_reglas_negocio(id_negocio: int, articulos: list) -> None:
-    if id_negocio in (1, 2):
+def _validar_reglas_negocio(tipo_negocio: str | None, articulos: list) -> None:
+    if tipo_negocio in ("calzado", "confeccion"):
         for a in articulos:
             if not a.get("servicios"):
                 raise ValueError("Cada artículo debe tener al menos 1 servicio.")
@@ -192,7 +213,7 @@ def _validar_reglas_negocio(id_negocio: int, articulos: list) -> None:
                     raise ValueError("Servicio inválido (sin id).")
                 if float(s.get("precio_aplicado") or 0) <= 0:
                     raise ValueError("El precio aplicado debe ser mayor a 0.")
-    if id_negocio == 3:
+    if tipo_negocio == "maquila":
         for a in articulos:
             if a.get("servicios"):
                 raise ValueError("Maquila no permite servicios.")
@@ -209,7 +230,8 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> int:
 
     prepago, monto_prepago   = _parsear_prepago(form)
     aplica_descuento, cantidad_descuento = _parsear_descuento(form)
-    articulos = _parsear_articulos_form(form, TIPOS_POR_NEGOCIO.get(id_negocio))
+    tipo_negocio = cargar_tipos_por_negocio().get(id_negocio)
+    articulos = _parsear_articulos_form(form, tipo_negocio)
 
     if not id_cliente or not fecha_estimada:
         raise ValueError(
@@ -219,7 +241,7 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> int:
     if not articulos:
         raise ValueError("Debes agregar al menos 1 artículo.")
 
-    _validar_reglas_negocio(id_negocio, articulos)
+    _validar_reglas_negocio(tipo_negocio, articulos)
 
     id_venta = crear_venta(
         id_negocio=id_negocio,

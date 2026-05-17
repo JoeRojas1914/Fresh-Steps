@@ -4,10 +4,12 @@
 {% from "components/alerts.html" import alerts %}
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal, modal_eliminar_venta %}
+{% from "components/pagination.html" import pagination %}
     <h1><i data-lucide="check-circle" width="24" height="24"></i> Entregas procesadas</h1>
 
     {{ alerts(get_flashed_messages(with_categories=true)) }}
 
+    <form method="GET" action="{{ url_for('ventas.ventas_listas') }}">
     <div class="filtro-box">
         <div class="filtro-row">
             <div class="filtro-item filtro-item--max280">
@@ -17,15 +19,19 @@
             </div>
             <div class="filtro-item filtro-item--max220 ml-12">
                 <label>Negocio</label>
-                <select id="filtro-negocio">
+                <select id="filtro-negocio" name="id_negocio" onchange="this.form.submit()">
                     <option value="">Todos los negocios</option>
                     {% for n in negocios %}
-                        <option value="{{ n.nombre | lower }}">{{ n.nombre }}</option>
+                        <option value="{{ n.id_negocio }}"
+                            {% if id_negocio == n.id_negocio %}selected{% endif %}>
+                            {{ n.nombre }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
         </div>
     </div>
+    </form>
 
     {% if ventas %}
 
@@ -151,6 +157,9 @@
         <p>No hay ventas listas para entregar en este momento.</p>
     </div>
     {% endif %}
+
+    {{ pagination(pagina, total_paginas, "ventas.ventas_listas",
+        {"id_negocio": id_negocio} if id_negocio else {}) }}
 
 {% call(section) modal("modalEntrega", "Entrega", "sm") %}
 

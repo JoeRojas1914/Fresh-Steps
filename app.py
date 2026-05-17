@@ -1,5 +1,6 @@
 import os
 import logging
+from logging.handlers import RotatingFileHandler
 from datetime import date
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from dotenv import load_dotenv
@@ -9,12 +10,32 @@ from flask_talisman import Talisman
 from extensions import limiter
 
 # ================= LOGGING =================
-_log_level = logging.DEBUG if os.getenv("FLASK_ENV") == "development" else logging.WARNING
-logging.basicConfig(
-    level=_log_level,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
+def _setup_logging() -> None:
+    is_dev   = os.getenv("FLASK_ENV") == "development"
+    level    = logging.DEBUG if is_dev else logging.INFO
+    fmt      = logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    root = logging.getLogger()
+    root.setLevel(level)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(level)
+    ch.setFormatter(fmt)
+    root.addHandler(ch)
+
+    os.makedirs("logs", exist_ok=True)
+    fh = RotatingFileHandler(
+        "logs/app.log", maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+    )
+    fh.setLevel(logging.INFO)
+    fh.setFormatter(fmt)
+    root.addHandler(fh)
+
+_setup_logging()
+logger = logging.getLogger(__name__)
 
 
 
@@ -82,6 +103,7 @@ def not_found(e):
 
 @app.errorhandler(500)
 def server_error(e):
+    logger.exception("Error no manejado: %s", e)
     return render_template("errors/500.html"), 500
 
 

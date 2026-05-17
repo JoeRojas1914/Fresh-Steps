@@ -92,30 +92,26 @@ def venta_ticket(id_venta):
 @ventas_bp.route("/ventas/listas")
 def ventas_listas():
     id_negocio = request.args.get("id_negocio", type=int)
+    pagina     = request.args.get("pagina", 1, type=int)
 
-    data = listar_ventas_listas_service(id_negocio)
+    data = listar_ventas_listas_service(id_negocio, pagina)
 
-    return render_template(
-        "ventas/ventas_listas.html",
-        **data
-    )
+    return render_template("ventas/ventas_listas.html", **data)
 
 
 @ventas_bp.route("/ventas/pendientes")
 def ventas_pendientes():
     try:
         id_negocio = request.args.get("id_negocio", type=int)
+        pagina     = request.args.get("pagina", 1, type=int)
 
-        data = listar_entregas_pendientes_service(id_negocio)
+        data = listar_entregas_pendientes_service(id_negocio, pagina)
 
-        return render_template(
-            "ventas/ventas_pendientes.html",
-            **data
-        )
+        return render_template("ventas/ventas_pendientes.html", **data)
 
     except Exception:
-        logger.exception("Error en ventas_pendientes id_negocio=%s", id_negocio)
-        return render_template("errors/403.html"), 500
+        logger.exception("Error en ventas_pendientes id_negocio=%s", request.args.get("id_negocio"))
+        return render_template("errors/500.html"), 500
 
 
 @ventas_bp.route("/ventas/marcar-lista/<int:id_venta>", methods=["POST"])
@@ -309,7 +305,7 @@ def exportar_historial_excel():
 
 @ventas_bp.route("/ventas/<int:id_venta>/historial")
 def historial_venta_por_id(id_venta):
-    from ventas import obtener_historial_venta
+    from models.ventas import obtener_historial_venta
     data = obtener_historial_venta(id_venta)
     # Serializar fechas
     from datetime import datetime, date
