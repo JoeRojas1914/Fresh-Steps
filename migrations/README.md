@@ -1,32 +1,23 @@
 # Migraciones de Base de Datos — Fresh Steps
 
-## Cómo aplicar una migración
+## Aplicar el esquema completo (BD nueva)
 
 ```bash
 mysql -u FreshStepsTest -p freshsteps < migrations/001_schema_completo.sql
 ```
 
-## Convención de numeración
+`001_schema_completo.sql` es el único archivo necesario para levantar una BD desde cero.
+Contiene tablas, datos iniciales e índices. Es idempotente (`IF NOT EXISTS`).
 
-```
-migrations/
-  001_schema_completo.sql       ← Estado inicial completo (mayo 2026)
-  002_agregar_campo_xxx.sql     ← Cambios incrementales
-  003_nueva_tabla_yyy.sql
-```
+## Agregar una migración incremental
 
-Cada archivo debe:
-- Usar `IF NOT EXISTS` o `IF EXISTS` para ser idempotente cuando sea posible
-- Incluir un comentario con la fecha y una descripción del cambio
+Cuando el esquema cambie en producción (una BD ya existente):
 
-## Crear una nueva migración
+1. Crear `migrations/002_descripcion_breve.sql` con solo el cambio incremental.
+2. Aplicarlo en producción: `mysql -u user -p freshstepsproduccion < migrations/002_descripcion_breve.sql`
+3. Incorporar el cambio también en `001_schema_completo.sql` para que las BDs nuevas lo incluyan.
 
-1. Copiar el número siguiente al último archivo existente
-2. Nombrar el archivo descriptivamente: `NNN_descripcion_breve.sql`
-3. Incluir solo el cambio incremental (no el esquema completo)
-
-Ejemplo:
 ```sql
--- Migración 002: agregar campo notas a clientes — junio 2026
+-- Ejemplo 002: agregar campo notas a clientes — junio 2026
 ALTER TABLE cliente ADD COLUMN notas TEXT AFTER direccion;
 ```

@@ -16,10 +16,10 @@ python -m pytest tests/test_ventas_service.py::test_venta_calzado_valida_crea_re
 
 ## Architecture
 
-Three-layer: **routes/** (Flask Blueprints) → **services/** (business logic) → **root \*.py files** (data access).
+Three-layer: **routes/** (Flask Blueprints) → **services/** (business logic) → **models/** (data access).
 
-- `routes/` import exclusively from `services/` — never directly from root data files.
-- `services/ventas_service.py` re-exports `marcar_entregada`, `obtener_venta`, `obtener_detalles_venta` from `ventas.py` so routes stay in one layer.
+- `routes/` import exclusively from `services/` — never directly from `models/`.
+- `services/ventas_service.py` re-exports `marcar_entregada`, `obtener_venta`, `obtener_detalles_venta` from `models/ventas.py` so routes stay in one layer.
 - `db.py` exposes `get_connection()` (raw connection) and `get_db()` (context manager with auto-commit/rollback). Pool size: 20, `autocommit=False`.
 
 ## Multi-business model
@@ -32,7 +32,7 @@ Three negocios with fixed IDs (referenced in code):
 | 2 | confeccion |
 | 3 | maquila |
 
-`TIPOS_POR_NEGOCIO` in `ventas.py` maps these IDs to article types. A `venta` belongs to exactly one negocio and only accepts articles of the matching type.
+`TIPOS_POR_NEGOCIO` in `models/ventas.py` maps these IDs to article types. A `venta` belongs to exactly one negocio and only accepts articles of the matching type.
 
 ## Authentication
 
@@ -72,7 +72,7 @@ for u in ('test_admin_pytest', 'test_caja_pytest'):
 conn.commit()
 ```
 
-## Frontend state (ventas_crear.js)
+## Frontend state (static/js/pages/ventas_crear.js)
 
 All mutable state lives in a single object `ventaState` (declared once with `typeof` guard):
 

@@ -1,7 +1,7 @@
 -- =============================================================
 -- Fresh Steps — Esquema completo de base de datos
--- Migración 001: estado del esquema a mayo 2026
--- Aplicar sobre una BD vacía: mysql -u user -p freshsteps < 001_schema_completo.sql
+-- Aplicar sobre una BD vacía: mysql -u user -p freshsteps < migrations/001_schema_completo.sql
+-- Idempotente: todas las sentencias usan IF NOT EXISTS
 -- =============================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     correo        VARCHAR(150),
     cp            VARCHAR(10),
     activo        TINYINT(1) NOT NULL DEFAULT 1,
+    session_token VARCHAR(64) NULL DEFAULT NULL,
     creado_en     DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -131,10 +132,10 @@ CREATE TABLE IF NOT EXISTS venta_historial (
 -- Artículos (tabla abstracta + especializaciones por tipo)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS articulo (
-    id_articulo  INT AUTO_INCREMENT PRIMARY KEY,
-    id_venta     INT NOT NULL,
+    id_articulo   INT AUTO_INCREMENT PRIMARY KEY,
+    id_venta      INT NOT NULL,
     tipo_articulo ENUM('calzado', 'confeccion', 'maquila') NOT NULL,
-    comentario   TEXT,
+    comentario    TEXT,
     FOREIGN KEY (id_venta) REFERENCES venta(id_venta)
 );
 
@@ -163,12 +164,12 @@ CREATE TABLE IF NOT EXISTS articulo_confeccion (
 );
 
 CREATE TABLE IF NOT EXISTS articulo_maquila (
-    id_articulo    INT PRIMARY KEY,
-    tipo           VARCHAR(100),
-    cantidad       INT NOT NULL DEFAULT 1,
+    id_articulo     INT PRIMARY KEY,
+    tipo            VARCHAR(100),
+    cantidad        INT NOT NULL DEFAULT 1,
     precio_unitario DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    CONSTRAINT chk_maquila_cantidad  CHECK (cantidad >= 1),
-    CONSTRAINT chk_maquila_precio    CHECK (precio_unitario >= 0),
+    CONSTRAINT chk_maquila_cantidad CHECK (cantidad >= 1),
+    CONSTRAINT chk_maquila_precio   CHECK (precio_unitario >= 0),
     FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo)
 );
 
@@ -177,7 +178,7 @@ CREATE TABLE IF NOT EXISTS articulo_servicio (
     id_articulo          INT NOT NULL,
     id_servicio          INT NOT NULL,
     precio_aplicado      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    CONSTRAINT chk_art_serv_precio   CHECK (precio_aplicado >= 0),
+    CONSTRAINT chk_art_serv_precio CHECK (precio_aplicado >= 0),
     FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo),
     FOREIGN KEY (id_servicio) REFERENCES servicio(id_servicio)
 );
@@ -186,14 +187,14 @@ CREATE TABLE IF NOT EXISTS articulo_servicio (
 -- Pagos
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pago_venta (
-    id_pago_venta  INT AUTO_INCREMENT PRIMARY KEY,
-    id_venta       INT NOT NULL,
-    fecha_pago     DATETIME DEFAULT CURRENT_TIMESTAMP,
-    monto          DECIMAL(10,2) NOT NULL,
-    tipo_pago      VARCHAR(50),        -- efectivo | tarjeta | transferencia
-    tipo_pago_venta VARCHAR(50),       -- prepago | final
+    id_pago_venta   INT AUTO_INCREMENT PRIMARY KEY,
+    id_venta        INT NOT NULL,
+    fecha_pago      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    monto           DECIMAL(10,2) NOT NULL,
+    tipo_pago       VARCHAR(50),        -- efectivo | tarjeta | transferencia
+    tipo_pago_venta VARCHAR(50),        -- prepago | final
     id_usuario_cobro INT,
-    CONSTRAINT chk_pago_monto        CHECK (monto >= 0),
+    CONSTRAINT chk_pago_monto CHECK (monto >= 0),
     FOREIGN KEY (id_venta)         REFERENCES venta(id_venta),
     FOREIGN KEY (id_usuario_cobro) REFERENCES usuario(id_usuario)
 );
@@ -212,7 +213,7 @@ CREATE TABLE IF NOT EXISTS gastos (
     tipo_pago        VARCHAR(50),
     id_usuario       INT,
     eliminado        TINYINT(1) NOT NULL DEFAULT 0,
-    CONSTRAINT chk_gasto_total       CHECK (total >= 0),
+    CONSTRAINT chk_gasto_total CHECK (total >= 0),
     FOREIGN KEY (id_negocio) REFERENCES negocio(id_negocio),
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
@@ -250,7 +251,7 @@ CREATE TABLE IF NOT EXISTS login_log (
     id_log     INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT,
     usuario    VARCHAR(100),
-    metodo     VARCHAR(50),       -- password_admin | pin_caja
+    metodo     VARCHAR(50),        -- password_admin | pin_caja
     exito      TINYINT(1) NOT NULL DEFAULT 0,
     ip         VARCHAR(50),
     user_agent TEXT,
@@ -259,12 +260,45 @@ CREATE TABLE IF NOT EXISTS login_log (
 );
 
 CREATE TABLE IF NOT EXISTS login_intentos (
-    id_intento     INT AUTO_INCREMENT PRIMARY KEY,
-    usuario        VARCHAR(100) NOT NULL,
-    ip             VARCHAR(50)  NOT NULL,
-    intentos       INT NOT NULL DEFAULT 0,
+    id_intento      INT AUTO_INCREMENT PRIMARY KEY,
+    usuario         VARCHAR(100) NOT NULL,
+    ip              VARCHAR(50)  NOT NULL,
+    intentos        INT NOT NULL DEFAULT 0,
     bloqueado_hasta DATETIME,
     UNIQUE KEY uq_usuario_ip (usuario, ip)
 );
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- =============================================================
+-- Índices de rendimiento
+-- =============================================================
+
+-- usuario
+CREATE INDEX IF NOT EXISTS idx_usuario_usuario             ON usuario(usuario);
+
+-- cliente
+CREATE INDEX IF NOT EXISTS idx_cliente_nombre_apellido     ON cliente(nombre, apellido);
+CREATE INDEX IF NOT EXISTS idx_cliente_id_usuario          ON cliente(id_usuario);
+
+-- venta
+CREATE INDEX IF NOT EXISTS idx_venta_id_cliente            ON venta(id_cliente, eliminado);
+CREATE INDEX IF NOT EXISTS idx_venta_id_negocio            ON venta(id_negocio, eliminado);
+CREATE INDEX IF NOT EXISTS idx_venta_fecha_recibo          ON venta(fecha_recibo);
+CREATE INDEX IF NOT EXISTS idx_venta_fecha_lista           ON venta(fecha_lista);
+
+-- articulo
+CREATE INDEX IF NOT EXISTS idx_articulo_id_venta           ON articulo(id_venta);
+
+-- articulo_servicio
+CREATE INDEX IF NOT EXISTS idx_articulo_servicio_id_articulo ON articulo_servicio(id_articulo);
+
+-- pago_venta
+CREATE INDEX IF NOT EXISTS idx_pago_venta_id_venta         ON pago_venta(id_venta);
+
+-- gastos
+CREATE INDEX IF NOT EXISTS idx_gastos_fecha_registro       ON gastos(fecha_registro);
+CREATE INDEX IF NOT EXISTS idx_gastos_id_negocio           ON gastos(id_negocio, eliminado);
+
+-- login_intentos
+CREATE INDEX IF NOT EXISTS idx_login_intentos_usuario      ON login_intentos(usuario);
