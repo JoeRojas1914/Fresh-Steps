@@ -74,7 +74,7 @@ _CSP = {
     "style-src": ["'self'", "fonts.googleapis.com", "'unsafe-inline'"],
     "font-src": ["'self'", "fonts.gstatic.com"],
     "img-src": ["'self'", "data:"],
-    "connect-src": "'self'",
+    "connect-src": ["'self'", "cdn.jsdelivr.net"],
 }
 Talisman(
     app,

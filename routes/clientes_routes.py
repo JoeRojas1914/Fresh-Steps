@@ -118,7 +118,7 @@ def api_crear_cliente():
 @clientes_bp.route("/clientes/exportar")
 @admin_required
 def exportar_clientes_excel():
-    from clientes import obtener_clientes
+    from models.clientes import obtener_clientes
 
     incluir_eliminados = request.args.get("eliminados") == "1"
     clientes = obtener_clientes(limit=MAX_FILAS_EXPORTAR, offset=0, incluir_eliminados=incluir_eliminados)
@@ -150,9 +150,9 @@ def exportar_clientes_excel():
 @clientes_bp.route("/clientes/<int:id_cliente>/exportar")
 @admin_required
 def exportar_cliente_excel(id_cliente):
-    from ventas import obtener_ventas_cliente, obtener_detalles_venta
-    from pagos import obtener_pagos_venta
-    from clientes import obtener_cliente_por_id
+    from models.ventas_detalles import obtener_ventas_cliente, obtener_detalles_venta
+    from models.pagos import obtener_pagos_venta
+    from models.clientes import obtener_cliente_por_id
 
     id_negocio   = request.args.get("id_negocio")  or None
     fecha_inicio = request.args.get("fecha_inicio") or None

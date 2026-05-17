@@ -134,7 +134,7 @@ def restaurar_servicio(id_servicio):
 @servicios_bp.route("/servicios/exportar")
 @admin_required
 def exportar_servicios_excel():
-    from servicios import obtener_servicios
+    from models.servicios import obtener_servicios
 
     id_negocio         = request.args.get("id_negocio") or None
     incluir_eliminados = request.args.get("eliminados") == "1"

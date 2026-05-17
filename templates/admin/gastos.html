@@ -201,7 +201,7 @@
             {% endif %}
         </td>
 
-        <td>{{ g.fecha_registro.strftime("%d %b %Y") }}</td>
+        <td>{{ g.fecha_registro.strftime("%d %b %Y") if g.fecha_registro else "—" }}</td>
 
         <td>
             {% if g.activo %}

@@ -29,9 +29,9 @@ gastos_bp = Blueprint("gastos", __name__)
 @gastos_bp.route("/gastos")
 @admin_required
 def gastos():
-    id_negocio         = request.args.get("id_negocio")
-    fecha_inicio       = request.args.get("fecha_inicio")
-    fecha_fin          = request.args.get("fecha_fin")
+    id_negocio         = request.args.get("id_negocio")   or None
+    fecha_inicio       = request.args.get("fecha_inicio") or None
+    fecha_fin          = request.args.get("fecha_fin")    or None
     pagina             = request.args.get("pagina", 1, type=int)
     incluir_eliminados = request.args.get("eliminados") == "1"
 
@@ -105,7 +105,7 @@ def restaurar_gasto_route(id_gasto):
 @gastos_bp.route("/gastos/exportar")
 @admin_required
 def exportar_gastos_excel():
-    from gastos import obtener_gastos
+    from models.gastos import obtener_gastos
 
     id_negocio         = request.args.get("id_negocio")  or None
     fecha_inicio       = request.args.get("fecha_inicio") or None
