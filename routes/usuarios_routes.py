@@ -32,7 +32,7 @@ def listar_usuarios():
     )
 
     return render_template(
-        "usuarios.html",
+        "admin/usuarios.html",
         usuarios=usuarios,
         total_usuarios=len(usuarios),
         q=q, rol=rol, activo=activo

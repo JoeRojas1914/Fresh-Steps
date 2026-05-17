@@ -27,11 +27,11 @@ def login():
 
         if usuario == "LOCKED":
             flash("Cuenta bloqueada por demasiados intentos.", "error")
-            return render_template("login.html")
+            return render_template("auth/login.html")
 
         if not usuario:
             flash("Usuario o contraseña incorrectos", "error")
-            return render_template("login.html")
+            return render_template("auth/login.html")
 
 
         session.clear()
@@ -56,7 +56,7 @@ def login():
         return redirect(url_for("auth.pin_login"))
 
 
-    return render_template("login.html")
+    return render_template("auth/login.html")
 
 @auth_bp.route("/pin", methods=["GET", "POST"])
 @limiter.limit("10 per minute", methods=["POST"])
@@ -68,7 +68,7 @@ def pin_login():
 
 
     if request.method == "GET":
-        return render_template("pin.html")
+        return render_template("auth/pin.html")
 
 
     usuario = login_pin_service(
@@ -78,11 +78,11 @@ def pin_login():
 
     if usuario == "LOCKED":
         flash("PIN bloqueado por demasiados intentos.", "error")
-        return render_template("pin.html")
+        return render_template("auth/pin.html")
 
     if not usuario:
         flash("PIN incorrecto", "error")
-        return render_template("pin.html")
+        return render_template("auth/pin.html")
 
 
     session.clear()

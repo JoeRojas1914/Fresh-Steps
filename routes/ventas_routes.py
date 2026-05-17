@@ -49,7 +49,7 @@ def guardar_venta():
 
 @ventas_bp.route("/ventas")
 def ventas():
-    return render_template("ventas_crear.html")
+    return render_template("ventas/ventas_crear.html")
 
 
 @ventas_bp.route("/ventas/entregar/<int:id_venta>", methods=["POST"])
@@ -78,13 +78,13 @@ def entregar_venta(id_venta):
 def venta_ticket(id_venta):
     venta = obtener_venta(id_venta)
     if not venta:
-        return render_template("404.html"), 404
+        return render_template("errors/404.html"), 404
 
     detalles_dict = obtener_detalles_venta([id_venta])
     detalles = detalles_dict.get(id_venta, [])
 
     return render_template(
-        "ticket_venta.html",
+        "ventas/ticket_venta.html",
         venta=venta,
         detalles=detalles
     )
@@ -96,7 +96,7 @@ def ventas_listas():
     data = listar_ventas_listas_service(id_negocio)
 
     return render_template(
-        "ventas_listas.html",
+        "ventas/ventas_listas.html",
         **data
     )
 
@@ -109,13 +109,13 @@ def ventas_pendientes():
         data = listar_entregas_pendientes_service(id_negocio)
 
         return render_template(
-            "ventas_pendientes.html",
+            "ventas/ventas_pendientes.html",
             **data
         )
 
     except Exception:
         logger.exception("Error en ventas_pendientes id_negocio=%s", id_negocio)
-        return render_template("403.html"), 500
+        return render_template("errors/403.html"), 500
 
 
 @ventas_bp.route("/ventas/marcar-lista/<int:id_venta>", methods=["POST"])
@@ -187,15 +187,15 @@ def historial_ventas():
     mostrar_eliminadas = request.args.get('eliminadas') == '1'
     data = historial_ventas_service(id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas, q=q)
 
-    return render_template("historial_ventas.html", **data)
+    return render_template("ventas/historial_ventas.html", **data)
 
 
 
 @ventas_bp.route("/ventas/historial/exportar")
 @admin_required
 def exportar_historial_excel():
-    from ventas import obtener_historial_ventas
-    from pagos import obtener_pagos_venta
+    from models.ventas import obtener_historial_ventas
+    from models.pagos import obtener_pagos_venta
 
     id_negocio   = request.args.get("id_negocio",  type=int)
     fecha_inicio = request.args.get("fecha_inicio") or None

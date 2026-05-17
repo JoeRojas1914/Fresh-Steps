@@ -16,7 +16,7 @@ def admin_required(f):
             )
             if wants_json:
                 return jsonify({"ok": False, "error": "No autorizado"}), 403
-            return render_template("403.html"), 403
+            return render_template("errors/403.html"), 403
         return f(*args, **kwargs)
     return decorated
 
@@ -131,4 +131,4 @@ def init_auth_middleware(app):
         if session.get("rol") == "caja" and endpoint in RUTAS_CAJA:
             return
 
-        return render_template("403.html"), 403
+        return render_template("errors/403.html"), 403

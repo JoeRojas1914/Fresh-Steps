@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 def estadisticas():
     try:
         data = dashboard_page_data_service()
-        return render_template("estadisticas.html", **data)
+        return render_template("admin/estadisticas.html", **data)
     except Exception:
         logger.exception("Error en estadisticas id_usuario=%s", session.get("id_usuario"))
-        return render_template("500.html"), 500
+        return render_template("errors/500.html"), 500
 
 
 @estadisticas_bp.route("/api/estadisticas/dashboard")

@@ -45,7 +45,7 @@ def servicios():
     negocios = obtener_negocios()
 
     return render_template(
-        "servicios.html",
+        "admin/servicios.html",
         servicios=data["servicios"],
         negocios=negocios,
         id_negocio=id_negocio,

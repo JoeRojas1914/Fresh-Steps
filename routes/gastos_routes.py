@@ -41,7 +41,7 @@ def gastos():
         incluir_eliminados=incluir_eliminados
     )
     return render_template(
-        "gastos.html",
+        "admin/gastos.html",
         gastos=data["gastos"], negocios=obtener_negocios(),
         pagina=pagina, total_paginas=data["total_paginas"],
         incluir_eliminados=incluir_eliminados

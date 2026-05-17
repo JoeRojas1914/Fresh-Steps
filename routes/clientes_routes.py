@@ -35,7 +35,7 @@ def clientes():
     incluir_eliminados = request.args.get("eliminados") == "1"
     data = listar_clientes_service(q=q, pagina=pagina, incluir_eliminados=incluir_eliminados)
     return render_template(
-        "clientes.html",
+        "clientes/clientes.html",
         clientes=data["clientes"], q=q, pagina=pagina,
         total_paginas=data["total_paginas"],
         total_clientes=data["total_clientes"],
@@ -104,7 +104,7 @@ def api_clientes():
 def ver_cliente(id_cliente):
     filtros = request.args
     data = obtener_cliente_detalle_service(id_cliente, filtros)
-    return render_template("cliente_perfil.html", **data)
+    return render_template("clientes/cliente_perfil.html", **data)
 
 
 @clientes_bp.route("/api/clientes/crear", methods=["POST"])
