@@ -19,7 +19,6 @@ function inputConLabel(label, name, placeholder = "", required = false, type = "
                 placeholder="${placeholder}"
                 ${required ? "required" : ""}
                 ${extra}
-                oninput="validarFormulario(); actualizarTotal(); validarArticuloVisual(this.closest('.articulo-item'))"
             >
         </div>
     `;
@@ -88,7 +87,7 @@ function agregarArticulo() {
                 <div class="zapato-titulo">
                     <i data-lucide="receipt" width="14" height="14"></i> Artículo ${index + 1}${negNombre ? `<span class="zapato-titulo-badge">${negNombre}</span>` : ""}
                 </div>
-                <button type="button" class="btn btn--danger btn--sm" onclick="eliminarArticulo(this)">
+                <button type="button" data-action="delete-article" class="btn btn--danger btn--sm">
                     <i data-lucide="x" width="14" height="14"></i>
                 </button>
             </div>
@@ -101,7 +100,8 @@ function agregarArticulo() {
     actualizarEmptyState();
     if (window.lucide) lucide.createIcons();
 
-    div.querySelector(".articulo-resumen").addEventListener("click", function () {
+    div.querySelector(".articulo-resumen").addEventListener("click", function (e) {
+        if (e.target.closest("button")) return;
         abrirArticuloDesdeResumen(this);
     });
 

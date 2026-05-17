@@ -53,8 +53,7 @@ function crearServiciosSelect(indexArticulo) {
         <div class="form-group servicios-box" data-articulo="${indexArticulo}">
             <div class="servicios-header">
                 <label class="form-label">Servicios</label>
-                <button type="button" class="btn btn--info btn--sm"
-                        onclick="agregarServicio(${indexArticulo})">
+                <button type="button" data-action="add-service" class="btn btn--info btn--sm">
                     <i data-lucide="plus" width="14" height="14"></i> Agregar servicio
                 </button>
             </div>
@@ -68,18 +67,15 @@ function crearServiciosSelect(indexArticulo) {
 function crearFilaServicio(indexArticulo, indexServicio, opcionesHTML) {
     return `
         <div class="servicio-item" data-index-servicio="${indexServicio}">
-            <select name="articulos[${indexArticulo}][servicios][${indexServicio}][id_servicio]"
-                    onchange="onChangeServicio(this, ${indexArticulo}); validarFormulario(); actualizarTotal(); validarArticuloVisual(this.closest('.articulo-item'))">
+            <select name="articulos[${indexArticulo}][servicios][${indexServicio}][id_servicio]">
                 ${opcionesHTML}
             </select>
             <input type="number" min="0" step="0.01"
                    class="precio-aplicado"
                    name="articulos[${indexArticulo}][servicios][${indexServicio}][precio_aplicado]"
                    placeholder="Precio aplicado"
-                   value="" disabled data-editado="0"
-                   oninput="marcarPrecioEditado(this); validarFormulario(); actualizarTotal()">
-            <button type="button" class="btn btn--danger btn--sm"
-                    onclick="eliminarServicioPro(this, ${indexArticulo})">
+                   value="" disabled data-editado="0">
+            <button type="button" data-action="delete-service" class="btn btn--danger btn--sm">
                 <i data-lucide="x" width="14" height="14"></i>
             </button>
         </div>

@@ -122,6 +122,48 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.getElementById("btnAgregarArticulo").addEventListener("click", agregarArticulo);
 
+    /* ── Event delegation para artículos (reemplaza inline handlers bloqueados por CSP) ── */
+    const articulosContainer = document.getElementById("articulosContainer");
+
+    articulosContainer.addEventListener("change", e => {
+        const sel = e.target;
+        if (sel.tagName !== "SELECT" || !sel.closest(".servicio-item")) return;
+        const box = sel.closest(".servicios-box");
+        const indexArticulo = parseInt(box?.dataset?.articulo ?? "0");
+        onChangeServicio(sel, indexArticulo);
+        validarFormulario();
+        actualizarTotal();
+        validarArticuloVisual(sel.closest(".articulo-item"));
+    });
+
+    articulosContainer.addEventListener("input", e => {
+        const target = e.target;
+        if (target.classList.contains("precio-aplicado")) {
+            marcarPrecioEditado(target);
+        }
+        validarFormulario();
+        actualizarTotal();
+        const art = target.closest(".articulo-item");
+        if (art) validarArticuloVisual(art);
+    });
+
+    articulosContainer.addEventListener("click", e => {
+        const btn = e.target.closest("[data-action]");
+        if (!btn) return;
+        const action = btn.dataset.action;
+        if (action === "delete-article") {
+            eliminarArticulo(btn);
+        } else if (action === "add-service") {
+            const box = btn.closest(".servicios-box");
+            const indexArticulo = parseInt(box?.dataset?.articulo ?? "0");
+            agregarServicio(indexArticulo);
+        } else if (action === "delete-service") {
+            const box = btn.closest(".servicios-box");
+            const indexArticulo = parseInt(box?.dataset?.articulo ?? "0");
+            eliminarServicioPro(btn, indexArticulo);
+        }
+    });
+
     /* ── Inicialización ── */
     bloquearFechaMinima();
     togglePrepago();
