@@ -1,7 +1,10 @@
 -- =============================================================
 -- Fresh Steps — Esquema completo de base de datos
--- Aplicar sobre una BD vacía: mysql -u user -p freshsteps < migrations/001_schema_completo.sql
--- Idempotente: todas las sentencias usan IF NOT EXISTS
+-- Idempotente: se puede aplicar en BDs vacías Y en BDs ya existentes
+--
+-- BD nueva:     mysql -u usuario -p freshsteps            < migrations/001_schema_completo.sql
+-- BD test:      mysql -u usuario -p freshsteps            < migrations/001_schema_completo.sql
+-- Producción:   mysql -u usuario -p freshstepsproduccion  < migrations/001_schema_completo.sql
 -- =============================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -20,6 +23,12 @@ INSERT IGNORE INTO negocio (id_negocio, nombre, tipo) VALUES
     (1, 'Calzado',    'calzado'),
     (2, 'Confección', 'confeccion'),
     (3, 'Maquila',    'maquila');
+
+-- Columna `tipo` en BDs existentes — solo ejecutar si la columna no existe todavía
+-- ALTER TABLE negocio ADD COLUMN tipo VARCHAR(30) NULL AFTER nombre;
+-- UPDATE negocio SET tipo = 'calzado'    WHERE id_negocio = 1 AND tipo IS NULL;
+-- UPDATE negocio SET tipo = 'confeccion' WHERE id_negocio = 2 AND tipo IS NULL;
+-- UPDATE negocio SET tipo = 'maquila'    WHERE id_negocio = 3 AND tipo IS NULL;
 
 -- -------------------------------------------------------------
 -- Usuarios
