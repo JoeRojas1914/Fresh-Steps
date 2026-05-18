@@ -169,36 +169,32 @@ def obtener_entregas_pendientes(id_negocio=None, limit=None, offset=0):
         return cursor.fetchall()
 
 
-def contar_entregas_listas(id_negocio=None):
+def contar_entregas_resumen(id_negocio=None):
+    sql = """
+        SELECT
+            SUM(CASE WHEN fecha_lista IS NOT NULL AND fecha_entrega IS NULL THEN 1 ELSE 0 END) AS listas,
+            SUM(CASE WHEN fecha_lista IS NULL     AND fecha_entrega IS NULL THEN 1 ELSE 0 END) AS pendientes
+        FROM venta
+        WHERE eliminado = 0
+    """
+    params = []
+    if id_negocio is not None:
+        sql += " AND id_negocio = %s"
+        params.append(id_negocio)
     with get_db() as (_, cursor):
-        sql = (
-            "SELECT COUNT(*) AS total FROM venta"
-            " WHERE fecha_lista IS NOT NULL"
-            "   AND fecha_entrega IS NULL"
-            "   AND eliminado = 0"
-        )
-        params = []
-        if id_negocio is not None:
-            sql += " AND id_negocio = %s"
-            params.append(id_negocio)
         cursor.execute(sql, params)
-        return cursor.fetchone()["total"]
+        row = cursor.fetchone()
+    return int(row["listas"] or 0), int(row["pendientes"] or 0)
+
+
+def contar_entregas_listas(id_negocio=None):
+    listas, _ = contar_entregas_resumen(id_negocio)
+    return listas
 
 
 def contar_entregas_pendientes(id_negocio=None):
-    with get_db() as (_, cursor):
-        sql = (
-            "SELECT COUNT(*) AS total FROM venta"
-            " WHERE fecha_lista IS NULL"
-            "   AND fecha_entrega IS NULL"
-            "   AND eliminado = 0"
-        )
-        params = []
-        if id_negocio is not None:
-            sql += " AND id_negocio = %s"
-            params.append(id_negocio)
-        cursor.execute(sql, params)
-        return cursor.fetchone()["total"]
+    _, pendientes = contar_entregas_resumen(id_negocio)
+    return pendientes
 
 
 def contar_ventas_cliente(id_cliente, id_negocio=None, fecha_inicio=None, fecha_fin=None):

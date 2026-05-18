@@ -510,37 +510,48 @@ def obtener_ingresos_por_mes(anio, id_negocio):
 
 
 def obtener_unidades_por_mes(anio, id_negocio):
-    sql = """
-        SELECT MONTH(v.fecha_recibo) AS mes,
-               COALESCE(
-                   (SELECT COUNT(*) FROM articulo a
-                    JOIN articulo_calzado ac ON ac.id_articulo = a.id_articulo
-                    WHERE a.id_venta = v.id_venta) +
-                   (SELECT COALESCE(SUM(ac2.cantidad),0) FROM articulo a2
-                    JOIN articulo_confeccion ac2 ON ac2.id_articulo = a2.id_articulo
-                    WHERE a2.id_venta = v.id_venta) +
-                   (SELECT COALESCE(SUM(am.cantidad),0) FROM articulo a3
-                    JOIN articulo_maquila am ON am.id_articulo = a3.id_articulo
-                    WHERE a3.id_venta = v.id_venta)
-               , 0) AS unidades
-        FROM venta v
-        WHERE YEAR(v.fecha_recibo) = %s AND v.eliminado = 0
-    """
-    params = [anio]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    meses_labels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun",
+                    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+    totals: defaultdict = defaultdict(int)
 
     with get_db() as (_, cursor):
-        cursor.execute(sql, params)
-        rows_raw = cursor.fetchall()
+        if id_negocio in ("1", "all"):
+            cursor.execute("""
+                SELECT MONTH(v.fecha_recibo) AS mes, COUNT(a.id_articulo) AS u
+                FROM venta v
+                JOIN articulo a          ON a.id_venta     = v.id_venta
+                JOIN articulo_calzado ac ON ac.id_articulo = a.id_articulo
+                WHERE YEAR(v.fecha_recibo) = %s AND v.eliminado = 0 AND v.id_negocio = 1
+                GROUP BY mes
+            """, [anio])
+            for r in cursor.fetchall():
+                totals[r["mes"]] += int(r["u"] or 0)
 
-    acumulado = {}
-    for r in rows_raw:
-        m = r["mes"]
-        acumulado[m] = acumulado.get(m, 0) + int(r["unidades"] or 0)
-    meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-    return [{"label": meses[i], "total": acumulado.get(i + 1, 0)} for i in range(12)]
+        if id_negocio in ("2", "all"):
+            cursor.execute("""
+                SELECT MONTH(v.fecha_recibo) AS mes, COALESCE(SUM(ac2.cantidad), 0) AS u
+                FROM venta v
+                JOIN articulo a              ON a.id_venta      = v.id_venta
+                JOIN articulo_confeccion ac2 ON ac2.id_articulo = a.id_articulo
+                WHERE YEAR(v.fecha_recibo) = %s AND v.eliminado = 0 AND v.id_negocio = 2
+                GROUP BY mes
+            """, [anio])
+            for r in cursor.fetchall():
+                totals[r["mes"]] += int(r["u"] or 0)
+
+        if id_negocio in ("3", "all"):
+            cursor.execute("""
+                SELECT MONTH(v.fecha_recibo) AS mes, COALESCE(SUM(am.cantidad), 0) AS u
+                FROM venta v
+                JOIN articulo a          ON a.id_venta     = v.id_venta
+                JOIN articulo_maquila am ON am.id_articulo = a.id_articulo
+                WHERE YEAR(v.fecha_recibo) = %s AND v.eliminado = 0 AND v.id_negocio = 3
+                GROUP BY mes
+            """, [anio])
+            for r in cursor.fetchall():
+                totals[r["mes"]] += int(r["u"] or 0)
+
+    return [{"label": meses_labels[i], "total": totals[i + 1]} for i in range(12)]
 
 
 def obtener_metodos_pago(inicio, fin, id_negocio):

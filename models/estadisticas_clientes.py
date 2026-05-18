@@ -12,7 +12,8 @@ def obtener_top_clientes(inicio, fin, id_negocio, limit=5):
             SUM(v.total)       AS total_gastado
         FROM venta v
         JOIN cliente c ON c.id_cliente = v.id_cliente
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE v.fecha_recibo >= %s
+          AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -38,7 +39,8 @@ def obtener_clientes_unicos(inicio, fin, id_negocio):
     sql = """
         SELECT COUNT(DISTINCT id_cliente) AS total
         FROM venta
-        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+        WHERE fecha_recibo >= %s
+          AND fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND eliminado = 0
           AND id_cliente IS NOT NULL
     """
@@ -56,13 +58,14 @@ def obtener_clientes_nuevos(inicio, fin, id_negocio):
     sql = """
         SELECT COUNT(DISTINCT v.id_cliente) AS total
         FROM venta v
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE v.fecha_recibo >= %s
+          AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
           AND v.id_cliente IS NOT NULL
           AND NOT EXISTS (
               SELECT 1 FROM venta v2
-              WHERE v2.id_cliente = v.id_cliente
-                AND v2.eliminado  = 0
+              WHERE v2.id_cliente  = v.id_cliente
+                AND v2.eliminado   = 0
                 AND v2.fecha_recibo < v.fecha_recibo
           )
     """
@@ -83,13 +86,14 @@ def obtener_tasa_retorno(inicio, fin, id_negocio):
             COUNT(DISTINCT CASE
                 WHEN EXISTS (
                     SELECT 1 FROM venta v2
-                    WHERE v2.id_cliente = v.id_cliente
-                      AND v2.eliminado  = 0
-                      AND DATE(v2.fecha_recibo) < %s
+                    WHERE v2.id_cliente  = v.id_cliente
+                      AND v2.eliminado   = 0
+                      AND v2.fecha_recibo < %s
                 ) THEN v.id_cliente
             END) AS recurrentes
         FROM venta v
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE v.fecha_recibo >= %s
+          AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
           AND v.id_cliente IS NOT NULL
     """
@@ -113,7 +117,8 @@ def obtener_gasto_promedio_cliente(inicio, fin, id_negocio):
             COALESCE(SUM(v.total), 0)        AS total_ingresos,
             COUNT(DISTINCT v.id_cliente)      AS clientes_unicos
         FROM venta v
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE v.fecha_recibo >= %s
+          AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
           AND v.id_cliente IS NOT NULL
     """

@@ -47,7 +47,7 @@ from routes.auth_routes import auth_bp
 from routes.usuarios_routes import usuarios_bp
 from routes.ventas_routes import ventas_bp
 from middleware.auth_middleware import init_auth_middleware
-from models.ventas import contar_entregas_pendientes, contar_entregas_listas
+from models.ventas import contar_entregas_resumen
 
 
 
@@ -99,7 +99,7 @@ init_auth_middleware(app)
 @app.after_request
 def add_cache_headers(response):
     if request.path.startswith("/static/"):
-        response.cache_control.max_age = 3600
+        response.cache_control.max_age = 604800  # 7 días
         response.cache_control.public = True
     return response
 
@@ -135,10 +135,11 @@ def index():
     hoy_dt = date.today()
     fecha_bonita = f"{dias[hoy_dt.weekday()]} {hoy_dt.day} de {meses[hoy_dt.month-1]}, {hoy_dt.year}"
 
+    total_entregas, total_pendientes = contar_entregas_resumen()
     return render_template(
         "index.html",
-        total_entregas   = contar_entregas_listas(),
-        total_pendientes = contar_entregas_pendientes(),
+        total_entregas   = total_entregas,
+        total_pendientes = total_pendientes,
         nombre_usuario   = session.get("nombre") or session.get("usuario", "").capitalize(),
         fecha_bonita     = fecha_bonita,
     )

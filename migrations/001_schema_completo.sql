@@ -1,10 +1,5 @@
 -- =============================================================
 -- Fresh Steps — Esquema completo de base de datos
--- Idempotente: se puede aplicar en BDs vacías Y en BDs ya existentes
---
--- BD nueva:     mysql -u usuario -p freshsteps            < migrations/001_schema_completo.sql
--- BD test:      mysql -u usuario -p freshsteps            < migrations/001_schema_completo.sql
--- Producción:   mysql -u usuario -p freshstepsproduccion  < migrations/001_schema_completo.sql
 -- =============================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -305,6 +300,7 @@ CREATE INDEX IF NOT EXISTS idx_articulo_servicio_id_articulo ON articulo_servici
 
 -- pago_venta
 CREATE INDEX IF NOT EXISTS idx_pago_venta_id_venta         ON pago_venta(id_venta);
+CREATE INDEX IF NOT EXISTS idx_pago_venta_fecha_pago       ON pago_venta(fecha_pago);
 
 -- gastos
 CREATE INDEX IF NOT EXISTS idx_gastos_fecha_registro       ON gastos(fecha_registro);
@@ -312,3 +308,7 @@ CREATE INDEX IF NOT EXISTS idx_gastos_id_negocio           ON gastos(id_negocio,
 
 -- login_intentos
 CREATE INDEX IF NOT EXISTS idx_login_intentos_usuario      ON login_intentos(usuario);
+
+-- venta: índices compuestos para filtros de rendimiento
+CREATE INDEX IF NOT EXISTS idx_venta_fecha_recibo_eliminado   ON venta(fecha_recibo, eliminado);
+CREATE INDEX IF NOT EXISTS idx_venta_id_cliente_fecha_recibo  ON venta(id_cliente, fecha_recibo, eliminado);
