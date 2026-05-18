@@ -95,6 +95,15 @@ app.register_blueprint(ventas_bp)
 init_auth_middleware(app)
 
 
+# ================= STATIC CACHE =================
+@app.after_request
+def add_cache_headers(response):
+    if request.path.startswith("/static/"):
+        response.cache_control.max_age = 3600
+        response.cache_control.public = True
+    return response
+
+
 # ================= ERROR HANDLERS =================
 @app.errorhandler(404)
 def not_found(e):

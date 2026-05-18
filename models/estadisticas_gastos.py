@@ -6,35 +6,37 @@ from .estadisticas_ventas import generar_semanas_rango
 
 def obtener_gastos_por_semana_y_proveedor(inicio: date, fin: date, id_negocio: str):
     semanas = generar_semanas_rango(inicio, fin)
-    data_por_proveedor = defaultdict(lambda: [0] * len(semanas))
+    data_por_proveedor = defaultdict(lambda: [0.0] * len(semanas))
+
+    yw_to_idx = {
+        s["inicio"].isocalendar()[0] * 100 + s["inicio"].isocalendar()[1]: i
+        for i, s in enumerate(semanas)
+    }
+
+    sql = """
+        SELECT YEARWEEK(fecha_registro, 1) AS yw, proveedor, SUM(total) AS total
+        FROM gastos
+        WHERE fecha_registro >= %s
+          AND fecha_registro <= %s
+    """
+    params = [inicio, fin]
+    if id_negocio != "all":
+        sql += " AND id_negocio = %s"
+        params.append(id_negocio)
+    sql += " GROUP BY yw, proveedor"
 
     with get_db() as (_, cursor):
-        for i, s in enumerate(semanas):
-            semana_inicio_real = max(s["inicio"], inicio)
-            semana_fin_real    = min(s["fin"],    fin)
-
-            sql = """
-                SELECT proveedor, SUM(total) AS total
-                FROM gastos
-                WHERE fecha_registro >= %s
-                  AND fecha_registro <= %s
-            """
-            params = [semana_inicio_real, semana_fin_real]
-
-            if id_negocio != "all":
-                sql += " AND id_negocio = %s"
-                params.append(id_negocio)
-
-            sql += " GROUP BY proveedor"
-            cursor.execute(sql, params)
-
-            for r in cursor.fetchall():
+        cursor.execute(sql, params)
+        for r in cursor.fetchall():
+            idx = yw_to_idx.get(r["yw"])
+            if idx is not None:
                 proveedor = r["proveedor"] or "Sin proveedor"
-                data_por_proveedor[proveedor][i] = float(r["total"] or 0)
+                data_por_proveedor[proveedor][idx] = float(r["total"] or 0)
 
-    labels   = [s["label"] for s in semanas]
-    datasets = [{"label": p, "data": v} for p, v in data_por_proveedor.items()]
-    return {"labels": labels, "datasets": datasets}
+    return {
+        "labels":   [s["label"] for s in semanas],
+        "datasets": [{"label": p, "data": v} for p, v in data_por_proveedor.items()],
+    }
 
 
 def obtener_total_gastos(inicio: date, fin: date, id_negocio: str):
