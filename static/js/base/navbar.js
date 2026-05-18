@@ -3,6 +3,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const navToggle = document.getElementById("navToggle");
     const navbar    = document.getElementById("navbar");
 
+    const navbarBottom = navbar.getBoundingClientRect().bottom + window.scrollY;
+    let placeholder = null;
+
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > navbarBottom) {
+            if (!navbar.classList.contains("navbar--fixed")) {
+                navbar.classList.add("navbar--fixed");
+                placeholder = document.createElement("div");
+                placeholder.style.height = navbar.offsetHeight + "px";
+                navbar.parentNode.insertBefore(placeholder, navbar);
+            }
+        } else {
+            if (navbar.classList.contains("navbar--fixed")) {
+                navbar.classList.remove("navbar--fixed");
+                placeholder?.remove();
+                placeholder = null;
+            }
+        }
+    }, { passive: true });
+
     if (navToggle && navbar) {
         navToggle.addEventListener("click", () => {
             navbar.classList.toggle("open");

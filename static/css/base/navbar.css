@@ -15,6 +15,22 @@
     background-clip: padding-box, border-box;
 }
 
+.navbar--fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-radius: 0;
+    margin-bottom: 0;
+    animation: navbarSlideDown 0.2s ease;
+}
+
+@keyframes navbarSlideDown {
+    from { transform: translateY(-100%); }
+    to   { transform: translateY(0); }
+}
+
 .nav-logo {
     display: flex;
     align-items: center;
