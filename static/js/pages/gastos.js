@@ -1,3 +1,8 @@
+import { abrirModal } from '../components/modal.js';
+import { mostrarFeedback, crearEliminarHandler } from '../base/helpers.js';
+import { validarRequerido, validarPrecio } from '../base/form_validators.js';
+import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const toggleEliminados = document.getElementById("toggle-eliminados-gastos");
@@ -29,22 +34,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 const _eliminarGasto = crearEliminarHandler("modalConfirmarEliminarGasto");
-window.confirmarEliminarGasto = id => _eliminarGasto.confirmar(`/gastos/eliminar/${id}`);
-window.ejecutarEliminarGasto  = ()  => _eliminarGasto.ejecutar();
+function confirmarEliminarGasto(id) { _eliminarGasto.confirmar(`/gastos/eliminar/${id}`); }
+function ejecutarEliminarGasto()    { _eliminarGasto.ejecutar(); }
 
 
-window.editarGasto = function (id, id_negocio, descripcion, proveedor, total, fecha_registro, tipo_comprobante, tipo_pago) {
+function editarGasto(id, id_negocio, descripcion, proveedor, total, fecha_registro, tipo_comprobante, tipo_pago) {
     abrirModal("modalGasto");
-    document.getElementById("modalGasto_title").innerText = "Editar gasto";
-    document.getElementById("id_gasto").value = id;
-    document.getElementById("id_negocio").value = id_negocio;
-    document.querySelector("[name=descripcion]").value = descripcion;
-    document.querySelector("[name=proveedor]").value = proveedor;
-    document.querySelector("[name=total]").value = total;
-    document.querySelector("[name=fecha_registro]").value = fecha_registro || "";
-    document.querySelector("[name=tipo_comprobante]").value = tipo_comprobante;
-    document.querySelector("[name=tipo_pago]").value = tipo_pago;
-};
+    document.getElementById("modalGasto_title").innerText           = "Editar gasto";
+    document.getElementById("id_gasto").value                       = id;
+    document.getElementById("id_negocio").value                     = id_negocio;
+    document.querySelector("[name=descripcion]").value              = descripcion;
+    document.querySelector("[name=proveedor]").value                = proveedor;
+    document.querySelector("[name=total]").value                    = total;
+    document.querySelector("[name=fecha_registro]").value           = fecha_registro || "";
+    document.querySelector("[name=tipo_comprobante]").value         = tipo_comprobante;
+    document.querySelector("[name=tipo_pago]").value                = tipo_pago;
+}
 
 document.addEventListener("click", function (e) {
     const btnEditar = e.target.closest(".js-editar-gasto");
@@ -65,13 +70,11 @@ document.addEventListener("click", function (e) {
 });
 
 
-
-
-window.verHistorial = function (id) {
+function verHistorial(id) {
     abrirHistorial(
         `/gastos/${id}/historial`,
         "modalHistorial",
         "#tablaHistorial",
         h => renderDiff(h, "Gasto")
     );
-};
+}

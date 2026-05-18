@@ -1,3 +1,5 @@
+import { escapeHtml } from '../base/helpers.js';
+
 const detallesCargados = {};
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -11,8 +13,8 @@ document.addEventListener("click", function (e) {
     if (btn) { window.open(btn.dataset.url, "_blank"); }
 });
 
-function toggleDetalles(idVenta, btn) {
-    const fila = document.getElementById(`detalles-${idVenta}`);
+export function toggleDetalles(idVenta, btn) {
+    const fila  = document.getElementById(`detalles-${idVenta}`);
     const lista = document.getElementById(`lista-detalles-${idVenta}`);
 
     if (!fila || !lista) return;
@@ -45,7 +47,6 @@ function toggleDetalles(idVenta, btn) {
             }
 
             lista.innerHTML = detalles.map(item => {
-
 
                 let html = "";
 

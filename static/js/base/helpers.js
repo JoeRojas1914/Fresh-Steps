@@ -1,16 +1,17 @@
-window.escapeHtml = function (str) {
+import { abrirModal, cerrarModal } from '../components/modal.js';
+
+export function escapeHtml(str) {
     const d = document.createElement("div");
     d.appendChild(document.createTextNode(String(str ?? "")));
     return d.innerHTML;
-};
+}
 
-window.normalizar = function (txt) {
+export function normalizar(txt) {
     return (txt || "").toLowerCase()
         .normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
-};
+}
 
-window.csrfFetch = function (url, options = {}) {
-
+export function csrfFetch(url, options = {}) {
     const tokenMeta = document.querySelector('meta[name="csrf-token"]');
     if (!tokenMeta) {
         console.error("CSRF token not found");
@@ -26,10 +27,10 @@ window.csrfFetch = function (url, options = {}) {
     };
 
     return fetch(url, options);
-};
+}
 
 
-window.mostrarFeedback = function (texto, tipo = "success") {
+export function mostrarFeedback(texto, tipo = "success") {
     const anchor =
         document.querySelector(".page-content > .filtro-box") ||
         document.querySelector(".page-content > h1") ||
@@ -53,10 +54,10 @@ window.mostrarFeedback = function (texto, tipo = "success") {
     }, 4500);
 
     setTimeout(() => div.remove(), 5000);
-};
+}
 
 
-window.apiAction = function ({
+export function apiAction({
     url, method = "POST", body = null,
     msgOk = null, msgError = "Error al realizar la acción.",
     reload = false, reloadDelay = 1200,
@@ -71,7 +72,7 @@ window.apiAction = function ({
 
     const opts = { method };
     if (body) {
-        opts.body    = JSON.stringify(body);
+        opts.body = JSON.stringify(body);
     }
 
     csrfFetch(url, opts)
@@ -82,9 +83,9 @@ window.apiAction = function ({
                 loadingBtn.innerHTML = loadingBtn._textoOriginal;
             }
             if (res.ok) {
-                if (msgOk)    mostrarFeedback(msgOk, "success");
+                if (msgOk)     mostrarFeedback(msgOk, "success");
                 if (onSuccess) onSuccess(res);
-                if (reload)   setTimeout(() => location.reload(), reloadDelay);
+                if (reload)    setTimeout(() => location.reload(), reloadDelay);
             } else {
                 mostrarFeedback(res.error || msgError, "error");
                 if (onError) onError(res);
@@ -97,19 +98,19 @@ window.apiAction = function ({
             }
             mostrarFeedback("Error de conexión.", "error");
         });
-};
+}
 
 
-window.crearEliminarHandler = function (modalId) {
+export function crearEliminarHandler(modalId) {
     let _pendingUrl = null;
     return {
         confirmar(url) { _pendingUrl = url; abrirModal(modalId); },
         ejecutar()     { if (_pendingUrl) location.href = _pendingUrl; }
     };
-};
+}
 
 
-window.confirmarEliminarVenta = function (idVenta) {
+export function confirmarEliminarVenta(idVenta) {
     const btnConf = document.getElementById("btnConfirmarEliminar");
     if (!btnConf) return;
 
@@ -127,7 +128,7 @@ window.confirmarEliminarVenta = function (idVenta) {
             reload:   true
         });
     });
-};
+}
 
 
 document.addEventListener("DOMContentLoaded", () => {

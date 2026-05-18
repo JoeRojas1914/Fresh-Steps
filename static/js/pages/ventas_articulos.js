@@ -1,3 +1,8 @@
+import { ventaState } from './ventas_state.js';
+import { mostrarFeedback } from '../base/helpers.js';
+import { validarFormulario, actualizarTotal } from './ventas_validacion.js';
+import { crearServiciosSelect, actualizarOpcionesServiciosDelArticulo } from './ventas_servicios.js';
+
 /* ─── Tipo de artículo por negocio ───────────────────────────────────────── */
 
 function obtenerTipoArticuloPorNegocio(idNegocio) {
@@ -43,12 +48,12 @@ function crearCamposArticulo(index, tipoArticulo) {
     if (tipoArticulo === "confeccion") {
         return `
             <div class="form-group form-row articulo-row">
-                ${inputConLabel("Tipo",                        `articulos[${index}][tipo]`,             "Pantalón, Falda...",    true)}
-                ${inputConLabel("Marca",                       `articulos[${index}][marca]`,            "Zara, Levis...",        true)}
+                ${inputConLabel("Tipo",                        `articulos[${index}][tipo]`,             "Pantalón, Falda...",   true)}
+                ${inputConLabel("Marca",                       `articulos[${index}][marca]`,            "Zara, Levis...",       true)}
                 ${inputConLabel("Material",                    `articulos[${index}][material]`,         "Mezclilla, Gamuza...", true)}
-                ${inputConLabel("Color base",                  `articulos[${index}][color_base]`,       "Negro, Blanco...",      true)}
-                ${inputConLabel("Color secundario (Opcional)", `articulos[${index}][color_secundario]`, "Negro, Blanco...",      false)}
-                ${inputConLabel("Cantidad",                    `articulos[${index}][cantidad]`,         "1,2...",                true, "number", `min="1"`)}
+                ${inputConLabel("Color base",                  `articulos[${index}][color_base]`,       "Negro, Blanco...",     true)}
+                ${inputConLabel("Color secundario (Opcional)", `articulos[${index}][color_secundario]`, "Negro, Blanco...",     false)}
+                ${inputConLabel("Cantidad",                    `articulos[${index}][cantidad]`,         "1,2...",               true, "number", `min="1"`)}
             </div>
             ${crearServiciosSelect(index)}
             ${inputConLabel("Comentario", `articulos[${index}][comentario]`, "(opcional)", false)}
@@ -67,7 +72,7 @@ function crearCamposArticulo(index, tipoArticulo) {
 
 /* ─── CRUD de artículos ──────────────────────────────────────────────────── */
 
-function agregarArticulo() {
+export function agregarArticulo() {
     const idNegocio = document.getElementById("id_negocio").value;
     if (!idNegocio) {
         mostrarFeedback("Primero selecciona un negocio.", "error");
@@ -78,9 +83,9 @@ function agregarArticulo() {
     const tipoArticulo = obtenerTipoArticuloPorNegocio(idNegocio);
     const negNombre    = document.getElementById("id_negocio")?.selectedOptions[0]?.text || "";
 
-    const div       = document.createElement("div");
-    div.className   = "articulo-item";
-    div.innerHTML   = `
+    const div     = document.createElement("div");
+    div.className = "articulo-item";
+    div.innerHTML = `
         <div class="articulo-resumen"></div>
         <div class="articulo-detalle">
             <div class="zapato-header">
@@ -131,7 +136,7 @@ function agregarArticulo() {
     actualizarTotal();
 }
 
-function eliminarArticulo(btn) {
+export function eliminarArticulo(btn) {
     btn.closest(".articulo-item").remove();
     renumerarArticulos();
     actualizarEmptyState();
@@ -151,7 +156,7 @@ function renumerarArticulos() {
     }
 }
 
-function actualizarEmptyState() {
+export function actualizarEmptyState() {
     const empty = document.getElementById("empty-articulos");
     if (!empty) return;
 
@@ -176,30 +181,7 @@ function actualizarEmptyState() {
 
 /* ─── Accordion (abrir/cerrar/toggle) ───────────────────────────────────── */
 
-function toggleArticulo(btn) {
-    const item    = btn.closest(".articulo-item");
-    const detalle = item.querySelector(".articulo-detalle");
-    const resumen = item.querySelector(".articulo-resumen");
-    const abierto = detalle.style.display !== "none";
-
-    if (abierto) {
-        generarResumenArticulo(item);
-        detalle.style.display = "none";
-        resumen.style.display = "block";
-        btn.innerText = "Editar";
-        item.classList.remove("abierto");
-    } else {
-        document.querySelectorAll(".articulo-item.abierto").forEach(a => {
-            if (a !== item) cerrarArticulo(a);
-        });
-        detalle.style.display = "block";
-        resumen.style.display = "none";
-        btn.innerText = "Minimizar";
-        item.classList.add("abierto");
-    }
-}
-
-function cerrarArticulo(item) {
+export function cerrarArticulo(item) {
     const detalle = item.querySelector(".articulo-detalle");
     const resumen = item.querySelector(".articulo-resumen");
 
@@ -273,7 +255,7 @@ function generarResumenArticulo(item) {
         .map(s => s.selectedOptions[0]?.text.split(" ($")[0] || "")
         .join(", ");
 
-    const partes = [color, mat, cant ? `x${cant}` : ""].filter(Boolean);
+    const partes  = [color, mat, cant ? `x${cant}` : ""].filter(Boolean);
     const detalle = partes.join(" · ");
 
     const negNombre = document.getElementById("id_negocio")?.selectedOptions[0]?.text || "";
@@ -322,7 +304,7 @@ function articuloCompleto(item) {
     return true;
 }
 
-function validarArticuloVisual(item) {
+export function validarArticuloVisual(item) {
     if (!item) return;
     item.classList.remove("completo", "incompleto");
     item.classList.add(articuloCompleto(item) ? "completo" : "incompleto");

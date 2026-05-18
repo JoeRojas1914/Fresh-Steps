@@ -1,11 +1,9 @@
-if (typeof ventaState === "undefined") {
-    var ventaState = {
-        contadorArticulos:    0,
-        serviciosGlobales:    [],
-        negocioSeleccionado:  "",
-        enProceso:            false,
-    };
-}
+import { ventaState } from './ventas_state.js';
+import { mostrarFeedback } from '../base/helpers.js';
+import { buscarClientes, crearCliente } from './ventas_clientes.js';
+import { seleccionarNegocio, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado } from './ventas_servicios.js';
+import { agregarArticulo, cerrarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
+import { validarFormulario, togglePrepago, toggleDescuento, actualizarTotal, bloquearFechaMinima, actualizarFechaEstimadaCompleta } from './ventas_validacion.js';
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -22,12 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ── Cambiar cliente ── */
     document.getElementById("btn-cambiar-cliente").addEventListener("click", () => {
-        document.getElementById("id_cliente").value          = "";
+        document.getElementById("id_cliente").value               = "";
         document.getElementById("cliente-seleccionado").innerText = "";
         document.getElementById("cliente-box").style.display      = "none";
         document.getElementById("busqueda-cliente").style.display = "block";
         document.getElementById("buscar-cliente").value           = "";
-        document.getElementById("lista-clientes").innerHTML        = "";
+        document.getElementById("lista-clientes").innerHTML       = "";
         validarFormulario();
     });
 
@@ -49,11 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (ventaState.enProceso) return;
         ventaState.enProceso = true;
 
-        const btnCrear       = document.getElementById("btn-crear");
-        const textoOriginal  = btnCrear?.textContent;
+        const btnCrear      = document.getElementById("btn-crear");
+        const textoOriginal = btnCrear?.textContent;
         if (btnCrear) { btnCrear.disabled = true; btnCrear.textContent = "Guardando..."; }
 
-        const csrfToken  = document.querySelector('meta[name="csrf-token"]')?.content;
+        const csrfToken    = document.querySelector('meta[name="csrf-token"]')?.content;
         const nuevaPestana = window.open("", "_blank");
 
         try {
@@ -122,13 +120,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.getElementById("btn-agregar-articulo").addEventListener("click", agregarArticulo);
 
-    /* ── Event delegation para artículos (reemplaza inline handlers bloqueados por CSP) ── */
+    /* ── Event delegation para artículos ── */
     const articulosContainer = document.getElementById("articulos-container");
 
     articulosContainer.addEventListener("change", e => {
         const sel = e.target;
         if (sel.tagName !== "SELECT" || !sel.closest(".servicio-item")) return;
-        const box = sel.closest(".servicios-box");
+        const box           = sel.closest(".servicios-box");
         const indexArticulo = parseInt(box?.dataset?.articulo ?? "0");
         onChangeServicio(sel, indexArticulo);
         validarFormulario();
@@ -154,11 +152,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (action === "delete-article") {
             eliminarArticulo(btn);
         } else if (action === "add-service") {
-            const box = btn.closest(".servicios-box");
+            const box           = btn.closest(".servicios-box");
             const indexArticulo = parseInt(box?.dataset?.articulo ?? "0");
             agregarServicio(indexArticulo);
         } else if (action === "delete-service") {
-            const box = btn.closest(".servicios-box");
+            const box           = btn.closest(".servicios-box");
             const indexArticulo = parseInt(box?.dataset?.articulo ?? "0");
             eliminarServicioPro(btn, indexArticulo);
         }

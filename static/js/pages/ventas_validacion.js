@@ -1,6 +1,6 @@
 /* ─── Fecha ─────────────────────────────────────────────────────────────── */
 
-function bloquearFechaMinima() {
+export function bloquearFechaMinima() {
     const input = document.getElementById("fecha_estimada_fecha");
     const hoy = new Date();
     const yyyy = hoy.getFullYear();
@@ -9,7 +9,7 @@ function bloquearFechaMinima() {
     input.min = `${yyyy}-${mm}-${dd}`;
 }
 
-function actualizarFechaEstimadaCompleta() {
+export function actualizarFechaEstimadaCompleta() {
     const fecha = document.getElementById("fecha_estimada_fecha").value;
     const hora  = document.getElementById("fecha_estimada_hora").value;
     document.getElementById("fecha_estimada").value =
@@ -18,7 +18,7 @@ function actualizarFechaEstimadaCompleta() {
 
 /* ─── Prepago / Descuento ────────────────────────────────────────────────── */
 
-function togglePrepago() {
+export function togglePrepago() {
     const checked = document.getElementById("toggle-prepago").checked;
     document.getElementById("prepago").value = checked ? "si" : "no";
     const fields = document.getElementById("prepago-fields");
@@ -32,7 +32,7 @@ function togglePrepago() {
     }
 }
 
-function toggleDescuento() {
+export function toggleDescuento() {
     const checked = document.getElementById("toggle-descuento").checked;
     document.getElementById("aplica_descuento").value = checked ? "si" : "no";
     const fields = document.getElementById("descuento-fields");
@@ -48,7 +48,7 @@ function toggleDescuento() {
 
 /* ─── Cálculo de totales ─────────────────────────────────────────────────── */
 
-function calcularTotal(bruto = false) {
+export function calcularTotal(bruto = false) {
     const negocio = document.getElementById("id_negocio").value;
     let total = 0;
 
@@ -94,7 +94,7 @@ function calcularTotal(bruto = false) {
     return total;
 }
 
-function actualizarTotal() {
+export function actualizarTotal() {
     const total = calcularTotal();
     document.getElementById("total-venta").innerText =
         `Total: $${total.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -102,7 +102,7 @@ function actualizarTotal() {
 
 /* ─── Validación ─────────────────────────────────────────────────────────── */
 
-function articulosCompletos() {
+export function articulosCompletos() {
     const articulos = document.querySelectorAll(".articulo-item");
     if (articulos.length === 0) return false;
 
@@ -120,11 +120,11 @@ function articulosCompletos() {
     return true;
 }
 
-function obtenerMotivosBloqueo() {
+export function obtenerMotivosBloqueo() {
     const motivos = [];
 
-    if (!document.getElementById("id_cliente").value)    motivos.push("Seleccionar un cliente");
-    if (!document.getElementById("id_negocio").value)    motivos.push("Eligir un negocio");
+    if (!document.getElementById("id_cliente").value)     motivos.push("Seleccionar un cliente");
+    if (!document.getElementById("id_negocio").value)     motivos.push("Eligir un negocio");
     if (!document.getElementById("fecha_estimada").value) motivos.push("Definir fecha y hora");
 
     const articulos = document.querySelectorAll(".articulo-item");
@@ -147,21 +147,21 @@ function obtenerMotivosBloqueo() {
     if (aplicaDesc) {
         const desc       = parseFloat(document.getElementById("cantidad_descuento").value || 0);
         const totalBruto = calcularTotal(true);
-        if (desc <= 0)          motivos.push("El descuento debe ser mayor a 0");
+        if (desc <= 0)           motivos.push("El descuento debe ser mayor a 0");
         else if (desc > totalBruto) motivos.push("El descuento supera el total");
     }
 
     return motivos;
 }
 
-function validarFormulario() {
-    const negocio      = document.getElementById("id_negocio").value;
+export function validarFormulario() {
+    const negocio       = document.getElementById("id_negocio").value;
     const fechaEstimada = document.getElementById("fecha_estimada").value;
-    const prepago      = document.getElementById("prepago").value;
-    const tipoPago     = document.getElementById("tipo_pago").value;
-    const montoPrepago = parseFloat(document.getElementById("monto_prepago")?.value || 0);
-    const aplicaDesc   = document.getElementById("aplica_descuento").value === "si";
-    const descuento    = parseFloat(document.getElementById("cantidad_descuento")?.value || 0);
+    const prepago       = document.getElementById("prepago").value;
+    const tipoPago      = document.getElementById("tipo_pago").value;
+    const montoPrepago  = parseFloat(document.getElementById("monto_prepago")?.value || 0);
+    const aplicaDesc    = document.getElementById("aplica_descuento").value === "si";
+    const descuento     = parseFloat(document.getElementById("cantidad_descuento")?.value || 0);
 
     let valido = !!(negocio && fechaEstimada);
 
@@ -209,8 +209,8 @@ function validarFormulario() {
 
     btn.disabled = !valido || motivos.length > 0;
     if (motivos.length > 0) {
-        msg.innerText      = "Falta: " + motivos.join(" · ");
-        msg.style.display  = "block";
+        msg.innerText     = "Falta: " + motivos.join(" · ");
+        msg.style.display = "block";
     } else {
         msg.style.display = "none";
     }

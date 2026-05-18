@@ -1,6 +1,11 @@
+import { escapeHtml, mostrarFeedback } from '../base/helpers.js';
+import { validarRequerido, validarTelefono } from '../base/form_validators.js';
+import { cerrarModal } from '../components/modal.js';
+import { validarFormulario } from './ventas_validacion.js';
+
 /* ─── Búsqueda de cliente ────────────────────────────────────────────────── */
 
-async function buscarClientes() {
+export async function buscarClientes() {
     const q     = document.getElementById("buscar-cliente").value.trim();
     const lista = document.getElementById("lista-clientes");
     lista.innerHTML = "";
@@ -38,7 +43,7 @@ async function buscarClientes() {
 
 /* ─── Selección de cliente ───────────────────────────────────────────────── */
 
-function seleccionarCliente(cliente) {
+export function seleccionarCliente(cliente) {
     document.getElementById("id_cliente").value = cliente.id_cliente;
 
     const ventas     = cliente.total_ventas || 0;
@@ -50,8 +55,8 @@ function seleccionarCliente(cliente) {
         `<span>${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</span>`
         + `<span class="cliente-ventas-badge ${ventas > 0 ? "has-ventas" : "no-ventas"}">${escapeHtml(ventasText)}</span>`;
 
-    document.getElementById("lista-clientes").innerHTML  = "";
-    document.getElementById("cliente-box").style.display  = "flex";
+    document.getElementById("lista-clientes").innerHTML       = "";
+    document.getElementById("cliente-box").style.display      = "flex";
     document.getElementById("busqueda-cliente").style.display = "none";
 
     validarFormulario();
@@ -64,7 +69,7 @@ function cerrarModalCliente() {
     document.getElementById("formNuevoCliente").reset();
 }
 
-async function crearCliente(e) {
+export async function crearCliente(e) {
     e.preventDefault();
 
     const nombre   = document.getElementById("cliente_nombre").value.trim();

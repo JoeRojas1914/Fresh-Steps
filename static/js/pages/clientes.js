@@ -1,3 +1,8 @@
+import { abrirModal } from '../components/modal.js';
+import { mostrarFeedback, crearEliminarHandler } from '../base/helpers.js';
+import { validarRequerido, validarTelefono } from '../base/form_validators.js';
+import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const form = document.querySelector(".modal-form");
@@ -22,31 +27,25 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-window.editarClienteBtn = function (e, btn) {
-  e.stopPropagation();
+function editarClienteBtn(e, btn) {
+    e.stopPropagation();
 
-  const modal = document.getElementById("modalCliente");
+    const modal = document.getElementById("modalCliente");
 
-  abrirModal("modalCliente");
+    abrirModal("modalCliente");
 
-  modal.querySelector(".modal__title").innerText = "Editar cliente";
+    modal.querySelector(".modal__title").innerText = "Editar cliente";
 
-  modal.querySelector("#id_cliente").value = btn.dataset.id;
-
-  modal.querySelector("[name=nombre]").value = btn.dataset.nombre;
-  modal.querySelector("[name=apellido]").value = btn.dataset.apellido;
-  modal.querySelector("[name=correo]").value = btn.dataset.correo || "";
-  modal.querySelector("[name=telefono]").value = btn.dataset.telefono;
-  modal.querySelector("[name=direccion]").value = btn.dataset.direccion || "";
-};
-
+    modal.querySelector("#id_cliente").value          = btn.dataset.id;
+    modal.querySelector("[name=nombre]").value        = btn.dataset.nombre;
+    modal.querySelector("[name=apellido]").value      = btn.dataset.apellido;
+    modal.querySelector("[name=correo]").value        = btn.dataset.correo || "";
+    modal.querySelector("[name=telefono]").value      = btn.dataset.telefono;
+    modal.querySelector("[name=direccion]").value     = btn.dataset.direccion || "";
+}
 
 
-window.cerrarHistorialCliente = function () {
-    document.getElementById("modalHistorialCliente").style.display = "none";
-};
-
-window.verHistorialCliente = function (e, id) {
+function verHistorialCliente(e, id) {
     e.stopPropagation();
     abrirHistorial(
         `/clientes/${id}/historial`,
@@ -54,16 +53,16 @@ window.verHistorialCliente = function (e, id) {
         "#tablaHistorialCliente tbody",
         h => renderDiff(h, "Cliente")
     );
-};
+}
 
 
 const _eliminarCliente = crearEliminarHandler("modalConfirmarEliminarCliente");
-window.confirmarEliminarCliente = id => _eliminarCliente.confirmar(`/clientes/eliminar/${id}`);
-window.ejecutarEliminarCliente  = ()  => _eliminarCliente.ejecutar();
+function confirmarEliminarCliente(id) { _eliminarCliente.confirmar(`/clientes/eliminar/${id}`); }
+function ejecutarEliminarCliente()    { _eliminarCliente.ejecutar(); }
 
-window.restaurarCliente = function (idCliente) {
+function restaurarCliente(idCliente) {
     window.location.href = `/clientes/restaurar/${idCliente}`;
-};
+}
 
 document.addEventListener("click", function (e) {
     const btnEditar = e.target.closest(".js-editar-cliente");

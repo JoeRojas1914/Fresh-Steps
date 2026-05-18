@@ -1,6 +1,11 @@
+import { ventaState } from './ventas_state.js';
+import { mostrarFeedback } from '../base/helpers.js';
+import { validarFormulario, actualizarTotal } from './ventas_validacion.js';
+import { actualizarEmptyState } from './ventas_articulos.js';
+
 /* ─── Carga de servicios por negocio ─────────────────────────────────────── */
 
-async function cargarServicios() {
+export async function cargarServicios() {
     const idNegocio = document.getElementById("id_negocio").value;
     if (!idNegocio) { ventaState.serviciosGlobales = []; return; }
     try {
@@ -12,8 +17,8 @@ async function cargarServicios() {
     }
 }
 
-async function seleccionarNegocio() {
-    const select      = document.getElementById("id_negocio");
+export async function seleccionarNegocio() {
+    const select       = document.getElementById("id_negocio");
     const nuevoNegocio = select.value;
     const hayArticulos = document.querySelectorAll(".articulo-item").length > 0;
 
@@ -48,7 +53,7 @@ function _opcionesServiciosHTML() {
     return html;
 }
 
-function crearServiciosSelect(indexArticulo) {
+export function crearServiciosSelect(indexArticulo) {
     return `
         <div class="form-group servicios-box" data-articulo="${indexArticulo}">
             <div class="servicios-header">
@@ -84,11 +89,11 @@ function crearFilaServicio(indexArticulo, indexServicio, opcionesHTML) {
 
 /* ─── CRUD de filas de servicio ──────────────────────────────────────────── */
 
-function marcarPrecioEditado(input) {
+export function marcarPrecioEditado(input) {
     input.dataset.editado = "1";
 }
 
-function agregarServicio(indexArticulo) {
+export function agregarServicio(indexArticulo) {
     const contenedor    = document.getElementById(`serviciosLista_${indexArticulo}`);
     const indexServicio = contenedor.querySelectorAll(".servicio-item").length;
     contenedor.insertAdjacentHTML("beforeend", crearFilaServicio(indexArticulo, indexServicio, _opcionesServiciosHTML()));
@@ -98,7 +103,7 @@ function agregarServicio(indexArticulo) {
     actualizarTotal();
 }
 
-function eliminarServicioPro(btn, indexArticulo) {
+export function eliminarServicioPro(btn, indexArticulo) {
     const fila       = btn.closest(".servicio-item");
     const contenedor = fila.parentElement;
     fila.remove();
@@ -112,15 +117,15 @@ function eliminarServicioPro(btn, indexArticulo) {
     actualizarTotal();
 }
 
-function onChangeServicio(select, indexArticulo) {
-    const fila       = select.closest(".servicio-item");
+export function onChangeServicio(select, indexArticulo) {
+    const fila        = select.closest(".servicio-item");
     const inputPrecio = fila.querySelector(".precio-aplicado");
-    const opt        = select.selectedOptions[0];
+    const opt         = select.selectedOptions[0];
 
     if (!opt || !opt.value) {
-        inputPrecio.value            = "";
-        inputPrecio.disabled         = true;
-        inputPrecio.dataset.editado  = "0";
+        inputPrecio.value           = "";
+        inputPrecio.disabled        = true;
+        inputPrecio.dataset.editado = "0";
         actualizarOpcionesServiciosDelArticulo(indexArticulo);
         actualizarTotal();
         return;
@@ -133,10 +138,10 @@ function onChangeServicio(select, indexArticulo) {
 
     if (hayServicioRepetidoEnArticulo(indexArticulo)) {
         mostrarFeedback("No puedes repetir el mismo servicio en el mismo artículo.", "error");
-        select.value                 = "";
-        inputPrecio.value            = "";
-        inputPrecio.disabled         = true;
-        inputPrecio.dataset.editado  = "0";
+        select.value                = "";
+        inputPrecio.value           = "";
+        inputPrecio.disabled        = true;
+        inputPrecio.dataset.editado = "0";
     }
 
     actualizarOpcionesServiciosDelArticulo(indexArticulo);
@@ -155,7 +160,7 @@ function hayServicioRepetidoEnArticulo(indexArticulo) {
     return false;
 }
 
-function actualizarOpcionesServiciosDelArticulo(indexArticulo) {
+export function actualizarOpcionesServiciosDelArticulo(indexArticulo) {
     const contenedor = document.getElementById(`serviciosLista_${indexArticulo}`);
     if (!contenedor) return;
 

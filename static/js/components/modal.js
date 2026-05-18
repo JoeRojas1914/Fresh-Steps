@@ -1,4 +1,4 @@
-function abrirModal(id) {
+export function abrirModal(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
   modal.classList.add("is-open");
@@ -7,7 +7,7 @@ function abrirModal(id) {
   if (focusable) focusable.focus();
 }
 
-function cerrarModal(id) {
+export function cerrarModal(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
   modal.classList.remove("is-open");

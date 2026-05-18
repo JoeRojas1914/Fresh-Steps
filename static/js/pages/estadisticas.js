@@ -1,3 +1,5 @@
+import { escapeHtml, mostrarFeedback } from '../base/helpers.js';
+
 // ── Formatters ───────────────────────────────────────────────────────────────
 const fmt$ = n => "$" + Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtN = n => Number(n||0).toLocaleString("es-MX");
@@ -17,7 +19,7 @@ const redPalette       = ["#7f1d1d","#991b1b","#b91c1c","#dc2626","#ef4444"];
 const serviciosPalette = ["#60a5fa","#34d399","#fbbf24","#a78bfa","#fb7185","#38bdf8","#4ade80"];
 const negocioPalette   = ["#6366f1","#22c55e","#f59e0b","#ef4444","#3b82f6"];
 const pagoPalette      = ["#22c55e","#3b82f6","#f59e0b","#a78bfa","#fb7185"];
-const rankColors       = ["#f59e0b","#9ca3af","#b45309","#6366f1","#22c55e"]; // kept for chart use
+const rankColors       = ["#f59e0b","#9ca3af","#b45309","#6366f1","#22c55e"];
 const aplicarRojos = ds => ds.map((d,i) => ({
     ...d,
     backgroundColor: redPalette[i%5],
@@ -62,9 +64,9 @@ const tooltipStyle = {
     bodyFont: { size: 12 },
 };
 
-const gridSoft = { color: 'rgba(226,232,240,0.5)' };
-const gridNone = { display: false };
-const noBorder = { display: false };
+const gridSoft   = { color: 'rgba(226,232,240,0.5)' };
+const gridNone   = { display: false };
+const noBorder   = { display: false };
 
 const legendBottom = { position: 'bottom', labels: { color: '#1e293b', padding: 16, font: { size: 12 } } };
 
@@ -427,7 +429,6 @@ function switchTab(nombre, btn) {
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     document.getElementById(`tab-${nombre}`).style.display="block";
     btn.classList.add("active");
-    // Forzar re-render para que el plugin de gradiente tenga chartArea válido
     (chartsPerTab[nombre]?.() || []).forEach(c => c?.update('none'));
 }
 

@@ -1,7 +1,12 @@
+import { abrirModal } from '../components/modal.js';
+import { mostrarFeedback, normalizar, escapeHtml } from '../base/helpers.js';
+import { validarRequerido, validarTelefono, validarPassword, validarPin, validarUsername } from '../base/form_validators.js';
+import { abrirHistorial } from '../base/historial_helpers.js';
+
 (function () {
-    const input         = document.getElementById("buscar-input");
-    const toggleInact   = document.getElementById("toggle-inactivos");
-    const tbody         = document.querySelector("tbody");
+    const input       = document.getElementById("buscar-input");
+    const toggleInact = document.getElementById("toggle-inactivos");
+    const tbody       = document.querySelector("tbody");
 
     if (!input) return;
 
@@ -38,63 +43,63 @@
 
 let _pendingToggleUrl = null;
 
-window.confirmarToggleUsuario = function (id, accion) {
+function confirmarToggleUsuario(id, accion) {
     _pendingToggleUrl = `/usuarios/toggle/${id}`;
-    document.getElementById("modalToggleTitulo").innerText = `${accion} usuario`;
+    document.getElementById("modalToggleTitulo").innerText  = `${accion} usuario`;
     document.getElementById("modalToggleMensaje").innerText = `¿Seguro que deseas ${accion.toLowerCase()} este usuario?`;
     abrirModal("modalConfirmarToggleUsuario");
-};
+}
 
-window.ejecutarToggleUsuario = function () {
+function ejecutarToggleUsuario() {
     if (_pendingToggleUrl) location.href = _pendingToggleUrl;
-};
+}
 
 
-window.abrirModalUsuario = function () {
+function abrirModalUsuario() {
     abrirModal("modalUsuario");
 
-    document.getElementById("modalTitulo").innerText = "Agregar usuario";
-    document.getElementById("id_usuario").value  = "";
-    document.getElementById("usuario").value     = "";
-    document.getElementById("password").value    = "";
-    document.getElementById("pin").value         = "";
-    document.getElementById("u_nombre").value    = "";
-    document.getElementById("u_apellido").value  = "";
-    document.getElementById("u_telefono").value  = "";
-    document.getElementById("u_correo").value    = "";
-    document.getElementById("u_cp").value        = "";
-    document.getElementById("u_rol").value       = "caja";
+    document.getElementById("modalTitulo").innerText  = "Agregar usuario";
+    document.getElementById("id_usuario").value       = "";
+    document.getElementById("usuario").value          = "";
+    document.getElementById("password").value         = "";
+    document.getElementById("pin").value              = "";
+    document.getElementById("u_nombre").value         = "";
+    document.getElementById("u_apellido").value       = "";
+    document.getElementById("u_telefono").value       = "";
+    document.getElementById("u_correo").value         = "";
+    document.getElementById("u_cp").value             = "";
+    document.getElementById("u_rol").value            = "caja";
 
-    document.getElementById("password").required = true;
-    document.getElementById("pin").required      = true;
-    document.getElementById("pass-requerido").style.display = "inline";
-    document.getElementById("pass-opcional").style.display  = "none";
-    document.getElementById("pin-requerido").style.display  = "inline";
-};
+    document.getElementById("password").required                  = true;
+    document.getElementById("pin").required                       = true;
+    document.getElementById("pass-requerido").style.display       = "inline";
+    document.getElementById("pass-opcional").style.display        = "none";
+    document.getElementById("pin-requerido").style.display        = "inline";
+}
 
 
-window.editarUsuario = function (e, u) {
+function editarUsuario(e, u) {
     e.stopPropagation();
     abrirModal("modalUsuario");
 
     document.getElementById("modalTitulo").innerText = "Editar usuario";
-    document.getElementById("id_usuario").value  = u.id_usuario;
-    document.getElementById("usuario").value     = u.usuario     || "";
-    document.getElementById("u_nombre").value    = u.nombre      || "";
-    document.getElementById("u_apellido").value  = u.apellido    || "";
-    document.getElementById("u_telefono").value  = u.telefono    || "";
-    document.getElementById("u_correo").value    = u.correo      || "";
-    document.getElementById("u_cp").value        = u.cp          || "";
-    document.getElementById("u_rol").value       = u.rol         || "caja";
-    document.getElementById("password").value    = "";
-    document.getElementById("pin").value         = "";
+    document.getElementById("id_usuario").value      = u.id_usuario;
+    document.getElementById("usuario").value         = u.usuario     || "";
+    document.getElementById("u_nombre").value        = u.nombre      || "";
+    document.getElementById("u_apellido").value      = u.apellido    || "";
+    document.getElementById("u_telefono").value      = u.telefono    || "";
+    document.getElementById("u_correo").value        = u.correo      || "";
+    document.getElementById("u_cp").value            = u.cp          || "";
+    document.getElementById("u_rol").value           = u.rol         || "caja";
+    document.getElementById("password").value        = "";
+    document.getElementById("pin").value             = "";
 
-    document.getElementById("password").required = false;
-    document.getElementById("pin").required      = false;
+    document.getElementById("password").required            = false;
+    document.getElementById("pin").required                 = false;
     document.getElementById("pass-requerido").style.display = "none";
     document.getElementById("pass-opcional").style.display  = "inline";
     document.getElementById("pin-requerido").style.display  = "none";
-};
+}
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -153,7 +158,7 @@ document.addEventListener("click", function (e) {
     if (btnEjecutar) { ejecutarToggleUsuario(); return; }
 });
 
-window.verHistorialUsuario = function (e, id) {
+function verHistorialUsuario(e, id) {
     e.stopPropagation();
     abrirHistorial(
         `/usuarios/${id}/historial`,
@@ -161,7 +166,7 @@ window.verHistorialUsuario = function (e, id) {
         "#tablaHistorialUsuario tbody",
         _detalleHistorialUsuario
     );
-};
+}
 
 function _detalleHistorialUsuario(h) {
     if (h.accion === "CREADO") return "Usuario creado";
@@ -173,7 +178,7 @@ function _detalleHistorialUsuario(h) {
     }
     if (h.accion === "EDITADO") {
         try {
-            const a = JSON.parse(h.datos_antes  || "{}");
+            const a = JSON.parse(h.datos_antes   || "{}");
             const d = JSON.parse(h.datos_despues || "{}");
             const campos = ["usuario", "rol", "nombre", "apellido", "telefono", "correo", "cp"];
             const cambios = campos

@@ -2,12 +2,7 @@
 
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/ventas_crear.css') }}">
-    <script src="{{ url_for('static', filename='js/components/modal.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/pages/ventas_crear.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/pages/ventas_validacion.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/pages/ventas_clientes.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/pages/ventas_servicios.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/pages/ventas_articulos.js') }}" defer></script>
+    <script type="module" src="{{ url_for('static', filename='js/pages/ventas_crear.js') }}"></script>
 {% endblock %}
 
 {% block content %}

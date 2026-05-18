@@ -1,4 +1,7 @@
-function renderDiff(h, entidad) {
+import { escapeHtml } from './helpers.js';
+import { abrirModal } from '../components/modal.js';
+
+export function renderDiff(h, entidad) {
     const antes   = h.datos_antes   ? JSON.parse(h.datos_antes)   : null;
     const despues = h.datos_despues ? JSON.parse(h.datos_despues) : null;
 
@@ -22,7 +25,7 @@ function renderDiff(h, entidad) {
 }
 
 
-async function abrirHistorial(url, modalId, tbodySelector, getCambios) {
+export async function abrirHistorial(url, modalId, tbodySelector, getCambios) {
     const tbody = document.querySelector(tbodySelector);
     if (!tbody) return;
 

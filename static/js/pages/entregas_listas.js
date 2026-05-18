@@ -1,13 +1,12 @@
-let ventaEntregaActual = null;
+import { abrirModal, cerrarModal } from '../components/modal.js';
+import { mostrarFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
+
+let ventaEntregaActual  = null;
 let saldoPendienteActual = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    document.querySelectorAll(".btn-eliminar").forEach(btn => {
-        btn.addEventListener("click", () => confirmarEliminarVenta(btn.dataset.id));
-    });
-
-    document.addEventListener("click", function(e) {
+    document.addEventListener("click", function (e) {
         const btn = e.target.closest(".btn-eliminar");
         if (!btn) return;
         confirmarEliminarVenta(btn.dataset.id);
@@ -15,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".btn-entregar").forEach(btn => {
         btn.addEventListener("click", () => {
-
             const idVenta = parseInt(btn.dataset.id);
             const deuda   = parseFloat(btn.dataset.deuda);
             const pagado  = parseFloat(btn.dataset.pagado);
@@ -28,35 +26,31 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-window.abrirModalEntrega = function (idVenta, deuda, pagado, total) {
-
-    ventaEntregaActual = idVenta;
+function abrirModalEntrega(idVenta, deuda, pagado, total) {
+    ventaEntregaActual   = idVenta;
     saldoPendienteActual = deuda;
 
     abrirModal("modalEntrega");
 
-    const bloquePago     = document.getElementById("bloquePago");
-    const textoSinDeuda  = document.getElementById("textoSinDeuda");
-    const btnConfirmar   = document.getElementById("btnConfirmarEntrega");
+    const bloquePago    = document.getElementById("bloquePago");
+    const textoSinDeuda = document.getElementById("textoSinDeuda");
+    const btnConfirmar  = document.getElementById("btnConfirmarEntrega");
 
     if (deuda <= 0) {
         textoSinDeuda.style.display = "block";
-        bloquePago.style.display = "none";
-        btnConfirmar.onclick = confirmarEntregaSinPago;
+        bloquePago.style.display    = "none";
+        btnConfirmar.onclick        = confirmarEntregaSinPago;
     } else {
         textoSinDeuda.style.display = "none";
-        bloquePago.style.display = "block";
+        bloquePago.style.display    = "block";
 
-        document.getElementById("montoPendiente").innerText =
-            `$${deuda.toFixed(2)}`;
-
+        document.getElementById("montoPendiente").innerText = `$${deuda.toFixed(2)}`;
         btnConfirmar.onclick = confirmarPagoYEntrega;
     }
-};
+}
 
 
-window.confirmarEntregaSinPago = function () {
-
+function confirmarEntregaSinPago() {
     csrfFetch(`/ventas/entregar/${ventaEntregaActual}`, { method: "POST" })
         .then(r => r.json())
         .then(res => {
@@ -69,11 +63,10 @@ window.confirmarEntregaSinPago = function () {
             }
         })
         .catch(() => mostrarFeedback("Error de conexión al entregar la venta.", "error"));
-};
+}
 
 
-window.confirmarPagoYEntrega = function () {
-
+function confirmarPagoYEntrega() {
     const metodo = document.getElementById("metodoPagoFinal").value;
 
     if (!metodo) {
@@ -85,8 +78,8 @@ window.confirmarPagoYEntrega = function () {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            id_venta: ventaEntregaActual,
-            monto: saldoPendienteActual,
+            id_venta:    ventaEntregaActual,
+            monto:       saldoPendienteActual,
             metodo_pago: metodo
         })
     })
@@ -101,19 +94,18 @@ window.confirmarPagoYEntrega = function () {
         }
     })
     .catch(() => mostrarFeedback("Error de conexión al registrar el pago.", "error"));
-};
+}
 
 
-
-window.cerrarModalEntrega = function () {
+function cerrarModalEntrega() {
     cerrarModal("modalEntrega");
 
     const metodo = document.getElementById("metodoPagoFinal");
     if (metodo) metodo.value = "";
 
-    const texto = document.getElementById("textoSinDeuda");
+    const texto  = document.getElementById("textoSinDeuda");
     const bloque = document.getElementById("bloquePago");
 
-    if (texto) texto.style.display = "none";
+    if (texto)  texto.style.display  = "none";
     if (bloque) bloque.style.display = "none";
-};
+}

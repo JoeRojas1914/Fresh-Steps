@@ -1,3 +1,8 @@
+import { abrirModal } from '../components/modal.js';
+import { mostrarFeedback, crearEliminarHandler } from '../base/helpers.js';
+import { validarRequerido, validarPrecio } from '../base/form_validators.js';
+import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
+
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector(".modal-form");
     if (form) {
@@ -19,8 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const select = document.getElementById("select-negocio-servicios");
-    const toggle = document.getElementById("toggle-eliminados-servicios");
+    const select    = document.getElementById("select-negocio-servicios");
+    const toggle    = document.getElementById("toggle-eliminados-servicios");
     const formFiltro = document.getElementById("form-filtro-servicios");
 
     if (formFiltro) {
@@ -36,40 +41,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 const _eliminarServicio = crearEliminarHandler("modalConfirmarEliminarServicio");
-window.confirmarEliminarServicio = id => _eliminarServicio.confirmar(`/servicios/eliminar/${id}`);
-window.ejecutarEliminarServicio  = ()  => _eliminarServicio.ejecutar();
+function confirmarEliminarServicio(id) { _eliminarServicio.confirmar(`/servicios/eliminar/${id}`); }
+function ejecutarEliminarServicio()    { _eliminarServicio.ejecutar(); }
 
 
-window.abrirNuevoServicio = function () {
+function abrirNuevoServicio() {
     abrirModal("modalServicio");
 
     document.getElementById("modalServicio_title").innerText = "Agregar servicio";
-    document.getElementById("id_servicio").value = "";
+    document.getElementById("id_servicio").value             = "";
 
     document.querySelector(".modal-form").reset();
-};
+}
 
 
-window.editarServicio = function (btn) {
+function editarServicio(btn) {
     abrirModal("modalServicio");
 
     document.getElementById("modalServicio_title").innerText = "Editar servicio";
 
-    document.getElementById("id_servicio").value = btn.dataset.id;
-    document.getElementById("id_negocio").value = btn.dataset.negocio;
-    document.querySelector("[name=nombre]").value = btn.dataset.nombre;
-    document.querySelector("[name=precio]").value = btn.dataset.precio;
-};
+    document.getElementById("id_servicio").value         = btn.dataset.id;
+    document.getElementById("id_negocio").value          = btn.dataset.negocio;
+    document.querySelector("[name=nombre]").value        = btn.dataset.nombre;
+    document.querySelector("[name=precio]").value        = btn.dataset.precio;
+}
 
 
-window.verHistorialServicio = function (id) {
+function verHistorialServicio(id) {
     abrirHistorial(
         `/servicios/${id}/historial`,
         "modalHistorialServicio",
         "#tablaHistorialServicio",
         h => renderDiff(h, "Servicio")
     );
-};
+}
 
 document.addEventListener("click", function (e) {
     const btnNuevo = e.target.closest(".js-abrir-nuevo-servicio");
