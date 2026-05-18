@@ -55,7 +55,7 @@
 {% call(section) modal("modalCliente", "Agregar cliente", "md") %}
 
 {% if section == 'body' %}
-<form id="modalClienteForm" method="POST" action="/clientes/guardar" class="modal-form">
+<form id="modalClienteForm" method="POST" action="/clientes/guardar" class="modal-form modal-form--grid">
   <input type="hidden" name="id_cliente" id="id_cliente">
 
   <div class="modal-field">
@@ -70,11 +70,7 @@
 
   <div class="modal-field">
     <label for="cliente_telefono">Teléfono</label>
-    <input id="cliente_telefono"
-           type="text"
-           name="telefono"
-           required
-           pattern="[0-9]{10}">
+    <input id="cliente_telefono" type="text" name="telefono" required pattern="[0-9]{10}">
   </div>
 
   <div class="modal-field">
@@ -82,7 +78,7 @@
     <input id="cliente_correo" type="email" name="correo">
   </div>
 
-  <div class="modal-field">
+  <div class="modal-field modal-field--full">
     <label for="cliente_direccion">Código Postal (opcional)</label>
     <input id="cliente_direccion" type="text" name="direccion">
   </div>
@@ -152,10 +148,15 @@
                 Editar
             </button>
 
+            <a href="{{ url_for('clientes.ver_cliente', id_cliente=c.id_cliente) }}"
+               class="btn btn--info btn--sm no-underline no-row-click">
+                Ver perfil
+            </a>
+
             <button type="button"
                     class="btn btn--info btn--sm no-row-click js-ver-historial-cliente"
                     data-id="{{ c.id_cliente }}">
-                Historial
+                Cambios
             </button>
 
             <button type="button"
@@ -205,12 +206,15 @@
 {# ── Modal confirmar eliminar cliente ── #}
 {% call(section) modal("modalConfirmarEliminarCliente", "Eliminar cliente", "sm") %}
 {% if section == 'body' %}
-<p class="modal-question">
-    ¿Seguro que deseas eliminar este cliente?
-</p>
-<p class="modal-hint">
-    Si el cliente tiene ventas registradas, no podrá eliminarse.
-</p>
+<div class="modal-confirm">
+  <div class="modal-confirm__hero modal-confirm__hero--danger">
+    <div class="modal-confirm__icon">
+      <i data-lucide="trash-2" width="32" height="32"></i>
+    </div>
+  </div>
+  <p class="modal-confirm__title">¿Eliminar este cliente?</p>
+  <p class="modal-confirm__sub">Si el cliente tiene ventas registradas, no podrá eliminarse.</p>
+</div>
 {% endif %}
 {% if section == 'footer' %}
 <button class="btn btn--primary btn--sm" data-modal-close="modalConfirmarEliminarCliente">Cancelar</button>

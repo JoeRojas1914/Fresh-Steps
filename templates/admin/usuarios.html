@@ -105,7 +105,7 @@
 
             <button class="btn btn--info btn--sm no-row-click js-ver-historial-usuario"
                 data-id="{{ u.id_usuario }}">
-                Historial
+                Cambios
             </button>
         {% else %}
             <span class="dim text-sm">Protegido</span>
@@ -247,10 +247,15 @@
             <button class="modal__close" data-modal-close="modalConfirmarToggleUsuario">&times;</button>
         </div>
         <div class="modal__body">
-            <p id="modalToggleMensaje" class="modal-question"></p>
-            <p class="modal-hint">
-                Puedes revertir esta acción en cualquier momento.
-            </p>
+          <div class="modal-confirm">
+            <div class="modal-confirm__hero modal-confirm__hero--warning">
+              <div class="modal-confirm__icon">
+                <i data-lucide="user-cog" width="32" height="32"></i>
+              </div>
+            </div>
+            <p id="modalToggleMensaje" class="modal-confirm__title"></p>
+            <p class="modal-confirm__sub">Puedes revertir esta acción en cualquier momento.</p>
+          </div>
         </div>
         <div class="modal__footer">
             <button class="btn btn--primary btn--sm" data-modal-close="modalConfirmarToggleUsuario">Cancelar</button>

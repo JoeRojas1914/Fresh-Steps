@@ -145,7 +145,7 @@
 
             <button class="btn btn--info btn--sm js-ver-historial-servicio"
                 data-id="{{ s.id_servicio }}">
-                Historial
+                Cambios
             </button>
 
             <button type="button"
@@ -194,9 +194,15 @@
 {# ── Modal confirmar eliminar servicio ── #}
 {% call(section) modal("modalConfirmarEliminarServicio", "Eliminar servicio", "sm") %}
 {% if section == 'body' %}
-<p class="modal-question">
-    ¿Seguro que deseas eliminar este servicio?
-</p>
+<div class="modal-confirm">
+  <div class="modal-confirm__hero modal-confirm__hero--danger">
+    <div class="modal-confirm__icon">
+      <i data-lucide="trash-2" width="32" height="32"></i>
+    </div>
+  </div>
+  <p class="modal-confirm__title">¿Eliminar este servicio?</p>
+  <p class="modal-confirm__sub">Esta acción no se puede deshacer.</p>
+</div>
 {% endif %}
 {% if section == 'footer' %}
 <button class="btn btn--primary btn--sm" data-modal-close="modalConfirmarEliminarServicio">Cancelar</button>

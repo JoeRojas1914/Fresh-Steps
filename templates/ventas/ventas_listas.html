@@ -164,25 +164,33 @@
 {% call(section) modal("modalEntrega", "Entrega", "sm") %}
 
   {% if section == 'body' %}
-  
-      <p id="textoSinDeuda" class="d-none">
-        <i data-lucide="check-circle" width="16" height="16"></i> Esta venta ya está totalmente pagada.<br>
-        ¿Deseas marcarla como entregada?
-      </p>
+
+      <div id="textoSinDeuda" class="d-none entrega-confirm">
+        <div class="entrega-confirm__hero">
+          <div class="entrega-confirm__icon">
+            <i data-lucide="package-check" width="40" height="40"></i>
+          </div>
+        </div>
+        <p class="entrega-confirm__title">Venta totalmente pagada</p>
+        <p class="entrega-confirm__sub">¿Deseas marcarla como entregada?</p>
+      </div>
 
       <div id="bloquePago" class="d-none">
-        <p>
-          <b>Saldo pendiente:</b>
-          <span id="montoPendiente"></span>
-        </p>
-
-        <label class="form-label">Método de pago</label>
-        <select id="metodoPagoFinal">
-          <option value="">-- Selecciona --</option>
-          <option value="efectivo">Efectivo</option>
-          <option value="tarjeta">Tarjeta</option>
-          <option value="transferencia">Transferencia</option>
-        </select>
+        <div class="entrega-saldo">
+          <span class="entrega-saldo__label">Saldo pendiente</span>
+          <span class="entrega-saldo__monto" id="montoPendiente"></span>
+        </div>
+        <div class="modal-field" style="margin-top:16px;">
+          <label>Método de pago</label>
+          <div class="select-wrapper">
+            <select id="metodoPagoFinal">
+              <option value="">-- Selecciona --</option>
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
+            </select>
+          </div>
+        </div>
       </div>
 
   {% endif %}

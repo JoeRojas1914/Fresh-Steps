@@ -54,7 +54,8 @@
 .table--hover tbody tr:hover .btn--primary { background: linear-gradient(to right, #2fa4ff, #1e7fd6); }
 .table--hover tbody tr:hover .btn--success { background: linear-gradient(to right, #4ade80, #22c55e); }
 .table--hover tbody tr:hover .btn--danger  { background: linear-gradient(to right, #f87171, #ef4444); }
-.table--hover tbody tr:hover .btn--info    { background: #3498db; }
+.table--hover tbody tr:hover .btn--info       { background: #3498db; }
+.table--hover tbody tr:hover .btn--secondary  { background: #94a3b8; }
 
 .table--details td {
   padding: 0;

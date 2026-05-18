@@ -16,8 +16,8 @@
 
 {% call(section) modal("modalCliente", "Nuevo cliente", "md") %}
 {% if section == 'body' %}
-<form id="formNuevoCliente" class="modal-form">
-    <div id="errorClienteNuevo" class="error-msg d-none"></div>
+<form id="formNuevoCliente" class="modal-form modal-form--grid">
+    <div id="errorClienteNuevo" class="error-msg d-none modal-field--full"></div>
     <div class="modal-field">
         <label for="cliente_nombre">Nombre</label>
         <input id="cliente_nombre" type="text" name="nombre" required>
@@ -34,7 +34,7 @@
         <label for="cliente_correo">Correo (opcional)</label>
         <input id="cliente_correo" type="email" name="correo">
     </div>
-    <div class="modal-field">
+    <div class="modal-field modal-field--full">
         <label for="cliente_cp">Código postal (opcional)</label>
         <input id="cliente_cp" type="text" name="codigo_postal">
     </div>

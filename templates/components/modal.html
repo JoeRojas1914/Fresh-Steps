@@ -30,13 +30,15 @@
       <button class="modal__close" data-modal-close="modalEliminarVenta">&times;</button>
     </div>
     <div class="modal__body">
-      <p class="modal-question">
-        ¿Seguro que deseas eliminar esta venta?
-      </p>
-      <p class="modal-hint">
-        Se eliminarán los artículos y pagos relacionados.<br>
-        Esta acción <strong>no se puede deshacer</strong>.
-      </p>
+      <div class="modal-confirm">
+        <div class="modal-confirm__hero modal-confirm__hero--danger">
+          <div class="modal-confirm__icon">
+            <i data-lucide="trash-2" width="32" height="32"></i>
+          </div>
+        </div>
+        <p class="modal-confirm__title">¿Eliminar esta venta?</p>
+        <p class="modal-confirm__sub">Se eliminarán los artículos y pagos relacionados. Esta acción no se puede deshacer.</p>
+      </div>
     </div>
     <div class="modal__footer">
       <button class="btn btn--primary btn--sm" data-modal-close="modalEliminarVenta">Cancelar</button>

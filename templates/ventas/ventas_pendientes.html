@@ -167,9 +167,15 @@
 {% call(section) modal("modalProcesado", "Marcar como lista", "sm") %}
 
   {% if section == 'body' %}
-      <p>
-        ¿Confirmas que esta venta está lista para entrega?
-      </p>
+  <div class="modal-confirm">
+    <div class="modal-confirm__hero">
+      <div class="modal-confirm__icon modal-confirm__icon--success">
+        <i data-lucide="package-check" width="32" height="32"></i>
+      </div>
+    </div>
+    <p class="modal-confirm__title">¿Marcar como lista para entrega?</p>
+    <p class="modal-confirm__sub">La venta pasará a la cola de entregas pendientes.</p>
+  </div>
   {% endif %}
 
   {% if section == 'footer' %}
