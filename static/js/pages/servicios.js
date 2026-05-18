@@ -35,16 +35,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-let _pendingServicioUrl = null;
-
-window.confirmarEliminarServicio = function (id) {
-    _pendingServicioUrl = `/servicios/eliminar/${id}`;
-    abrirModal("modalConfirmarEliminarServicio");
-};
-
-window.ejecutarEliminarServicio = function () {
-    if (_pendingServicioUrl) location.href = _pendingServicioUrl;
-};
+const _eliminarServicio = crearEliminarHandler("modalConfirmarEliminarServicio");
+window.confirmarEliminarServicio = id => _eliminarServicio.confirmar(`/servicios/eliminar/${id}`);
+window.ejecutarEliminarServicio  = ()  => _eliminarServicio.ejecutar();
 
 
 window.abrirNuevoServicio = function () {

@@ -146,7 +146,7 @@
 
 .articulo-item {
   margin-bottom: 10px;
-  animation: slideIn 0.25s ease;
+  animation: slideUp 0.25s ease;
   border-radius: 14px;
 }
 
@@ -510,10 +510,6 @@
 .form-row .form-item:first-child { flex: 1; }
 .form-row .form-item:last-child  { flex: 0 0 260px; }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 
 
 .toggle-option-row {

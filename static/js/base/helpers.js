@@ -100,11 +100,18 @@ window.apiAction = function ({
 };
 
 
-window.confirmarEliminarVenta = function (idVenta) {
-    const modal   = document.getElementById("modalEliminarVenta");
-    const btnConf = document.getElementById("btnConfirmarEliminar");
+window.crearEliminarHandler = function (modalId) {
+    let _pendingUrl = null;
+    return {
+        confirmar(url) { _pendingUrl = url; abrirModal(modalId); },
+        ejecutar()     { if (_pendingUrl) location.href = _pendingUrl; }
+    };
+};
 
-    if (!modal || !btnConf) return;
+
+window.confirmarEliminarVenta = function (idVenta) {
+    const btnConf = document.getElementById("btnConfirmarEliminar");
+    if (!btnConf) return;
 
     abrirModal("modalEliminarVenta");
 
@@ -113,18 +120,12 @@ window.confirmarEliminarVenta = function (idVenta) {
 
     nuevo.addEventListener("click", () => {
         cerrarModal("modalEliminarVenta");
-
-        csrfFetch(`/ventas/eliminar/${idVenta}`, { method: "POST" })
-            .then(r => r.json())
-            .then(res => {
-                if (res.ok) {
-                    mostrarFeedback("Venta eliminada correctamente.", "success");
-                    setTimeout(() => location.reload(), 1200);
-                } else {
-                    mostrarFeedback(res.error || "No se pudo eliminar la venta.", "error");
-                }
-            })
-            .catch(() => mostrarFeedback("Error de conexión.", "error"));
+        apiAction({
+            url:      `/ventas/eliminar/${idVenta}`,
+            msgOk:    "Venta eliminada correctamente.",
+            msgError: "No se pudo eliminar la venta.",
+            reload:   true
+        });
     });
 };
 

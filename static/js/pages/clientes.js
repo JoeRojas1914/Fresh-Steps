@@ -57,16 +57,9 @@ window.verHistorialCliente = function (e, id) {
 };
 
 
-let _pendingClienteUrl = null;
-
-window.confirmarEliminarCliente = function (idCliente) {
-    _pendingClienteUrl = `/clientes/eliminar/${idCliente}`;
-    abrirModal("modalConfirmarEliminarCliente");
-};
-
-window.ejecutarEliminarCliente = function () {
-    if (_pendingClienteUrl) location.href = _pendingClienteUrl;
-};
+const _eliminarCliente = crearEliminarHandler("modalConfirmarEliminarCliente");
+window.confirmarEliminarCliente = id => _eliminarCliente.confirmar(`/clientes/eliminar/${id}`);
+window.ejecutarEliminarCliente  = ()  => _eliminarCliente.ejecutar();
 
 window.restaurarCliente = function (idCliente) {
     window.location.href = `/clientes/restaurar/${idCliente}`;

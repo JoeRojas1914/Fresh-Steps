@@ -35,10 +35,6 @@ hr {
   .page-content { padding: 20px 16px; }
 }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
 
 
 .page-content h1 {
