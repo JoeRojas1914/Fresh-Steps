@@ -11,29 +11,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ── Búsqueda de cliente con debounce ── */
     let _buscarTimer;
-    document.getElementById("buscarCliente").addEventListener("input", () => {
+    document.getElementById("buscar-cliente").addEventListener("input", () => {
         clearTimeout(_buscarTimer);
-        const q     = document.getElementById("buscarCliente").value.trim();
-        const lista = document.getElementById("listaClientes");
+        const q     = document.getElementById("buscar-cliente").value.trim();
+        const lista = document.getElementById("lista-clientes");
         if (q.length < 2) { lista.innerHTML = ""; return; }
         lista.innerHTML = `<div class="result-item resultado-buscando">Buscando...</div>`;
         _buscarTimer = setTimeout(buscarClientes, 350);
     });
 
     /* ── Cambiar cliente ── */
-    document.getElementById("btnCambiarCliente").addEventListener("click", () => {
+    document.getElementById("btn-cambiar-cliente").addEventListener("click", () => {
         document.getElementById("id_cliente").value          = "";
-        document.getElementById("clienteSeleccionado").innerText = "";
-        document.getElementById("clienteBox").style.display      = "none";
-        document.getElementById("busquedaCliente").style.display = "block";
-        document.getElementById("buscarCliente").value           = "";
-        document.getElementById("listaClientes").innerHTML        = "";
+        document.getElementById("cliente-seleccionado").innerText = "";
+        document.getElementById("cliente-box").style.display      = "none";
+        document.getElementById("busqueda-cliente").style.display = "block";
+        document.getElementById("buscar-cliente").value           = "";
+        document.getElementById("lista-clientes").innerHTML        = "";
         validarFormulario();
     });
 
     /* ── Cerrar artículo al hacer clic fuera ── */
     document.addEventListener("click", e => {
-        if (e.target.closest("#btnAgregarArticulo")) return;
+        if (e.target.closest("#btn-agregar-articulo")) return;
         const abierto = document.querySelector(".articulo-item.abierto");
         if (!abierto || abierto.contains(e.target)) return;
         cerrarArticulo(abierto);
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (ventaState.enProceso) return;
         ventaState.enProceso = true;
 
-        const btnCrear       = document.getElementById("btnCrear");
+        const btnCrear       = document.getElementById("btn-crear");
         const textoOriginal  = btnCrear?.textContent;
         if (btnCrear) { btnCrear.disabled = true; btnCrear.textContent = "Guardando..."; }
 
@@ -89,16 +89,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* ── Estado inicial ── */
-    document.getElementById("clienteBox").style.display      = "none";
-    document.getElementById("busquedaCliente").style.display = "block";
+    document.getElementById("cliente-box").style.display      = "none";
+    document.getElementById("busqueda-cliente").style.display = "block";
 
     /* ── Otros listeners ── */
-    document.getElementById("togglePrepago").addEventListener("change", () => {
+    document.getElementById("toggle-prepago").addEventListener("change", () => {
         togglePrepago();
         validarFormulario();
         actualizarTotal();
     });
-    document.getElementById("toggleDescuento").addEventListener("change", toggleDescuento);
+    document.getElementById("toggle-descuento").addEventListener("change", toggleDescuento);
     document.getElementById("id_negocio").addEventListener("change", seleccionarNegocio);
     document.getElementById("fecha_estimada_fecha").addEventListener("change", () => {
         actualizarFechaEstimadaCompleta();
@@ -120,10 +120,10 @@ document.addEventListener("DOMContentLoaded", () => {
         validarFormulario();
         actualizarTotal();
     });
-    document.getElementById("btnAgregarArticulo").addEventListener("click", agregarArticulo);
+    document.getElementById("btn-agregar-articulo").addEventListener("click", agregarArticulo);
 
     /* ── Event delegation para artículos (reemplaza inline handlers bloqueados por CSP) ── */
-    const articulosContainer = document.getElementById("articulosContainer");
+    const articulosContainer = document.getElementById("articulos-container");
 
     articulosContainer.addEventListener("change", e => {
         const sel = e.target;

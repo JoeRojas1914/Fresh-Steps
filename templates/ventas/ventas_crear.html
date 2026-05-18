@@ -17,7 +17,7 @@
 {% call(section) modal("modalCliente", "Nuevo cliente", "md") %}
 {% if section == 'body' %}
 <form id="formNuevoCliente" class="modal-form modal-form--grid">
-    <div id="errorClienteNuevo" class="error-msg d-none modal-field--full"></div>
+    <div id="error-cliente-nuevo" class="error-msg d-none modal-field--full"></div>
     <div class="modal-field">
         <label for="cliente_nombre">Nombre</label>
         <input id="cliente_nombre" type="text" name="nombre" required>
@@ -64,9 +64,9 @@
                 <div class="cliente-negocio-row">
                     <div class="cliente-negocio-col">
                         <label class="form-label">Cliente</label>
-                        <div id="busquedaCliente">
+                        <div id="busqueda-cliente">
                             <div class="search-form-inline">
-                                <input type="text" id="buscarCliente"
+                                <input type="text" id="buscar-cliente"
                                        placeholder="Buscar por nombre..."
                                        autocomplete="off">
                                 <button type="button" class="btn btn--primary btn--sm"
@@ -75,9 +75,9 @@
                                 </button>
                             </div>
                         </div>
-                        <div id="clienteBox" class="d-none">
-                            <strong id="clienteSeleccionado"></strong>
-                            <button type="button" class="btn btn--primary btn--sm" id="btnCambiarCliente">
+                        <div id="cliente-box" class="d-none">
+                            <strong id="cliente-seleccionado"></strong>
+                            <button type="button" class="btn btn--primary btn--sm" id="btn-cambiar-cliente">
                                 Cambiar
                             </button>
                         </div>
@@ -90,14 +90,14 @@
                             <option value="2">Confección</option>
                             <option value="3">Maquila</option>
                         </select>
-                        <div id="errorNegocio" class="error-msg d-none">
+                        <div id="error-negocio" class="error-msg d-none" role="alert">
                             Borra los artículos para cambiar el negocio.
                         </div>
                     </div>
                 </div>
 
                 {# Resultados de búsqueda — aparecen debajo del buscador #}
-                <div class="results-list" id="listaClientes"></div>
+                <div class="results-list" id="lista-clientes"></div>
 
             </div>
         </div>
@@ -109,13 +109,13 @@
                 <h2>Artículos</h2>
             </div>
             <div class="venta-seccion-body">
-                <div id="articulosContainer">
-                    <div id="emptyArticulos" class="empty-articulos">
-                        <i id="emptyArticulosIcon" data-lucide="store" width="36" height="36"></i>
-                        <p id="emptyArticulosMsg">Selecciona un negocio para comenzar</p>
+                <div id="articulos-container">
+                    <div id="empty-articulos" class="empty-articulos">
+                        <i id="empty-articulos-icon" data-lucide="store" width="36" height="36"></i>
+                        <p id="empty-articulos-msg">Selecciona un negocio para comenzar</p>
                     </div>
                 </div>
-                <button type="button" id="btnAgregarArticulo"
+                <button type="button" id="btn-agregar-articulo"
                         class="btn btn--primary btn--sm">
                     <i data-lucide="plus" width="14" height="14"></i> Agregar artículo
                 </button>
@@ -144,7 +144,7 @@
                     <input type="time" id="fecha_estimada_hora">
                 </div>
                 <input type="hidden" name="fecha_estimada" id="fecha_estimada">
-                <div id="errorFecha" class="error-msg d-none">
+                <div id="error-fecha" class="error-msg d-none" role="alert">
                     La fecha estimada no puede ser menor a hoy.
                 </div>
             </div>
@@ -165,7 +165,7 @@
                         <div class="toggle-option-sub">El cliente paga una parte ahora</div>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="togglePrepago">
+                        <input type="checkbox" id="toggle-prepago">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -186,7 +186,7 @@
                         <input type="number" min="0" step="0.01"
                                name="monto_prepago" id="monto_prepago"
                                placeholder="0.00">
-                        <div id="errorPrepago" class="error-msg d-none">
+                        <div id="error-prepago" class="error-msg d-none" role="alert">
                             El prepago no puede ser mayor al total.
                         </div>
                     </div>
@@ -201,7 +201,7 @@
                         <div class="toggle-option-sub">Aplicar descuento al total</div>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="toggleDescuento">
+                        <input type="checkbox" id="toggle-descuento">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -213,7 +213,7 @@
                         <input type="number" min="0" step="0.01"
                                name="cantidad_descuento" id="cantidad_descuento"
                                placeholder="0.00">
-                        <div id="errorDescuento" class="error-msg d-none">
+                        <div id="error-descuento" class="error-msg d-none" role="alert">
                             El descuento no puede ser mayor al total.
                         </div>
                     </div>
@@ -225,11 +225,11 @@
       </div>
 
         <div class="venta-side-footer">
-            <div id="totalVenta" class="total-amount">$0.00</div>
-            <button type="submit" class="btn btn--primary btn--lg" id="btnCrear" disabled>
+            <div id="total-venta" class="total-amount">$0.00</div>
+            <button type="submit" class="btn btn--primary btn--lg" id="btn-crear" disabled>
                 Crear recibo
             </button>
-            <div id="mensajeBloqueo" class="mensaje-bloqueo"></div>
+            <div id="mensaje-bloqueo" class="mensaje-bloqueo"></div>
         </div>
 
     </div>

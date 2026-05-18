@@ -25,7 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (navToggle && navbar) {
         navToggle.addEventListener("click", () => {
-            navbar.classList.toggle("open");
+            const open = navbar.classList.toggle("open");
+            navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+            navToggle.setAttribute("aria-label", open ? "Cerrar menú de navegación" : "Abrir menú de navegación");
         });
     }
 
@@ -35,12 +37,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (userBtn && userMenu && userDropdown) {
         userBtn.addEventListener("click", () => {
-            userMenu.classList.toggle("show");
+            const show = userMenu.classList.toggle("show");
+            userBtn.setAttribute("aria-expanded", show ? "true" : "false");
         });
 
         document.addEventListener("click", (e) => {
             if (!userDropdown.contains(e.target)) {
                 userMenu.classList.remove("show");
+                userBtn.setAttribute("aria-expanded", "false");
             }
         });
     }

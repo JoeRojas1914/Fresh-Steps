@@ -96,13 +96,23 @@ function agregarArticulo() {
         </div>
     `;
 
-    document.getElementById("articulosContainer").appendChild(div);
+    document.getElementById("articulos-container").appendChild(div);
     actualizarEmptyState();
     if (window.lucide) lucide.createIcons();
 
-    div.querySelector(".articulo-resumen").addEventListener("click", function (e) {
+    const resumenDiv = div.querySelector(".articulo-resumen");
+    resumenDiv.setAttribute("role", "button");
+    resumenDiv.setAttribute("tabindex", "0");
+    resumenDiv.setAttribute("aria-label", "Editar artículo");
+    resumenDiv.addEventListener("click", function (e) {
         if (e.target.closest("button")) return;
         abrirArticuloDesdeResumen(this);
+    });
+    resumenDiv.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            if (!e.target.closest("button")) abrirArticuloDesdeResumen(this);
+        }
     });
 
     ventaState.contadorArticulos++;
@@ -137,12 +147,12 @@ function renumerarArticulos() {
     ventaState.contadorArticulos = document.querySelectorAll(".articulo-item").length;
 
     if (ventaState.contadorArticulos === 0) {
-        document.getElementById("errorNegocio").style.display = "none";
+        document.getElementById("error-negocio").style.display = "none";
     }
 }
 
 function actualizarEmptyState() {
-    const empty = document.getElementById("emptyArticulos");
+    const empty = document.getElementById("empty-articulos");
     if (!empty) return;
 
     if (document.querySelectorAll(".articulo-item").length) {
@@ -151,8 +161,8 @@ function actualizarEmptyState() {
     }
 
     empty.style.display = "flex";
-    const msg  = document.getElementById("emptyArticulosMsg");
-    const icon = document.getElementById("emptyArticulosIcon");
+    const msg  = document.getElementById("empty-articulos-msg");
+    const icon = document.getElementById("empty-articulos-icon");
 
     if (ventaState.negocioSeleccionado) {
         if (msg)  msg.textContent = "Agrega el primer artículo para comenzar";

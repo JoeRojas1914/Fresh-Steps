@@ -19,7 +19,7 @@ function actualizarFechaEstimadaCompleta() {
 /* ─── Prepago / Descuento ────────────────────────────────────────────────── */
 
 function togglePrepago() {
-    const checked = document.getElementById("togglePrepago").checked;
+    const checked = document.getElementById("toggle-prepago").checked;
     document.getElementById("prepago").value = checked ? "si" : "no";
     const fields = document.getElementById("prepago-fields");
     fields.classList.toggle("visible", checked);
@@ -28,12 +28,12 @@ function togglePrepago() {
     } else {
         document.getElementById("monto_prepago").value = "";
         document.getElementById("tipo_pago").value = "";
-        document.getElementById("errorPrepago").style.display = "none";
+        document.getElementById("error-prepago").style.display = "none";
     }
 }
 
 function toggleDescuento() {
-    const checked = document.getElementById("toggleDescuento").checked;
+    const checked = document.getElementById("toggle-descuento").checked;
     document.getElementById("aplica_descuento").value = checked ? "si" : "no";
     const fields = document.getElementById("descuento-fields");
     fields.classList.toggle("visible", checked);
@@ -96,7 +96,7 @@ function calcularTotal(bruto = false) {
 
 function actualizarTotal() {
     const total = calcularTotal();
-    document.getElementById("totalVenta").innerText =
+    document.getElementById("total-venta").innerText =
         `Total: $${total.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
@@ -182,30 +182,30 @@ function validarFormulario() {
     if (prepago === "si") {
         if (!tipoPago || montoPrepago <= 0) valido = false;
         if (montoPrepago > calcularTotal()) {
-            document.getElementById("errorPrepago").style.display = "block";
+            document.getElementById("error-prepago").style.display = "block";
             valido = false;
         } else {
-            document.getElementById("errorPrepago").style.display = "none";
+            document.getElementById("error-prepago").style.display = "none";
         }
     } else {
-        document.getElementById("errorPrepago").style.display = "none";
+        document.getElementById("error-prepago").style.display = "none";
     }
 
     if (aplicaDesc) {
         const totalBruto = calcularTotal(true);
         if (descuento <= 0 || descuento > totalBruto) {
-            document.getElementById("errorDescuento").style.display = "block";
+            document.getElementById("error-descuento").style.display = "block";
             valido = false;
         } else {
-            document.getElementById("errorDescuento").style.display = "none";
+            document.getElementById("error-descuento").style.display = "none";
         }
     } else {
-        document.getElementById("errorDescuento").style.display = "none";
+        document.getElementById("error-descuento").style.display = "none";
     }
 
     const motivos = obtenerMotivosBloqueo();
-    const btn     = document.getElementById("btnCrear");
-    const msg     = document.getElementById("mensajeBloqueo");
+    const btn     = document.getElementById("btn-crear");
+    const msg     = document.getElementById("mensaje-bloqueo");
 
     btn.disabled = !valido || motivos.length > 0;
     if (motivos.length > 0) {

@@ -2,12 +2,16 @@ function abrirModal(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
   modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  const focusable = modal.querySelector("button, input, select, textarea, [tabindex]");
+  if (focusable) focusable.focus();
 }
 
 function cerrarModal(id) {
   const modal = document.getElementById(id);
   if (!modal) return;
   modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
 }
 
 document.addEventListener("click", e => {
@@ -19,5 +23,8 @@ document.addEventListener("click", e => {
 
   const modal = e.target.closest(".modal.is-open");
   if (!modal) return;
-  if (e.target === modal) modal.classList.remove("is-open");
+  if (e.target === modal) {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+  }
 });

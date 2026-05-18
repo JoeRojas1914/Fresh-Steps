@@ -9,17 +9,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!form) return;
 
     form.addEventListener("submit", function (e) {
-        const descripcion = document.querySelector("[name=descripcion]").value.trim();
-        const proveedor = document.querySelector("[name=proveedor]").value.trim();
-        const total = document.querySelector("[name=total]").value;
+        const descripcion = document.querySelector("[name=descripcion]").value;
+        const proveedor   = document.querySelector("[name=proveedor]").value;
+        const total       = document.querySelector("[name=total]").value;
 
-        if (!descripcion || !proveedor || total === "") {
+        if (!validarRequerido(descripcion) || !validarRequerido(proveedor) || !validarRequerido(total)) {
             mostrarFeedback("Descripción, proveedor y total son obligatorios.", "error");
             e.preventDefault();
             return;
         }
 
-        if (parseFloat(total) < 0) {
+        if (!validarPrecio(total)) {
             mostrarFeedback("El total no puede ser negativo.", "error");
             e.preventDefault();
         }

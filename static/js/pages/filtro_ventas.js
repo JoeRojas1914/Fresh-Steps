@@ -1,5 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    const filtroNegocio = document.getElementById("filtro-negocio");
+    if (filtroNegocio) {
+        filtroNegocio.addEventListener("change", () => filtroNegocio.form.submit());
+    }
+
     const inputBusqueda = document.getElementById("buscador-cliente");
     const tabla = document.querySelector("#tabla-ventas table");
 

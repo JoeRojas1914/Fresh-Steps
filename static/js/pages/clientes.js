@@ -3,17 +3,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector(".modal-form");
 
     if (form) form.addEventListener("submit", function (e) {
-        const nombre = document.querySelector("[name=nombre]").value.trim();
-        const apellido = document.querySelector("[name=apellido]").value.trim();
-        const telefono = document.querySelector("[name=telefono]").value.trim();
+        const nombre   = document.querySelector("[name=nombre]").value;
+        const apellido = document.querySelector("[name=apellido]").value;
+        const telefono = document.querySelector("[name=telefono]").value;
 
-        if (!nombre || !apellido || !telefono) {
+        if (!validarRequerido(nombre) || !validarRequerido(apellido) || !validarRequerido(telefono)) {
             mostrarFeedback("Nombre, apellido y teléfono son obligatorios.", "error");
             e.preventDefault();
             return;
         }
 
-        if (!/^\d{10}$/.test(telefono)) {
+        if (!validarTelefono(telefono)) {
             mostrarFeedback("El teléfono debe tener exactamente 10 dígitos.", "error");
             e.preventDefault();
         }

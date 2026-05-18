@@ -1,10 +1,10 @@
 {% macro modal(id, titulo="", size="md") %}
-<div id="{{ id }}" class="modal">
+<div id="{{ id }}" class="modal" role="dialog" aria-modal="true" aria-labelledby="{{ id }}_title" aria-hidden="true">
   <div class="modal__dialog modal--{{ size }}">
 
     <div class="modal__header">
       <h2 id="{{ id }}_title" class="modal__title">{{ titulo }}</h2>
-      <button class="modal__close" data-modal-close="{{ id }}">&times;</button>
+      <button class="modal__close" data-modal-close="{{ id }}" aria-label="Cerrar">&times;</button>
     </div>
 
     <div class="modal__body">
@@ -23,11 +23,11 @@
 
 
 {% macro modal_eliminar_venta() %}
-<div id="modalEliminarVenta" class="modal">
+<div id="modalEliminarVenta" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalEliminarVenta_title" aria-hidden="true">
   <div class="modal__dialog modal--sm">
     <div class="modal__header">
-      <h2 class="modal__title">Eliminar venta</h2>
-      <button class="modal__close" data-modal-close="modalEliminarVenta">&times;</button>
+      <h2 id="modalEliminarVenta_title" class="modal__title">Eliminar venta</h2>
+      <button class="modal__close" data-modal-close="modalEliminarVenta" aria-label="Cerrar">&times;</button>
     </div>
     <div class="modal__body">
       <div class="modal-confirm">

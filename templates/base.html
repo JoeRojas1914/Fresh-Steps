@@ -22,7 +22,7 @@
             <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
         </div>
 
-        <button class="nav-toggle" id="navToggle">
+        <button class="nav-toggle" id="navToggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="navbar">
             <i data-lucide="menu" width="22" height="22"></i>
         </button>
 
@@ -52,7 +52,7 @@
         {# ── Usuario — siempre al extremo derecho ── #}
         <div class="nav-right">
             <div class="nav-user-dropdown" id="userDropdown">
-                <button class="nav-user-btn" id="userBtn">
+                <button class="nav-user-btn" id="userBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
                     <span class="nav-user-avatar">{{ session.usuario[0].upper() if session.usuario else '?' }}</span>
                     {{ session.get("usuario") }}
                     <i data-lucide="chevron-down" width="14" height="14"></i>
@@ -108,12 +108,13 @@
     </div>
 </footer>
 
-<script src="{{ url_for('static', filename='js/base/navbar.js') }}"></script>
-<script src="{{ url_for('static', filename='js/base/csrf.js') }}"></script>
-<script src="{{ url_for('static', filename='js/base/helpers.js') }}"></script>
-<script src="{{ url_for('static', filename='js/base/historial_helpers.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/base/navbar.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/base/csrf.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/base/helpers.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/base/form_validators.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/base/historial_helpers.js') }}"></script>
 
 {% block scripts %}{% endblock %}
-<script src="{{ url_for('static', filename='js/base/init.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/base/init.js') }}"></script>
 </body>
 </html>

@@ -108,27 +108,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const username = document.getElementById("usuario").value.trim();
         const telefono = document.getElementById("u_telefono").value.trim();
 
-        if (creando && !password) {
+        if (creando && !validarRequerido(password)) {
             mostrarFeedback("La contraseña es obligatoria al crear un usuario.", "error");
             e.preventDefault(); return;
         }
 
-        if (password && !/^(?=.*\d).{6,}$/.test(password)) {
+        if (password && !validarPassword(password)) {
             mostrarFeedback("La contraseña debe tener mínimo 6 caracteres y al menos 1 número.", "error");
             e.preventDefault(); return;
         }
 
-        if (creando && !/^\d{4}$/.test(pin)) {
+        if (creando && !validarPin(pin)) {
             mostrarFeedback("El PIN debe tener exactamente 4 dígitos.", "error");
             e.preventDefault(); return;
         }
 
-        if (!/^[a-zA-Z0-9_]{3,}$/.test(username)) {
+        if (!validarUsername(username)) {
             mostrarFeedback("El usuario debe tener mínimo 3 caracteres (letras, números o _).", "error");
             e.preventDefault(); return;
         }
 
-        if (telefono && !/^\d{10}$/.test(telefono)) {
+        if (telefono && !validarTelefono(telefono)) {
             mostrarFeedback("El teléfono debe tener exactamente 10 dígitos.", "error");
             e.preventDefault(); return;
         }

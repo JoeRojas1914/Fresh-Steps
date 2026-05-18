@@ -19,17 +19,17 @@ async function seleccionarNegocio() {
 
     if (hayArticulos && ventaState.negocioSeleccionado && nuevoNegocio !== ventaState.negocioSeleccionado) {
         select.value = ventaState.negocioSeleccionado;
-        document.getElementById("errorNegocio").style.display = "block";
+        document.getElementById("error-negocio").style.display = "block";
         return;
     }
 
-    document.getElementById("errorNegocio").style.display = "none";
+    document.getElementById("error-negocio").style.display = "none";
     ventaState.negocioSeleccionado = nuevoNegocio;
 
     await cargarServicios();
 
     if (!hayArticulos) {
-        document.querySelectorAll("#articulosContainer .articulo-item").forEach(el => el.remove());
+        document.querySelectorAll("#articulos-container .articulo-item").forEach(el => el.remove());
         ventaState.contadorArticulos = 0;
         actualizarEmptyState();
         actualizarTotal();
