@@ -1,4 +1,5 @@
 {% macro table(headers) %}
+<div class="table-wrapper">
 <table class="table table--striped table--hover">
     <thead>
         <tr>
@@ -11,4 +12,5 @@
         {{ caller() }}
     </tbody>
 </table>
+</div>
 {% endmacro %}

@@ -56,6 +56,50 @@ window.mostrarFeedback = function (texto, tipo = "success") {
 };
 
 
+window.apiAction = function ({
+    url, method = "POST", body = null,
+    msgOk = null, msgError = "Error al realizar la acción.",
+    reload = false, reloadDelay = 1200,
+    onSuccess = null, onError = null,
+    loadingBtn = null
+}) {
+    if (loadingBtn) {
+        loadingBtn.disabled = true;
+        loadingBtn._textoOriginal = loadingBtn.innerHTML;
+        loadingBtn.innerHTML = '<span class="spinner"></span>';
+    }
+
+    const opts = { method };
+    if (body) {
+        opts.body    = JSON.stringify(body);
+    }
+
+    csrfFetch(url, opts)
+        .then(r => r.json())
+        .then(res => {
+            if (loadingBtn) {
+                loadingBtn.disabled  = false;
+                loadingBtn.innerHTML = loadingBtn._textoOriginal;
+            }
+            if (res.ok) {
+                if (msgOk)    mostrarFeedback(msgOk, "success");
+                if (onSuccess) onSuccess(res);
+                if (reload)   setTimeout(() => location.reload(), reloadDelay);
+            } else {
+                mostrarFeedback(res.error || msgError, "error");
+                if (onError) onError(res);
+            }
+        })
+        .catch(() => {
+            if (loadingBtn) {
+                loadingBtn.disabled  = false;
+                loadingBtn.innerHTML = loadingBtn._textoOriginal;
+            }
+            mostrarFeedback("Error de conexión.", "error");
+        });
+};
+
+
 window.confirmarEliminarVenta = function (idVenta) {
     const modal   = document.getElementById("modalEliminarVenta");
     const btnConf = document.getElementById("btnConfirmarEliminar");

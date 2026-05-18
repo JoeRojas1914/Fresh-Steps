@@ -129,3 +129,37 @@
   align-items: flex-end;
   gap: 12px;
 }
+
+@media (max-width: 768px) {
+  .filtro-box { padding: 14px 16px; }
+
+  .filtro-row { flex-direction: column; gap: 12px; }
+
+  .filtro-item,
+  .filtro-item--max220,
+  .filtro-item--max260,
+  .filtro-item--max280 {
+    min-width: 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .filtro-actions,
+  .filtro-actions--right {
+    width: 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+
+  .filtro-actions .btn,
+  .filtro-actions--right .btn,
+  .filtro-actions a,
+  .filtro-actions--right a {
+    flex: 1 1 auto;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .date-form { flex-direction: column; gap: 12px; }
+  .date-group input { width: 100%; }
+}
