@@ -18,7 +18,7 @@ POR_PAGINA_VENTAS_ACTIVAS   = 30
 MAX_FILAS_EXPORTAR = 10_000
 
 # Métodos de pago válidos en ventas
-METODOS_PAGO_VALIDOS = {"efectivo", "transferencia"}
+METODOS_PAGO_VALIDOS = {"efectivo", "transferencia", "tarjeta"}
 
 # Etiquetas legibles para exportaciones y reportes
 PAGO_LABEL = {"efectivo": "Efectivo", "transferencia": "Transferencia", "TDC": "Tarjeta de crédito"}
