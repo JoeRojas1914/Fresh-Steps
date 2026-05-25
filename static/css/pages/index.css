@@ -150,7 +150,6 @@
 .admin-label { font-size: 13px; font-weight: 600; color: #0b3c5d; }
 
 
-/* ── KPIs del día + sparkline ── */
 .hoy-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -230,7 +229,6 @@
     height: 110px;
 }
 
-/* ── Resumen del mes (admin) ── */
 .mes-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
