@@ -42,14 +42,37 @@ body {
 
 .titulo-articulo {
   margin-top: 4px;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
   font-weight: bold;
   text-transform: uppercase;
   font-size: 12px;
 }
 
+.art-attrs {
+  font-size: 10px;
+  margin-bottom: 3px;
+  color: #222;
+}
+
 .subtexto {
   font-size: 10px;
+}
+
+.servicio-linea {
+  padding-left: 4px;
+  font-size: 11px;
+}
+
+.subtotal-art {
+  font-weight: bold;
+  font-size: 12px;
+  border-top: 1px dotted #555;
+  padding-top: 2px;
+  margin-top: 3px !important;
+}
+
+.comentario-art {
+  font-style: italic;
 }
 
 hr {
