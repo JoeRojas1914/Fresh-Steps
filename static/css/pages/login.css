@@ -182,11 +182,6 @@
     transition: all 0.2s ease;
 }
 
-.btn-pin::before {
-    content: "🔢";
-    font-size: 16px;
-}
-
 .btn-pin:hover {
     background: #f0f7ff;
     border-color: var(--color-primary-dark);

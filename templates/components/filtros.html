@@ -7,12 +7,12 @@
 {% macro cerrar_filtro(limpiar_url=None, mostrar_limpiar=False, extra="") %}
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm">
-                    🔍 Filtrar
+                    <i data-lucide="search" width="14" height="14"></i> Filtrar
                 </button>
                 {% if mostrar_limpiar and limpiar_url %}
                 <a href="{{ limpiar_url }}"
                    class="btn btn--danger btn--sm no-underline">
-                    ✕ Limpiar
+                    <i data-lucide="x" width="14" height="14"></i> Limpiar
                 </a>
                 {% endif %}
                 {{ extra | safe }}

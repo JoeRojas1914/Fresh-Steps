@@ -23,8 +23,17 @@ export function toggleDetalles(idVenta, btn) {
     const chevron = btn ? btn.querySelector(".chevron-icon") : null;
 
     if (visible) {
-        fila.style.display = "none";
+        const box = fila.querySelector(".detalles-box");
         if (chevron) chevron.style.transform = "";
+        if (box) {
+            box.classList.add("detalles-box--closing");
+            box.addEventListener("animationend", () => {
+                fila.style.display = "none";
+                box.classList.remove("detalles-box--closing");
+            }, { once: true });
+        } else {
+            fila.style.display = "none";
+        }
         return;
     }
 

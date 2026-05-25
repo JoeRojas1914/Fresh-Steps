@@ -91,9 +91,14 @@
 
         <td>
         {% if u.rol != 'admin' %}
-            <button class="btn btn--success btn--sm no-row-click js-editar-usuario"
+            <button class="btn btn--info btn--sm no-row-click js-editar-usuario"
                 data-user='{{ u|tojson }}'>
                 Editar
+            </button>
+
+            <button class="btn btn--warning btn--sm no-row-click js-ver-historial-usuario"
+                data-id="{{ u.id_usuario }}">
+                Cambios
             </button>
 
             <button type="button"
@@ -101,11 +106,6 @@
                     data-id="{{ u.id_usuario }}"
                     data-accion="{{ 'Desactivar' if u.activo else 'Activar' }}">
                 {{ 'Desactivar' if u.activo else 'Activar' }}
-            </button>
-
-            <button class="btn btn--info btn--sm no-row-click js-ver-historial-usuario"
-                data-id="{{ u.id_usuario }}">
-                Cambios
             </button>
         {% else %}
             <span class="dim text-sm">Protegido</span>

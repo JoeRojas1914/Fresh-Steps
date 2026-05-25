@@ -73,6 +73,20 @@
   background: #1a68a8;
 }
 
+.btn--warning {
+  background: linear-gradient(to right, #ffb347, #ff9800);
+}
+
+.btn--warning:hover {
+  background: linear-gradient(to right, #ff9800, #e68900);
+}
+
+.btn--warning:active {
+  transform: scale(0.93);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.35);
+  background: #d47e00;
+}
+
 
 .btn--sm {
   padding: 6px 12px;
@@ -99,5 +113,6 @@
 .btn-row {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   margin-top: 12px;
 }
