@@ -1,7 +1,8 @@
 import os
+import json
 import logging
 from logging.handlers import RotatingFileHandler
-from datetime import date
+from datetime import date, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
@@ -48,6 +49,8 @@ from routes.usuarios_routes import usuarios_bp
 from routes.ventas_routes import ventas_bp
 from middleware.auth_middleware import init_auth_middleware
 from models.ventas import contar_entregas_resumen
+from models.estadisticas_ventas import contar_ventas_por_dia_rango, obtener_total_ingresos
+from models.estadisticas_gastos import obtener_total_gastos
 
 
 
@@ -136,12 +139,35 @@ def index():
     fecha_bonita = f"{dias[hoy_dt.weekday()]} {hoy_dt.day} de {meses[hoy_dt.month-1]}, {hoy_dt.year}"
 
     total_entregas, total_pendientes = contar_entregas_resumen()
+
+    lunes         = hoy_dt - timedelta(days=hoy_dt.weekday())
+    sabado        = lunes + timedelta(days=5)
+    ventas_semana = contar_ventas_por_dia_rango(lunes, sabado, "all")
+    idx_hoy       = min(hoy_dt.weekday(), 5)          # domingo (6) cae en sábado
+    ventas_hoy    = ventas_semana[idx_hoy]["total"] if ventas_semana else 0
+    chart_labels  = json.dumps([x["label"] for x in ventas_semana])
+    chart_data    = json.dumps([x["total"]  for x in ventas_semana])
+
+    ingresos_hoy = None
+    kpis_mes     = None
+    if session.get("rol") == "admin":
+        ingresos_hoy   = float(obtener_total_ingresos(hoy_dt, hoy_dt, "all"))
+        primer_dia_mes = date(hoy_dt.year, hoy_dt.month, 1)
+        ing_mes  = float(obtener_total_ingresos(primer_dia_mes, hoy_dt, "all"))
+        gas_mes  = float(obtener_total_gastos(primer_dia_mes, hoy_dt, "all"))
+        kpis_mes = {"ingresos": ing_mes, "gastos": gas_mes, "ganancia": ing_mes - gas_mes}
+
     return render_template(
         "index.html",
         total_entregas   = total_entregas,
         total_pendientes = total_pendientes,
         nombre_usuario   = session.get("nombre") or session.get("usuario", "").capitalize(),
         fecha_bonita     = fecha_bonita,
+        ventas_hoy       = ventas_hoy,
+        ingresos_hoy     = ingresos_hoy,
+        kpis_mes         = kpis_mes,
+        chart_labels     = chart_labels,
+        chart_data       = chart_data,
     )
 
 

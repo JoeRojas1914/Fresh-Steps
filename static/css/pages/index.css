@@ -150,14 +150,152 @@
 .admin-label { font-size: 13px; font-weight: 600; color: #0b3c5d; }
 
 
+/* ── KPIs del día + sparkline ── */
+.hoy-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    margin-bottom: 0;
+    align-items: stretch;
+}
+
+.hoy-kpis {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.kpi-hoy-card {
+    border-radius: 14px;
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 148px;
+}
+
+.kpi-hoy-card.azul  { background: linear-gradient(135deg, #2fa4ff, #1a7fd4); }
+.kpi-hoy-card.verde { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+.hoy-kpis--solo {
+    min-width: 200px;
+}
+
+.hoy-kpis--solo .kpi-hoy-card {
+    flex: 1;
+    min-width: unset;
+}
+
+.kpi-hoy-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.82);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.kpi-hoy-num {
+    font-size: 30px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -1px;
+    line-height: 1.1;
+}
+
+.hoy-chart {
+    background: #ffffff;
+    border: 1px solid #eaeef5;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.hoy-chart-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.hoy-chart-wrap {
+    position: relative;
+    height: 110px;
+}
+
+/* ── Resumen del mes (admin) ── */
+.mes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.mes-card {
+    background: #ffffff;
+    border: 1px solid #eaeef5;
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.mes-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mes-card.ingresos .mes-icon  { background: #dcfce7; color: #16a34a; }
+.mes-card.gastos   .mes-icon  { background: #fee2e2; color: #dc2626; }
+.mes-card.ganancia .mes-icon  { background: #dbeafe; color: #2563eb; }
+
+.mes-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.mes-num {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    display: block;
+}
+
+.mes-card.ingresos .mes-num  { color: #16a34a; }
+.mes-card.gastos   .mes-num  { color: #dc2626; }
+.mes-card.ganancia .mes-num  { color: #2563eb; }
+
+
 @media (max-width: 768px) {
     .acciones-grid { grid-template-columns: 1fr; }
     .kpi-grid      { grid-template-columns: 1fr; }
     .admin-grid    { grid-template-columns: repeat(2, 1fr); }
     .kpi-num       { font-size: 36px; }
+    .hoy-grid      { grid-template-columns: 1fr; }
+    .mes-grid      { grid-template-columns: 1fr; }
+    .hoy-kpis      { flex-direction: row; }
 }
 
 @media (max-width: 480px) {
     .admin-grid { grid-template-columns: 1fr; }
     .home-fecha { display: none; }
+    .hoy-kpis   { flex-direction: column; }
 }

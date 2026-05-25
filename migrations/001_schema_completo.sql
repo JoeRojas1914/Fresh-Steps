@@ -113,6 +113,7 @@ CREATE TABLE IF NOT EXISTS venta (
     id_usuario_creo    INT,
     id_usuario_entrego INT,
     eliminado          TINYINT(1) NOT NULL DEFAULT 0,
+    fecha_eliminado    DATETIME NULL DEFAULT NULL,
     CONSTRAINT chk_venta_total      CHECK (total >= 0),
     CONSTRAINT chk_venta_descuento  CHECK (cantidad_descuento >= 0),
     FOREIGN KEY (id_negocio)         REFERENCES negocio(id_negocio),
