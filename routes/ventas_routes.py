@@ -16,6 +16,7 @@ from services.ventas_service import (
     listar_entregas_pendientes_service,
     guardar_venta_service,
     marcar_lista_service,
+    revertir_lista_service,
     marcar_entregada,
     obtener_venta,
     obtener_detalles_venta,
@@ -152,6 +153,21 @@ def registrar_pago_final():
         return jsonify({"ok": False, "error": str(e)}), 400
     except Exception:
         logger.exception("Error en registrar_pago_final id_usuario=%s", id_usuario)
+        return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
+
+
+@ventas_bp.route("/ventas/revertir-lista/<int:id_venta>", methods=["POST"])
+@admin_required
+@limiter.limit("30 per minute")
+def revertir_lista_route(id_venta):
+    id_usuario = session.get("id_usuario")
+    try:
+        if revertir_lista_service(id_venta, id_usuario):
+            return jsonify({"ok": True, "message": "Venta regresada a pendientes correctamente"})
+        else:
+            return jsonify({"ok": False, "error": "La venta no puede ser revertida"})
+    except Exception:
+        logger.exception("Error en revertir_lista id_venta=%s id_usuario=%s", id_venta, id_usuario)
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
 
 

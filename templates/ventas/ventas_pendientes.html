@@ -112,7 +112,11 @@
             <td>
                 <button
                     class="btn btn--success btn--sm btn-marcar-lista"
-                    data-id="{{ v.id_venta }}">
+                    data-id="{{ v.id_venta }}"
+                    data-nombre="{{ v.nombre }}"
+                    data-telefono="{{ v.telefono or '' }}"
+                    data-negocio-id="{{ v.id_negocio }}"
+                    data-negocio="{{ v.negocio }}">
                     <i data-lucide="check-circle" width="14" height="14"></i> Lista
                 </button>
             </td>
@@ -174,7 +178,13 @@
       </div>
     </div>
     <p class="modal-confirm__title">¿Marcar como lista para entrega?</p>
-    <p class="modal-confirm__sub">La venta pasará a la cola de entregas pendientes.</p>
+    <p class="modal-confirm__sub" id="waModalSub">La venta pasará a la cola de entregas pendientes.</p>
+    <div class="wa-check-row">
+      <label class="wa-check-label">
+        <input type="checkbox" id="waCheckbox" checked>
+        Notificar por WhatsApp
+      </label>
+    </div>
   </div>
   {% endif %}
 

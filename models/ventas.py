@@ -56,6 +56,24 @@ def marcar_como_lista(id_venta, id_usuario=None):
         return afectadas > 0
 
 
+def revertir_lista(id_venta, id_usuario=None):
+    with get_db() as (_, cursor):
+        cursor.execute("""
+            UPDATE venta
+            SET fecha_lista = NULL
+            WHERE id_venta = %s
+              AND fecha_lista IS NOT NULL
+              AND fecha_entrega IS NULL
+              AND eliminado = 0
+        """, (id_venta,))
+
+        afectadas = cursor.rowcount
+        if afectadas > 0 and id_usuario:
+            registrar_historial_venta(cursor, id_venta, "REVERTIDO", id_usuario)
+
+        return afectadas > 0
+
+
 def eliminar_venta(id_venta, id_usuario=None):
     with get_db() as (_, cursor):
         cursor.execute("""

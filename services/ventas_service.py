@@ -5,6 +5,7 @@ from models.ventas import (
     eliminar_venta,
     marcar_entregada,
     marcar_como_lista,
+    revertir_lista,
     obtener_venta,
     obtener_ventas_listas,
     obtener_detalles_venta,
@@ -348,4 +349,8 @@ def historial_ventas_service(
 
 def marcar_lista_service(id_venta: int, id_usuario: int | None = None) -> bool:
     return marcar_como_lista(id_venta, id_usuario)
+
+
+def revertir_lista_service(id_venta: int, id_usuario: int | None = None) -> bool:
+    return revertir_lista(id_venta, id_usuario)
 

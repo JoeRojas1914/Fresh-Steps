@@ -127,18 +127,23 @@
                 </ul>
 
                 <div class="btn-row">
-                    <button type="button"
-                            class="btn btn--info btn--sm js-ver-ticket"
-                            data-url="{{ url_for('ventas.venta_ticket', id_venta=v.id_venta) }}">
-                        <i data-lucide="receipt" width="14" height="14"></i> Ver ticket
-                    </button>
                     {% if session.get("rol") == "admin" %}
                     <button type="button"
                             class="btn btn--danger btn--sm btn-eliminar"
                             data-id="{{ v.id_venta }}">
                         Eliminar
                     </button>
+                    <button type="button"
+                            class="btn btn--warning btn--sm btn-revertir"
+                            data-id="{{ v.id_venta }}">
+                        <i data-lucide="undo-2" width="14" height="14"></i> Regresar a pendiente
+                    </button>
                     {% endif %}
+                    <button type="button"
+                            class="btn btn--info btn--sm js-ver-ticket"
+                            data-url="{{ url_for('ventas.venta_ticket', id_venta=v.id_venta) }}">
+                        <i data-lucide="receipt" width="14" height="14"></i> Ver ticket
+                    </button>
                 </div>
             </div>
         </td>
@@ -215,6 +220,25 @@
 
 
 {{ modal_eliminar_venta() }}
+
+{% call(section) modal("modalRevertir", "Regresar a pendiente", "sm") %}
+  {% if section == 'body' %}
+    <div class="entrega-confirm">
+      <div class="entrega-confirm__hero">
+        <div class="entrega-confirm__icon">
+          <i data-lucide="undo-2" width="40" height="40"></i>
+        </div>
+      </div>
+      <p class="entrega-confirm__title">¿Regresar esta venta a pendientes?</p>
+      <p class="entrega-confirm__sub">La venta volverá a la lista de entregas pendientes y deberá marcarse como lista nuevamente.</p>
+    </div>
+  {% endif %}
+  {% if section == 'footer' %}
+    <button class="btn btn--danger btn--sm" data-modal-close="modalRevertir">Cancelar</button>
+    <button id="btnConfirmarRevertir" class="btn btn--primary btn--lg">Confirmar</button>
+  {% endif %}
+{% endcall %}
+
 {% endblock %}
 
 {% block scripts %}
