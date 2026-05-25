@@ -124,11 +124,11 @@
 <div id="tab-operacional" class="tab-panel d-none">
     <div class="stats-page">
         <div class="card stats-card">
-            <h2 class="stats-title" id="titulo-ventas">Número de ventas</h2>
+            <h2 class="stats-title" id="titulo-ventas">Número de ventas <span class="chart-total-badge" id="total-ventas"></span></h2>
             <canvas id="ventasSemanaChart"></canvas>
         </div>
         <div class="card stats-card">
-            <h2 class="stats-title" id="titulo-unidades">Unidades recibidas</h2>
+            <h2 class="stats-title" id="titulo-unidades">Unidades recibidas <span class="chart-total-badge" id="total-unidades"></span></h2>
             <canvas id="unidadesSemanaChart"></canvas>
         </div>
     </div>
@@ -136,7 +136,7 @@
     {# Ocultar ventas por día en modo "día" — no tiene sentido #}
     <div id="card-ventas-por-dia" class="stats-page">
         <div class="card stats-card full-width">
-            <h2 class="stats-title">Ventas por día de la semana</h2>
+            <h2 class="stats-title">Ventas por día de la semana <span class="chart-total-badge" id="total-ventas-dia"></span></h2>
             <canvas id="ventasPorDiaChart"></canvas>
         </div>
     </div>

@@ -415,7 +415,13 @@ function actualizarTitulos() {
     const sufijos = {dia:"por hora", semana:"por día", mes:"por semana", personalizado:"por semana"};
     const s = sufijos[modoActual] || "por semana";
     [["titulo-ingresos","Ingresos"],["titulo-gastos","Gastos"],["titulo-ventas","Número de ventas"],["titulo-unidades","Unidades recibidas"]]
-        .forEach(([id,base]) => { const el=document.getElementById(id); if(el) el.textContent=`${base} ${s}`; });
+        .forEach(([id,base]) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const badge = el.querySelector('.chart-total-badge');
+            el.textContent = `${base} ${s}`;
+            if (badge) el.appendChild(badge);
+        });
 }
 
 const chartsPerTab = {
@@ -476,11 +482,28 @@ async function cargarDashboard() {
 
         if (data.ingresos_semanales) { ingresosChart.data.labels=data.ingresos_semanales.map(x=>x.label); ingresosChart.data.datasets[0].data=data.ingresos_semanales.map(x=>x.total); ingresosChart.update(); }
         if (data.gastos_semanales)   { gastosChart.data.labels=data.gastos_semanales.labels||[]; gastosChart.data.datasets=aplicarRojos(data.gastos_semanales.datasets||[]); gastosChart.update(); }
-        if (data.ventas_semanales)   { ventasSemanaChart.data.labels=data.ventas_semanales.map(x=>x.label); ventasSemanaChart.data.datasets[0].data=data.ventas_semanales.map(x=>x.total); ventasSemanaChart.update(); }
-        if (data.unidades_semanales) { unidadesSemanaChart.data.labels=data.unidades_semanales.map(x=>x.label); unidadesSemanaChart.data.datasets[0].data=data.unidades_semanales.map(x=>x.total); unidadesSemanaChart.update(); }
+        if (data.ventas_semanales)   {
+            ventasSemanaChart.data.labels=data.ventas_semanales.map(x=>x.label);
+            ventasSemanaChart.data.datasets[0].data=data.ventas_semanales.map(x=>x.total);
+            ventasSemanaChart.update();
+            const elTV=document.getElementById("total-ventas");
+            if(elTV) elTV.textContent=`Total: ${fmtN(data.ventas_semanales.reduce((s,x)=>s+x.total,0))}`;
+        }
+        if (data.unidades_semanales) {
+            unidadesSemanaChart.data.labels=data.unidades_semanales.map(x=>x.label);
+            unidadesSemanaChart.data.datasets[0].data=data.unidades_semanales.map(x=>x.total);
+            unidadesSemanaChart.update();
+            const elTU=document.getElementById("total-unidades");
+            if(elTU) elTU.textContent=`Total: ${fmtN(data.unidades_semanales.reduce((s,x)=>s+x.total,0))}`;
+        }
         if (data.ventas_prepago)     { tipoPagoChart.data.labels=data.ventas_prepago.map(x=>x.tipo); tipoPagoChart.data.datasets[0].data=data.ventas_prepago.map(x=>x.total); tipoPagoChart.update(); }
         if (data.uso_servicios)      { serviciosChart.data.labels=data.uso_servicios.map(x=>x.nombre); serviciosChart.data.datasets[0].data=data.uso_servicios.map(x=>x.total); serviciosChart.update(); }
-        if (data.ventas_por_dia)     { ventasPorDiaChart.data.datasets[0].data=data.ventas_por_dia; ventasPorDiaChart.update(); }
+        if (data.ventas_por_dia)     {
+            ventasPorDiaChart.data.datasets[0].data=data.ventas_por_dia;
+            ventasPorDiaChart.update();
+            const elTD=document.getElementById("total-ventas-dia");
+            if(elTD) elTD.textContent=`Total: ${fmtN(data.ventas_por_dia.reduce((s,v)=>s+v,0))}`;
+        }
 
         if (data.metodos_pago) {
             metodosPagoChart.data.labels=data.metodos_pago.map(x=>x.metodo);
