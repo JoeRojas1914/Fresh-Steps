@@ -316,7 +316,8 @@
 }
 
 .venta-side-scroll {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -342,7 +343,14 @@
 .venta-side select,
 .venta-side input { height: 36px; }
 
-#btnCrear { width: 100%; height: 46px; font-size: 15px; margin-top: 10px; }
+#btn-crear {
+  width: 100%;
+  height: 56px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin-top: 10px;
+}
 
 .articulo-resumen {
   display: none;
