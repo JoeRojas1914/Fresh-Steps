@@ -31,7 +31,7 @@ async function verHistorialVenta(idVenta) {
             return;
         }
 
-        const ACCIONES_VALIDAS = new Set(["CREADO", "LISTA", "ENTREGADO", "ELIMINADO"]);
+        const ACCIONES_VALIDAS = new Set(["CREADO", "LISTA", "ENTREGADO", "ELIMINADO", "REVERTIDO"]);
 
         tbody.innerHTML = data.map(h => {
             const accion = ACCIONES_VALIDAS.has(h.accion) ? h.accion : "DESCONOCIDO";
