@@ -33,7 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("click", e => {
         if (e.target.closest("#btn-agregar-articulo")) return;
         const abierto = document.querySelector(".articulo-item.abierto");
-        if (!abierto || abierto.contains(e.target)) return;
+        if (!abierto) return;
+        if (e.composedPath().includes(abierto)) return;
         cerrarArticulo(abierto);
     });
 
