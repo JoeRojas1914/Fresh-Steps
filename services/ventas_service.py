@@ -306,10 +306,11 @@ def historial_ventas_service(
     mostrar_eliminadas: bool = False,
     q: str | None = None,
     id_venta: int | None = None,
+    estado: str | None = None,
 ) -> dict:
     offset          = (pagina - 1) * POR_PAGINA_HISTORIAL
     total_registros = contar_historial_ventas(
-        id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas, q=q, id_venta=id_venta
+        id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas, q=q, id_venta=id_venta, estado=estado
     )
     total_paginas   = max(
         1, (total_registros + POR_PAGINA_HISTORIAL - 1) // POR_PAGINA_HISTORIAL
@@ -318,7 +319,7 @@ def historial_ventas_service(
     ventas   = obtener_historial_ventas(
         id_negocio, fecha_inicio, fecha_fin,
         limit=POR_PAGINA_HISTORIAL, offset=offset,
-        mostrar_eliminadas=mostrar_eliminadas, q=q, id_venta=id_venta,
+        mostrar_eliminadas=mostrar_eliminadas, q=q, id_venta=id_venta, estado=estado,
     )
     negocios = obtener_negocios()
 
@@ -362,6 +363,7 @@ def historial_ventas_service(
         "mostrar_eliminadas": mostrar_eliminadas,
         "q":                  q,
         "id_venta":           id_venta,
+        "estado":             estado,
     }
 
 

@@ -50,6 +50,17 @@
                 <input type="date" name="fecha_fin" value="{{ fecha_fin or '' }}">
             </div>
  
+            <div class="filtro-item filtro-item--max160">
+                <label>Estado</label>
+                <select name="estado">
+                    <option value="">Todos</option>
+                    <option value="pendiente"  {% if estado == 'pendiente'  %}selected{% endif %}>Pendiente</option>
+                    <option value="lista"      {% if estado == 'lista'      %}selected{% endif %}>Lista</option>
+                    <option value="entregada"  {% if estado == 'entregada'  %}selected{% endif %}>Entregada</option>
+                    <option value="eliminada"  {% if estado == 'eliminada'  %}selected{% endif %}>Eliminada</option>
+                </select>
+            </div>
+
             <div class="filtro-item filtro-item--auto">
                 <label>&nbsp;</label>
                 <div class="filtro-toggle filtro-toggle--compact">
@@ -67,7 +78,7 @@
 
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
-                {% if id_negocio or fecha_inicio or fecha_fin or q or id_venta %}
+                {% if id_negocio or fecha_inicio or fecha_fin or q or id_venta or estado %}
                 <a href="/ventas/historial" class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
                 {% endif %}
                 <a href="{{ url_for('ventas.exportar_historial_excel',
@@ -215,7 +226,8 @@
         "id_negocio":   id_negocio,
         "fecha_inicio": fecha_inicio,
         "fecha_fin":    fecha_fin,
-        "q":            q
+        "q":            q,
+        "estado":       estado
     }
 ) }}
  

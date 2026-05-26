@@ -19,6 +19,20 @@ def obtener_historial_venta(id_venta):
         return cursor.fetchall()
 
 
+def _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas):
+    if estado == "pendiente":
+        sql += " AND v.eliminado = 0 AND v.fecha_lista IS NULL AND v.fecha_entrega IS NULL"
+    elif estado == "lista":
+        sql += " AND v.eliminado = 0 AND v.fecha_lista IS NOT NULL AND v.fecha_entrega IS NULL"
+    elif estado == "entregada":
+        sql += " AND v.eliminado = 0 AND v.fecha_entrega IS NOT NULL"
+    elif estado == "eliminada":
+        sql += " AND v.eliminado = 1"
+    elif not mostrar_eliminadas:
+        sql += " AND v.eliminado = 0"
+    return sql, params
+
+
 def contar_historial_ventas(
     id_negocio=None,
     fecha_inicio=None,
@@ -26,6 +40,7 @@ def contar_historial_ventas(
     mostrar_eliminadas=False,
     q=None,
     id_venta=None,
+    estado=None,
 ):
     with get_db() as (_, cursor):
         sql = """
@@ -34,10 +49,9 @@ def contar_historial_ventas(
             JOIN cliente c ON c.id_cliente = v.id_cliente
             WHERE 1=1
         """
-        if not mostrar_eliminadas:
-            sql += " AND v.eliminado = 0"
-
         params = []
+        sql, params = _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas)
+
         if id_negocio:
             sql += " AND v.id_negocio = %s"
             params.append(id_negocio)
@@ -68,6 +82,7 @@ def obtener_historial_ventas(
     mostrar_eliminadas=False,
     q=None,
     id_venta=None,
+    estado=None,
 ):
     with get_db() as (_, cursor):
         sql = """
@@ -97,11 +112,9 @@ def obtener_historial_ventas(
             LEFT JOIN pago_venta p ON p.id_venta = v.id_venta
             WHERE 1=1
         """
-
-        if not mostrar_eliminadas:
-            sql += " AND v.eliminado = 0"
-
         params = []
+        sql, params = _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas)
+
         if id_negocio:
             sql += " AND v.id_negocio = %s"
             params.append(id_negocio)

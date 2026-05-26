@@ -241,10 +241,11 @@ def historial_ventas():
     pagina       = request.args.get("pagina", 1,    type=int)
     q            = request.args.get("q", "").strip() or None
     id_venta     = request.args.get("id_venta",     type=int)
+    estado       = request.args.get("estado")       or None
 
     mostrar_eliminadas = request.args.get('eliminadas') == '1'
     data = historial_ventas_service(
-        id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas, q=q, id_venta=id_venta
+        id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas, q=q, id_venta=id_venta, estado=estado
     )
 
     return render_template("ventas/historial_ventas.html", **data)
