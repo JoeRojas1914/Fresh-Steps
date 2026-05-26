@@ -1,5 +1,7 @@
 import logging
 import io
+import os
+import subprocess
 from datetime import date, datetime
 from flask import Blueprint, render_template, jsonify, session, request, send_file
 from config import MAX_FILAS_EXPORTAR
@@ -30,6 +32,45 @@ from extensions import limiter
 logger = logging.getLogger(__name__)
 
 ventas_bp = Blueprint("ventas", __name__)
+
+_EDGE_PATHS = [
+    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+]
+_CHROME_PATHS = [
+    r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+    r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    os.path.join(os.path.expanduser("~"), r"AppData\Local\Google\Chrome\Application\chrome.exe"),
+]
+
+def _encontrar_browser(paths):
+    for p in paths:
+        if os.path.exists(p):
+            return p
+    return None
+
+
+@ventas_bp.route("/ventas/abrir-whatsapp", methods=["POST"])
+@limiter.limit("30 per minute")
+def abrir_whatsapp():
+    if not session.get("id_usuario"):
+        return jsonify({"ok": False}), 401
+    data       = request.get_json(silent=True) or {}
+    url        = data.get("url", "")
+    negocio_id = int(data.get("negocio_id", 0))
+    if not url.startswith("https://web.whatsapp.com/send?"):
+        return jsonify({"ok": False, "error": "URL no válida"}), 400
+    try:
+        paths = _EDGE_PATHS if negocio_id == 1 else _CHROME_PATHS
+        exe   = _encontrar_browser(paths)
+        if exe:
+            subprocess.Popen([exe, url])
+        else:
+            logger.warning("No se encontró el navegador para negocio_id=%s", negocio_id)
+        return jsonify({"ok": True})
+    except Exception:
+        logger.exception("Error al abrir WhatsApp negocio_id=%s", negocio_id)
+        return jsonify({"ok": False, "error": "Error al abrir el navegador"}), 500
 
 
 @ventas_bp.route("/ventas/guardar", methods=["POST"])

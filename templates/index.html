@@ -15,17 +15,50 @@
     <span class="home-fecha">{{ fecha_bonita }}</span>
 </div>
 
+{# ── Resumen del mes — solo admin ── #}
+{% if session.rol == "admin" and kpis_mes %}
+<div class="mes-grid">
+    <div class="mes-card ingresos">
+        <span class="mes-icon"><i data-lucide="trending-up" width="18" height="18"></i></span>
+        <div>
+            <span class="mes-label">Ingresos del mes</span>
+            <span class="mes-num">${{ "%.2f"|format(kpis_mes.ingresos) }}</span>
+        </div>
+    </div>
+    <div class="mes-card gastos">
+        <span class="mes-icon"><i data-lucide="banknote" width="18" height="18"></i></span>
+        <div>
+            <span class="mes-label">Gastos del mes</span>
+            <span class="mes-num">${{ "%.2f"|format(kpis_mes.gastos) }}</span>
+        </div>
+    </div>
+    <div class="mes-card ganancia">
+        <span class="mes-icon"><i data-lucide="wallet" width="18" height="18"></i></span>
+        <div>
+            <span class="mes-label">Ganancia del mes</span>
+            <span class="mes-num">${{ "%.2f"|format(kpis_mes.ganancia) }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {# ── KPIs del día ── #}
 <div class="hoy-grid">
     <div class="hoy-kpis{% if session.rol != 'admin' %} hoy-kpis--solo{% endif %}">
         <div class="kpi-hoy-card azul">
-            <span class="kpi-hoy-label"><i data-lucide="receipt" width="13" height="13"></i> Ventas hoy</span>
-            <span class="kpi-hoy-num">{{ ventas_hoy }}</span>
+            <div class="kpi-hoy-icon"><i data-lucide="receipt" width="20" height="20"></i></div>
+            <div>
+                <span class="kpi-hoy-label">Ventas hoy</span>
+                <span class="kpi-hoy-num">{{ ventas_hoy }}</span>
+            </div>
         </div>
         {% if session.rol == "admin" %}
         <div class="kpi-hoy-card verde">
-            <span class="kpi-hoy-label"><i data-lucide="dollar-sign" width="13" height="13"></i> Ingresos hoy</span>
-            <span class="kpi-hoy-num">${{ "%.2f"|format(ingresos_hoy) }}</span>
+            <div class="kpi-hoy-icon"><i data-lucide="dollar-sign" width="20" height="20"></i></div>
+            <div>
+                <span class="kpi-hoy-label">Ingresos hoy</span>
+                <span class="kpi-hoy-num">${{ "%.2f"|format(ingresos_hoy) }}</span>
+            </div>
         </div>
         {% endif %}
     </div>
@@ -62,34 +95,6 @@
         </div>
     </a>
 </div>
-
-{# ── Resumen del mes — solo admin ── #}
-{% if session.rol == "admin" and kpis_mes %}
-<p class="home-section-label">Este mes</p>
-<div class="mes-grid">
-    <div class="mes-card ingresos">
-        <span class="mes-icon"><i data-lucide="trending-up" width="18" height="18"></i></span>
-        <div>
-            <span class="mes-label">Ingresos</span>
-            <span class="mes-num">${{ "%.2f"|format(kpis_mes.ingresos) }}</span>
-        </div>
-    </div>
-    <div class="mes-card gastos">
-        <span class="mes-icon"><i data-lucide="banknote" width="18" height="18"></i></span>
-        <div>
-            <span class="mes-label">Gastos</span>
-            <span class="mes-num">${{ "%.2f"|format(kpis_mes.gastos) }}</span>
-        </div>
-    </div>
-    <div class="mes-card ganancia">
-        <span class="mes-icon"><i data-lucide="wallet" width="18" height="18"></i></span>
-        <div>
-            <span class="mes-label">Ganancia</span>
-            <span class="mes-num">${{ "%.2f"|format(kpis_mes.ganancia) }}</span>
-        </div>
-    </div>
-</div>
-{% endif %}
 
 {# ── Administración — solo admin ── #}
 {% if session.rol == "admin" %}

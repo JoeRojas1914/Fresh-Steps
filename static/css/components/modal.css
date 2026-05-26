@@ -338,3 +338,35 @@
   font-weight: 800;
   color: #ea580c;
 }
+
+
+/* ── WhatsApp checkbox en modal ── */
+.wa-check-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.wa-check-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  user-select: none;
+}
+
+.wa-check-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #16a34a;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.wa-check-label:has(input:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

@@ -18,6 +18,7 @@ def obtener_gastos_por_semana_y_proveedor(inicio: date, fin: date, id_negocio: s
         FROM gastos
         WHERE fecha_registro >= %s
           AND fecha_registro <= %s
+          AND activo = 1
     """
     params = [inicio, fin]
     if id_negocio != "all":
@@ -45,6 +46,7 @@ def obtener_total_gastos(inicio: date, fin: date, id_negocio: str):
         FROM gastos
         WHERE fecha_registro >= %s
           AND fecha_registro <= %s
+          AND activo = 1
     """
     params = [inicio, fin]
     if id_negocio != "all":

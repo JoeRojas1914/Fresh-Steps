@@ -143,6 +143,7 @@ def obtener_entregas_pendientes(id_negocio=None, id_venta=None, limit=None, offs
         sql = """
             SELECT
                 v.id_venta,
+                v.id_negocio,
                 v.fecha_recibo,
                 v.fecha_estimada,
                 v.total,

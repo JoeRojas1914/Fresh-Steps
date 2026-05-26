@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 window.open(`/ventas/ticket/${data.id_venta}?copias=2`, "_blank");
             }
-            window.location.href = "/ventas/pendientes";
+            window.location.href = "/";
 
         } catch (err) {
             if (nuevaPestana) nuevaPestana.close();
