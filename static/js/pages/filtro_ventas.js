@@ -8,14 +8,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const inputBusqueda = document.getElementById("buscador-cliente");
+    const inputTicket   = document.getElementById("buscador-ticket");
     const tabla         = document.querySelector("#tabla-ventas table");
 
-    if (!inputBusqueda || !tabla) return;
+    if (!tabla) return;
 
     const filas = tabla.querySelectorAll("tbody tr");
 
     function aplicarFiltro() {
-        const textoBusqueda = normalizar(inputBusqueda.value);
+        const textoBusqueda = inputBusqueda ? normalizar(inputBusqueda.value) : "";
+        const textoTicket   = inputTicket   ? inputTicket.value.trim()        : "";
 
         filas.forEach(fila => {
             if (fila.classList.contains("table--details")) return;
@@ -23,19 +25,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const columnas = fila.querySelectorAll("td");
             if (columnas.length < 3) return;
 
+            const ticket  = columnas[0].innerText.replace("#", "").trim();
             const cliente = normalizar(columnas[2].innerText);
-            const mostrar = cliente.includes(textoBusqueda);
+
+            const coincideNombre = !textoBusqueda || cliente.includes(textoBusqueda);
+            const coincideTicket = !textoTicket   || ticket.startsWith(textoTicket);
+            const mostrar        = coincideNombre && coincideTicket;
 
             fila.style.display = mostrar ? "" : "none";
 
-            const idVenta     = columnas[0].innerText.replace("#", "").trim();
-            const filaDetalles = document.getElementById(`detalles-${idVenta}`);
-            if (filaDetalles) {
-                filaDetalles.style.display = "none";
-            }
+            const filaDetalles = document.getElementById(`detalles-${ticket}`);
+            if (filaDetalles) filaDetalles.style.display = "none";
         });
     }
 
-    inputBusqueda.addEventListener("input", aplicarFiltro);
+    if (inputBusqueda) inputBusqueda.addEventListener("input", aplicarFiltro);
+    if (inputTicket)   inputTicket.addEventListener("input",   aplicarFiltro);
 
 });

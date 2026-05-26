@@ -83,11 +83,13 @@ def venta_ticket(id_venta):
 
     detalles_dict = obtener_detalles_venta([id_venta])
     detalles = detalles_dict.get(id_venta, [])
+    copias   = min(request.args.get("copias", 1, type=int), 5)
 
     return render_template(
         "ventas/ticket_venta.html",
         venta=venta,
-        detalles=detalles
+        detalles=detalles,
+        copias=copias,
     )
 
 @ventas_bp.route("/ventas/listas")

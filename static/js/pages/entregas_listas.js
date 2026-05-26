@@ -3,6 +3,7 @@ import { mostrarFeedback, csrfFetch, confirmarEliminarVenta } from '../base/help
 
 let ventaEntregaActual  = null;
 let saldoPendienteActual = 0;
+let ventaRevertirActual  = null;
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -11,6 +12,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!btn) return;
         confirmarEliminarVenta(btn.dataset.id);
     });
+
+    document.addEventListener("click", function (e) {
+        const btn = e.target.closest(".btn-revertir");
+        if (!btn) return;
+        ventaRevertirActual = parseInt(btn.dataset.id);
+        abrirModal("modalRevertir");
+    });
+
+    const btnConfirmarRevertir = document.getElementById("btnConfirmarRevertir");
+    if (btnConfirmarRevertir) {
+        btnConfirmarRevertir.addEventListener("click", confirmarRevertir);
+    }
 
     document.querySelectorAll(".btn-entregar").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -108,4 +121,22 @@ function cerrarModalEntrega() {
 
     if (texto)  texto.style.display  = "none";
     if (bloque) bloque.style.display = "none";
+}
+
+
+function confirmarRevertir() {
+    if (!ventaRevertirActual) return;
+
+    csrfFetch(`/ventas/revertir-lista/${ventaRevertirActual}`, { method: "POST" })
+        .then(r => r.json())
+        .then(res => {
+            cerrarModal("modalRevertir");
+            if (res.ok) {
+                mostrarFeedback(res.message, "success");
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                mostrarFeedback(res.error || "Error al revertir la venta", "error");
+            }
+        })
+        .catch(() => mostrarFeedback("Error de conexión al revertir la venta.", "error"));
 }

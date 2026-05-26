@@ -8,6 +8,7 @@
 </head>
 
 <body>
+{% for copia in range(copias) %}
   <div class="ticket">
 
     <div class="logo">
@@ -163,6 +164,9 @@
           <b>GRACIAS POR SU PREFERENCIA</b>
         </div>
     </div>
+
+  {% if not loop.last %}<div class="salto-pagina"></div>{% endif %}
+{% endfor %}
 
   <script type="module" src="{{ url_for('static', filename='js/pages/ticket_venta.js') }}"></script>
 

@@ -130,6 +130,12 @@ hr {
 .mt-10  { margin-top: 10px; }
 .fw-bold { font-weight: bold; }
 
+.salto-pagina {
+  page-break-after: always;
+  break-after: page;
+  height: 0;
+}
+
 @media print {
   @page {
     size: 80mm auto;

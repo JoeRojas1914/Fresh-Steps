@@ -71,9 +71,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (nuevaPestana) {
-                nuevaPestana.location.href = `/ventas/ticket/${data.id_venta}`;
+                nuevaPestana.location.href = `/ventas/ticket/${data.id_venta}?copias=2`;
             } else {
-                window.open(`/ventas/ticket/${data.id_venta}`, "_blank");
+                window.open(`/ventas/ticket/${data.id_venta}?copias=2`, "_blank");
             }
             window.location.href = "/ventas/pendientes";
 
