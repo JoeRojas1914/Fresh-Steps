@@ -1,6 +1,6 @@
 import { ventaState } from './ventas_state.js';
 import { mostrarFeedback } from '../base/helpers.js';
-import { validarFormulario, actualizarTotal } from './ventas_validacion.js';
+import { validarFormulario, actualizarTotal, calcularTotal } from './ventas_validacion.js';
 import { crearServiciosSelect, actualizarOpcionesServiciosDelArticulo } from './ventas_servicios.js';
 
 /* ─── Tipo de artículo por negocio ───────────────────────────────────────── */
@@ -140,6 +140,17 @@ export function eliminarArticulo(btn) {
     btn.closest(".articulo-item").remove();
     renumerarArticulos();
     actualizarEmptyState();
+
+    const campoPrepago = document.getElementById("monto_prepago");
+    if (campoPrepago) {
+        const nuevoTotal   = calcularTotal();
+        const montoPrepago = parseFloat(campoPrepago.value || 0);
+        if (montoPrepago > nuevoTotal) {
+            campoPrepago.value = nuevoTotal > 0 ? nuevoTotal.toFixed(2) : "";
+            mostrarFeedback("El prepago se ajustó al nuevo total.", "warning");
+        }
+    }
+
     validarFormulario();
     actualizarTotal();
 }

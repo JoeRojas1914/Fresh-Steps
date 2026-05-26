@@ -272,6 +272,9 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> int:
         tipo_pago = form.get("tipo_pago")
         if not tipo_pago:
             raise ValueError("Debes seleccionar el tipo de pago del prepago.")
+        venta_creada = obtener_venta(id_venta)
+        if venta_creada and monto_prepago > float(venta_creada["total"]):
+            raise ValueError("El prepago no puede ser mayor al total de la venta.")
         registrar_pago(
             id_venta=id_venta,
             monto=monto_prepago,
