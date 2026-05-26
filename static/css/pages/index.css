@@ -166,36 +166,19 @@
 
 .kpi-hoy-card {
     border-radius: 16px;
-    border: 1.5px solid #e8eef5;
-    border-left-width: 4px;
-    padding: 16px 18px;
+    background: #ffffff;
+    border: 1.5px solid #eaeef5;
+    border-top-width: 4px;
+    padding: 20px;
     display: flex;
-    align-items: center;
-    gap: 14px;
-    min-width: 190px;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 170px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-.kpi-hoy-card.azul {
-    border-left-color: #2fa4ff;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
-}
-.kpi-hoy-card.verde {
-    border-left-color: #22c55e;
-    background: linear-gradient(135deg, #ffffff 0%, #f0fdf5 100%);
-}
-
-.kpi-hoy-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.kpi-hoy-card.azul  .kpi-hoy-icon { background: #dbeafe; color: #2563eb; }
-.kpi-hoy-card.verde .kpi-hoy-icon { background: #dcfce7; color: #16a34a; }
+.kpi-hoy-card.azul  { border-top-color: #2fa4ff; }
+.kpi-hoy-card.verde { border-top-color: #22c55e; }
 
 .hoy-kpis--solo .kpi-hoy-card {
     flex: 1;
@@ -207,26 +190,27 @@
     font-weight: 600;
     color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: .05em;
+    letter-spacing: .06em;
     display: block;
-    margin-bottom: 2px;
 }
 
 .kpi-hoy-num {
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 800;
-    color: #0b3c5d;
     letter-spacing: -1px;
     line-height: 1.1;
     display: block;
 }
 
+.kpi-hoy-card.azul  .kpi-hoy-num { color: #2fa4ff; }
+.kpi-hoy-card.verde .kpi-hoy-num { color: #16a34a; }
+
 .hoy-chart {
-    background: #ffffff;
-    border: 1px solid #eaeef5;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-    padding: 16px 20px;
+    background: #f0f8ff;
+    border: 1.5px solid #dceeff;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 18px 20px;
     display: flex;
     flex-direction: column;
 }
@@ -255,47 +239,35 @@
 
 .mes-card {
     border-radius: 16px;
-    border: 1.5px solid #e8eef5;
-    border-left-width: 4px;
-    padding: 16px 18px;
+    background: #ffffff;
+    border: 1.5px solid #eaeef5;
+    border-top-width: 4px;
+    padding: 20px;
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-.mes-card.ingresos { border-left-color: #22c55e; background: linear-gradient(135deg, #ffffff 0%, #f0fdf5 100%); }
-.mes-card.gastos   { border-left-color: #dc2626; background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%); }
-.mes-card.ganancia { border-left-color: #2563eb; background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%); }
+.mes-card.ingresos { border-top-color: #16a34a; }
+.mes-card.gastos   { border-top-color: #dc2626; }
+.mes-card.ganancia { border-top-color: #2563eb; }
 
-.mes-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.mes-card.ingresos .mes-icon { background: #dcfce7; color: #16a34a; }
-.mes-card.gastos   .mes-icon { background: #fee2e2; color: #dc2626; }
-.mes-card.ganancia .mes-icon { background: #dbeafe; color: #2563eb; }
+.mes-icon { display: none; }
 
 .mes-label {
     font-size: 11px;
     font-weight: 600;
     color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: .05em;
+    letter-spacing: .06em;
     display: block;
-    margin-bottom: 2px;
 }
 
 .mes-num {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 800;
     letter-spacing: -0.5px;
-    color: #0b3c5d;
     display: block;
 }
 

@@ -46,19 +46,13 @@
 <div class="hoy-grid">
     <div class="hoy-kpis{% if session.rol != 'admin' %} hoy-kpis--solo{% endif %}">
         <div class="kpi-hoy-card azul">
-            <div class="kpi-hoy-icon"><i data-lucide="receipt" width="20" height="20"></i></div>
-            <div>
-                <span class="kpi-hoy-label">Ventas hoy</span>
-                <span class="kpi-hoy-num">{{ ventas_hoy }}</span>
-            </div>
+            <span class="kpi-hoy-label">Ventas hoy</span>
+            <span class="kpi-hoy-num">{{ ventas_hoy }}</span>
         </div>
         {% if session.rol == "admin" %}
         <div class="kpi-hoy-card verde">
-            <div class="kpi-hoy-icon"><i data-lucide="dollar-sign" width="20" height="20"></i></div>
-            <div>
-                <span class="kpi-hoy-label">Ingresos hoy</span>
-                <span class="kpi-hoy-num">${{ "%.2f"|format(ingresos_hoy) }}</span>
-            </div>
+            <span class="kpi-hoy-label">Ingresos hoy</span>
+            <span class="kpi-hoy-num">${{ "%.2f"|format(ingresos_hoy) }}</span>
         </div>
         {% endif %}
     </div>
