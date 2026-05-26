@@ -29,12 +29,18 @@ from models.negocio import obtener_negocios, cargar_tipos_por_negocio
 def listar_ventas_listas_service(
     id_negocio: int | None = None,
     pagina: int = 1,
+    id_venta: int | None = None,
 ) -> dict:
     offset          = (pagina - 1) * POR_PAGINA_VENTAS_ACTIVAS
-    total_registros = contar_entregas_listas(id_negocio)
-    total_paginas   = max(1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS)
+    total_registros = contar_entregas_listas(id_negocio, id_venta)
+    total_paginas   = max(
+        1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS
+    )
 
-    ventas   = obtener_ventas_listas(id_negocio, limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset)
+    ventas   = obtener_ventas_listas(
+        id_negocio, id_venta=id_venta,
+        limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset,
+    )
     negocios = obtener_negocios()
 
     ids_venta    = [v["id_venta"] for v in ventas]
@@ -63,6 +69,7 @@ def listar_ventas_listas_service(
         "negocios":        negocios,
         "hoy":             date.today(),
         "id_negocio":      id_negocio,
+        "id_venta":        id_venta,
         "pagina":          pagina,
         "total_paginas":   total_paginas,
         "total_registros": total_registros,
@@ -72,12 +79,18 @@ def listar_ventas_listas_service(
 def listar_entregas_pendientes_service(
     id_negocio: int | None = None,
     pagina: int = 1,
+    id_venta: int | None = None,
 ) -> dict:
     offset          = (pagina - 1) * POR_PAGINA_VENTAS_ACTIVAS
-    total_registros = contar_entregas_pendientes(id_negocio)
-    total_paginas   = max(1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS)
+    total_registros = contar_entregas_pendientes(id_negocio, id_venta)
+    total_paginas   = max(
+        1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS
+    )
 
-    ventas   = obtener_entregas_pendientes(id_negocio, limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset)
+    ventas   = obtener_entregas_pendientes(
+        id_negocio, id_venta=id_venta,
+        limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset,
+    )
     negocios = obtener_negocios()
 
     ids_venta    = [v["id_venta"] for v in ventas]
@@ -93,6 +106,7 @@ def listar_entregas_pendientes_service(
         "negocios":        negocios,
         "hoy":             date.today(),
         "id_negocio":      id_negocio,
+        "id_venta":        id_venta,
         "pagina":          pagina,
         "total_paginas":   total_paginas,
         "total_registros": total_registros,
@@ -291,17 +305,20 @@ def historial_ventas_service(
     pagina: int = 1,
     mostrar_eliminadas: bool = False,
     q: str | None = None,
+    id_venta: int | None = None,
 ) -> dict:
     offset          = (pagina - 1) * POR_PAGINA_HISTORIAL
     total_registros = contar_historial_ventas(
-        id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas, q=q
+        id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas, q=q, id_venta=id_venta
     )
-    total_paginas   = max(1, (total_registros + POR_PAGINA_HISTORIAL - 1) // POR_PAGINA_HISTORIAL)
+    total_paginas   = max(
+        1, (total_registros + POR_PAGINA_HISTORIAL - 1) // POR_PAGINA_HISTORIAL
+    )
 
     ventas   = obtener_historial_ventas(
         id_negocio, fecha_inicio, fecha_fin,
         limit=POR_PAGINA_HISTORIAL, offset=offset,
-        mostrar_eliminadas=mostrar_eliminadas, q=q,
+        mostrar_eliminadas=mostrar_eliminadas, q=q, id_venta=id_venta,
     )
     negocios = obtener_negocios()
 
@@ -344,6 +361,7 @@ def historial_ventas_service(
         "total_registros":    total_registros,
         "mostrar_eliminadas": mostrar_eliminadas,
         "q":                  q,
+        "id_venta":           id_venta,
     }
 
 

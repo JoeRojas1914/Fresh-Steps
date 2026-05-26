@@ -25,6 +25,7 @@ def contar_historial_ventas(
     fecha_fin=None,
     mostrar_eliminadas=False,
     q=None,
+    id_venta=None,
 ):
     with get_db() as (_, cursor):
         sql = """
@@ -50,6 +51,9 @@ def contar_historial_ventas(
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"
             like = f"%{q}%"
             params.extend([like, like, like])
+        if id_venta:
+            sql += " AND v.id_venta = %s"
+            params.append(id_venta)
 
         cursor.execute(sql, params)
         return cursor.fetchone()["total"]
@@ -63,6 +67,7 @@ def obtener_historial_ventas(
     offset=0,
     mostrar_eliminadas=False,
     q=None,
+    id_venta=None,
 ):
     with get_db() as (_, cursor):
         sql = """
@@ -110,6 +115,9 @@ def obtener_historial_ventas(
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"
             like = f"%{q}%"
             params.extend([like, like, like])
+        if id_venta:
+            sql += " AND v.id_venta = %s"
+            params.append(id_venta)
 
         sql += " GROUP BY v.id_venta ORDER BY v.id_venta DESC LIMIT %s OFFSET %s"
         params.extend([limit, offset])

@@ -29,6 +29,11 @@
                     {% endfor %}
                 </select>
             </div>
+            <div class="filtro-item filtro-item--max110 ml-12">
+                <label>N° Ticket</label>
+                <input type="number" id="buscador-ticket" min="1"
+                       placeholder="# Recibo...">
+            </div>
         </div>
     </div>
     </form>
@@ -165,7 +170,7 @@
     {% endif %}
 
     {{ pagination(pagina, total_paginas, "ventas.ventas_pendientes",
-        {"id_negocio": id_negocio} if id_negocio else {}) }}
+        {"id_negocio": id_negocio, "id_venta": id_venta}) }}
 
 
 {% call(section) modal("modalProcesado", "Marcar como lista", "sm") %}

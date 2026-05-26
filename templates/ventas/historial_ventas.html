@@ -20,6 +20,13 @@
                 <input type="text" name="q" value="{{ q or '' }}" placeholder="Nombre o apellido...">
             </div>
 
+            <div class="filtro-item filtro-item--max160">
+                <label>N° Ticket</label>
+                <input type="number" name="id_venta" min="1"
+                       value="{{ id_venta or '' }}"
+                       placeholder="# Recibo...">
+            </div>
+
             <div class="filtro-item">
                 <label>Negocio</label>
                 <select name="id_negocio">
@@ -60,14 +67,15 @@
 
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
-                {% if id_negocio or fecha_inicio or fecha_fin or q %}
+                {% if id_negocio or fecha_inicio or fecha_fin or q or id_venta %}
                 <a href="/ventas/historial" class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
                 {% endif %}
                 <a href="{{ url_for('ventas.exportar_historial_excel',
                             id_negocio=id_negocio or '',
                             fecha_inicio=fecha_inicio or '',
                             fecha_fin=fecha_fin or '',
-                            q=q or '') }}"
+                            q=q or '',
+                            id_venta=id_venta or '') }}"
                    class="btn btn--success btn--sm no-underline">
                     <i data-lucide="download" width="14" height="14"></i> Exportar Excel
                 </a>

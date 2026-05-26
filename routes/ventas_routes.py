@@ -93,9 +93,10 @@ def venta_ticket(id_venta):
 @ventas_bp.route("/ventas/listas")
 def ventas_listas():
     id_negocio = request.args.get("id_negocio", type=int)
+    id_venta   = request.args.get("id_venta", type=int)
     pagina     = request.args.get("pagina", 1, type=int)
 
-    data = listar_ventas_listas_service(id_negocio, pagina)
+    data = listar_ventas_listas_service(id_negocio, pagina, id_venta)
 
     return render_template("ventas/ventas_listas.html", **data)
 
@@ -104,9 +105,10 @@ def ventas_listas():
 def ventas_pendientes():
     try:
         id_negocio = request.args.get("id_negocio", type=int)
+        id_venta   = request.args.get("id_venta", type=int)
         pagina     = request.args.get("pagina", 1, type=int)
 
-        data = listar_entregas_pendientes_service(id_negocio, pagina)
+        data = listar_entregas_pendientes_service(id_negocio, pagina, id_venta)
 
         return render_template("ventas/ventas_pendientes.html", **data)
 
@@ -195,9 +197,12 @@ def historial_ventas():
     fecha_fin    = request.args.get("fecha_fin")    or None
     pagina       = request.args.get("pagina", 1,    type=int)
     q            = request.args.get("q", "").strip() or None
+    id_venta     = request.args.get("id_venta",     type=int)
 
     mostrar_eliminadas = request.args.get('eliminadas') == '1'
-    data = historial_ventas_service(id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas, q=q)
+    data = historial_ventas_service(
+        id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas, q=q, id_venta=id_venta
+    )
 
     return render_template("ventas/historial_ventas.html", **data)
 
