@@ -163,7 +163,6 @@
   box-shadow: 0 0 0 3px rgba(47,164,255,.15);
 }
 
-/* flecha */
 .modal__body .select-wrapper::after {
   content: "▾";
   position: absolute;
@@ -200,7 +199,6 @@
 }
 
 
-/* ── modal-question / modal-hint ── */
 .modal-question {
   font-size: 15px;
   font-weight: 600;
@@ -218,7 +216,6 @@
 }
 
 
-/* ── Modal confirmación genérico ── */
 .modal-confirm {
   display: flex;
   flex-direction: column;
@@ -274,7 +271,6 @@
 }
 
 
-/* ── Modal Entrega ── */
 .entrega-confirm {
   display: flex;
   flex-direction: column;
@@ -340,7 +336,6 @@
 }
 
 
-/* ── WhatsApp checkbox en modal ── */
 .wa-check-row {
   display: flex;
   justify-content: center;
