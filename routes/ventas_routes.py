@@ -60,17 +60,19 @@ def abrir_whatsapp():
     negocio_id = int(data.get("negocio_id", 0))
     if not url.startswith("https://web.whatsapp.com/send?"):
         return jsonify({"ok": False, "error": "URL no válida"}), 400
-    try:
-        paths = _EDGE_PATHS if negocio_id == 1 else _CHROME_PATHS
-        exe   = _encontrar_browser(paths)
-        if exe:
-            subprocess.Popen([exe, url])
-        else:
-            logger.warning("No se encontró el navegador para negocio_id=%s", negocio_id)
-        return jsonify({"ok": True})
-    except Exception:
-        logger.exception("Error al abrir WhatsApp negocio_id=%s", negocio_id)
-        return jsonify({"ok": False, "error": "Error al abrir el navegador"}), 500
+    is_local = not request.headers.get("X-Forwarded-For")
+    if is_local:
+        try:
+            paths = _EDGE_PATHS if negocio_id == 1 else _CHROME_PATHS
+            exe   = _encontrar_browser(paths)
+            if exe:
+                subprocess.Popen([exe, url])
+            else:
+                logger.warning("No se encontró el navegador para negocio_id=%s", negocio_id)
+        except Exception:
+            logger.exception("Error al abrir WhatsApp negocio_id=%s", negocio_id)
+        return jsonify({"ok": True, "opened": True})
+    return jsonify({"ok": True, "opened": False, "url": url})
 
 
 @ventas_bp.route("/ventas/guardar", methods=["POST"])

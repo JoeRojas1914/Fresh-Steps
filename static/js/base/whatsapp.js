@@ -18,7 +18,11 @@ export async function abrirWhatsApp(phone, message, negocioId) {
             body:   JSON.stringify({ url, negocio_id: negocioId }),
         });
         const res = await r.json();
-        if (!res.ok) console.error('abrir-whatsapp:', res.error);
+        if (!res.ok) {
+            console.error('abrir-whatsapp:', res.error);
+        } else if (!res.opened && res.url) {
+            window.open(res.url, '_blank');
+        }
         return res;
     } catch (err) {
         console.error('abrir-whatsapp fetch error:', err);
