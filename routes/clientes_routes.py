@@ -53,6 +53,8 @@ def guardar_cliente():
             "Cliente actualizado correctamente." if resultado == "actualizado"
             else "Cliente creado correctamente.", "success"
         )
+    except ValueError as e:
+        flash(str(e), "error")
     except Exception:
         logger.exception("Error al guardar cliente id_usuario=%s", id_usuario)
         flash("Error al guardar el cliente. Verifica los datos.", "error")

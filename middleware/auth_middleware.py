@@ -1,8 +1,11 @@
+import logging
 from functools import wraps
 from flask import session, redirect, url_for, flash, render_template, request, jsonify
 from datetime import datetime, timedelta
 from config import TIMEOUT_ADMIN, TIMEOUT_CAJA
 from models.usuario import obtener_session_token
+
+logger = logging.getLogger(__name__)
 
 
 def admin_required(f):
@@ -87,8 +90,14 @@ def init_auth_middleware(app):
             return redirect(url_for("auth.login"))
 
 
-        # Verificar que la sesión activa en BD coincide (invalida sesiones concurrentes)
-        token_bd = obtener_session_token(session["id_usuario"])
+        try:
+            token_bd = obtener_session_token(session["id_usuario"])
+        except Exception:
+            logger.exception("Error al verificar session token id_usuario=%s", session.get("id_usuario"))
+            session.clear()
+            flash("Error de sesión. Por favor vuelve a ingresar.", "error")
+            return redirect(url_for("auth.login"))
+
         if token_bd != session.get("session_token"):
             session.clear()
             flash("Tu sesión fue iniciada en otro dispositivo.", "error")

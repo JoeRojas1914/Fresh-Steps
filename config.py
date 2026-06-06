@@ -20,6 +20,10 @@ MAX_FILAS_EXPORTAR = 10_000
 # Métodos de pago válidos en ventas
 METODOS_PAGO_VALIDOS = {"efectivo", "transferencia", "tarjeta"}
 
+# Tipos de pago en la tabla pago_venta (columna tipo_pago_venta)
+TIPO_PAGO_PREPAGO = "prepago"
+TIPO_PAGO_FINAL   = "final"
+
 # Etiquetas legibles para exportaciones y reportes
 PAGO_LABEL = {"efectivo": "Efectivo", "transferencia": "Transferencia", "TDC": "Tarjeta de crédito"}
 COMPROBANTE_LABEL = {"factura": "Factura", "ticket": "Ticket"}

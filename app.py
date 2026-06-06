@@ -1,5 +1,4 @@
 import os
-import json
 import logging
 from logging.handlers import RotatingFileHandler
 from datetime import date, timedelta
@@ -145,8 +144,8 @@ def index():
     ventas_semana = contar_ventas_por_dia_rango(lunes, sabado, "all")
     idx_hoy       = min(hoy_dt.weekday(), 5)          # domingo (6) cae en sábado
     ventas_hoy    = ventas_semana[idx_hoy]["total"] if ventas_semana else 0
-    chart_labels  = json.dumps([x["label"] for x in ventas_semana])
-    chart_data    = json.dumps([x["total"]  for x in ventas_semana])
+    chart_labels  = [x["label"] for x in ventas_semana]
+    chart_data    = [x["total"]  for x in ventas_semana]
 
     ingresos_hoy = None
     kpis_mes     = None

@@ -7,3 +7,7 @@ flask-talisman==1.1.0
 flask-limiter==4.1.1
 bcrypt==5.0.0
 openpyxl==3.1.5
+
+# Dev / testing
+pytest
+pytest-cov

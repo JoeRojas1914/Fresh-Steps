@@ -1,4 +1,5 @@
 from db import get_db
+from config import TIPO_PAGO_FINAL
 
 
 def registrar_pago(id_venta, monto, tipo_pago, id_usuario_cobro):
@@ -57,5 +58,5 @@ def registrar_pago_final_db(id_venta, monto, metodo_pago, id_usuario):
                 fecha_pago,
                 id_usuario_cobro
             )
-            VALUES (%s, %s, %s, 'final', NOW(), %s)
-        """, (id_venta, monto, metodo_pago, id_usuario))
+            VALUES (%s, %s, %s, %s, NOW(), %s)
+        """, (id_venta, monto, metodo_pago, TIPO_PAGO_FINAL, id_usuario))

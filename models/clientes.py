@@ -93,6 +93,7 @@ def buscar_clientes_por_nombre(texto):
             FROM cliente
             WHERE activo = 1
               AND (nombre LIKE %s OR apellido LIKE %s)
+            LIMIT 50
         """, (f"%{texto}%", f"%{texto}%"))
         return cursor.fetchall()
 

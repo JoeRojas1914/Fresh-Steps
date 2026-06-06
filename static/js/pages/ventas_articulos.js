@@ -1,5 +1,5 @@
 import { ventaState } from './ventas_state.js';
-import { mostrarFeedback } from '../base/helpers.js';
+import { mostrarFeedback, escapeHtml } from '../base/helpers.js';
 import { validarFormulario, actualizarTotal, calcularTotal } from './ventas_validacion.js';
 import { crearServiciosSelect, actualizarOpcionesServiciosDelArticulo } from './ventas_servicios.js';
 
@@ -90,7 +90,7 @@ export function agregarArticulo() {
         <div class="articulo-detalle">
             <div class="zapato-header">
                 <div class="zapato-titulo">
-                    <i data-lucide="receipt" width="14" height="14"></i> Artículo ${index + 1}${negNombre ? `<span class="zapato-titulo-badge">${negNombre}</span>` : ""}
+                    <i data-lucide="receipt" width="14" height="14"></i> Artículo ${index + 1}${negNombre ? `<span class="zapato-titulo-badge">${escapeHtml(negNombre)}</span>` : ""}
                 </div>
                 <button type="button" data-action="delete-article" class="btn btn--danger btn--sm">
                     <i data-lucide="x" width="14" height="14"></i>
@@ -275,18 +275,18 @@ function generarResumenArticulo(item) {
 
     resumen.innerHTML = `
         <div class="resumen-header-bar">
-            <span class="resumen-header-label">${titulo}</span>
+            <span class="resumen-header-label">${escapeHtml(titulo)}</span>
             <div class="resumen-header-actions">
-                <span class="resumen-header-badge">${negNombre}</span>
+                <span class="resumen-header-badge">${escapeHtml(negNombre)}</span>
                 ${btnEl}
             </div>
         </div>
         <div class="resumen-body">
             <div class="resumen-linea">
                 <div>
-                    <div class="resumen-nombre">${tipo} ${marca}</div>
-                    ${detalle ? `<div class="resumen-detalle">${detalle}</div>` : ""}
-                    ${svcs    ? `<div class="resumen-detalle resumen-svcs"><i data-lucide="wrench" width="12" height="12"></i> ${svcs}</div>` : ""}
+                    <div class="resumen-nombre">${escapeHtml(tipo)} ${escapeHtml(marca)}</div>
+                    ${detalle ? `<div class="resumen-detalle">${escapeHtml(detalle)}</div>` : ""}
+                    ${svcs    ? `<div class="resumen-detalle resumen-svcs"><i data-lucide="wrench" width="12" height="12"></i> ${escapeHtml(svcs)}</div>` : ""}
                 </div>
                 <div class="resumen-precio">$${precio.toFixed(2)}</div>
             </div>

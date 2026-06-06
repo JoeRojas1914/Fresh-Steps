@@ -4,7 +4,7 @@
         <div class="filtro-row">
 {% endmacro %}
 
-{% macro cerrar_filtro(limpiar_url=None, mostrar_limpiar=False, extra="") %}
+{% macro cerrar_filtro(limpiar_url=None, mostrar_limpiar=False) %}
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm">
                     <i data-lucide="search" width="14" height="14"></i> Filtrar
@@ -15,7 +15,7 @@
                     <i data-lucide="x" width="14" height="14"></i> Limpiar
                 </a>
                 {% endif %}
-                {{ extra | safe }}
+                {{ caller() if caller is defined else "" }}
             </div>
         </div>
     </div>
