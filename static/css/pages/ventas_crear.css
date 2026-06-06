@@ -617,6 +617,11 @@
   min-width: 0;
 }
 
+@media (max-width: 1024px) {
+  .venta-layout { grid-template-columns: 1fr; height: auto; }
+  .venta-main   { height: auto; overflow-y: visible; padding-right: 0; }
+}
+
 @media (max-width: 640px) {
   .cliente-negocio-row { grid-template-columns: 1fr; }
   .results-list { grid-template-columns: 1fr; }

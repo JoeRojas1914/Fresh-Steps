@@ -22,7 +22,7 @@
     <div class="filtro-row">
 
         <div class="filtro-item filtro-item--max260">
-            <label>Buscar</label>
+            <label for="buscar-input">Buscar</label>
             <input type="text" id="buscar-input"
                    placeholder="Usuario, nombre, apellido o teléfono..."
                    value="{{ q or '' }}"
@@ -92,7 +92,7 @@
         <td>
         {% if u.rol != 'admin' %}
             <button class="btn btn--info btn--sm no-row-click js-editar-usuario"
-                data-user='{{ u|tojson }}'>
+                data-id="{{ u.id_usuario }}">
                 Editar
             </button>
 
@@ -180,9 +180,9 @@
             </div>
 
             <div class="modal-field">
-                <label>PIN (4 dígitos) <span id="pin-requerido" class="text-danger">*</span></label>
+                <label for="pin">PIN (4-6 dígitos) <span id="pin-requerido" class="text-danger">*</span></label>
                 <input type="password" name="pin" id="pin"
-                       maxlength="4" pattern="\d{4}" placeholder="1234">
+                       maxlength="6" pattern="\d{4,6}" placeholder="1234">
             </div>
 
             <div class="modal-field modal-field--full">
@@ -267,5 +267,6 @@
 {% endblock %}
 
 {% block scripts %}
+    <script type="application/json" id="usuariosData">{{ usuarios | tojson }}</script>
     <script type="module" src="{{ url_for('static', filename='js/pages/usuarios.js') }}"></script>
 {% endblock %}

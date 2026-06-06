@@ -70,6 +70,11 @@
   background: #f8fbff;
 }
 
+@media (max-width: 1024px) {
+  .table th { font-size: 11px; padding: 14px 12px; }
+  .table td { font-size: 13px; padding: 11px 12px; }
+}
+
 @media (max-width: 768px) {
   .table-wrapper { border-radius: 12px; }
   .table th { font-size: 10px; padding: 12px 10px; letter-spacing: .5px; }

@@ -3,6 +3,15 @@ import { mostrarFeedback, normalizar, escapeHtml } from '../base/helpers.js';
 import { validarRequerido, validarTelefono, validarPassword, validarPin, validarUsername } from '../base/form_validators.js';
 import { abrirHistorial } from '../base/historial_helpers.js';
 
+const _usuariosMap = (() => {
+    const el = document.getElementById("usuariosData");
+    if (!el) return {};
+    try {
+        const lista = JSON.parse(el.textContent);
+        return Object.fromEntries(lista.map(u => [u.id_usuario, u]));
+    } catch { return {}; }
+})();
+
 (function () {
     const input       = document.getElementById("buscar-input");
     const toggleInact = document.getElementById("toggle-inactivos");
@@ -124,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (creando && !validarPin(pin)) {
-            mostrarFeedback("El PIN debe tener exactamente 4 dígitos.", "error");
+            mostrarFeedback("El PIN debe tener entre 4 y 6 dígitos numéricos.", "error");
             e.preventDefault(); return;
         }
 
@@ -146,7 +155,12 @@ document.addEventListener("click", function (e) {
     if (btnAbrir) { abrirModalUsuario(); return; }
 
     const btnEditar = e.target.closest(".js-editar-usuario");
-    if (btnEditar) { e.stopPropagation(); editarUsuario(e, JSON.parse(btnEditar.dataset.user)); return; }
+    if (btnEditar) {
+        e.stopPropagation();
+        const u = _usuariosMap[parseInt(btnEditar.dataset.id)];
+        if (u) editarUsuario(e, u);
+        return;
+    }
 
     const btnToggle = e.target.closest(".js-confirmar-toggle");
     if (btnToggle) { confirmarToggleUsuario(parseInt(btnToggle.dataset.id), btnToggle.dataset.accion); return; }

@@ -28,10 +28,10 @@
 
         {# ── Operación diaria — todos los roles ── #}
         <div class="nav-group">
-            <a href="/">Inicio</a>
-            <a href="/ventas">Nueva venta</a>
-            <a href="/ventas/pendientes">Pendientes</a>
-            <a href="/ventas/listas">Procesadas</a>
+            <a href="/"                  {% if request.path == "/"                   %}aria-current="page"{% endif %}>Inicio</a>
+            <a href="/ventas"            {% if request.path == "/ventas"             %}aria-current="page"{% endif %}>Nueva venta</a>
+            <a href="/ventas/pendientes" {% if request.path == "/ventas/pendientes"  %}aria-current="page"{% endif %}>Pendientes</a>
+            <a href="/ventas/listas"     {% if request.path == "/ventas/listas"      %}aria-current="page"{% endif %}>Procesadas</a>
         </div>
 
         {% if session.rol == "admin" %}
@@ -40,12 +40,12 @@
         {# ── Administración — solo admin ── #}
         <div class="nav-group">
             <span class="nav-label">Admin</span>
-            <a href="/clientes">Clientes</a>
-            <a href="/servicios">Servicios</a>
-            <a href="/gastos">Gastos</a>
-            <a href="/usuarios">Usuarios</a>
-            <a href="/ventas/historial">Historial</a>
-            <a href="/estadisticas">Estadísticas</a>
+            <a href="/clientes"         {% if request.path.startswith("/clientes")    %}aria-current="page"{% endif %}>Clientes</a>
+            <a href="/servicios"        {% if request.path.startswith("/servicios")   %}aria-current="page"{% endif %}>Servicios</a>
+            <a href="/gastos"           {% if request.path.startswith("/gastos")      %}aria-current="page"{% endif %}>Gastos</a>
+            <a href="/usuarios"         {% if request.path.startswith("/usuarios")    %}aria-current="page"{% endif %}>Usuarios</a>
+            <a href="/ventas/historial" {% if request.path == "/ventas/historial"     %}aria-current="page"{% endif %}>Historial</a>
+            <a href="/estadisticas"     {% if request.path.startswith("/estadisticas")%}aria-current="page"{% endif %}>Estadísticas</a>
         </div>
         {% endif %}
 

@@ -62,7 +62,8 @@ export function apiAction({
     msgOk = null, msgError = "Error al realizar la acción.",
     reload = false, reloadDelay = 1200,
     onSuccess = null, onError = null,
-    loadingBtn = null
+    loadingBtn = null,
+    timeoutMs = 30_000
 }) {
     if (loadingBtn) {
         loadingBtn.disabled = true;
@@ -70,18 +71,32 @@ export function apiAction({
         loadingBtn.innerHTML = '<span class="spinner"></span>';
     }
 
-    const opts = { method };
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    const opts = { method, signal: controller.signal };
     if (body) {
         opts.body = JSON.stringify(body);
     }
 
+    const restoreBtn = () => {
+        if (loadingBtn) {
+            loadingBtn.disabled  = false;
+            loadingBtn.innerHTML = loadingBtn._textoOriginal;
+        }
+    };
+
     csrfFetch(url, opts)
-        .then(r => r.json())
-        .then(res => {
-            if (loadingBtn) {
-                loadingBtn.disabled  = false;
-                loadingBtn.innerHTML = loadingBtn._textoOriginal;
+        .then(r => {
+            clearTimeout(timer);
+            const ct = r.headers.get("content-type") || "";
+            if (!ct.includes("application/json")) {
+                throw new Error("Respuesta inesperada del servidor.");
             }
+            return r.json();
+        })
+        .then(res => {
+            restoreBtn();
             if (res.ok) {
                 if (msgOk)     mostrarFeedback(msgOk, "success");
                 if (onSuccess) onSuccess(res);
@@ -91,12 +106,13 @@ export function apiAction({
                 if (onError) onError(res);
             }
         })
-        .catch(() => {
-            if (loadingBtn) {
-                loadingBtn.disabled  = false;
-                loadingBtn.innerHTML = loadingBtn._textoOriginal;
-            }
-            mostrarFeedback("Error de conexión.", "error");
+        .catch(err => {
+            clearTimeout(timer);
+            restoreBtn();
+            const msg = err.name === "AbortError"
+                ? "La solicitud tardó demasiado. Intenta de nuevo."
+                : (err.message || "Error de conexión.");
+            mostrarFeedback(msg, "error");
         });
 }
 
