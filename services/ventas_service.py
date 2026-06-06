@@ -26,35 +26,45 @@ from models.pagos import (
 from models.negocio import obtener_negocios, cargar_tipos_por_negocio
 
 
+def _paginar_ventas(
+    contar_fn,
+    obtener_fn,
+    id_negocio: int | None,
+    id_venta: int | None,
+    pagina: int,
+) -> tuple[list, int, int]:
+    offset          = (pagina - 1) * POR_PAGINA_VENTAS_ACTIVAS
+    total_registros = contar_fn(id_negocio, id_venta)
+    total_paginas   = max(
+        1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS
+    )
+    ventas = obtener_fn(
+        id_negocio, id_venta=id_venta,
+        limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset,
+    )
+    return ventas, total_registros, total_paginas
+
+
 def listar_ventas_listas_service(
     id_negocio: int | None = None,
     pagina: int = 1,
     id_venta: int | None = None,
 ) -> dict:
-    offset          = (pagina - 1) * POR_PAGINA_VENTAS_ACTIVAS
-    total_registros = contar_entregas_listas(id_negocio, id_venta)
-    total_paginas   = max(
-        1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS
+    ventas, total_registros, total_paginas = _paginar_ventas(
+        contar_entregas_listas, obtener_ventas_listas,
+        id_negocio, id_venta, pagina,
     )
-
-    ventas   = obtener_ventas_listas(
-        id_negocio, id_venta=id_venta,
-        limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset,
-    )
-    negocios = obtener_negocios()
 
     ids_venta    = [v["id_venta"] for v in ventas]
     detalles_map = obtener_detalles_venta(ids_venta)
     pagos_map    = obtener_pagos_venta(ids_venta)
 
-    ventas_con_detalles = []
     for v in ventas:
-        detalles     = detalles_map.get(v["id_venta"], [])
         pagos        = pagos_map.get(v["id_venta"], [])
         total_pagado = sum(float(p["monto"]) for p in pagos)
         total        = float(v.get("total") or 0)
 
-        v["detalles"]        = detalles
+        v["detalles"]        = detalles_map.get(v["id_venta"], [])
         v["pagos"]           = pagos
         v["total"]           = total
         v["total_pagado"]    = total_pagado
@@ -62,11 +72,9 @@ def listar_ventas_listas_service(
         v["tiene_pagos"]     = total_pagado > 0
         v["esta_pagada"]     = v["saldo_pendiente"] == 0
 
-        ventas_con_detalles.append(v)
-
     return {
-        "ventas":          ventas_con_detalles,
-        "negocios":        negocios,
+        "ventas":          ventas,
+        "negocios":        obtener_negocios(),
         "hoy":             date.today(),
         "id_negocio":      id_negocio,
         "id_venta":        id_venta,
@@ -81,29 +89,20 @@ def listar_entregas_pendientes_service(
     pagina: int = 1,
     id_venta: int | None = None,
 ) -> dict:
-    offset          = (pagina - 1) * POR_PAGINA_VENTAS_ACTIVAS
-    total_registros = contar_entregas_pendientes(id_negocio, id_venta)
-    total_paginas   = max(
-        1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS
+    ventas, total_registros, total_paginas = _paginar_ventas(
+        contar_entregas_pendientes, obtener_entregas_pendientes,
+        id_negocio, id_venta, pagina,
     )
-
-    ventas   = obtener_entregas_pendientes(
-        id_negocio, id_venta=id_venta,
-        limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset,
-    )
-    negocios = obtener_negocios()
 
     ids_venta    = [v["id_venta"] for v in ventas]
     detalles_map = obtener_detalles_venta(ids_venta)
 
-    ventas_con_detalles = []
     for v in ventas:
         v["detalles"] = detalles_map.get(v["id_venta"], [])
-        ventas_con_detalles.append(v)
 
     return {
-        "ventas":          ventas_con_detalles,
-        "negocios":        negocios,
+        "ventas":          ventas,
+        "negocios":        obtener_negocios(),
         "hoy":             date.today(),
         "id_negocio":      id_negocio,
         "id_venta":        id_venta,
@@ -161,6 +160,58 @@ def _parsear_descuento(form: dict) -> tuple[bool, float]:
         raise ValueError("El monto del descuento no es válido.")
 
 
+
+_CAMPOS_ARTICULO: dict[str, dict[str, object]] = {
+    "calzado": {
+        "tipo":             str,
+        "marca":            str,
+        "material":         str,
+        "color_base":       str,
+        "color_secundario": str,
+        "color_agujetas":   str,
+    },
+    "confeccion": {
+        "tipo":             str,
+        "marca":            str,
+        "material":         str,
+        "color_base":       str,
+        "color_secundario": str,
+        "cantidad":         lambda v: int(v or 1),
+        "agujetas":         lambda v: v == "1",
+    },
+    "maquila": {
+        "tipo":            str,
+        "cantidad":        lambda v: int(v or 1),
+        "precio_unitario": lambda v: float(v or 0),
+    },
+}
+
+# Tipos que requieren la sección de servicios
+_TIPOS_CON_SERVICIOS: frozenset[str] = frozenset({"calzado", "confeccion"})
+
+
+def _parsear_articulo_unico(form: dict, i: int, tipo_articulo: str) -> dict:
+    schema = _CAMPOS_ARTICULO.get(tipo_articulo)
+    if not schema:
+        raise ValueError(f"Tipo de artículo desconocido: '{tipo_articulo}'")
+
+    datos = {
+        campo: converter(form.get(f"articulos[{i}][{campo}]"))
+        for campo, converter in schema.items()
+    }
+
+    articulo: dict = {
+        "tipo_articulo": tipo_articulo,
+        "datos":         datos,
+        "comentario":    form.get(f"articulos[{i}][comentario]"),
+    }
+
+    if tipo_articulo in _TIPOS_CON_SERVICIOS:
+        articulo["servicios"] = _parsear_servicios(form, i)
+
+    return articulo
+
+
 def _parsear_articulos_form(form: dict, tipo_permitido: str | None) -> list:
     articulos: list = []
     try:
@@ -173,43 +224,7 @@ def _parsear_articulos_form(form: dict, tipo_permitido: str | None) -> list:
                 raise ValueError(
                     f"Este negocio solo permite artículos tipo: {tipo_permitido}"
                 )
-            comentario = form.get(f"articulos[{i}][comentario]")
-            if tipo_articulo == "calzado":
-                datos = {
-                    "tipo":             form.get(f"articulos[{i}][tipo]"),
-                    "marca":            form.get(f"articulos[{i}][marca]"),
-                    "material":         form.get(f"articulos[{i}][material]"),
-                    "color_base":       form.get(f"articulos[{i}][color_base]"),
-                    "color_secundario": form.get(f"articulos[{i}][color_secundario]"),
-                    "color_agujetas":   form.get(f"articulos[{i}][color_agujetas]"),
-                }
-                articulos.append({
-                    "tipo_articulo": "calzado", "datos": datos,
-                    "servicios": _parsear_servicios(form, i), "comentario": comentario,
-                })
-            elif tipo_articulo == "confeccion":
-                datos = {
-                    "tipo":             form.get(f"articulos[{i}][tipo]"),
-                    "marca":            form.get(f"articulos[{i}][marca]"),
-                    "material":         form.get(f"articulos[{i}][material]"),
-                    "color_base":       form.get(f"articulos[{i}][color_base]"),
-                    "color_secundario": form.get(f"articulos[{i}][color_secundario]"),
-                    "cantidad":         int(form.get(f"articulos[{i}][cantidad]") or 1),
-                    "agujetas":         form.get(f"articulos[{i}][agujetas]") == "1",
-                }
-                articulos.append({
-                    "tipo_articulo": "confeccion", "datos": datos,
-                    "servicios": _parsear_servicios(form, i), "comentario": comentario,
-                })
-            elif tipo_articulo == "maquila":
-                datos = {
-                    "tipo":            form.get(f"articulos[{i}][tipo]"),
-                    "cantidad":        int(form.get(f"articulos[{i}][cantidad]") or 1),
-                    "precio_unitario": float(form.get(f"articulos[{i}][precio_unitario]") or 0),
-                }
-                articulos.append({
-                    "tipo_articulo": "maquila", "datos": datos, "comentario": comentario,
-                })
+            articulos.append(_parsear_articulo_unico(form, i, tipo_articulo))
             i += 1
     except ValueError:
         raise
