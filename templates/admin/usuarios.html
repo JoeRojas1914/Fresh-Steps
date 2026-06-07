@@ -138,33 +138,33 @@
         <div class="modal__body modal__body--grid-2">
 
             <div class="modal-field">
-                <label>Nombre</label>
+                <label for="u_nombre">Nombre</label>
                 <input type="text" name="nombre" id="u_nombre" placeholder="Juan">
             </div>
 
             <div class="modal-field">
-                <label>Apellido</label>
+                <label for="u_apellido">Apellido</label>
                 <input type="text" name="apellido" id="u_apellido" placeholder="Pérez">
             </div>
 
             <div class="modal-field">
-                <label>Teléfono</label>
+                <label for="u_telefono">Teléfono</label>
                 <input type="text" name="telefono" id="u_telefono"
                        placeholder="10 dígitos" pattern="[0-9]{10}" maxlength="10">
             </div>
 
             <div class="modal-field">
-                <label>Correo</label>
+                <label for="u_correo">Correo</label>
                 <input type="email" name="correo" id="u_correo" placeholder="correo@ejemplo.com">
             </div>
 
             <div class="modal-field">
-                <label>Código postal</label>
+                <label for="u_cp">Código postal</label>
                 <input type="text" name="cp" id="u_cp" placeholder="78000" maxlength="10">
             </div>
 
             <div class="modal-field">
-                <label>Rol</label>
+                <label for="u_rol">Rol</label>
                 <div class="select-wrapper">
                     <select name="rol" id="u_rol">
                         <option value="caja">Caja</option>
@@ -173,7 +173,7 @@
             </div>
 
             <div class="modal-field">
-                <label>Usuario <span class="text-danger">*</span></label>
+                <label for="usuario">Usuario <span class="text-danger">*</span></label>
                 <input type="text" name="usuario" id="usuario" required
                        minlength="3" pattern="^[a-zA-Z0-9_]+$"
                        placeholder="letras, números y _">
@@ -186,7 +186,7 @@
             </div>
 
             <div class="modal-field modal-field--full">
-                <label>
+                <label for="password">
                     Contraseña
                     <span id="pass-requerido" class="text-danger">*</span>
                     <span id="pass-opcional" class="dim text-2xs d-none">(dejar vacío para no cambiar)</span>
