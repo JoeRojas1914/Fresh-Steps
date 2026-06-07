@@ -1,5 +1,7 @@
 import { abrirModal, cerrarModal } from '../components/modal.js';
 
+const _TOAST_KEY = "_pendingToast";
+
 export function escapeHtml(str) {
     const d = document.createElement("div");
     d.appendChild(document.createTextNode(String(str ?? "")));
@@ -30,30 +32,47 @@ export function csrfFetch(url, options = {}) {
 }
 
 
-export function mostrarFeedback(texto, tipo = "success") {
-    const anchor =
-        document.querySelector(".page-content > .filtro-box") ||
-        document.querySelector(".page-content > h1") ||
-        document.querySelector(".page-content");
+function _getToastContainer() {
+    let container = document.getElementById("toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "toast-container";
+        document.body.appendChild(container);
+    }
+    return container;
+}
 
+function _scheduleAlertDismiss(el) {
+    if (el.dataset.dismissScheduled) return;
+    el.dataset.dismissScheduled = "1";
+
+    el.addEventListener("click", () => el.remove(), { once: true });
+    setTimeout(() => {
+        el.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+        el.style.opacity    = "0";
+        el.style.transform  = "translateY(-10px)";
+    }, 4500);
+    setTimeout(() => el.remove(), 5000);
+}
+
+function _appendToast(texto, tipo) {
     const div = document.createElement("div");
     div.className = `alert ${tipo}`;
     div.textContent = texto;
-    div.style.animation = "slideIn 0.25s ease";
+    _getToastContainer().appendChild(div);
+    _scheduleAlertDismiss(div);
+}
 
-    if (anchor && anchor.parentNode) {
-        anchor.parentNode.insertBefore(div, anchor);
-    } else {
-        document.body.prepend(div);
-    }
+export function mostrarFeedback(texto, tipo = "success") {
+    _appendToast(texto, tipo);
+}
 
-    setTimeout(() => {
-        div.style.transition = "opacity 0.5s ease, transform 0.5s ease";
-        div.style.opacity    = "0";
-        div.style.transform  = "translateX(10px)";
-    }, 4500);
 
-    setTimeout(() => div.remove(), 5000);
+export function recargarConFeedback(texto, tipo = "success", delay = 300) {
+    try {
+        sessionStorage.setItem(_TOAST_KEY, JSON.stringify({ texto, tipo }));
+    } catch {}
+    setTimeout(() => location.reload(), delay);
 }
 
 
@@ -98,9 +117,12 @@ export function apiAction({
         .then(res => {
             restoreBtn();
             if (res.ok) {
-                if (msgOk)     mostrarFeedback(msgOk, "success");
                 if (onSuccess) onSuccess(res);
-                if (reload)    setTimeout(() => location.reload(), reloadDelay);
+                if (reload) {
+                    recargarConFeedback(msgOk || res.message || "", "success", reloadDelay);
+                } else {
+                    if (msgOk) mostrarFeedback(msgOk, "success");
+                }
             } else {
                 mostrarFeedback(res.error || msgError, "error");
                 if (onError) onError(res);
@@ -147,18 +169,3 @@ export function confirmarEliminarVenta(idVenta) {
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
-    const alerts = document.querySelectorAll(".alert");
-
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            alert.style.transition = "opacity 0.5s ease, transform 0.5s ease";
-            alert.style.opacity    = "0";
-            alert.style.transform  = "translateX(10px)";
-        }, 4500);
-
-        setTimeout(() => {
-            alert.style.display = "none";
-        }, 5000);
-    });
-});

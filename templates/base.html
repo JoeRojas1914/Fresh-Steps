@@ -108,8 +108,11 @@
     </div>
 </footer>
 
+<div id="toast-container" role="status" aria-live="polite" aria-label="Notificaciones"></div>
+
 <script defer src="{{ url_for('static', filename='js/base/navbar.js') }}"></script>
 <script defer src="{{ url_for('static', filename='js/base/csrf.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/base/toast.js') }}"></script>
 
 {% block scripts %}{% endblock %}
 <script defer src="{{ url_for('static', filename='js/base/init.js') }}"></script>

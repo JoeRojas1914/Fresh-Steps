@@ -1,5 +1,5 @@
 import { abrirModal, cerrarModal } from '../components/modal.js';
-import { mostrarFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
+import { mostrarFeedback, recargarConFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
 import { abrirWhatsApp } from '../base/whatsapp.js';
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -48,9 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             abrirWhatsApp(ventaTelefono, msg, ventaNegocioId)
                                 .then(r => { if (!r.ok) mostrarFeedback("No se pudo abrir WhatsApp", "error"); });
                         }
-                        mostrarFeedback(res.message, "success");
-
-                        setTimeout(() => location.reload(), 1500);
+                        recargarConFeedback(res.message, "success");
                     } else {
                         mostrarFeedback(res.error || "Error al marcar como lista", "error");
                     }

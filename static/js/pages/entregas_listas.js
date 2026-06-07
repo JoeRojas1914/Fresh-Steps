@@ -1,5 +1,5 @@
 import { abrirModal, cerrarModal } from '../components/modal.js';
-import { mostrarFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
+import { mostrarFeedback, recargarConFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
 
 let ventaEntregaActual  = null;
 let saldoPendienteActual = 0;
@@ -69,8 +69,7 @@ function confirmarEntregaSinPago() {
         .then(res => {
             if (res.ok) {
                 cerrarModalEntrega();
-                mostrarFeedback(res.message, "success");
-                setTimeout(() => location.reload(), 1200);
+                recargarConFeedback(res.message, "success");
             } else {
                 mostrarFeedback(res.error || "Error al entregar", "error");
             }
@@ -100,8 +99,7 @@ function confirmarPagoYEntrega() {
     .then(res => {
         if (res.ok) {
             cerrarModalEntrega();
-            mostrarFeedback(res.message, "success");
-            setTimeout(() => location.reload(), 1200);
+            recargarConFeedback(res.message, "success");
         } else {
             mostrarFeedback(res.error || "Error al registrar pago", "error");
         }
@@ -132,8 +130,7 @@ function confirmarRevertir() {
         .then(res => {
             cerrarModal("modalRevertir");
             if (res.ok) {
-                mostrarFeedback(res.message, "success");
-                setTimeout(() => location.reload(), 1200);
+                recargarConFeedback(res.message, "success");
             } else {
                 mostrarFeedback(res.error || "Error al revertir la venta", "error");
             }
