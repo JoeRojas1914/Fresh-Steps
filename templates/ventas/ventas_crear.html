@@ -85,7 +85,7 @@
                             <option value="2">Confección</option>
                             <option value="3">Maquila</option>
                         </select>
-                        <div id="error-negocio" class="error-msg d-none" role="alert">
+                        <div id="error-negocio" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
                             Borra los artículos para cambiar el negocio.
                         </div>
                     </div>
@@ -139,7 +139,7 @@
                     <input type="time" id="fecha_estimada_hora">
                 </div>
                 <input type="hidden" name="fecha_estimada" id="fecha_estimada">
-                <div id="error-fecha" class="error-msg d-none" role="alert">
+                <div id="error-fecha" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
                     La fecha estimada no puede ser menor a hoy.
                 </div>
             </div>
@@ -181,7 +181,7 @@
                         <input type="number" min="0" step="0.01"
                                name="monto_prepago" id="monto_prepago"
                                placeholder="0.00">
-                        <div id="error-prepago" class="error-msg d-none" role="alert">
+                        <div id="error-prepago" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
                             El prepago no puede ser mayor al total.
                         </div>
                     </div>
@@ -208,7 +208,7 @@
                         <input type="number" min="0" step="0.01"
                                name="cantidad_descuento" id="cantidad_descuento"
                                placeholder="0.00">
-                        <div id="error-descuento" class="error-msg d-none" role="alert">
+                        <div id="error-descuento" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
                             El descuento no puede ser mayor al total.
                         </div>
                     </div>
