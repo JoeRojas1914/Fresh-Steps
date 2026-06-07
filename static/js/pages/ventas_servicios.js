@@ -1,5 +1,5 @@
 import { ventaState } from './ventas_state.js';
-import { mostrarFeedback } from '../base/helpers.js';
+import { mostrarFeedback, escapeHtml } from '../base/helpers.js';
 import { validarFormulario, actualizarTotal } from './ventas_validacion.js';
 import { actualizarEmptyState } from './ventas_articulos.js';
 
@@ -48,7 +48,7 @@ function _opcionesServiciosHTML() {
     let html = `<option value="">-- Selecciona servicio --</option>`;
     ventaState.serviciosGlobales.forEach(s => {
         const precio = s.precio_base ?? s.precio ?? 0;
-        html += `<option value="${s.id_servicio}" data-precio="${precio}">${s.nombre} ($${precio})</option>`;
+        html += `<option value="${s.id_servicio}" data-precio="${precio}">${escapeHtml(s.nombre)} ($${precio})</option>`;
     });
     return html;
 }
