@@ -45,6 +45,53 @@ def _paginar_ventas(
     return ventas, total_registros, total_paginas
 
 
+def _enriquecer_ventas(
+    ventas: list,
+    *,
+    con_pagos: bool = False,
+    calcular_estado: bool = False,
+) -> None:
+    """Mutates ventas in-place: attaches detalles, optionally pagos/totals/estado."""
+    if not ventas:
+        return
+    ids_venta    = [v["id_venta"] for v in ventas]
+    detalles_map = obtener_detalles_venta(ids_venta)
+    pagos_map    = obtener_pagos_venta(ids_venta) if (con_pagos or calcular_estado) else {}
+
+    for v in ventas:
+        v["detalles"] = detalles_map.get(v["id_venta"], [])
+
+        if con_pagos:
+            pagos        = pagos_map.get(v["id_venta"], [])
+            total        = float(v.get("total") or 0)
+            total_pagado = sum(float(p["monto"]) for p in pagos)
+            v["pagos"]           = pagos
+            v["total"]           = total
+            v["total_pagado"]    = total_pagado
+            v["saldo_pendiente"] = max(total - total_pagado, 0)
+            v["tiene_pagos"]     = total_pagado > 0
+            v["esta_pagada"]     = v["saldo_pendiente"] == 0
+
+        if calcular_estado:
+            pagos        = pagos_map.get(v["id_venta"], [])
+            total        = float(v.get("total") or 0)
+            total_pagado = float(v.get("total_pagado") or 0)
+            v["pagos"]           = pagos
+            v["total"]           = total
+            v["total_pagado"]    = total_pagado
+            v["saldo_pendiente"] = max(total - total_pagado, 0)
+            v["esta_pagada"]     = v["saldo_pendiente"] == 0
+
+            if v.get("eliminado"):
+                v["estado"] = "eliminada"
+            elif v.get("fecha_entrega"):
+                v["estado"] = "entregada"
+            elif v.get("fecha_lista"):
+                v["estado"] = "lista"
+            else:
+                v["estado"] = "pendiente"
+
+
 def listar_ventas_listas_service(
     id_negocio: int | None = None,
     pagina: int = 1,
@@ -54,24 +101,7 @@ def listar_ventas_listas_service(
         contar_entregas_listas, obtener_ventas_listas,
         id_negocio, id_venta, pagina,
     )
-
-    ids_venta    = [v["id_venta"] for v in ventas]
-    detalles_map = obtener_detalles_venta(ids_venta)
-    pagos_map    = obtener_pagos_venta(ids_venta)
-
-    for v in ventas:
-        pagos        = pagos_map.get(v["id_venta"], [])
-        total_pagado = sum(float(p["monto"]) for p in pagos)
-        total        = float(v.get("total") or 0)
-
-        v["detalles"]        = detalles_map.get(v["id_venta"], [])
-        v["pagos"]           = pagos
-        v["total"]           = total
-        v["total_pagado"]    = total_pagado
-        v["saldo_pendiente"] = max(total - total_pagado, 0)
-        v["tiene_pagos"]     = total_pagado > 0
-        v["esta_pagada"]     = v["saldo_pendiente"] == 0
-
+    _enriquecer_ventas(ventas, con_pagos=True)
     return {
         "ventas":          ventas,
         "negocios":        obtener_negocios(),
@@ -93,13 +123,7 @@ def listar_entregas_pendientes_service(
         contar_entregas_pendientes, obtener_entregas_pendientes,
         id_negocio, id_venta, pagina,
     )
-
-    ids_venta    = [v["id_venta"] for v in ventas]
-    detalles_map = obtener_detalles_venta(ids_venta)
-
-    for v in ventas:
-        v["detalles"] = detalles_map.get(v["id_venta"], [])
-
+    _enriquecer_ventas(ventas)
     return {
         "ventas":          ventas,
         "negocios":        obtener_negocios(),
@@ -341,35 +365,10 @@ def historial_ventas_service(
     )
     negocios = obtener_negocios()
 
-    ids_venta    = [v["id_venta"] for v in ventas]
-    detalles_map = obtener_detalles_venta(ids_venta)
-    pagos_map    = obtener_pagos_venta(ids_venta)
-
-    resultado = []
-    for v in ventas:
-        total        = float(v.get("total") or 0)
-        total_pagado = float(v.get("total_pagado") or 0)
-
-        v["detalles"]        = detalles_map.get(v["id_venta"], [])
-        v["pagos"]           = pagos_map.get(v["id_venta"], [])
-        v["total"]           = total
-        v["total_pagado"]    = total_pagado
-        v["saldo_pendiente"] = max(total - total_pagado, 0)
-        v["esta_pagada"]     = v["saldo_pendiente"] == 0
-
-        if v.get("eliminado"):
-            v["estado"] = "eliminada"
-        elif v.get("fecha_entrega"):
-            v["estado"] = "entregada"
-        elif v.get("fecha_lista"):
-            v["estado"] = "lista"
-        else:
-            v["estado"] = "pendiente"
-
-        resultado.append(v)
+    _enriquecer_ventas(ventas, calcular_estado=True)
 
     return {
-        "ventas":             resultado,
+        "ventas":             ventas,
         "negocios":           negocios,
         "hoy":                date.today(),
         "id_negocio":         id_negocio,
