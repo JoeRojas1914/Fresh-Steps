@@ -18,7 +18,10 @@
 <div class="login-wrapper">
     <div class="login-card">
         <div class="login-logo">
-            <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
+            <picture>
+                <source srcset="{{ url_for('static', filename='images/FreshStepsLogo.webp') }}" type="image/webp">
+                <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
+            </picture>
         </div>
 
         <h2>BIENVENIDO</h2>

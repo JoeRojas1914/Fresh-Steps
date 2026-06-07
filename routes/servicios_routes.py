@@ -17,6 +17,7 @@ from middleware.auth_middleware import admin_required
 from extensions import limiter
 from services.servicios_service import (
     listar_servicios,
+    listar_servicios_api,
     guardar_servicio_service,
     eliminar_servicio_service,
     obtener_historial_servicio_service,
@@ -100,13 +101,7 @@ def eliminar_servicio(id_servicio):
 @servicios_bp.route("/api/servicios")
 def api_servicios():
     id_negocio = request.args.get("id_negocio", type=int)
-
-    data = listar_servicios(
-        id_negocio=id_negocio,
-        pagina=1,
-        por_pagina=1000
-    )
-
+    data = listar_servicios_api(id_negocio)
     return jsonify(data["servicios"])
 
 

@@ -1,3 +1,5 @@
+import time
+
 from models.servicios import (
     contar_servicios,
     obtener_servicios,
@@ -8,6 +10,9 @@ from models.servicios import (
     restaurar_servicio,
     existe_servicio_activo
 )
+
+_servicios_cache: dict = {}
+_SERVICIOS_TTL = 300  # segundos
 
 
 def listar_servicios(
@@ -42,6 +47,20 @@ def listar_servicios(
     }
 
 
+def listar_servicios_api(id_negocio: int | None) -> dict:
+    key = str(id_negocio)
+    entry = _servicios_cache.get(key)
+    if entry and (time.time() - entry[1]) < _SERVICIOS_TTL:
+        return entry[0]
+    data = listar_servicios(id_negocio=id_negocio, pagina=1, por_pagina=1000)
+    _servicios_cache[key] = (data, time.time())
+    return data
+
+
+def _invalidar_cache_servicios() -> None:
+    _servicios_cache.clear()
+
+
 def guardar_servicio_service(
     id_servicio: str | None,
     id_negocio: int,
@@ -53,13 +72,16 @@ def guardar_servicio_service(
         raise ValueError(f"Ya existe un servicio activo con el nombre '{nombre}' en este negocio.")
     if id_servicio:
         actualizar_servicio(id_servicio, id_negocio, nombre, precio, id_usuario)
-        return "actualizado"
-    crear_servicio(id_negocio, nombre, precio, id_usuario)
-    return "creado"
+    else:
+        crear_servicio(id_negocio, nombre, precio, id_usuario)
+    _invalidar_cache_servicios()
+    return "actualizado" if id_servicio else "creado"
 
 
 def eliminar_servicio_service(id_servicio: int, id_usuario: int) -> bool:
-    return eliminar_servicio(id_servicio, id_usuario)
+    result = eliminar_servicio(id_servicio, id_usuario)
+    _invalidar_cache_servicios()
+    return result
 
 
 def obtener_historial_servicio_service(id_servicio: int) -> list[dict]:
@@ -68,3 +90,4 @@ def obtener_historial_servicio_service(id_servicio: int) -> list[dict]:
 
 def restaurar_servicio_service(id_servicio: int, id_usuario: int) -> None:
     restaurar_servicio(id_servicio, id_usuario)
+    _invalidar_cache_servicios()

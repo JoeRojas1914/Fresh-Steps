@@ -19,7 +19,10 @@
     <nav class="navbar" id="navbar">
 
         <div class="nav-logo">
-            <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
+            <picture>
+                <source srcset="{{ url_for('static', filename='images/FreshStepsLogo.webp') }}" type="image/webp">
+                <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
+            </picture>
         </div>
 
         <button class="nav-toggle" id="navToggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="navbar">
@@ -76,7 +79,10 @@
 <footer class="footer">
     <div class="footer-container">
         <div class="footer-brand">
-            <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
+            <picture>
+                <source srcset="{{ url_for('static', filename='images/FreshStepsLogo.webp') }}" type="image/webp">
+                <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
+            </picture>
             <div class="footer-brand-text">
                 <span class="footer-brand-name">Fresh Steps</span>
                 <span class="footer-brand-secondary">Fer's Shop</span>

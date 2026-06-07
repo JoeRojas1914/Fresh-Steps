@@ -13,9 +13,15 @@
 
     <div class="logo">
       {% if (venta.id_negocio | int) == 1 %}
-        <img src="{{ url_for('static', filename='images/FreshStepsTicket.jpeg') }}" alt="Fresh Steps">
+        <picture>
+          <source srcset="{{ url_for('static', filename='images/FreshStepsTicket.webp') }}" type="image/webp">
+          <img src="{{ url_for('static', filename='images/FreshStepsTicket.jpeg') }}" alt="Fresh Steps">
+        </picture>
       {% else %}
-        <img src="{{ url_for('static', filename='images/FersShopBW.jpeg') }}" alt="Confección / Maquila">
+        <picture>
+          <source srcset="{{ url_for('static', filename='images/FersShopBW.webp') }}" type="image/webp">
+          <img src="{{ url_for('static', filename='images/FersShopBW.jpeg') }}" alt="Confección / Maquila">
+        </picture>
       {% endif %}
     </div>
 

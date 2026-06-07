@@ -563,7 +563,7 @@ function renderTopClientes(clientes) {
             <div class="tc-body">
                 <div class="tc-name">${escapeHtml(cl.nombre)}</div>
                 <div class="tc-bar-wrap">
-                    <div class="tc-bar tc-bar--${rank}" data-pct="${barPct}"></div>
+                    <div class="tc-bar tc-bar--${rank}" style="width:${barPct}%"></div>
                 </div>
             </div>
             <div class="tc-meta">
@@ -572,10 +572,6 @@ function renderTopClientes(clientes) {
             </div>
         </div>`;
     }).join('')}</div>`;
-
-    c.querySelectorAll(".tc-bar[data-pct]").forEach(bar => {
-        bar.style.width = bar.dataset.pct + "%";
-    });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -594,6 +590,12 @@ function verVentasRelacionadas() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+let _dashTimer = null;
+function _cargarDashboardDebounced() {
+    clearTimeout(_dashTimer);
+    _dashTimer = setTimeout(cargarDashboard, 400);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     initCharts();
 
@@ -604,7 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     inputs.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener("change", cargarDashboard);
+        if (el) el.addEventListener("change", _cargarDashboardDebounced);
     });
 
     cargarDashboard();
