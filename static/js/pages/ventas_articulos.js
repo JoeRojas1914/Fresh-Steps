@@ -159,6 +159,16 @@ function renumerarArticulos() {
     document.querySelectorAll(".articulo-item").forEach((item, i) => {
         item.querySelector(".zapato-titulo").innerHTML =
             `<i data-lucide="receipt" width="14" height="14"></i> Artículo ${i + 1}`;
+
+        item.querySelectorAll("input[name], select[name]").forEach(el => {
+            el.name = el.name.replace(/^articulos\[\d+\]/, `articulos[${i}]`);
+        });
+
+        const serviciosBox = item.querySelector(".servicios-box");
+        if (serviciosBox) serviciosBox.dataset.articulo = i;
+
+        const serviciosLista = item.querySelector("[id^='serviciosLista_']");
+        if (serviciosLista) serviciosLista.id = `serviciosLista_${i}`;
     });
     ventaState.contadorArticulos = document.querySelectorAll(".articulo-item").length;
 
