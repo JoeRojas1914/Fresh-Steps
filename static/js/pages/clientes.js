@@ -21,7 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!validarTelefono(telefono)) {
             mostrarFeedback("El teléfono debe tener exactamente 10 dígitos.", "error");
             e.preventDefault();
+            return;
         }
+
+        const btn = this.querySelector('[type="submit"]');
+        if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
     });
 
 });

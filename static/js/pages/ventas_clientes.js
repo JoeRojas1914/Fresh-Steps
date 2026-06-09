@@ -5,18 +5,24 @@ import { validarFormulario } from './ventas_validacion.js';
 
 /* ─── Búsqueda de cliente ────────────────────────────────────────────────── */
 
+let _abortBusqueda = null;
+
 export async function buscarClientes() {
     const q     = document.getElementById("buscar-cliente").value.trim();
     const lista = document.getElementById("lista-clientes");
     lista.innerHTML = "";
     if (q.length < 2) return;
 
+    if (_abortBusqueda) _abortBusqueda.abort();
+    _abortBusqueda = new AbortController();
+
     let clientes;
     try {
-        const res = await fetch(`/api/clientes?q=${q}`);
+        const res = await fetch(`/api/clientes?q=${q}`, { signal: _abortBusqueda.signal });
         if (!res.ok) throw new Error("Error de red");
         clientes = await res.json();
-    } catch {
+    } catch (err) {
+        if (err.name === "AbortError") return;
         lista.innerHTML = "<div class='result-item'>Error al buscar clientes.</div>";
         return;
     }

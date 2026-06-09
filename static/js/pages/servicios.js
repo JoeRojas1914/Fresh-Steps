@@ -20,7 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!validarPrecio(precio)) {
                 mostrarFeedback("El precio no puede ser negativo.", "error");
                 e.preventDefault();
+                return;
             }
+
+            const btn = this.querySelector('[type="submit"]');
+            if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
         });
     }
 

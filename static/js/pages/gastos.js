@@ -27,7 +27,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!validarPrecio(total)) {
             mostrarFeedback("El total no puede ser negativo.", "error");
             e.preventDefault();
+            return;
         }
+
+        const btn = this.querySelector('[type="submit"]');
+        if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
     });
 
 });
