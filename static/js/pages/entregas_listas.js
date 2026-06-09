@@ -64,6 +64,11 @@ function abrirModalEntrega(idVenta, deuda, pagado, total) {
 
 
 function confirmarEntregaSinPago() {
+    const btn = document.getElementById("btnConfirmarEntrega");
+    if (btn?.disabled) return;
+    const textoOriginal = btn?.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = "Procesando..."; }
+
     csrfFetch(`/ventas/entregar/${ventaEntregaActual}`, { method: "POST" })
         .then(r => r.json())
         .then(res => {
@@ -71,10 +76,14 @@ function confirmarEntregaSinPago() {
                 cerrarModalEntrega();
                 recargarConFeedback(res.message, "success");
             } else {
+                if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
                 mostrarFeedback(res.error || "Error al entregar", "error");
             }
         })
-        .catch(() => mostrarFeedback("Error de conexión al entregar la venta.", "error"));
+        .catch(() => {
+            if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+            mostrarFeedback("Error de conexión al entregar la venta.", "error");
+        });
 }
 
 
@@ -85,6 +94,11 @@ function confirmarPagoYEntrega() {
         mostrarFeedback("Selecciona un método de pago.", "error");
         return;
     }
+
+    const btn = document.getElementById("btnConfirmarEntrega");
+    if (btn?.disabled) return;
+    const textoOriginal = btn?.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = "Procesando..."; }
 
     csrfFetch("/ventas/pago-final", {
         method: "POST",
@@ -101,10 +115,14 @@ function confirmarPagoYEntrega() {
             cerrarModalEntrega();
             recargarConFeedback(res.message, "success");
         } else {
+            if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
             mostrarFeedback(res.error || "Error al registrar pago", "error");
         }
     })
-    .catch(() => mostrarFeedback("Error de conexión al registrar el pago.", "error"));
+    .catch(() => {
+        if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+        mostrarFeedback("Error de conexión al registrar el pago.", "error");
+    });
 }
 
 
@@ -124,6 +142,10 @@ function cerrarModalEntrega() {
 
 function confirmarRevertir() {
     if (!ventaRevertirActual) return;
+    const btn = document.getElementById("btnConfirmarRevertir");
+    if (btn?.disabled) return;
+    const textoOriginal = btn?.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = "Procesando..."; }
 
     csrfFetch(`/ventas/revertir-lista/${ventaRevertirActual}`, { method: "POST" })
         .then(r => r.json())
@@ -132,8 +154,13 @@ function confirmarRevertir() {
             if (res.ok) {
                 recargarConFeedback(res.message, "success");
             } else {
+                if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
                 mostrarFeedback(res.error || "Error al revertir la venta", "error");
             }
         })
-        .catch(() => mostrarFeedback("Error de conexión al revertir la venta.", "error"));
+        .catch(() => {
+            cerrarModal("modalRevertir");
+            if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+            mostrarFeedback("Error de conexión al revertir la venta.", "error");
+        });
 }

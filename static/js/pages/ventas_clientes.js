@@ -91,23 +91,35 @@ export async function crearCliente(e) {
 
     errorBox.style.display = "none";
 
+    const btn = e.target.querySelector('[type="submit"]');
+    if (btn?.disabled) return;
+    const textoOriginal = btn?.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
+
     const formData  = new FormData(e.target);
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-    const res = await fetch("/api/clientes/crear", {
-        method:  "POST",
-        headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
-        body:    formData,
-    });
+    try {
+        const res = await fetch("/api/clientes/crear", {
+            method:  "POST",
+            headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
+            body:    formData,
+        });
 
-    if (!res.ok) {
-        errorBox.innerText     = "Error al crear el cliente.";
+        if (!res.ok) {
+            if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+            errorBox.innerText     = "Error al crear el cliente.";
+            errorBox.style.display = "block";
+            return;
+        }
+
+        const cliente = await res.json();
+        cerrarModalCliente();
+        seleccionarCliente(cliente);
+        mostrarFeedback("Cliente creado correctamente.", "success");
+    } catch {
+        if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+        errorBox.innerText     = "Error de conexión.";
         errorBox.style.display = "block";
-        return;
     }
-
-    const cliente = await res.json();
-    cerrarModalCliente();
-    seleccionarCliente(cliente);
-    mostrarFeedback("Cliente creado correctamente.", "success");
 }

@@ -34,7 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnConfirmar) {
         btnConfirmar.addEventListener("click", () => {
 
-            if (!ventaSeleccionada) return;
+            if (!ventaSeleccionada || btnConfirmar.disabled) return;
+
+            const textoOriginal = btnConfirmar.textContent;
+            btnConfirmar.disabled    = true;
+            btnConfirmar.textContent = "Procesando...";
 
             csrfFetch(`/ventas/marcar-lista/${ventaSeleccionada}`, { method: "POST" })
                 .then(r => r.json())
@@ -50,10 +54,16 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                         recargarConFeedback(res.message, "success");
                     } else {
+                        btnConfirmar.disabled    = false;
+                        btnConfirmar.textContent = textoOriginal;
                         mostrarFeedback(res.error || "Error al marcar como lista", "error");
                     }
                 })
-                .catch(() => mostrarFeedback("Error de conexión al marcar la venta.", "error"));
+                .catch(() => {
+                    btnConfirmar.disabled    = false;
+                    btnConfirmar.textContent = textoOriginal;
+                    mostrarFeedback("Error de conexión al marcar la venta.", "error");
+                });
         });
     }
 
