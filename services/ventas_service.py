@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal, InvalidOperation
 
 from config import METODOS_PAGO_VALIDOS, POR_PAGINA_VENTAS_ACTIVAS
 from models.ventas import (
@@ -166,21 +167,21 @@ def eliminar_venta_service(id_venta: int, id_usuario: int | None = None) -> None
     eliminar_venta(id_venta, id_usuario)
 
 
-def _parsear_prepago(form: dict) -> tuple[bool, float]:
+def _parsear_prepago(form: dict) -> tuple[bool, Decimal]:
     if form.get("prepago") != "si":
-        return False, 0
+        return False, Decimal(0)
     try:
-        return True, float(form.get("monto_prepago") or 0)
-    except (ValueError, TypeError):
+        return True, Decimal(form.get("monto_prepago") or "0")
+    except (InvalidOperation, TypeError):
         raise ValueError("El monto del prepago no es válido.")
 
 
-def _parsear_descuento(form: dict) -> tuple[bool, float]:
+def _parsear_descuento(form: dict) -> tuple[bool, Decimal]:
     if form.get("aplica_descuento") != "si":
-        return False, 0
+        return False, Decimal(0)
     try:
-        return True, float(form.get("cantidad_descuento") or 0)
-    except (ValueError, TypeError):
+        return True, Decimal(form.get("cantidad_descuento") or "0")
+    except (InvalidOperation, TypeError):
         raise ValueError("El monto del descuento no es válido.")
 
 
@@ -206,7 +207,7 @@ _CAMPOS_ARTICULO: dict[str, dict[str, object]] = {
     "maquila": {
         "tipo":            str,
         "cantidad":        lambda v: int(v or 1),
-        "precio_unitario": lambda v: float(v or 0),
+        "precio_unitario": lambda v: Decimal(str(v or 0)),
     },
 }
 
@@ -265,7 +266,7 @@ def _validar_reglas_negocio(tipo_negocio: str | None, articulos: list) -> None:
             for s in a["servicios"]:
                 if not s.get("id_servicio"):
                     raise ValueError("Servicio inválido (sin id).")
-                if float(s.get("precio_aplicado") or 0) <= 0:
+                if Decimal(str(s.get("precio_aplicado") or 0)) <= 0:
                     raise ValueError("El precio aplicado debe ser mayor a 0.")
     if tipo_negocio == "maquila":
         for a in articulos:
@@ -312,7 +313,7 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> int:
         if not tipo_pago:
             raise ValueError("Debes seleccionar el tipo de pago del prepago.")
         venta_creada = obtener_venta(id_venta)
-        if venta_creada and monto_prepago > float(venta_creada["total"]):
+        if venta_creada and monto_prepago > Decimal(str(venta_creada["total"] or 0)):
             raise ValueError("El prepago no puede ser mayor al total de la venta.")
         registrar_pago(
             id_venta=id_venta,
@@ -332,7 +333,7 @@ def _parsear_servicios(form: dict, i: int) -> list[dict]:
         if not id_serv:
             break
         precio_ap = form.get(f"articulos[{i}][servicios][{j}][precio_aplicado]") or 0
-        servicios.append({"id_servicio": int(id_serv), "precio_aplicado": float(precio_ap)})
+        servicios.append({"id_servicio": int(id_serv), "precio_aplicado": Decimal(str(precio_ap or 0))})
         j += 1
     return servicios
 

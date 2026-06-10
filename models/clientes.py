@@ -82,7 +82,7 @@ def contar_clientes(q=None, incluir_eliminados=False):
         ("(nombre LIKE %s OR apellido LIKE %s)", q_like, q_like),
     ])
     with get_db() as (_, cursor):
-        cursor.execute(f"SELECT COUNT(*) AS total FROM cliente {where}", params)
+        cursor.execute("SELECT COUNT(*) AS total FROM cliente " + where, params)
         return cursor.fetchone()["total"]
 
 

@@ -78,7 +78,7 @@ def contar_servicios(id_negocio=None, q=None, incluir_eliminados=False):
         ("activo = %s", None if incluir_eliminados else 1),
     ])
     with get_db() as (_, cursor):
-        cursor.execute(f"SELECT COUNT(*) AS total FROM servicio {where}", params)
+        cursor.execute("SELECT COUNT(*) AS total FROM servicio " + where, params)
         return cursor.fetchone()["total"]
 
 
@@ -90,13 +90,13 @@ def obtener_servicios(id_negocio=None, q=None, incluir_eliminados=False, limit=1
     ])
     params.extend([limit, offset])
     with get_db() as (_, cursor):
-        sql = f"""
-            SELECT s.id_servicio, s.nombre, s.precio, s.id_negocio, s.activo, n.nombre AS negocio
-            FROM servicio s
-            JOIN negocio n ON n.id_negocio = s.id_negocio
-            {where}
-            ORDER BY s.nombre ASC LIMIT %s OFFSET %s
-        """
+        sql = (
+            "SELECT s.id_servicio, s.nombre, s.precio, s.id_negocio, s.activo, n.nombre AS negocio"
+            " FROM servicio s"
+            " JOIN negocio n ON n.id_negocio = s.id_negocio "
+            + where +
+            " ORDER BY s.nombre ASC LIMIT %s OFFSET %s"
+        )
 
         cursor.execute(sql, params)
         return cursor.fetchall()

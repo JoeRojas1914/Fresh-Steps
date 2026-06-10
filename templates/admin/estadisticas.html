@@ -203,6 +203,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script defer src="{{ url_for('static', filename='vendor/chart.min.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='js/pages/estadisticas.js') }}"></script>
 {% endblock %}

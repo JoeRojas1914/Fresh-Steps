@@ -107,17 +107,17 @@ def obtener_gastos(
     ])
     params.extend([limit, offset])
     with get_db() as (_, cursor):
-        cursor.execute(f"""
-            SELECT
-                g.id_gasto, g.id_negocio, n.nombre AS negocio,
-                g.descripcion, g.proveedor, g.total, g.fecha_registro,
-                g.tipo_comprobante, g.tipo_pago, u.usuario AS creado_por, g.activo
-            FROM gastos g
-            JOIN negocio n ON g.id_negocio = n.id_negocio
-            JOIN usuario u ON g.id_usuario = u.id_usuario
-            {where}
-            ORDER BY g.fecha_registro DESC LIMIT %s OFFSET %s
-        """, params)
+        cursor.execute(
+            "SELECT g.id_gasto, g.id_negocio, n.nombre AS negocio,"
+            " g.descripcion, g.proveedor, g.total, g.fecha_registro,"
+            " g.tipo_comprobante, g.tipo_pago, u.usuario AS creado_por, g.activo"
+            " FROM gastos g"
+            " JOIN negocio n ON g.id_negocio = n.id_negocio"
+            " JOIN usuario u ON g.id_usuario = u.id_usuario "
+            + where +
+            " ORDER BY g.fecha_registro DESC LIMIT %s OFFSET %s",
+            params
+        )
         return cursor.fetchall()
 
 
@@ -147,7 +147,7 @@ def contar_gastos(
         ("fecha_registro <= %s", fecha_fin),
     ])
     with get_db() as (_, cursor):
-        cursor.execute(f"SELECT COUNT(*) AS total FROM gastos {where}", params)
+        cursor.execute("SELECT COUNT(*) AS total FROM gastos " + where, params)
         return cursor.fetchone()["total"]
 
 

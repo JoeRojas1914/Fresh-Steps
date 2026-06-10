@@ -72,11 +72,11 @@ limiter.init_app(app)
 _is_dev = os.getenv("FLASK_ENV") == "development"
 _CSP = {
     "default-src": "'self'",
-    "script-src": ["'self'", "unpkg.com", "cdn.jsdelivr.net"],
+    "script-src": "'self'",
     "style-src": ["'self'", "fonts.googleapis.com", "'unsafe-inline'"],
     "font-src": ["'self'", "fonts.gstatic.com"],
     "img-src": ["'self'", "data:"],
-    "connect-src": ["'self'", "cdn.jsdelivr.net"],
+    "connect-src": "'self'",
 }
 Talisman(
     app,
