@@ -157,8 +157,13 @@ export function eliminarArticulo(btn) {
 
 function renumerarArticulos() {
     document.querySelectorAll(".articulo-item").forEach((item, i) => {
+        const newLabel = `Artículo ${i + 1}`;
+        const badge    = item.querySelector(".zapato-titulo .zapato-titulo-badge")?.outerHTML || "";
         item.querySelector(".zapato-titulo").innerHTML =
-            `<i data-lucide="receipt" width="14" height="14"></i> Artículo ${i + 1}`;
+            `<i data-lucide="receipt" width="14" height="14"></i> ${newLabel}${badge}`;
+
+        const resumenLabel = item.querySelector(".resumen-header-label");
+        if (resumenLabel) resumenLabel.textContent = newLabel;
 
         item.querySelectorAll("input[name], select[name]").forEach(el => {
             el.name = el.name.replace(/^articulos\[\d+\]/, `articulos[${i}]`);
