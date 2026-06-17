@@ -164,6 +164,21 @@ def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False):
         return cursor.fetchall()
 
 
+def contar_pedidos_por_cliente(ids_cliente: list) -> dict:
+    if not ids_cliente:
+        return {}
+    placeholders = ",".join(["%s"] * len(ids_cliente))
+    with get_db() as (_, cursor):
+        cursor.execute(f"""
+            SELECT id_cliente, COUNT(*) AS total
+            FROM venta
+            WHERE id_cliente IN ({placeholders})
+              AND eliminado = 0
+            GROUP BY id_cliente
+        """, ids_cliente)
+        return {r["id_cliente"]: int(r["total"]) for r in cursor.fetchall()}
+
+
 def obtener_historial_cliente(id_cliente):
     with get_db() as (_, cursor):
         cursor.execute("""

@@ -120,19 +120,21 @@ def api_crear_cliente():
 @clientes_bp.route("/clientes/exportar")
 @admin_required
 def exportar_clientes_excel():
-    from models.clientes import obtener_clientes
+    from models.clientes import obtener_clientes, contar_pedidos_por_cliente
 
     incluir_eliminados = request.args.get("eliminados") == "1"
     clientes = obtener_clientes(limit=MAX_FILAS_EXPORTAR, offset=0, incluir_eliminados=incluir_eliminados)
+    ids = [cl["id_cliente"] for cl in clientes]
+    pedidos_map = contar_pedidos_por_cliente(ids)
 
     wb = Workbook()
     ws = wb.active
     ws.title = "Clientes"
     ws.freeze_panes = "A4"
 
-    xl_titulo_hoja(ws, "Clientes — Fresh Steps", 6,
+    xl_titulo_hoja(ws, "Clientes — Fresh Steps", 7,
                    "Incluye eliminados" if incluir_eliminados else "Solo clientes activos")
-    xl_fila_headers(ws, ["Nombre", "Apellido", "Teléfono", "Correo", "Dirección", "Estado"])
+    xl_fila_headers(ws, ["Nombre", "Apellido", "Teléfono", "Correo", "Dirección", "Estado", "Total pedidos"])
 
     for i, cl in enumerate(clientes):
         r  = i + 4
@@ -143,9 +145,10 @@ def exportar_clientes_excel():
         xl_cell(ws, r, 4, cl.get("correo",    "—"), fg=bg)
         xl_cell(ws, r, 5, cl.get("direccion", "—"), fg=bg)
         xl_badge_activo(ws, r, 6, cl.get("activo", 1))
+        xl_cell(ws, r, 7, pedidos_map.get(cl["id_cliente"], 0), fg=bg, align="center")
         ws.row_dimensions[r].height = 16
 
-    xl_col_widths(ws, [20, 20, 14, 28, 30, 11])
+    xl_col_widths(ws, [20, 20, 14, 28, 30, 11, 13])
     return send_excel(wb, "clientes")
 
 
