@@ -228,6 +228,8 @@ def eliminar_venta_route(id_venta):
         logger.exception("Error en eliminar_venta id_venta=%s id_usuario=%s", id_venta, id_usuario)
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
 
+_TIPOS_FECHA_HISTORIAL = {"fecha_recibo", "fecha_lista", "fecha_entrega"}
+
 @ventas_bp.route("/ventas/historial")
 @admin_required
 def historial_ventas():
@@ -239,10 +241,14 @@ def historial_ventas():
     q            = request.args.get("q", "").strip() or None
     id_venta     = request.args.get("id_venta",     type=int)
     estado       = request.args.get("estado")       or None
+    tipo_fecha   = request.args.get("tipo_fecha", "fecha_recibo")
+    if tipo_fecha not in _TIPOS_FECHA_HISTORIAL:
+        tipo_fecha = "fecha_recibo"
 
     mostrar_eliminadas = request.args.get('eliminadas') == '1'
     data = historial_ventas_service(
-        id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas, q=q, id_venta=id_venta, estado=estado
+        id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas,
+        q=q, id_venta=id_venta, estado=estado, tipo_fecha=tipo_fecha,
     )
 
     return render_template("ventas/historial_ventas.html", **data)
@@ -255,7 +261,10 @@ def exportar_historial_excel():
     id_negocio   = request.args.get("id_negocio",  type=int)
     fecha_inicio = request.args.get("fecha_inicio") or None
     fecha_fin    = request.args.get("fecha_fin")    or None
-    wb = exportar_historial_service(id_negocio, fecha_inicio, fecha_fin)
+    tipo_fecha   = request.args.get("tipo_fecha", "fecha_recibo")
+    if tipo_fecha not in _TIPOS_FECHA_HISTORIAL:
+        tipo_fecha = "fecha_recibo"
+    wb = exportar_historial_service(id_negocio, fecha_inicio, fecha_fin, tipo_fecha=tipo_fecha)
     return send_excel(wb, "historial_ventas")
 
 @ventas_bp.route("/ventas/<int:id_venta>/historial")

@@ -4,12 +4,20 @@
 
 <h1><i data-lucide="bar-chart-2" width="24" height="24"></i> Estadísticas</h1>
 
-{# ── Selector de modo ── #}
+{# ── Selector de modo + tipo de fecha ── #}
 <div class="modo-selector">
     <button class="modo-btn" data-modo="dia"><i data-lucide="calendar" width="14" height="14"></i> Día</button>
     <button class="modo-btn" data-modo="semana"><i data-lucide="calendar-days" width="14" height="14"></i> Semana</button>
     <button class="modo-btn active" data-modo="mes"><i data-lucide="calendar" width="14" height="14"></i> Mes</button>
     <button class="modo-btn" data-modo="personalizado"><i data-lucide="search" width="14" height="14"></i> Personalizado</button>
+
+    <div class="filtro-item filtro-item--max200" style="margin-left:auto;">
+        <label style="font-size:0.75rem;color:var(--text-muted,#64748b);margin-bottom:3px;display:block;">Filtrar por</label>
+        <select id="tipo-fecha" style="font-size:0.8rem;">
+            <option value="fecha_recibo">Fecha de recibo</option>
+            <option value="fecha_entrega">Fecha de entrega</option>
+        </select>
+    </div>
 </div>
 
 {# ── Paneles de filtro por modo ── #}

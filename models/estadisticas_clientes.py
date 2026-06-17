@@ -1,9 +1,10 @@
-from datetime import date
 from db import get_db
+from .estadisticas_ventas import _col_v
 
 
-def obtener_top_clientes(inicio, fin, id_negocio, limit=5):
-    sql = """
+def obtener_top_clientes(inicio, fin, id_negocio, limit=5, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT
             c.id_cliente,
             c.nombre,
@@ -12,8 +13,8 @@ def obtener_top_clientes(inicio, fin, id_negocio, limit=5):
             SUM(v.total)       AS total_gastado
         FROM venta v
         JOIN cliente c ON c.id_cliente = v.id_cliente
-        WHERE v.fecha_recibo >= %s
-          AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
+        WHERE v.{col} >= %s
+          AND v.{col} <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -35,12 +36,13 @@ def obtener_top_clientes(inicio, fin, id_negocio, limit=5):
         ]
 
 
-def obtener_clientes_unicos(inicio, fin, id_negocio):
-    sql = """
+def obtener_clientes_unicos(inicio, fin, id_negocio, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT COUNT(DISTINCT id_cliente) AS total
         FROM venta
-        WHERE fecha_recibo >= %s
-          AND fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
+        WHERE {col} >= %s
+          AND {col} <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND eliminado = 0
           AND id_cliente IS NOT NULL
     """
@@ -54,19 +56,20 @@ def obtener_clientes_unicos(inicio, fin, id_negocio):
         return int(cursor.fetchone()["total"] or 0)
 
 
-def obtener_clientes_nuevos(inicio, fin, id_negocio):
-    sql = """
+def obtener_clientes_nuevos(inicio, fin, id_negocio, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT COUNT(DISTINCT v.id_cliente) AS total
         FROM venta v
-        WHERE v.fecha_recibo >= %s
-          AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
+        WHERE v.{col} >= %s
+          AND v.{col} <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
           AND v.id_cliente IS NOT NULL
           AND NOT EXISTS (
               SELECT 1 FROM venta v2
               WHERE v2.id_cliente  = v.id_cliente
                 AND v2.eliminado   = 0
-                AND v2.fecha_recibo < v.fecha_recibo
+                AND v2.fecha_recibo < v.{col}
           )
     """
     params = [inicio, fin]
@@ -79,8 +82,9 @@ def obtener_clientes_nuevos(inicio, fin, id_negocio):
         return int(cursor.fetchone()["total"] or 0)
 
 
-def obtener_tasa_retorno(inicio, fin, id_negocio):
-    sql = """
+def obtener_tasa_retorno(inicio, fin, id_negocio, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT
             COUNT(DISTINCT v.id_cliente) AS total,
             COUNT(DISTINCT CASE
@@ -92,8 +96,8 @@ def obtener_tasa_retorno(inicio, fin, id_negocio):
                 ) THEN v.id_cliente
             END) AS recurrentes
         FROM venta v
-        WHERE v.fecha_recibo >= %s
-          AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
+        WHERE v.{col} >= %s
+          AND v.{col} <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
           AND v.id_cliente IS NOT NULL
     """
@@ -111,14 +115,15 @@ def obtener_tasa_retorno(inicio, fin, id_negocio):
     return {"total": total, "recurrentes": recurrentes, "tasa": tasa}
 
 
-def obtener_gasto_promedio_cliente(inicio, fin, id_negocio):
-    sql = """
+def obtener_gasto_promedio_cliente(inicio, fin, id_negocio, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT
             COALESCE(SUM(v.total), 0)        AS total_ingresos,
             COUNT(DISTINCT v.id_cliente)      AS clientes_unicos
         FROM venta v
-        WHERE v.fecha_recibo >= %s
-          AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
+        WHERE v.{col} >= %s
+          AND v.{col} <  DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
           AND v.id_cliente IS NOT NULL
     """

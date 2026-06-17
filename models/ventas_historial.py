@@ -1,6 +1,8 @@
 from db import get_db
 from utils import registrar_historial as _registrar_historial
 
+_COLS_FECHA_HISTORIAL = frozenset({"fecha_recibo", "fecha_lista", "fecha_entrega"})
+
 
 def registrar_historial_venta(cursor, id_venta, accion, id_usuario, antes=None, despues=None):
     _registrar_historial(cursor, "venta_historial", "id_venta", id_venta, accion, id_usuario, antes, despues)
@@ -41,7 +43,9 @@ def contar_historial_ventas(
     q=None,
     id_venta=None,
     estado=None,
+    tipo_fecha="fecha_recibo",
 ):
+    col = tipo_fecha if tipo_fecha in _COLS_FECHA_HISTORIAL else "fecha_recibo"
     with get_db() as (_, cursor):
         sql = """
             SELECT COUNT(DISTINCT v.id_venta) AS total
@@ -56,10 +60,10 @@ def contar_historial_ventas(
             sql += " AND v.id_negocio = %s"
             params.append(id_negocio)
         if fecha_inicio:
-            sql += " AND DATE(v.fecha_recibo) >= %s"
+            sql += f" AND DATE(v.{col}) >= %s"
             params.append(fecha_inicio)
         if fecha_fin:
-            sql += " AND DATE(v.fecha_recibo) <= %s"
+            sql += f" AND DATE(v.{col}) <= %s"
             params.append(fecha_fin)
         if q:
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"
@@ -83,7 +87,9 @@ def obtener_historial_ventas(
     q=None,
     id_venta=None,
     estado=None,
+    tipo_fecha="fecha_recibo",
 ):
+    col = tipo_fecha if tipo_fecha in _COLS_FECHA_HISTORIAL else "fecha_recibo"
     with get_db() as (_, cursor):
         sql = """
             SELECT
@@ -119,10 +125,10 @@ def obtener_historial_ventas(
             sql += " AND v.id_negocio = %s"
             params.append(id_negocio)
         if fecha_inicio:
-            sql += " AND DATE(v.fecha_recibo) >= %s"
+            sql += f" AND DATE(v.{col}) >= %s"
             params.append(fecha_inicio)
         if fecha_fin:
-            sql += " AND DATE(v.fecha_recibo) <= %s"
+            sql += f" AND DATE(v.{col}) <= %s"
             params.append(fecha_fin)
         if q:
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"

@@ -169,18 +169,26 @@ def _ws_pagos(ws, ventas, pagos_map, filtro_txt):
     xl_col_widths(ws, [10, 16, 26, 16, 16, 14, 14, 18, 18])
 
 
-def exportar_historial_service(id_negocio, fecha_inicio, fecha_fin):
+def exportar_historial_service(id_negocio, fecha_inicio, fecha_fin, tipo_fecha="fecha_recibo"):
     """Construye y retorna el Workbook de Excel del historial de ventas."""
     ventas    = obtener_historial_ventas(id_negocio, fecha_inicio, fecha_fin,
-                                        limit=MAX_FILAS_EXPORTAR, offset=0)
+                                        limit=MAX_FILAS_EXPORTAR, offset=0,
+                                        tipo_fecha=tipo_fecha)
     ids_venta    = [v["id_venta"] for v in ventas]
     detalles_map = obtener_detalles_venta(ids_venta)
     pagos_map    = obtener_pagos_venta(ids_venta)
 
+    _ETIQUETAS_FECHA = {
+        "fecha_recibo":  "Fecha de recibo",
+        "fecha_lista":   "Fecha lista",
+        "fecha_entrega": "Fecha de entrega",
+    }
+    etiqueta_fecha = _ETIQUETAS_FECHA.get(tipo_fecha, "Fecha de recibo")
     filtro_txt = "  ".join(filter(None, [
-        f"Negocio ID: {id_negocio}" if id_negocio  else "",
-        f"Desde: {fecha_inicio}"    if fecha_inicio else "",
-        f"Hasta: {fecha_fin}"       if fecha_fin    else "",
+        f"Negocio ID: {id_negocio}"         if id_negocio  else "",
+        f"Filtro por: {etiqueta_fecha}",
+        f"Desde: {fecha_inicio}"            if fecha_inicio else "",
+        f"Hasta: {fecha_fin}"               if fecha_fin    else "",
     ])) or "Sin filtros — todos los registros"
 
     wb    = Workbook()

@@ -382,11 +382,16 @@ function setModo(modo, btn) {
     cargarDashboard();
 }
 
+function getTipoFecha() {
+    return document.getElementById("tipo-fecha")?.value || "fecha_recibo";
+}
+
 function getParams() {
     const neg = id => document.getElementById(id)?.value || "all";
+    const tipo_fecha = getTipoFecha();
     if (modoActual==="dia") {
         const f = document.getElementById("fecha-dia").value;
-        return {inicio:f, fin:f, id_negocio:neg("negocio-dia"), granularidad:"hora"};
+        return {inicio:f, fin:f, id_negocio:neg("negocio-dia"), granularidad:"hora", tipo_fecha};
     }
     if (modoActual==="semana") {
         const val = document.getElementById("fecha-semana").value;
@@ -396,17 +401,17 @@ function getParams() {
         d.setDate(d.getDate()-((d.getDay()||7)-1));
         const fin = new Date(d); fin.setDate(d.getDate()+6);
         const iso = dd => dd.toISOString().split("T")[0];
-        return {inicio:iso(d), fin:iso(fin), id_negocio:neg("negocio-semana"), granularidad:"dia"};
+        return {inicio:iso(d), fin:iso(fin), id_negocio:neg("negocio-semana"), granularidad:"dia", tipo_fecha};
     }
     if (modoActual==="mes") {
         const val = document.getElementById("fecha-mes").value;
         if (!val) return null;
         const [y,m] = val.split("-");
         const ultimo = new Date(parseInt(y),parseInt(m),0).getDate();
-        return {inicio:`${y}-${m}-01`, fin:`${y}-${m}-${String(ultimo).padStart(2,"0")}`, id_negocio:neg("negocio-mes"), granularidad:"semana"};
+        return {inicio:`${y}-${m}-01`, fin:`${y}-${m}-${String(ultimo).padStart(2,"0")}`, id_negocio:neg("negocio-mes"), granularidad:"semana", tipo_fecha};
     }
     if (modoActual==="personalizado") {
-        return {inicio:document.getElementById("fecha-inicio-custom").value, fin:document.getElementById("fecha-fin-custom").value, id_negocio:neg("negocio-custom"), granularidad:"semana"};
+        return {inicio:document.getElementById("fecha-inicio-custom").value, fin:document.getElementById("fecha-fin-custom").value, id_negocio:neg("negocio-custom"), granularidad:"semana", tipo_fecha};
     }
     return null;
 }
@@ -414,8 +419,15 @@ function getParams() {
 function actualizarTitulos() {
     const sufijos = {dia:"por hora", semana:"por día", mes:"por semana", personalizado:"por semana"};
     const s = sufijos[modoActual] || "por semana";
-    [["titulo-ingresos","Ingresos"],["titulo-gastos","Gastos"],["titulo-ventas","Número de ventas"],["titulo-unidades","Unidades recibidas"]]
-        .forEach(([id,base]) => {
+    const esEntrega = getTipoFecha() === "fecha_entrega";
+    const baseVentas   = esEntrega ? "Ventas entregadas"  : "Número de ventas";
+    const baseUnidades = esEntrega ? "Unidades entregadas" : "Unidades recibidas";
+    [
+        ["titulo-ingresos", "Ingresos"],
+        ["titulo-gastos",   "Gastos"],
+        ["titulo-ventas",   baseVentas],
+        ["titulo-unidades", baseUnidades],
+    ].forEach(([id,base]) => {
             const el = document.getElementById(id);
             if (!el) return;
             const badge = el.querySelector('.chart-total-badge');
@@ -450,7 +462,7 @@ async function cargarDashboard() {
     actualizarTitulos();
 
     try {
-        const url = `/api/estadisticas/dashboard?inicio=${p.inicio}&fin=${p.fin}&id_negocio=${p.id_negocio}&granularidad=${p.granularidad||"semana"}`;
+        const url = `/api/estadisticas/dashboard?inicio=${p.inicio}&fin=${p.fin}&id_negocio=${p.id_negocio}&granularidad=${p.granularidad||"semana"}&tipo_fecha=${p.tipo_fecha||"fecha_recibo"}`;
         const res = await fetch(url);
         if (!res.ok) { const j=await res.json().catch(()=>({})); mostrarError(j.error||`Error ${res.status}`); return; }
         const data = await res.json();
@@ -602,7 +614,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputs = [
         "fecha-dia", "fecha-semana", "fecha-mes",
         "fecha-inicio-custom", "fecha-fin-custom",
-        "negocio-dia", "negocio-semana", "negocio-mes", "negocio-custom"
+        "negocio-dia", "negocio-semana", "negocio-mes", "negocio-custom",
+        "tipo-fecha",
     ];
     inputs.forEach(id => {
         const el = document.getElementById(id);

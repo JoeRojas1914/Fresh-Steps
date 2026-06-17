@@ -2,6 +2,12 @@ from collections import defaultdict
 from datetime import date, timedelta
 from db import get_db
 
+_COLS_FECHA_VENTA = frozenset({"fecha_recibo", "fecha_entrega"})
+
+
+def _col_v(col: str) -> str:
+    return col if col in _COLS_FECHA_VENTA else "fecha_recibo"
+
 
 def generar_semanas_rango(inicio: date, fin: date):
     meses = [
@@ -42,14 +48,15 @@ def _label_dia(d: date) -> str:
     return f"{_DIAS_CORTOS[d.weekday()]} {d.day} {_MESES_CORTOS[d.month - 1]}"
 
 
-def contar_ventas_por_semana(inicio: date, fin: date, id_negocio: str):
+def contar_ventas_por_semana(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo"):
+    col = _col_v(col)
     semanas = generar_semanas_rango(inicio, fin)
 
-    sql = """
-        SELECT YEARWEEK(fecha_recibo, 1) AS yw, COUNT(*) AS total
+    sql = f"""
+        SELECT YEARWEEK({col}, 1) AS yw, COUNT(*) AS total
         FROM venta
-        WHERE fecha_recibo >= %s
-          AND fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
+        WHERE {col} >= %s
+          AND {col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND eliminado = 0
     """
     params = [inicio, fin]
@@ -71,19 +78,20 @@ def contar_ventas_por_semana(inicio: date, fin: date, id_negocio: str):
     ]
 
 
-def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str):
+def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo"):
+    col = _col_v(col)
     semanas = generar_semanas_rango(inicio, fin)
     totals: defaultdict = defaultdict(int)
 
     with get_db() as (_, cursor):
         if id_negocio in ("1", "all"):
-            cursor.execute("""
-                SELECT YEARWEEK(v.fecha_recibo, 1) AS yw, COUNT(a.id_articulo) AS u
+            cursor.execute(f"""
+                SELECT YEARWEEK(v.{col}, 1) AS yw, COUNT(a.id_articulo) AS u
                 FROM venta v
                 JOIN articulo a          ON a.id_venta     = v.id_venta
                 JOIN articulo_calzado ac ON ac.id_articulo = a.id_articulo
-                WHERE v.fecha_recibo >= %s
-                  AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
+                WHERE v.{col} >= %s
+                  AND v.{col} <  DATE_ADD(%s, INTERVAL 1 DAY)
                   AND v.id_negocio = 1
                   AND v.eliminado  = 0
                 GROUP BY yw
@@ -92,13 +100,13 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str):
                 totals[r["yw"]] += int(r["u"] or 0)
 
         if id_negocio in ("2", "all"):
-            cursor.execute("""
-                SELECT YEARWEEK(v.fecha_recibo, 1) AS yw, COALESCE(SUM(ac2.cantidad), 0) AS u
+            cursor.execute(f"""
+                SELECT YEARWEEK(v.{col}, 1) AS yw, COALESCE(SUM(ac2.cantidad), 0) AS u
                 FROM venta v
                 JOIN articulo a              ON a.id_venta      = v.id_venta
                 JOIN articulo_confeccion ac2 ON ac2.id_articulo = a.id_articulo
-                WHERE v.fecha_recibo >= %s
-                  AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
+                WHERE v.{col} >= %s
+                  AND v.{col} <  DATE_ADD(%s, INTERVAL 1 DAY)
                   AND v.id_negocio = 2
                   AND v.eliminado  = 0
                 GROUP BY yw
@@ -107,13 +115,13 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str):
                 totals[r["yw"]] += int(r["u"] or 0)
 
         if id_negocio in ("3", "all"):
-            cursor.execute("""
-                SELECT YEARWEEK(v.fecha_recibo, 1) AS yw, COALESCE(SUM(am.cantidad), 0) AS u
+            cursor.execute(f"""
+                SELECT YEARWEEK(v.{col}, 1) AS yw, COALESCE(SUM(am.cantidad), 0) AS u
                 FROM venta v
                 JOIN articulo a          ON a.id_venta     = v.id_venta
                 JOIN articulo_maquila am ON am.id_articulo = a.id_articulo
-                WHERE v.fecha_recibo >= %s
-                  AND v.fecha_recibo <  DATE_ADD(%s, INTERVAL 1 DAY)
+                WHERE v.{col} >= %s
+                  AND v.{col} <  DATE_ADD(%s, INTERVAL 1 DAY)
                   AND v.id_negocio = 3
                   AND v.eliminado  = 0
                 GROUP BY yw
@@ -181,11 +189,12 @@ def obtener_ingresos_por_semana(inicio, fin, id_negocio):
     ]
 
 
-def contar_ventas_por_hora(inicio: date, fin: date, id_negocio: str):
-    sql = """
-        SELECT HOUR(fecha_recibo) AS hora, COUNT(*) AS total
+def contar_ventas_por_hora(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
+        SELECT HOUR({col}) AS hora, COUNT(*) AS total
         FROM venta
-        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+        WHERE DATE({col}) BETWEEN %s AND %s
           AND eliminado = 0
     """
     params = [inicio, fin]
@@ -220,12 +229,13 @@ def obtener_ingresos_por_hora(inicio: date, fin: date, id_negocio: str):
     return [{"label": f"{h}:00", "total": rows.get(h, 0.0)} for h in range(7, 22)]
 
 
-def obtener_unidades_por_hora(inicio: date, fin: date, id_negocio: str):
-    sql = """
-        SELECT HOUR(v.fecha_recibo) AS hora, COUNT(a.id_articulo) AS total
+def obtener_unidades_por_hora(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
+        SELECT HOUR(v.{col}) AS hora, COUNT(a.id_articulo) AS total
         FROM venta v
         JOIN articulo a ON a.id_venta = v.id_venta
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE DATE(v.{col}) BETWEEN %s AND %s
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -240,11 +250,12 @@ def obtener_unidades_por_hora(inicio: date, fin: date, id_negocio: str):
     return [{"label": f"{h}:00", "total": rows.get(h, 0)} for h in range(7, 22)]
 
 
-def contar_ventas_por_dia_rango(inicio: date, fin: date, id_negocio: str):
-    sql = """
-        SELECT DATE(fecha_recibo) AS dia, COUNT(*) AS total
+def contar_ventas_por_dia_rango(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
+        SELECT DATE({col}) AS dia, COUNT(*) AS total
         FROM venta
-        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+        WHERE DATE({col}) BETWEEN %s AND %s
           AND eliminado = 0
     """
     params = [inicio, fin]
@@ -291,12 +302,13 @@ def obtener_ingresos_por_dia_rango(inicio: date, fin: date, id_negocio: str):
     return resultado
 
 
-def obtener_unidades_por_dia_rango(inicio: date, fin: date, id_negocio: str):
-    sql = """
-        SELECT DATE(v.fecha_recibo) AS dia, COUNT(a.id_articulo) AS total
+def obtener_unidades_por_dia_rango(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
+        SELECT DATE(v.{col}) AS dia, COUNT(a.id_articulo) AS total
         FROM venta v
         JOIN articulo a ON a.id_venta = v.id_venta
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE DATE(v.{col}) BETWEEN %s AND %s
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -317,14 +329,15 @@ def obtener_unidades_por_dia_rango(inicio: date, fin: date, id_negocio: str):
     return resultado
 
 
-def obtener_uso_servicios(inicio, fin, id_negocio):
-    sql = """
+def obtener_uso_servicios(inicio, fin, id_negocio, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT s.nombre, COUNT(*) total
         FROM articulo_servicio aps
         JOIN servicio s ON s.id_servicio = aps.id_servicio
         JOIN articulo a ON a.id_articulo = aps.id_articulo
         JOIN venta v ON v.id_venta = a.id_venta
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE DATE(v.{col}) BETWEEN %s AND %s
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -338,8 +351,9 @@ def obtener_uso_servicios(inicio, fin, id_negocio):
         return cursor.fetchall()
 
 
-def obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio):
-    sql = """
+def obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT
             CASE WHEN pv_pre.id_venta IS NOT NULL THEN 'Con prepago' ELSE 'Sin prepago' END AS tipo,
             COUNT(*) AS total
@@ -349,7 +363,7 @@ def obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio):
             FROM pago_venta
             WHERE tipo_pago_venta = 'prepago'
         ) pv_pre ON pv_pre.id_venta = v.id_venta
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE DATE(v.{col}) BETWEEN %s AND %s
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -363,14 +377,15 @@ def obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio):
         return cursor.fetchall()
 
 
-def obtener_ventas_por_dia(inicio, fin, id_negocio):
-    sql = """
+def obtener_ventas_por_dia(inicio, fin, id_negocio, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT
-            WEEKDAY(fecha_recibo) AS dia,
+            WEEKDAY({col}) AS dia,
             COUNT(*) AS total
         FROM venta
-        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
-          AND WEEKDAY(fecha_recibo) BETWEEN 0 AND 5
+        WHERE DATE({col}) BETWEEN %s AND %s
+          AND WEEKDAY({col}) BETWEEN 0 AND 5
           AND eliminado = 0
     """
     params = [inicio, fin]
@@ -389,12 +404,13 @@ def obtener_ventas_por_dia(inicio, fin, id_negocio):
     return dias
 
 
-def obtener_ticket_promedio(inicio, fin, id_negocio):
-    sql = """
+def obtener_ticket_promedio(inicio, fin, id_negocio, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT COALESCE(AVG(total), 0) AS promedio,
                COUNT(*)               AS num_ventas
         FROM venta
-        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+        WHERE DATE({col}) BETWEEN %s AND %s
           AND eliminado = 0
     """
     params = [inicio, fin]
@@ -408,8 +424,9 @@ def obtener_ticket_promedio(inicio, fin, id_negocio):
         return float(row["promedio"] or 0), int(row["num_ventas"] or 0)
 
 
-def obtener_saldo_por_cobrar(inicio, fin, id_negocio):
-    sql = """
+def obtener_saldo_por_cobrar(inicio, fin, id_negocio, col: str = "fecha_recibo"):
+    col = _col_v(col)
+    sql = f"""
         SELECT COALESCE(
             SUM(v.total - COALESCE(p.pagado, 0)), 0
         ) AS saldo
@@ -419,7 +436,7 @@ def obtener_saldo_por_cobrar(inicio, fin, id_negocio):
             FROM pago_venta
             GROUP BY id_venta
         ) p ON p.id_venta = v.id_venta
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE DATE(v.{col}) BETWEEN %s AND %s
           AND v.eliminado = 0
           AND (v.total - COALESCE(p.pagado, 0)) > 0
     """
@@ -456,13 +473,14 @@ def obtener_tiempo_promedio_entrega(inicio, fin, id_negocio):
         }
 
 
-def obtener_ingresos_por_negocio(inicio, fin):
+def obtener_ingresos_por_negocio(inicio, fin, col: str = "fecha_recibo"):
+    col = _col_v(col)
     with get_db() as (_, cursor):
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT n.nombre, COALESCE(SUM(v.total), 0) AS total
             FROM venta v
             JOIN negocio n ON n.id_negocio = v.id_negocio
-            WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+            WHERE DATE(v.{col}) BETWEEN %s AND %s
               AND v.eliminado = 0
             GROUP BY v.id_negocio
             ORDER BY total DESC

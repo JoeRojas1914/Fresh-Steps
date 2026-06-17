@@ -40,11 +40,20 @@
                 </select>
             </div>
  
+            <div class="filtro-item filtro-item--max160">
+                <label>Tipo de fecha</label>
+                <select name="tipo_fecha">
+                    <option value="fecha_recibo"  {% if tipo_fecha == 'fecha_recibo'  %}selected{% endif %}>Fecha de recibo</option>
+                    <option value="fecha_lista"   {% if tipo_fecha == 'fecha_lista'   %}selected{% endif %}>Fecha lista</option>
+                    <option value="fecha_entrega" {% if tipo_fecha == 'fecha_entrega' %}selected{% endif %}>Fecha de entrega</option>
+                </select>
+            </div>
+
             <div class="filtro-item">
                 <label>Desde</label>
                 <input type="date" name="fecha_inicio" value="{{ fecha_inicio or '' }}">
             </div>
- 
+
             <div class="filtro-item">
                 <label>Hasta</label>
                 <input type="date" name="fecha_fin" value="{{ fecha_fin or '' }}">
@@ -78,13 +87,14 @@
 
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
-                {% if id_negocio or fecha_inicio or fecha_fin or q or id_venta or estado %}
+                {% if id_negocio or fecha_inicio or fecha_fin or q or id_venta or estado or (tipo_fecha and tipo_fecha != 'fecha_recibo') %}
                 <a href="/ventas/historial" class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
                 {% endif %}
                 <a href="{{ url_for('ventas.exportar_historial_excel',
                             id_negocio=id_negocio or '',
                             fecha_inicio=fecha_inicio or '',
                             fecha_fin=fecha_fin or '',
+                            tipo_fecha=tipo_fecha or '',
                             q=q or '',
                             id_venta=id_venta or '') }}"
                    class="btn btn--success btn--sm no-underline">
@@ -226,6 +236,7 @@
         "id_negocio":   id_negocio,
         "fecha_inicio": fecha_inicio,
         "fecha_fin":    fecha_fin,
+        "tipo_fecha":   tipo_fecha,
         "q":            q,
         "estado":       estado
     }
