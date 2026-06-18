@@ -14,7 +14,8 @@
         <div class="filtro-row">
             <div class="filtro-item filtro-item--max280">
                 <label>Buscar cliente</label>
-                <input type="text" id="buscador-cliente"
+                <input type="text" id="buscador-cliente" name="q"
+                       value="{{ q or '' }}"
                        placeholder="Nombre o apellido...">
             </div>
             <div class="filtro-item filtro-item--max220 ml-12">
@@ -31,7 +32,8 @@
             </div>
             <div class="filtro-item filtro-item--max110 ml-12">
                 <label>N° Ticket</label>
-                <input type="number" id="buscador-ticket" min="1"
+                <input type="number" id="buscador-ticket" name="id_venta" min="1"
+                       value="{{ id_venta or '' }}"
                        placeholder="# Recibo...">
             </div>
         </div>
@@ -170,7 +172,7 @@
     {% endif %}
 
     {{ pagination(pagina, total_paginas, "ventas.ventas_pendientes",
-        {"id_negocio": id_negocio, "id_venta": id_venta}) }}
+        {"id_negocio": id_negocio, "id_venta": id_venta, "q": q}) }}
 
 
 {% call(section) modal("modalProcesado", "Marcar como lista", "sm") %}

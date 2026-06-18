@@ -132,11 +132,13 @@ def venta_ticket(id_venta):
 
 @ventas_bp.route("/ventas/listas")
 def ventas_listas():
-    id_negocio = request.args.get("id_negocio", type=int)
-    id_venta   = request.args.get("id_venta", type=int)
-    pagina     = request.args.get("pagina", 1, type=int)
+    id_negocio    = request.args.get("id_negocio", type=int)
+    id_venta_raw  = request.args.get("id_venta", "").strip()
+    id_venta      = id_venta_raw if id_venta_raw.isdigit() else None
+    pagina        = request.args.get("pagina", 1, type=int)
+    q             = request.args.get("q", "").strip() or None
 
-    data = listar_ventas_listas_service(id_negocio, pagina, id_venta)
+    data = listar_ventas_listas_service(id_negocio, pagina, id_venta, q=q)
 
     return render_template("ventas/ventas_listas.html", **data)
 
@@ -144,11 +146,13 @@ def ventas_listas():
 @ventas_bp.route("/ventas/pendientes")
 def ventas_pendientes():
     try:
-        id_negocio = request.args.get("id_negocio", type=int)
-        id_venta   = request.args.get("id_venta", type=int)
-        pagina     = request.args.get("pagina", 1, type=int)
+        id_negocio    = request.args.get("id_negocio", type=int)
+        id_venta_raw  = request.args.get("id_venta", "").strip()
+        id_venta      = id_venta_raw if id_venta_raw.isdigit() else None
+        pagina        = request.args.get("pagina", 1, type=int)
+        q             = request.args.get("q", "").strip() or None
 
-        data = listar_entregas_pendientes_service(id_negocio, pagina, id_venta)
+        data = listar_entregas_pendientes_service(id_negocio, pagina, id_venta, q=q)
 
         return render_template("ventas/ventas_pendientes.html", **data)
 

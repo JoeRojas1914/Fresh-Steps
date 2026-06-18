@@ -31,16 +31,17 @@ def _paginar_ventas(
     contar_fn,
     obtener_fn,
     id_negocio: int | None,
-    id_venta: int | None,
+    id_venta: str | None,
     pagina: int,
+    q: str | None = None,
 ) -> tuple[list, int, int]:
     offset          = (pagina - 1) * POR_PAGINA_VENTAS_ACTIVAS
-    total_registros = contar_fn(id_negocio, id_venta)
+    total_registros = contar_fn(id_negocio, id_venta, q)
     total_paginas   = max(
         1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS
     )
     ventas = obtener_fn(
-        id_negocio, id_venta=id_venta,
+        id_negocio, id_venta=id_venta, q=q,
         limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset,
     )
     return ventas, total_registros, total_paginas
@@ -96,11 +97,12 @@ def _enriquecer_ventas(
 def listar_ventas_listas_service(
     id_negocio: int | None = None,
     pagina: int = 1,
-    id_venta: int | None = None,
+    id_venta: str | None = None,
+    q: str | None = None,
 ) -> dict:
     ventas, total_registros, total_paginas = _paginar_ventas(
         contar_entregas_listas, obtener_ventas_listas,
-        id_negocio, id_venta, pagina,
+        id_negocio, id_venta, pagina, q=q,
     )
     _enriquecer_ventas(ventas, con_pagos=True)
     return {
@@ -109,6 +111,7 @@ def listar_ventas_listas_service(
         "hoy":             date.today(),
         "id_negocio":      id_negocio,
         "id_venta":        id_venta,
+        "q":               q,
         "pagina":          pagina,
         "total_paginas":   total_paginas,
         "total_registros": total_registros,
@@ -118,11 +121,12 @@ def listar_ventas_listas_service(
 def listar_entregas_pendientes_service(
     id_negocio: int | None = None,
     pagina: int = 1,
-    id_venta: int | None = None,
+    id_venta: str | None = None,
+    q: str | None = None,
 ) -> dict:
     ventas, total_registros, total_paginas = _paginar_ventas(
         contar_entregas_pendientes, obtener_entregas_pendientes,
-        id_negocio, id_venta, pagina,
+        id_negocio, id_venta, pagina, q=q,
     )
     _enriquecer_ventas(ventas)
     return {
@@ -131,6 +135,7 @@ def listar_entregas_pendientes_service(
         "hoy":             date.today(),
         "id_negocio":      id_negocio,
         "id_venta":        id_venta,
+        "q":               q,
         "pagina":          pagina,
         "total_paginas":   total_paginas,
         "total_registros": total_registros,
