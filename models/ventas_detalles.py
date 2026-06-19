@@ -178,7 +178,7 @@ def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=No
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
             sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
             params.extend([like, like, like])
-        sql += " GROUP BY v.id_venta ORDER BY v.fecha_estimada ASC"
+        sql += " GROUP BY v.id_venta ORDER BY v.fecha_estimada ASC, v.id_venta ASC"
         if limit is not None:
             sql += " LIMIT %s OFFSET %s"
             params.extend([limit, offset])
