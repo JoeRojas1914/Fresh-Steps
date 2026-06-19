@@ -1,4 +1,11 @@
-html, body {
+html {
+  width: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  background: #eaf5ff;
+}
+
+body {
   width: 100%;
   margin: 0;
   overflow-x: hidden;
@@ -31,9 +38,6 @@ hr {
   box-sizing: border-box;
 }
 
-@media (max-width: 768px) {
-  .page-content { padding: 20px 16px; }
-}
 
 
 

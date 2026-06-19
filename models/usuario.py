@@ -25,7 +25,7 @@ def obtener_usuarios(q=None, rol=None, activo=None):
             sql += " AND activo = %s"
             params.append(activo)
 
-        sql += " ORDER BY creado_en DESC"
+        sql += " ORDER BY CASE WHEN rol = 'admin' THEN 0 ELSE 1 END, creado_en DESC"
         cursor.execute(sql, params)
         return cursor.fetchall()
 
