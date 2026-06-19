@@ -48,7 +48,7 @@ from routes.usuarios_routes import usuarios_bp
 from routes.ventas_routes import ventas_bp
 from middleware.auth_middleware import init_auth_middleware
 from models.ventas import contar_entregas_resumen
-from models.estadisticas_ventas import contar_ventas_por_dia_rango, obtener_total_ingresos
+from models.estadisticas_ventas import contar_ventas_por_dia_rango, obtener_total_ingresos, contar_unidades_hoy
 from models.estadisticas_gastos import obtener_total_gastos
 
 
@@ -63,7 +63,7 @@ app.config.update({
     "SESSION_COOKIE_HTTPONLY": True,
     "SESSION_COOKIE_SAMESITE": "Lax",
     "SESSION_COOKIE_SECURE": os.getenv("FLASK_ENV") != "development",
-    "MAX_CONTENT_LENGTH": 10 * 1024 * 1024,  # 10 MB
+    "MAX_CONTENT_LENGTH": 10 * 1024 * 1024, 
 })
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -101,7 +101,7 @@ init_auth_middleware(app)
 @app.after_request
 def add_cache_headers(response):
     if request.path.startswith("/static/"):
-        response.cache_control.max_age = 604800  # 7 días
+        response.cache_control.max_age = 604800 
         response.cache_control.public = True
     return response
 
@@ -142,10 +142,13 @@ def index():
     lunes         = hoy_dt - timedelta(days=hoy_dt.weekday())
     sabado        = lunes + timedelta(days=5)
     ventas_semana = contar_ventas_por_dia_rango(lunes, sabado, "all")
-    idx_hoy       = min(hoy_dt.weekday(), 5)          # domingo (6) cae en sábado
+    idx_hoy       = min(hoy_dt.weekday(), 5)       
     ventas_hoy    = ventas_semana[idx_hoy]["total"] if ventas_semana else 0
     chart_labels  = [x["label"] for x in ventas_semana]
     chart_data    = [x["total"]  for x in ventas_semana]
+
+    unidades_recibidas_hoy  = contar_unidades_hoy(hoy_dt, "fecha_recibo")
+    unidades_entregadas_hoy = contar_unidades_hoy(hoy_dt, "fecha_entrega")
 
     ingresos_hoy = None
     kpis_mes     = None
@@ -158,15 +161,17 @@ def index():
 
     return render_template(
         "index.html",
-        total_entregas   = total_entregas,
-        total_pendientes = total_pendientes,
-        nombre_usuario   = session.get("nombre") or session.get("usuario", "").capitalize(),
-        fecha_bonita     = fecha_bonita,
-        ventas_hoy       = ventas_hoy,
-        ingresos_hoy     = ingresos_hoy,
-        kpis_mes         = kpis_mes,
-        chart_labels     = chart_labels,
-        chart_data       = chart_data,
+        total_entregas          = total_entregas,
+        total_pendientes        = total_pendientes,
+        nombre_usuario          = session.get("nombre") or session.get("usuario", "").capitalize(),
+        fecha_bonita            = fecha_bonita,
+        ventas_hoy              = ventas_hoy,
+        ingresos_hoy            = ingresos_hoy,
+        kpis_mes                = kpis_mes,
+        chart_labels            = chart_labels,
+        chart_data              = chart_data,
+        unidades_recibidas_hoy  = unidades_recibidas_hoy,
+        unidades_entregadas_hoy = unidades_entregadas_hoy,
     )
 
 

@@ -633,3 +633,16 @@ def obtener_hora_pico_entrega(inicio, fin, id_negocio):
         cursor.execute(sql, params)
         rows = {r["hora"]: r["total"] for r in cursor.fetchall()}
     return [{"hora": f"{h}:00", "total": rows.get(h, 0)} for h in range(7, 22)]
+
+
+def contar_unidades_hoy(hoy: date, col: str = "fecha_recibo") -> int:
+    col = _col_v(col)
+    with get_db() as (_, cursor):
+        cursor.execute(f"""
+            SELECT COUNT(a.id_articulo) AS total
+            FROM venta v
+            JOIN articulo a ON a.id_venta = v.id_venta
+            WHERE DATE(v.{col}) = %s
+              AND v.eliminado = 0
+        """, (hoy,))
+        return int(cursor.fetchone()["total"] or 0)

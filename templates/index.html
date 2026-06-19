@@ -55,6 +55,14 @@
             <span class="kpi-hoy-num">${{ "%.2f"|format(ingresos_hoy) }}</span>
         </div>
         {% endif %}
+        <div class="kpi-hoy-card naranja">
+            <span class="kpi-hoy-label">Unidades recibidas</span>
+            <span class="kpi-hoy-num">{{ unidades_recibidas_hoy }}</span>
+        </div>
+        <div class="kpi-hoy-card morado">
+            <span class="kpi-hoy-label">Unidades entregadas</span>
+            <span class="kpi-hoy-num">{{ unidades_entregadas_hoy }}</span>
+        </div>
     </div>
     <div class="hoy-chart">
         <span class="hoy-chart-title">Ventas — esta semana</span>
