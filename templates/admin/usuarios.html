@@ -6,16 +6,10 @@
 {% from "components/modal.html"      import modal %}
 {% from "components/pagination.html" import pagination %}
 
-<h1><i data-lucide="user" width="24" height="24"></i> Usuarios</h1>
+<h1><i data-lucide="user" width="24" height="24"></i> Usuarios <span class="page-count">{{ total_usuarios }} usuarios</span></h1>
+<p class="page-sub">Administración de cuentas y accesos</p>
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
-
-<div class="monthly-cards mb-20">
-    <div class="monthly-card small azul">
-        <h4><i data-lucide="user" width="14" height="14"></i> Total usuarios</h4>
-        <p class="text-primary">{{ total_usuarios }}</p>
-    </div>
-</div>
 
 {# ── Filtros ── #}
 <div class="filtro-box">

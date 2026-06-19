@@ -1,6 +1,6 @@
 .home-header {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     margin-bottom: 28px;
     flex-wrap: wrap;
@@ -8,29 +8,34 @@
 }
 
 .home-greeting h1 {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 800;
     color: #0b3c5d;
     margin: 0;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.8px;
+    line-height: 1.1;
+}
+
+.home-greeting h1 strong {
+    color: #1e7fd6;
 }
 
 .home-greeting p {
-    font-size: 13px;
-    color: #64748b;
-    margin-top: 4px;
+    font-size: 14px;
+    color: #94a3b8;
+    margin-top: 6px;
+    font-weight: 500;
 }
 
 .home-fecha {
     font-size: 12px;
-    color: #64748b;
-    background: rgba(255,255,255,0.85);
-    border: 1px solid #dde8f5;
-    padding: 7px 16px;
-    border-radius: 999px;
+    font-weight: 600;
+    color: #1e7fd6;
+    background: #dbeafe;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
     white-space: nowrap;
-    backdrop-filter: blur(4px);
-    font-weight: 500;
 }
 
 .home-section-label {
@@ -43,6 +48,7 @@
     margin-top: 28px;
 }
 
+/* ── Acciones rápidas ── */
 .acciones-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -51,32 +57,30 @@
 
 .accion-card {
     border-radius: 16px;
-    border: 1.5px solid #e8eef5;
-    border-left-width: 4px;
-    padding: 20px 18px;
+    border: none;
+    padding: 22px 20px;
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     transition: transform .2s ease, box-shadow .2s ease;
 }
 
-.accion-card.nueva-venta {
-    border-left-color: #2fa4ff;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
-}
-.accion-card.pendientes {
-    border-left-color: #f59e0b;
-    background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%);
-}
+.accion-card.nueva-venta,
+.accion-card.pendientes,
 .accion-card.procesadas {
-    border-left-color: #22c55e;
-    background: linear-gradient(135deg, #ffffff 0%, #f0fdf5 100%);
+    background: #ffffff;
+    border: 1.5px solid #e8eef5;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05);
 }
 
-.accion-card.nueva-venta:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(47,164,255,.18); }
-.accion-card.pendientes:hover  { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(245,158,11,.18); }
-.accion-card.procesadas:hover  { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(34,197,94,.18); }
+.accion-card.nueva-venta:hover,
+.accion-card.pendientes:hover,
+.accion-card.procesadas:hover {
+    transform: translateY(-3px);
+    border-color: #1e7fd6;
+    box-shadow: 0 8px 24px rgba(30,127,214,.16);
+}
 
 .accion-icon {
     width: 48px;
@@ -86,16 +90,22 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    background: #dbeafe;
+    color: #1e7fd6;
 }
 
-.accion-card.nueva-venta .accion-icon { background: #dbeafe; color: #2563eb; }
-.accion-card.pendientes  .accion-icon { background: #fef3c7; color: #d97706; }
-.accion-card.procesadas  .accion-icon { background: #dcfce7; color: #16a34a; }
+.accion-card.nueva-venta .accion-icon,
+.accion-card.pendientes  .accion-icon,
+.accion-card.procesadas  .accion-icon {
+    background: #dbeafe;
+    color: #1e7fd6;
+}
 
 .accion-label { font-size: 14px; font-weight: 700; color: #0b3c5d; }
 .accion-sub   { font-size: 12px; color: #94a3b8; margin-top: 3px; }
-.accion-num   { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 2px; }
+.accion-num   { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 2px; color: #1e7fd6 !important; }
 
+/* ── Admin grid ── */
 .admin-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -116,16 +126,10 @@
 }
 
 .admin-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.09);
+    transform: translateY(-2px);
+    border-color: #1e7fd6;
+    box-shadow: 0 6px 18px rgba(30,127,214,.16);
 }
-
-.admin-card.clientes:hover  { border-color: #3b82f6; box-shadow: 0 8px 20px rgba(59,130,246,.14); }
-.admin-card.servicios:hover { border-color: #7c3aed; box-shadow: 0 8px 20px rgba(124,58,237,.14); }
-.admin-card.gastos:hover    { border-color: #ef4444; box-shadow: 0 8px 20px rgba(239,68,68,.14); }
-.admin-card.usuarios:hover  { border-color: #4f46e5; box-shadow: 0 8px 20px rgba(79,70,229,.14); }
-.admin-card.historial:hover { border-color: #d97706; box-shadow: 0 8px 20px rgba(217,119,6,.14); }
-.admin-card.estadisticas:hover { border-color: #16a34a; box-shadow: 0 8px 20px rgba(22,163,74,.14); }
 
 .admin-icon {
     width: 40px;
@@ -136,20 +140,25 @@
     justify-content: center;
     flex-shrink: 0;
     transition: transform .18s ease;
+    background: #dbeafe;
+    color: #1e7fd6;
+}
+
+.admin-card.clientes  .admin-icon,
+.admin-card.servicios .admin-icon,
+.admin-card.gastos    .admin-icon,
+.admin-card.usuarios  .admin-icon,
+.admin-card.historial .admin-icon,
+.admin-card.estadisticas .admin-icon {
+    background: #dbeafe;
+    color: #1e7fd6;
 }
 
 .admin-card:hover .admin-icon { transform: scale(1.08); }
 
-.admin-card.clientes  .admin-icon { background: #dbeafe; color: #2563eb; }
-.admin-card.servicios .admin-icon { background: #ede9fe; color: #7c3aed; }
-.admin-card.gastos    .admin-icon { background: #fee2e2; color: #dc2626; }
-.admin-card.usuarios  .admin-icon { background: #e0e7ff; color: #4f46e5; }
-.admin-card.historial .admin-icon { background: #fef3c7; color: #d97706; }
-.admin-card.estadisticas .admin-icon { background: #dcfce7; color: #16a34a; }
-
 .admin-label { font-size: 13px; font-weight: 600; color: #0b3c5d; }
 
-
+/* ── KPIs del día ── */
 .hoy-grid {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -165,20 +174,16 @@
 }
 
 .kpi-hoy-card {
-    border-radius: 16px;
+    border-radius: 14px;
     background: #ffffff;
-    border: 1.5px solid #eaeef5;
-    border-top-width: 4px;
+    border: 1px solid #e8eef5;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 6px;
     min-width: 170px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
-
-.kpi-hoy-card.azul  { border-top-color: #2fa4ff; }
-.kpi-hoy-card.verde { border-top-color: #22c55e; }
 
 .hoy-kpis--solo .kpi-hoy-card {
     flex: 1;
@@ -202,14 +207,15 @@
     display: block;
 }
 
-.kpi-hoy-card.azul  .kpi-hoy-num { color: #2fa4ff; }
-.kpi-hoy-card.verde .kpi-hoy-num { color: #16a34a; }
+.kpi-hoy-card.azul  .kpi-hoy-num { color: #1e7fd6; }
+.kpi-hoy-card.verde .kpi-hoy-num { color: #15803d; }
 
+/* ── Mini chart ── */
 .hoy-chart {
     background: #f0f8ff;
-    border: 1.5px solid #dceeff;
-    border-radius: 16px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid #dceeff;
+    border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     padding: 18px 20px;
     display: flex;
     flex-direction: column;
@@ -230,6 +236,7 @@
     height: 110px;
 }
 
+/* ── Resumen del mes ── */
 .mes-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -238,22 +245,30 @@
 }
 
 .mes-card {
-    border-radius: 16px;
+    border-radius: 14px;
     background: #ffffff;
-    border: 1.5px solid #eaeef5;
-    border-top-width: 4px;
-    padding: 20px;
+    border: 1px solid #e8eef5;
+    padding: 18px 20px;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
-.mes-card.ingresos { border-top-color: #16a34a; }
-.mes-card.gastos   { border-top-color: #dc2626; }
-.mes-card.ganancia { border-top-color: #2563eb; }
+.mes-icon {
+    display: flex;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
 
-.mes-icon { display: none; }
+.mes-card.ingresos .mes-icon { background: #dcfce7; color: #15803d; }
+.mes-card.gastos   .mes-icon { background: #fee2e2; color: #dc2626; }
+.mes-card.ganancia .mes-icon { background: #dbeafe; color: #1e7fd6; }
 
 .mes-label {
     font-size: 11px;
@@ -265,16 +280,16 @@
 }
 
 .mes-num {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     letter-spacing: -0.5px;
     display: block;
+    margin-top: 2px;
 }
 
-.mes-card.ingresos .mes-num { color: #16a34a; }
+.mes-card.ingresos .mes-num { color: #15803d; }
 .mes-card.gastos   .mes-num { color: #dc2626; }
-.mes-card.ganancia .mes-num { color: #2563eb; }
-
+.mes-card.ganancia .mes-num { color: #1e7fd6; }
 
 @media (max-width: 768px) {
     .acciones-grid { grid-template-columns: 1fr; }

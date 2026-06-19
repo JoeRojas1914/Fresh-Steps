@@ -4,72 +4,47 @@
 .badge-atrasado,
 .badge-estado {
   display: inline-block;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
+  padding: 3px 9px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 700;
 }
 
-.status-completado {
-  background-color: #dcfce7;
-  color: #166534;
-  border: 1px solid #22c55e;
-}
-
-.status-pendiente {
-  background-color: #fef9c3;
-  color: #854d0e;
-  border: 1px solid #facc15;
-}
-
-.badge-estado { white-space: nowrap; }
-
-.badge-estado.pendiente {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #f87171;
-}
-
-.badge-estado.lista {
-  background-color: #fef9c3;
-  color: #854d0e;
-  border: 1px solid #facc15;
-}
-
-.badge-estado.entregada {
-  background-color: #dcfce7;
-  color: #166534;
-  border: 1px solid #22c55e;
-}
-
+/* ── Badges de negocio ── */
 .badge-negocio {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: white;
   white-space: nowrap;
 }
 
-.negocio-fresh      { background-color: var(--color-primary-dark); }
-.negocio-confeccion { background-color: #F1A7B1; }
-.negocio-maquila    { background-color: #89C8D4; }
+.negocio-fresh      { background-color: #1e7fd6; }
+.negocio-confeccion { background-color: #c44569; }
+.negocio-maquila    { background-color: #1a7a87; }
 
+/* ── Badges de estado ── */
+.badge-estado { white-space: nowrap; }
+
+.badge-estado.pendiente  { background-color: #fee2e2; color: #991b1b; }
+.badge-estado.lista      { background-color: #fef9c3; color: #854d0e; }
+.badge-estado.entregada  { background-color: #dcfce7; color: #166534; }
+.badge-estado.eliminada  { background-color: #f3f4f6; color: #6b7280; }
+
+.status-completado { background-color: #dcfce7; color: #166534; }
+.status-pendiente  { background-color: #fef9c3; color: #854d0e; }
+
+/* ── Badges de entrega ── */
 .badge-hoy {
-  background: var(--color-warning);
+  background: #b45309;
   color: white;
   font-size: 0.75rem;
   margin-left: 6px;
 }
 
 .badge-atrasado {
-  background: var(--color-atrasado);
+  background: #dc2626;
   color: white;
   font-size: 0.75rem;
   margin-left: 6px;
 }
 
 .entrega-atrasada { background-color: #fdecea; }
-
-.badge-estado.eliminada {
-  background-color: #f3f4f6;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
-}

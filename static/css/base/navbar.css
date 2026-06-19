@@ -5,14 +5,9 @@
     margin-bottom: 30px;
 
     border-radius: 16px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-    backdrop-filter: blur(6px);
-
-    border-bottom: 2px solid transparent;
-    background-image: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)),
-                      linear-gradient(to right, #2fa4ff, #1e7fd6);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
+    background: #ffffff;
+    border: 1px solid #c8dff0;
+    box-shadow: 0 4px 20px rgba(30,127,214,0.13);
 }
 
 .navbar--fixed {
@@ -92,11 +87,10 @@
 }
 
 .nav-links a.active,
-.nav-group a.active {
-    background: var(--color-bg-blue);
-    color: var(--color-primary-dark);
+.nav-group a[aria-current="page"] {
+    background: #dbeafe;
+    color: #1e7fd6;
     font-weight: 700;
-    box-shadow: inset 0 -2px 0 var(--color-primary);
 }
 
 /* Usuario y cerrar sesión al extremo derecho */

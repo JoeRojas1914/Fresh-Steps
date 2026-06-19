@@ -8,7 +8,7 @@
 .stats-card {
     flex: 1;
     min-width: 280px;
-    background: #ffffff;
+    background: #f0f7ff;
     border: 1px solid #eaeef5;
     border-radius: var(--radius-lg);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);

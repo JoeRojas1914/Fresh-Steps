@@ -14,7 +14,7 @@
 .stats-card {
   padding: 24px;
   min-height: 420px;
-  background: #ffffff;
+  background: #f0f7ff;
   border-radius: var(--radius-lg);
   border: 1px solid #eaeef5;
   box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03);
@@ -83,24 +83,23 @@
 .monthly-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin: 25px 0;
+  gap: 12px;
+  margin: 20px 0;
 }
 
 .monthly-card {
   background: #ffffff;
-  border-radius: 16px;
-  padding: 22px 20px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  border-left: 4px solid #e5e7eb;
-  border-top: 1px solid #f0f4f8;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: left;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1px solid #e8eef5;
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .monthly-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.11);
 }
 
 .monthly-card h4 {
@@ -108,42 +107,52 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #9ca3af;
+  color: #94a3b8;
   margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.monthly-card p  { font-size: 30px; font-weight: 800; color: #6b7280; }
 
-.monthly-card.ventas   { border-left-color: #22c55e; }
-.monthly-card.ventas p { color: #22c55e; }
+.monthly-card p {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0b3c5d;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
 
-.monthly-card.gastos   { border-left-color: #ef4444; }
-.monthly-card.gastos p { color: #ef4444; }
+.monthly-card.ventas      { background: #f0fdf4; }
+.monthly-card.ventas p    { color: #15803d; }
 
-.monthly-card.ganancia   { border-left-color: #3b82f6; }
-.monthly-card.ganancia p { color: #3b82f6; }
+.monthly-card.gastos      { background: #fff1f2; }
+.monthly-card.gastos p    { color: #dc2626; }
 
-.monthly-card.total-ventas   { border-left-color: #8b5cf6; }
-.monthly-card.total-ventas p { color: #8b5cf6; }
+.monthly-card.ganancia    { background: #f0f7ff; }
+.monthly-card.ganancia p  { color: #1e7fd6; }
 
-.monthly-card.ticket   { border-left-color: #6366f1; }
-.monthly-card.ticket p { color: #6366f1; }
+.monthly-card.total-ventas    { background: #f0f7ff; }
+.monthly-card.total-ventas p  { color: #0b3c5d; }
 
-.monthly-card.cobrar   { border-left-color: #f97316; }
-.monthly-card.cobrar p { color: #f97316; }
+.monthly-card.ticket      { background: #f0f7ff; }
+.monthly-card.ticket p    { color: #1e7fd6; }
 
-.monthly-card.small p   { font-size: 20px; }
+.monthly-card.cobrar      { background: #fffbf0; }
+.monthly-card.cobrar p    { color: #b45309; }
 
-.monthly-card.azul   { border-left-color: #1e7fd6; }
+.monthly-card.small p { font-size: 20px; }
+
+.monthly-card.azul   { background: #f0f7ff; }
 .monthly-card.azul p { color: #1e7fd6; }
 
-.monthly-card.indigo   { border-left-color: #6366f1; }
-.monthly-card.indigo p { color: #6366f1; }
+.monthly-card.indigo   { background: #f0f7ff; }
+.monthly-card.indigo p { color: #1e7fd6; }
 
-.monthly-card.ambar   { border-left-color: #f59e0b; }
-.monthly-card.ambar p { color: #f59e0b; }
+.monthly-card.ambar   { background: #fffbf0; }
+.monthly-card.ambar p { color: #b45309; }
 
-.monthly-card.teal   { border-left-color: #14b8a6; }
-.monthly-card.teal p { color: #14b8a6; }
+.monthly-card.teal   { background: #f0f7ff; }
+.monthly-card.teal p { color: #0b3c5d; }
 
 .summary-cards {
   display: flex;

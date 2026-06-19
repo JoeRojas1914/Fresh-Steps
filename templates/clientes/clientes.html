@@ -8,17 +8,10 @@
 {% from "components/modal.html" import modal %}
 
 
-<h1><i data-lucide="users" width="24" height="24"></i> Clientes</h1>
+<h1><i data-lucide="users" width="24" height="24"></i> Clientes <span class="page-count">{{ total_clientes }} clientes</span></h1>
+<p class="page-sub">Búsqueda y gestión de clientes registrados</p>
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
-
-{# ── KPI cards ── #}
-<div class="monthly-cards mb-20">
-    <div class="monthly-card small azul">
-        <h4><i data-lucide="users" width="14" height="14"></i> Total clientes</h4>
-        <p class="text-primary">{{ total_clientes }}</p>
-    </div>
-</div>
 
 <div class="filtro-box">
     <div class="filtro-row">

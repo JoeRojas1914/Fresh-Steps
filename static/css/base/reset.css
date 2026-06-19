@@ -42,8 +42,37 @@ hr {
     font-weight: 800;
     color: #0b3c5d;
     margin: 0 0 24px;
-    padding-left: 14px;
-    border-left: 4px solid #1e7fd6;
     line-height: 1.2;
     letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.page-content h1 svg {
+    background: #dbeafe;
+    color: #1e7fd6;
+    padding: 9px;
+    border-radius: 11px;
+    flex-shrink: 0;
+    box-sizing: content-box;
+    box-shadow: 0 2px 8px rgba(30,127,214,0.18);
+}
+
+.page-sub {
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: 500;
+    margin: -16px 0 22px;
+}
+
+.page-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e7fd6;
+    background: #dbeafe;
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 0;
 }
