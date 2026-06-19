@@ -18,6 +18,9 @@
     z-index: 1000;
     border-radius: 0;
     margin-bottom: 0;
+    border: none;
+    border-bottom: 2px solid #c8dff0;
+    box-shadow: 0 4px 24px rgba(30,127,214,0.18);
     animation: navbarSlideDown 0.2s ease;
 }
 
