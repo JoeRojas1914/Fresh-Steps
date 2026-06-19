@@ -2,6 +2,7 @@ from validators import validar_nombre, validar_correo, validar_telefono
 from models.clientes import (
     buscar_clientes,
     contar_clientes,
+    contar_pedidos_por_cliente,
     obtener_cliente_por_id,
     obtener_clientes,
     crear_cliente,
@@ -26,6 +27,12 @@ def listar_clientes_service(
     total = contar_clientes(q, incluir_eliminados)
     clientes = obtener_clientes(q, por_pagina, offset, incluir_eliminados)
     total_paginas = (total + por_pagina - 1) // por_pagina
+
+    ids = [c["id_cliente"] for c in clientes]
+    pedidos_map = contar_pedidos_por_cliente(ids)
+    for c in clientes:
+        c["total_pedidos"] = pedidos_map.get(c["id_cliente"], 0)
+
     return {
         "clientes":       clientes,
         "total_paginas":  total_paginas,

@@ -105,6 +105,8 @@
 {% call table([
     "Nombre",
     "Teléfono",
+    "Cód. Postal",
+    "Pedidos",
     "Estado",
     "Acciones"
 ]) %}
@@ -118,6 +120,16 @@
         <td>{{ c.nombre }} {{ c.apellido }}</td>
 
         <td>{{ c.telefono }}</td>
+
+        <td>
+            {% if c.direccion %}
+                {{ c.direccion }}
+            {% else %}
+                <span class="dim">—</span>
+            {% endif %}
+        </td>
+
+        <td>{{ c.total_pedidos }}</td>
 
         <td>
             {% if c.activo %}
