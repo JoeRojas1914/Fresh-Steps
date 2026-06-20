@@ -67,7 +67,7 @@ document.addEventListener("click", function (e) {
     if (btnHistorial) { verHistorial(parseInt(btnHistorial.dataset.id)); return; }
 
     const btnEliminar = e.target.closest(".js-confirmar-eliminar-gasto");
-    if (btnEliminar) { confirmarEliminarGasto(parseInt(btnEliminar.dataset.id)); return; }
+    if (btnEliminar) { _eliminarGasto.confirmar(`/gastos/eliminar/${btnEliminar.dataset.id}`, btnEliminar.closest("tr")); return; }
 
     const btnEjecutar = e.target.closest(".js-ejecutar-eliminar-gasto");
     if (btnEjecutar) { ejecutarEliminarGasto(); return; }

@@ -1,3 +1,8 @@
+html.modal-open {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
 .modal {
   display: none;
   position: fixed;
@@ -6,8 +11,10 @@
   backdrop-filter: blur(4px);
   z-index: 1000;
 
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;
+  padding-block: 24px;
 }
 
 .modal.is-open {
@@ -19,9 +26,18 @@
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 90vw;
+  margin-block: auto;
   box-shadow: 0 25px 60px rgba(0,0,0,.25);
-  animation: fadeIn .25s ease;
+  animation: fadeIn .25s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
+}
+
+.modal.is-closing {
+  animation: modalOverlayOut 0.22s ease forwards;
+}
+
+.modal.is-closing .modal__dialog {
+  animation: modalDialogOut 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .modal--sm { max-width: 380px; }

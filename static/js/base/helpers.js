@@ -141,9 +141,25 @@ export function apiAction({
 
 export function crearEliminarHandler(modalId) {
     let _pendingUrl = null;
+    let _pendingRow = null;
     return {
-        confirmar(url) { _pendingUrl = url; abrirModal(modalId); },
-        ejecutar()     { if (_pendingUrl) location.href = _pendingUrl; }
+        confirmar(url, rowEl = null) {
+            _pendingUrl = url;
+            _pendingRow = rowEl;
+            abrirModal(modalId);
+        },
+        ejecutar() {
+            if (!_pendingUrl) return;
+            const url = _pendingUrl;
+            if (_pendingRow) {
+                _pendingRow.classList.add("row--removing");
+                _pendingRow.addEventListener("animationend", () => {
+                    location.href = url;
+                }, { once: true });
+            } else {
+                location.href = url;
+            }
+        }
     };
 }
 
@@ -169,3 +185,16 @@ export function confirmarEliminarVenta(idVenta) {
 }
 
 
+export function countUp(el, target, monetary = false, duration = 900) {
+    const start = performance.now();
+    const fmt = monetary
+        ? v => "$" + v.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : v => Math.floor(v).toLocaleString("es-MX");
+    function tick(now) {
+        const ease = 1 - Math.pow(1 - Math.min((now - start) / duration, 1), 3);
+        el.textContent = fmt(target * ease);
+        if (ease < 1) requestAnimationFrame(tick);
+        else el.textContent = fmt(target);
+    }
+    requestAnimationFrame(tick);
+}

@@ -76,7 +76,7 @@ document.addEventListener("click", function (e) {
     if (btnHistorial) { e.stopPropagation(); verHistorialCliente(e, parseInt(btnHistorial.dataset.id)); return; }
 
     const btnEliminar = e.target.closest(".js-confirmar-eliminar-cliente");
-    if (btnEliminar) { confirmarEliminarCliente(parseInt(btnEliminar.dataset.id)); return; }
+    if (btnEliminar) { _eliminarCliente.confirmar(`/clientes/eliminar/${btnEliminar.dataset.id}`, btnEliminar.closest("tr")); return; }
 
     const btnRestaurar = e.target.closest(".js-restaurar-cliente");
     if (btnRestaurar) { restaurarCliente(parseInt(btnRestaurar.dataset.id)); return; }

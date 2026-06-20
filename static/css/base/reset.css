@@ -36,6 +36,8 @@ hr {
   width: 100%;
   padding: 40px;
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
 }
 
 

@@ -1,3 +1,25 @@
+function countUp(el, target, monetary, duration) {
+    duration = duration || 900;
+    const start = performance.now();
+    const fmt = monetary
+        ? function(v) { return "$" + v.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        : function(v) { return Math.floor(v).toLocaleString("es-MX"); };
+    function tick(now) {
+        var ease = 1 - Math.pow(1 - Math.min((now - start) / duration, 1), 3);
+        el.textContent = fmt(target * ease);
+        if (ease < 1) requestAnimationFrame(tick);
+        else el.textContent = fmt(target);
+    }
+    requestAnimationFrame(tick);
+}
+
+document.querySelectorAll(".kpi-hoy-num, .accion-num, .mes-num").forEach(function(el) {
+    var raw = el.textContent.trim();
+    var monetary = raw.startsWith("$");
+    var target = parseFloat(raw.replace(/[$,]/g, ""));
+    if (!isNaN(target) && target > 0) countUp(el, target, monetary);
+});
+
 const raw    = JSON.parse(document.getElementById("indexChartData").textContent);
 const canvas = document.getElementById("miniVentasChart");
 

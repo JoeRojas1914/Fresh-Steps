@@ -1,4 +1,4 @@
-import { escapeHtml, mostrarFeedback } from '../base/helpers.js';
+import { escapeHtml, mostrarFeedback, countUp } from '../base/helpers.js';
 
 // ── Formatters ───────────────────────────────────────────────────────────────
 const fmt$ = n => "$" + Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -489,7 +489,11 @@ async function cargarDashboard() {
         setKpi("gananciaMes",   k.ganancia,         k.ganancia_pct);
         setKpi("ticketPromedio",k.ticket_promedio,  k.ticket_pct);
         setKpi("saldoCobrar",   k.saldo_por_cobrar, k.saldo_pct);
-        const elT=document.getElementById("totalVentas"); if(elT) elT.innerHTML=fmtN(k.total_ventas)+badgePct(k.ventas_pct);
+        const elT=document.getElementById("totalVentas");
+        if(elT) {
+            elT.innerHTML=`<span class="kpi-anim-num"></span>${badgePct(k.ventas_pct)}`;
+            countUp(elT.querySelector(".kpi-anim-num"), Number(k.total_ventas||0), false);
+        }
         const elV=document.getElementById("ticketVentas"); if(elV) elV.textContent=`${fmtN(k.num_ventas)} ventas`;
 
         if (data.ingresos_semanales) { ingresosChart.data.labels=data.ingresos_semanales.map(x=>x.label); ingresosChart.data.datasets[0].data=data.ingresos_semanales.map(x=>x.total); ingresosChart.update(); }
@@ -587,7 +591,13 @@ function renderTopClientes(clientes) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function setKpi(id,valor,pct,invert=false) { const el=document.getElementById(id); if(el) el.innerHTML=fmt$(valor)+badgePct(pct,invert); }
+function setKpi(id, valor, pct, invert=false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const badge = badgePct(pct, invert);
+    el.innerHTML = `<span class="kpi-anim-num"></span>${badge}`;
+    countUp(el.querySelector(".kpi-anim-num"), Number(valor || 0), true);
+}
 function mostrarError(msg) {
     let el=document.getElementById("dashboard-error");
     if (!el) { el=document.createElement("div"); el.id="dashboard-error"; el.style.cssText="background:#fee2e2;color:#b91c1c;padding:10px 16px;border-radius:8px;margin:12px 0;font-size:13px;font-weight:500;"; document.querySelector(".filtro-box").after(el); }

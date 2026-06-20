@@ -81,7 +81,34 @@
 }
 
 
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; }
+}
+
+@keyframes rowRemove {
+  from { opacity: 1; transform: scaleY(1);   background: transparent; }
+  to   { opacity: 0; transform: scaleY(0.6); background: #fee2e2; }
+}
+
+@keyframes modalOverlayOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes modalDialogOut {
+  from { opacity: 1; transform: translateY(0)    scale(1); }
+  to   { opacity: 0; transform: translateY(12px) scale(0.97); }
+}
+
 /* ── Clases utilitarias ── */
 .animate-slide-in { animation: slideIn 0.25s ease both; }
 .animate-slide-up { animation: slideUp 0.25s ease both; }
 .animate-fade-in  { animation: fadeIn  0.25s ease both; }
+
+.row--removing {
+  animation: rowRemove 0.25s ease forwards;
+  transform-origin: top;
+  pointer-events: none;
+  overflow: hidden;
+}

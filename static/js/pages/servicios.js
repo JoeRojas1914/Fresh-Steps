@@ -91,7 +91,7 @@ document.addEventListener("click", function (e) {
     if (btnHistorial) { verHistorialServicio(parseInt(btnHistorial.dataset.id)); return; }
 
     const btnEliminar = e.target.closest(".js-confirmar-eliminar-servicio");
-    if (btnEliminar) { confirmarEliminarServicio(parseInt(btnEliminar.dataset.id)); return; }
+    if (btnEliminar) { _eliminarServicio.confirmar(`/servicios/eliminar/${btnEliminar.dataset.id}`, btnEliminar.closest("tr")); return; }
 
     const btnEjecutar = e.target.closest(".js-ejecutar-eliminar-servicio");
     if (btnEjecutar) { ejecutarEliminarServicio(); return; }
