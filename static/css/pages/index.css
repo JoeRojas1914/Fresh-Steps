@@ -1,3 +1,6 @@
+[data-kpi] { transition: opacity 0.12s; }
+[data-kpi].kpi-loading { opacity: 0.35; }
+
 .home-header {
     display: flex;
     align-items: flex-end;

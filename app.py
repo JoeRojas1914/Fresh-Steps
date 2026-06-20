@@ -118,6 +118,46 @@ def server_error(e):
     return render_template("errors/500.html"), 500
 
 
+_NEGOCIOS_VALIDOS = {"all", "1", "2", "3"}
+
+
+def _kpis_index(negocio: str, es_admin: bool) -> dict:
+    hoy_dt         = date.today()
+    negocio_filtro = negocio if negocio != "all" else None
+
+    total_entregas, total_pendientes = contar_entregas_resumen(id_negocio=negocio_filtro)
+
+    lunes         = hoy_dt - timedelta(days=hoy_dt.weekday())
+    sabado        = lunes + timedelta(days=5)
+    ventas_semana = contar_ventas_por_dia_rango(lunes, sabado, negocio)
+    idx_hoy       = min(hoy_dt.weekday(), 5)
+    ventas_hoy    = ventas_semana[idx_hoy]["total"] if ventas_semana else 0
+
+    unidades_recibidas_hoy  = contar_unidades_hoy(hoy_dt, "fecha_recibo",  negocio)
+    unidades_entregadas_hoy = contar_unidades_hoy(hoy_dt, "fecha_entrega", negocio)
+
+    ingresos_hoy = None
+    kpis_mes     = None
+    if es_admin:
+        ingresos_hoy   = float(obtener_total_ingresos(hoy_dt, hoy_dt, negocio))
+        primer_dia_mes = date(hoy_dt.year, hoy_dt.month, 1)
+        ing_mes  = float(obtener_total_ingresos(primer_dia_mes, hoy_dt, negocio))
+        gas_mes  = float(obtener_total_gastos(primer_dia_mes, hoy_dt, negocio))
+        kpis_mes = {"ingresos": ing_mes, "gastos": gas_mes, "ganancia": ing_mes - gas_mes}
+
+    return {
+        "total_entregas":          total_entregas,
+        "total_pendientes":        total_pendientes,
+        "ventas_hoy":              ventas_hoy,
+        "chart_labels":            [x["label"] for x in ventas_semana],
+        "chart_data":              [x["total"]  for x in ventas_semana],
+        "unidades_recibidas_hoy":  unidades_recibidas_hoy,
+        "unidades_entregadas_hoy": unidades_entregadas_hoy,
+        "ingresos_hoy":            ingresos_hoy,
+        "kpis_mes":                kpis_mes,
+    }
+
+
 # ================= HOME =================
 @app.route("/")
 def index():
@@ -137,49 +177,32 @@ def index():
     hoy_dt = date.today()
     fecha_bonita = f"{dias[hoy_dt.weekday()]} {hoy_dt.day} de {meses[hoy_dt.month-1]}, {hoy_dt.year}"
 
-    _NEGOCIOS_VALIDOS = {"all", "1", "2", "3"}
     negocio = request.args.get("negocio", "all")
     if negocio not in _NEGOCIOS_VALIDOS:
         negocio = "all"
-    negocio_filtro = negocio if negocio != "all" else None
 
-    total_entregas, total_pendientes = contar_entregas_resumen(id_negocio=negocio_filtro)
-
-    lunes         = hoy_dt - timedelta(days=hoy_dt.weekday())
-    sabado        = lunes + timedelta(days=5)
-    ventas_semana = contar_ventas_por_dia_rango(lunes, sabado, negocio)
-    idx_hoy       = min(hoy_dt.weekday(), 5)
-    ventas_hoy    = ventas_semana[idx_hoy]["total"] if ventas_semana else 0
-    chart_labels  = [x["label"] for x in ventas_semana]
-    chart_data    = [x["total"]  for x in ventas_semana]
-
-    unidades_recibidas_hoy  = contar_unidades_hoy(hoy_dt, "fecha_recibo",  negocio)
-    unidades_entregadas_hoy = contar_unidades_hoy(hoy_dt, "fecha_entrega", negocio)
-
-    ingresos_hoy = None
-    kpis_mes     = None
-    if session.get("rol") == "admin":
-        ingresos_hoy   = float(obtener_total_ingresos(hoy_dt, hoy_dt, negocio))
-        primer_dia_mes = date(hoy_dt.year, hoy_dt.month, 1)
-        ing_mes  = float(obtener_total_ingresos(primer_dia_mes, hoy_dt, negocio))
-        gas_mes  = float(obtener_total_gastos(primer_dia_mes, hoy_dt, negocio))
-        kpis_mes = {"ingresos": ing_mes, "gastos": gas_mes, "ganancia": ing_mes - gas_mes}
+    kpis = _kpis_index(negocio, session.get("rol") == "admin")
 
     return render_template(
         "index.html",
-        total_entregas          = total_entregas,
-        total_pendientes        = total_pendientes,
         nombre_usuario          = session.get("nombre") or session.get("usuario", "").capitalize(),
         fecha_bonita            = fecha_bonita,
-        ventas_hoy              = ventas_hoy,
-        ingresos_hoy            = ingresos_hoy,
-        kpis_mes                = kpis_mes,
-        chart_labels            = chart_labels,
-        chart_data              = chart_data,
-        unidades_recibidas_hoy  = unidades_recibidas_hoy,
-        unidades_entregadas_hoy = unidades_entregadas_hoy,
         negocio_sel             = negocio,
+        **kpis,
     )
+
+
+@app.route("/api/index/kpis")
+def api_index_kpis():
+    if not session.get("id_usuario"):
+        return jsonify({"error": "No autorizado"}), 401
+
+    negocio = request.args.get("negocio", "all")
+    if negocio not in _NEGOCIOS_VALIDOS:
+        negocio = "all"
+
+    kpis = _kpis_index(negocio, session.get("rol") == "admin")
+    return jsonify(kpis)
 
 
 
