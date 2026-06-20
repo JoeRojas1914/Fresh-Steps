@@ -168,6 +168,82 @@ def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, col: 
     }
 
 
+def exportar_estadisticas_service(args):
+    inicio_str = args.get("inicio")
+    fin_str    = args.get("fin")
+    id_negocio = args.get("id_negocio", "all")
+    col        = args.get("tipo_fecha", "fecha_recibo")
+    if col not in _COLS_FECHA_ESTADISTICAS:
+        col = "fecha_recibo"
+
+    if not inicio_str or not fin_str:
+        return None, "Faltan fechas"
+    try:
+        inicio = datetime.strptime(inicio_str, "%Y-%m-%d").date()
+        fin    = datetime.strptime(fin_str,    "%Y-%m-%d").date()
+    except ValueError:
+        return None, "Formato de fecha inválido"
+    if fin < inicio:
+        return None, "La fecha fin no puede ser menor a inicio"
+    if (fin - inicio).days > MAX_DIAS_RANGO:
+        return None, f"El rango máximo permitido es {MAX_DIAS_RANGO} días"
+
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.utils import get_column_letter
+    from services.excel_helpers import (
+        C, xl_cell, xl_titulo_hoja, xl_fila_headers, xl_col_widths, send_excel
+    )
+
+    kpis   = _calcular_kpis(inicio, fin, id_negocio, col)
+    series = _cargar_series(inicio, fin, id_negocio, "dia" if (fin - inicio).days <= 31 else "semana", col)
+
+    negocio_label = {"1": "Calzado", "2": "Confección", "3": "Maquila"}.get(str(id_negocio), "Todos los negocios")
+    subtitulo = f"{inicio_str} al {fin_str} — {negocio_label}"
+
+    wb = Workbook()
+
+    # ── Hoja 1: KPIs ──
+    ws1 = wb.active
+    ws1.title = "Resumen"
+    xl_titulo_hoja(ws1, "Estadísticas Fresh Steps", 2, subtitulo)
+    xl_fila_headers(ws1, ["Indicador", "Valor"], fila=3)
+
+    kpi_rows = [
+        ("Ingresos",          kpis["ingresos"],         '#,##0.00'),
+        ("Gastos",            kpis["gastos"],            '#,##0.00'),
+        ("Ganancia",          kpis["ganancia"],          '#,##0.00'),
+        ("Total de ventas",   kpis["num_ventas"],        '#,##0'),
+        ("Ticket promedio",   kpis["ticket_promedio"],   '#,##0.00'),
+        ("Saldo por cobrar",  kpis["saldo_por_cobrar"],  '#,##0.00'),
+    ]
+    for i, (label, value, fmt) in enumerate(kpi_rows, 4):
+        bg = C["gris"] if i % 2 == 0 else C["blanco"]
+        xl_cell(ws1, i, 1, label, fg=bg)
+        xl_cell(ws1, i, 2, value, fg=bg, align="right", num_fmt=fmt)
+    xl_col_widths(ws1, {1: 24, 2: 18})
+
+    # ── Hoja 2: Series ──
+    ws2 = wb.create_sheet("Series por período")
+    labels    = [r["label"] for r in series.get("ventas_semanales", [])]
+    ventas    = [r["total"] for r in series.get("ventas_semanales", [])]
+    ingresos  = [r["total"] for r in series.get("ingresos_semanales", [])]
+    unidades  = [r["total"] for r in series.get("unidades_semanales", [])]
+
+    xl_titulo_hoja(ws2, "Series por período", 4, subtitulo)
+    xl_fila_headers(ws2, ["Período", "Ventas", "Ingresos ($)", "Unidades"], fila=3)
+    for i, lbl in enumerate(labels):
+        row = i + 4
+        bg  = C["gris"] if i % 2 == 0 else C["blanco"]
+        xl_cell(ws2, row, 1, lbl,             fg=bg)
+        xl_cell(ws2, row, 2, ventas[i],       fg=bg, align="right", num_fmt='#,##0')
+        xl_cell(ws2, row, 3, ingresos[i],     fg=bg, align="right", num_fmt='#,##0.00')
+        xl_cell(ws2, row, 4, unidades[i],     fg=bg, align="right", num_fmt='#,##0')
+    xl_col_widths(ws2, {1: 20, 2: 12, 3: 16, 4: 12})
+
+    return send_excel(wb, "estadisticas"), None
+
+
 def dashboard_api_service(args):
     inicio_str = args.get("inicio")
     fin_str    = args.get("fin")

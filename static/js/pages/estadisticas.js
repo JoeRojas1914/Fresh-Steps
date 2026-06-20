@@ -643,5 +643,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const btnVerVentas = e.target.closest(".js-ver-ventas");
         if (btnVerVentas) { verVentasRelacionadas(); return; }
+
+        const btnExportar = e.target.closest("#btn-exportar-stats");
+        if (btnExportar && !btnExportar.dataset.exporting) {
+            const p = getParams();
+            if (!p || !p.inicio || !p.fin) {
+                mostrarError("Selecciona un período antes de exportar.");
+                return;
+            }
+            const params = new URLSearchParams({
+                inicio:     p.inicio,
+                fin:        p.fin,
+                id_negocio: p.id_negocio || "all",
+                tipo_fecha: p.tipo_fecha  || "fecha_recibo",
+            });
+
+            btnExportar.dataset.exporting = "1";
+            const originalHTML = btnExportar.innerHTML;
+            btnExportar.innerHTML = '<span class="spinner spinner--sm"></span> Generando...';
+            btnExportar.style.pointerEvents = "none";
+
+            window.location.href = `/estadisticas/exportar?${params.toString()}`;
+
+            setTimeout(() => {
+                btnExportar.innerHTML = "✓ Descargado";
+                setTimeout(() => {
+                    btnExportar.innerHTML = originalHTML;
+                    btnExportar.style.pointerEvents = "";
+                    delete btnExportar.dataset.exporting;
+                    if (window.lucide) lucide.createIcons();
+                }, 1200);
+            }, 1500);
+            return;
+        }
     });
 });

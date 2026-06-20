@@ -44,6 +44,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".alert").forEach(alert => {
         if (!container.contains(alert)) {
+            if (!alert.querySelector(".toast-progress")) {
+                const bar = document.createElement("div");
+                bar.className = "toast-progress";
+                alert.appendChild(bar);
+            }
             container.appendChild(alert);
         }
         _scheduleDismiss(alert);
