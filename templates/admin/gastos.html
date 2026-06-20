@@ -20,8 +20,8 @@
 
   <div class="filtro-row">
     <div class="filtro-item">
-      <label>Negocio</label>
-      <select name="id_negocio">
+      <label for="filtro-negocio-gasto">Negocio</label>
+      <select name="id_negocio" id="filtro-negocio-gasto">
         <option value="">Todos</option>
         {% for n in negocios %}
           <option value="{{ n.id_negocio }}"
@@ -33,14 +33,14 @@
     </div>
 
     <div class="filtro-item">
-      <label>Desde</label>
-      <input type="date" name="fecha_inicio"
+      <label for="filtro-fecha-inicio-gasto">Desde</label>
+      <input type="date" name="fecha_inicio" id="filtro-fecha-inicio-gasto"
              value="{{ request.args.get('fecha_inicio', '') }}">
     </div>
 
     <div class="filtro-item">
-      <label>Hasta</label>
-      <input type="date" name="fecha_fin"
+      <label for="filtro-fecha-fin-gasto">Hasta</label>
+      <input type="date" name="fecha_fin" id="filtro-fecha-fin-gasto"
              value="{{ request.args.get('fecha_fin', '') }}">
     </div>
 
@@ -121,9 +121,9 @@
     </div>
 
     <div class="modal-field">
-        <label>Comprobante</label>
+        <label for="tipo-comprobante">Comprobante</label>
         <div class="select-wrapper">
-            <select name="tipo_comprobante" required>
+            <select name="tipo_comprobante" id="tipo-comprobante" required>
                 <option value="ticket">Ticket</option>
                 <option value="factura">Factura</option>
             </select>
@@ -131,9 +131,9 @@
     </div>
 
     <div class="modal-field">
-        <label>Método de pago</label>
+        <label for="tipo-pago">Método de pago</label>
         <div class="select-wrapper">
-            <select name="tipo_pago" required>
+            <select name="tipo_pago" id="tipo-pago" required>
                 <option value="efectivo">Efectivo</option>
                 <option value="TDC">Tarjeta de crédito</option>
                 <option value="transferencia">Transferencia</option>

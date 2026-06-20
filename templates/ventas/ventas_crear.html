@@ -58,7 +58,7 @@
 
                 <div class="cliente-negocio-row">
                     <div class="cliente-negocio-col">
-                        <label class="form-label">Cliente</label>
+                        <label class="form-label" for="buscar-cliente">Cliente</label>
                         <div id="busqueda-cliente">
                             <div class="search-form-inline">
                                 <input type="text" id="buscar-cliente"
@@ -78,7 +78,7 @@
                         </div>
                     </div>
                     <div class="cliente-negocio-col">
-                        <label class="form-label">Negocio</label>
+                        <label class="form-label" for="id_negocio">Negocio</label>
                         <select name="id_negocio" id="id_negocio" class="select--full">
                             <option value="">-- Selecciona --</option>
                             <option value="1">Fresh Steps</option>
@@ -86,7 +86,7 @@
                             <option value="3">Maquila</option>
                         </select>
                         <div id="error-negocio" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
-                            Borra los artículos para cambiar el negocio.
+                            <i data-lucide="alert-triangle" width="12" height="12"></i> Borra los artículos para cambiar el negocio.
                         </div>
                     </div>
                 </div>
@@ -131,16 +131,16 @@
             </div>
             <div class="venta-seccion-body">
                 <div class="form-group">
-                    <label class="form-label">Fecha</label>
+                    <label class="form-label" for="fecha_estimada_fecha">Fecha</label>
                     <input type="date" id="fecha_estimada_fecha">
                 </div>
                 <div class="form-group mt-10">
-                    <label class="form-label">Hora</label>
+                    <label class="form-label" for="fecha_estimada_hora">Hora</label>
                     <input type="time" id="fecha_estimada_hora">
                 </div>
                 <input type="hidden" name="fecha_estimada" id="fecha_estimada">
                 <div id="error-fecha" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
-                    La fecha estimada no puede ser menor a hoy.
+                    <i data-lucide="alert-triangle" width="12" height="12"></i> La fecha estimada no puede ser menor a hoy.
                 </div>
             </div>
         </div>
@@ -168,7 +168,7 @@
                 <div id="prepago-fields" class="toggle-extra-fields">
                     <input type="hidden" name="prepago" id="prepago" value="no">
                     <div class="field-group">
-                        <label class="form-label">Método de pago</label>
+                        <label class="form-label" for="tipo_pago">Método de pago</label>
                         <select name="tipo_pago" id="tipo_pago">
                             <option value="">-- Selecciona --</option>
                             <option value="efectivo">Efectivo</option>
@@ -177,12 +177,12 @@
                         </select>
                     </div>
                     <div class="field-group">
-                        <label class="form-label">Monto ($)</label>
+                        <label class="form-label" for="monto_prepago">Monto ($)</label>
                         <input type="number" min="0" step="0.01"
                                name="monto_prepago" id="monto_prepago"
                                placeholder="0.00">
                         <div id="error-prepago" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
-                            El prepago no puede ser mayor al total.
+                            <i data-lucide="alert-triangle" width="12" height="12"></i> El prepago no puede ser mayor al total.
                         </div>
                     </div>
                 </div>
@@ -204,12 +204,12 @@
                 <div id="descuento-fields" class="toggle-extra-fields">
                     <input type="hidden" name="aplica_descuento" id="aplica_descuento" value="no">
                     <div class="field-group">
-                        <label class="form-label">Descuento ($)</label>
+                        <label class="form-label" for="cantidad_descuento">Descuento ($)</label>
                         <input type="number" min="0" step="0.01"
                                name="cantidad_descuento" id="cantidad_descuento"
                                placeholder="0.00">
                         <div id="error-descuento" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
-                            El descuento no puede ser mayor al total.
+                            <i data-lucide="alert-triangle" width="12" height="12"></i> El descuento no puede ser mayor al total.
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 import time
 
+from models.negocio import obtener_negocios
 from models.servicios import (
     contar_servicios,
     obtener_servicios,
@@ -91,3 +92,13 @@ def obtener_historial_servicio_service(id_servicio: int) -> list[dict]:
 def restaurar_servicio_service(id_servicio: int, id_usuario: int) -> None:
     restaurar_servicio(id_servicio, id_usuario)
     _invalidar_cache_servicios()
+
+
+def exportar_servicios_service(id_negocio, incluir_eliminados):
+    from config import MAX_FILAS_EXPORTAR
+    return obtener_servicios(
+        id_negocio=id_negocio,
+        incluir_eliminados=incluir_eliminados,
+        limit=MAX_FILAS_EXPORTAR,
+        offset=0,
+    )

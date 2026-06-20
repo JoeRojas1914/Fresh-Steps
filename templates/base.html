@@ -18,9 +18,10 @@
     {% endif %}
 </head>
 <body>
+<a class="skip-link" href="#main-content">Ir al contenido principal</a>
 
 {% if session.get("id_usuario") %}
-<div class="page-content">
+<div class="page-content" id="main-content">
     <nav class="navbar" id="navbar">
 
         <div class="nav-logo">

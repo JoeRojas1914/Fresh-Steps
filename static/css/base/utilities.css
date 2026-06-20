@@ -1,3 +1,18 @@
+.skip-link {
+    position: absolute;
+    top: -48px;
+    left: 1rem;
+    background: var(--color-primary);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    z-index: 10000;
+    transition: top 0.15s;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+.skip-link:focus { top: 0; }
+
 .text-primary { color: var(--color-primary-dark); }
 .text-danger  { color: var(--color-danger); }
 .text-success { color: var(--color-success); }

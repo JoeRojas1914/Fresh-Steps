@@ -21,9 +21,10 @@ from services.servicios_service import (
     guardar_servicio_service,
     eliminar_servicio_service,
     obtener_historial_servicio_service,
-    restaurar_servicio_service
+    restaurar_servicio_service,
+    obtener_negocios,
+    exportar_servicios_service,
 )
-from models.negocio import obtener_negocios
 
 servicios_bp = Blueprint("servicios", __name__)
 
@@ -131,15 +132,10 @@ def restaurar_servicio(id_servicio):
 @servicios_bp.route("/servicios/exportar")
 @admin_required
 def exportar_servicios_excel():
-    from models.servicios import obtener_servicios
-
     id_negocio         = request.args.get("id_negocio") or None
     incluir_eliminados = request.args.get("eliminados") == "1"
 
-    servicios = obtener_servicios(
-        id_negocio=id_negocio, incluir_eliminados=incluir_eliminados,
-        limit=MAX_FILAS_EXPORTAR, offset=0
-    )
+    servicios = exportar_servicios_service(id_negocio, incluir_eliminados)
 
     subtexto = f"Negocio ID: {id_negocio}" if id_negocio else "Todos los negocios"
     if incluir_eliminados:

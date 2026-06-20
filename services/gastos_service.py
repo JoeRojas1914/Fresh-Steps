@@ -1,4 +1,5 @@
 from utils import calcular_paginacion
+from models.negocio import obtener_negocios
 from models.gastos import (
     crear_gasto,
     actualizar_gasto,
@@ -61,3 +62,12 @@ def obtener_historial_gasto_service(id_gasto: int) -> list[dict]:
 
 def restaurar_gasto_service(id_gasto: int, id_usuario: int) -> None:
     restaurar_gasto(id_gasto, id_usuario)
+
+
+def exportar_gastos_service(id_negocio, fecha_inicio, fecha_fin, incluir_eliminados):
+    from config import MAX_FILAS_EXPORTAR
+    return obtener_gastos(
+        id_negocio, fecha_inicio, fecha_fin,
+        limit=MAX_FILAS_EXPORTAR, offset=0,
+        incluir_eliminados=incluir_eliminados,
+    )

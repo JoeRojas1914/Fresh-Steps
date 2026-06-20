@@ -17,9 +17,10 @@ from services.gastos_service import (
     guardar_gasto_service,
     eliminar_gasto_service,
     obtener_historial_gasto,
-    restaurar_gasto_service
+    restaurar_gasto_service,
+    obtener_negocios,
+    exportar_gastos_service,
 )
-from models.negocio import obtener_negocios
 from middleware.auth_middleware import admin_required
 from extensions import limiter
 
@@ -107,17 +108,12 @@ def restaurar_gasto_route(id_gasto):
 @gastos_bp.route("/gastos/exportar")
 @admin_required
 def exportar_gastos_excel():
-    from models.gastos import obtener_gastos
-
     id_negocio         = request.args.get("id_negocio")  or None
     fecha_inicio       = request.args.get("fecha_inicio") or None
     fecha_fin          = request.args.get("fecha_fin")    or None
     incluir_eliminados = request.args.get("eliminados") == "1"
 
-    gastos = obtener_gastos(
-        id_negocio, fecha_inicio, fecha_fin,
-        limit=MAX_FILAS_EXPORTAR, offset=0, incluir_eliminados=incluir_eliminados
-    )
+    gastos = exportar_gastos_service(id_negocio, fecha_inicio, fecha_fin, incluir_eliminados)
 
     subtexto = "  ".join(filter(None, [
         f"Negocio ID: {id_negocio}" if id_negocio    else "",
