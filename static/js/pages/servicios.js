@@ -38,7 +38,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (toggle) {
-            toggle.addEventListener("change", () => formFiltro.submit());
+            toggle.addEventListener("change", () => {
+                const url = new URL(window.location.href);
+                if (toggle.checked) {
+                    url.searchParams.set("eliminados", "1");
+                } else {
+                    url.searchParams.delete("eliminados");
+                }
+                window.location.href = url.toString();
+            });
         }
     }
 });

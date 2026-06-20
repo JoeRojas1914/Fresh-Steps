@@ -10,7 +10,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const toggleEliminadas = document.getElementById("toggle-eliminadas");
     if (toggleEliminadas) {
-        toggleEliminadas.addEventListener("change", () => toggleEliminadas.form.submit());
+        toggleEliminadas.addEventListener("change", () => {
+            const url = new URL(window.location.href);
+            if (toggleEliminadas.checked) {
+                url.searchParams.set("eliminadas", "1");
+            } else {
+                url.searchParams.delete("eliminadas");
+            }
+            window.location.href = url.toString();
+        });
     }
 
 });

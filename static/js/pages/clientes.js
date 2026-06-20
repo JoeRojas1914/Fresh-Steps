@@ -125,7 +125,6 @@ document.addEventListener("click", function (e) {
         } else {
             url.searchParams.delete("eliminados");
         }
-        url.searchParams.delete("pagina");
         window.location.href = url.toString();
     });
 }());

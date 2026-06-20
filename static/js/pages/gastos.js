@@ -7,7 +7,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const toggleEliminados = document.getElementById("toggle-eliminados-gastos");
     if (toggleEliminados) {
-        toggleEliminados.addEventListener("change", () => toggleEliminados.form.submit());
+        toggleEliminados.addEventListener("change", () => {
+            const url = new URL(window.location.href);
+            if (toggleEliminados.checked) {
+                url.searchParams.set("eliminados", "1");
+            } else {
+                url.searchParams.delete("eliminados");
+            }
+            window.location.href = url.toString();
+        });
     }
 
     const form = document.querySelector(".modal-form");
