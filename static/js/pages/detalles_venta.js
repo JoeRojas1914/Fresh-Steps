@@ -2,15 +2,12 @@ import { escapeHtml } from '../base/helpers.js';
 
 const detallesCargados = {};
 
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".btn-detalles[data-id]").forEach(function (btn) {
-        btn.addEventListener("click", function () { toggleDetalles(btn.dataset.id, btn); });
-    });
-});
-
 document.addEventListener("click", function (e) {
-    const btn = e.target.closest(".js-ver-ticket");
-    if (btn) { window.open(btn.dataset.url, "_blank"); }
+    const btn = e.target.closest(".btn-detalles[data-id]");
+    if (btn) { toggleDetalles(btn.dataset.id, btn); return; }
+
+    const ticket = e.target.closest(".js-ver-ticket");
+    if (ticket) { window.open(ticket.dataset.url, "_blank"); }
 });
 
 export function toggleDetalles(idVenta, btn) {

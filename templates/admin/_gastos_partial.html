@@ -1,0 +1,111 @@
+{% from "macros/badges.html" import badge_negocio %}
+{% from "components/table.html" import table %}
+{% from "components/pagination.html" import pagination %}
+
+{% call table([
+    "Negocio",
+    "Descripción",
+    "Proveedor",
+    "Total",
+    "Comprobante",
+    "Pago",
+    "Fecha de registro",
+    "Estado",
+    "Acciones"
+]) %}
+
+    {% for g in gastos %}
+    <tr>
+        <td>{{ badge_negocio(g.negocio) }}</td>
+        <td>{{ g.descripcion }}</td>
+        <td>{{ g.proveedor }}</td>
+        <td>${{ "%.2f"|format(g.total) }}</td>
+
+        <td>
+            {% if g.tipo_comprobante == "factura" %}
+                Factura
+            {% else %}
+                Ticket
+            {% endif %}
+        </td>
+
+        <td>
+            {% if g.tipo_pago == "efectivo" %}
+                Efectivo
+            {% elif g.tipo_pago == "transferencia" %}
+                Transferencia
+            {% else %}
+                Tarjeta de Crédito
+            {% endif %}
+        </td>
+
+        <td>{{ g.fecha_registro.strftime("%d %b %Y") if g.fecha_registro else "—" }}</td>
+
+        <td>
+            {% if g.activo %}
+                <span class="status status-completado">Activo</span>
+            {% else %}
+                <span class="status status-pendiente">Eliminado</span>
+            {% endif %}
+        </td>
+
+        <td>
+        {% if g.activo %}
+
+            <button type="button"
+                class="btn btn--info btn--sm js-editar-gasto"
+                data-id="{{ g.id_gasto }}"
+                data-id-negocio="{{ g.id_negocio }}"
+                data-descripcion="{{ g.descripcion }}"
+                data-proveedor="{{ g.proveedor }}"
+                data-total="{{ g.total }}"
+                data-fecha="{{ g.fecha_registro.strftime('%Y-%m-%d') if g.fecha_registro else '' }}"
+                data-tipo-comprobante="{{ g.tipo_comprobante }}"
+                data-tipo-pago="{{ g.tipo_pago }}">
+                Editar
+            </button>
+
+            <button type="button"
+                    class="btn btn--warning btn--sm js-ver-historial-gasto"
+                    data-id="{{ g.id_gasto }}">
+                Cambios
+            </button>
+
+            <button type="button"
+                    class="btn btn--danger btn--sm js-confirmar-eliminar-gasto"
+                    data-id="{{ g.id_gasto }}"
+                    data-descripcion="{{ g.descripcion }}">
+                Eliminar
+            </button>
+
+        {% else %}
+
+            <a href="/gastos/restaurar/{{ g.id_gasto }}"
+               class="btn btn--primary btn--sm">
+               Restaurar
+            </a>
+
+        {% endif %}
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="9" class="dim td-empty">
+            No se encontraron gastos con esos filtros.
+        </td>
+    </tr>
+    {% endfor %}
+
+{% endcall %}
+
+{{ pagination(
+    pagina,
+    total_paginas,
+    'gastos.gastos',
+    {
+      "id_negocio": request.args.get('id_negocio'),
+      "fecha_inicio": request.args.get('fecha_inicio'),
+      "fecha_fin": request.args.get('fecha_fin'),
+      "eliminados": request.args.get('eliminados')
+    }
+) }}

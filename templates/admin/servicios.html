@@ -105,69 +105,9 @@
 
 <hr>
 
-{% call table([
-    "Negocio",
-    "Servicio",
-    "Precio",
-    "Estado",
-    "Acciones"
-]) %}
-
-    {% for s in servicios %}
-    <tr>
-        <td>{{ badge_negocio(s.negocio) }}</td>
-        <td>{{ s.nombre }}</td>
-        <td>${{ s.precio }}</td>
-        <td>
-            {% if s.activo %}
-                <span class="status status-completado">Activo</span>
-            {% else %}
-                <span class="status status-pendiente">Eliminado</span>
-            {% endif %}
-        </td>
-
-        <td>
-        {% if s.activo %}
-
-            <button class="btn btn--info btn--sm js-editar-servicio"
-                data-id="{{ s.id_servicio }}"
-                data-negocio="{{ s.id_negocio }}"
-                data-nombre="{{ s.nombre }}"
-                data-precio="{{ s.precio }}">
-                Editar
-            </button>
-
-            <button class="btn btn--warning btn--sm js-ver-historial-servicio"
-                data-id="{{ s.id_servicio }}">
-                Cambios
-            </button>
-
-            <button type="button"
-                    class="btn btn--danger btn--sm js-confirmar-eliminar-servicio"
-                    data-id="{{ s.id_servicio }}"
-                    data-nombre="{{ s.nombre }}">
-                Eliminar
-            </button>
-
-        {% else %}
-
-            <a href="/servicios/restaurar/{{ s.id_servicio }}"
-               class="btn btn--primary btn--sm">
-               Restaurar
-            </a>
-
-        {% endif %}
-        </td>
-    </tr>
-    {% else %}
-    <tr>
-        <td colspan="5" class="dim td-empty">
-            No se encontraron servicios con esos filtros.
-        </td>
-    </tr>
-    {% endfor %}
-
-{% endcall %}
+<div id="tabla-paginada">
+{% include "admin/_servicios_partial.html" %}
+</div>
 
 
 {% call(section) modal("modalHistorialServicio", "Historial del servicio", "lg") %}
@@ -203,21 +143,6 @@
 <button class="btn btn--danger btn--sm js-ejecutar-eliminar-servicio">Sí, eliminar</button>
 {% endif %}
 {% endcall %}
-
-
-{% from "components/pagination.html" import pagination %}
-
-{{ pagination(
-    pagina,
-    total_paginas,
-    'servicios.servicios',
-    {
-      "id_negocio": request.args.get('id_negocio'),
-      "fecha_inicio": request.args.get('fecha_inicio'),
-      "fecha_fin": request.args.get('fecha_fin'),
-      "eliminados": request.args.get('eliminados')
-    }
-) }}
 
 
 {% endblock %}

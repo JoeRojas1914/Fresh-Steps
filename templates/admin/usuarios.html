@@ -25,7 +25,8 @@
 
         <div class="filtro-toggle filtro-toggle--compact">
             <label class="switch">
-                <input type="checkbox" id="toggle-inactivos">
+                <input type="checkbox" id="toggle-inactivos"
+                       {% if mostrar_inactivos %}checked{% endif %}>
                 <span class="slider"></span>
             </label>
             <span class="toggle-text">Mostrar inactivos</span>
@@ -42,78 +43,9 @@
 
 <hr>
 
-{# ── Tabla ── #}
-{% call table([
-    "Usuario", "Nombre completo", "Teléfono", "Correo",
-    "Rol", "Estado", "Creado", "Acciones"
-]) %}
-    {% for u in usuarios %}
-    <tr data-id="{{ u.id_usuario }}"
-        data-rol="{{ u.rol }}"
-        data-activo="{{ '1' if u.activo else '0' }}"
-        data-buscar="{{ u.usuario }} {{ u.nombre or '' }} {{ u.apellido or '' }} {{ u.telefono or '' }}">
-        <td><strong>{{ u.usuario }}</strong></td>
-
-        <td>
-            {% if u.nombre or u.apellido %}
-                {{ u.nombre or '' }} {{ u.apellido or '' }}
-            {% else %}
-                <span class="dim">—</span>
-            {% endif %}
-        </td>
-
-        <td>{{ u.telefono or '—' }}</td>
-        <td>{{ u.correo   or '—' }}</td>
-
-        <td>
-            {% if u.rol == 'admin' %}
-                <span class="status status-completado">Admin</span>
-            {% else %}
-                <span class="status status-pendiente">Caja</span>
-            {% endif %}
-        </td>
-
-        <td>
-            {% if u.activo %}
-                <span class="status status-completado">Activo</span>
-            {% else %}
-                <span class="status status-pendiente">Inactivo</span>
-            {% endif %}
-        </td>
-
-        <td>{{ u.creado_en.strftime('%d/%m/%Y') if u.creado_en else '—' }}</td>
-
-        <td>
-        {% if u.rol != 'admin' %}
-            <button class="btn btn--info btn--sm no-row-click js-editar-usuario"
-                data-id="{{ u.id_usuario }}">
-                Editar
-            </button>
-
-            <button class="btn btn--warning btn--sm no-row-click js-ver-historial-usuario"
-                data-id="{{ u.id_usuario }}">
-                Cambios
-            </button>
-
-            <button type="button"
-                    class="btn btn--danger btn--sm no-row-click js-confirmar-toggle"
-                    data-id="{{ u.id_usuario }}"
-                    data-accion="{{ 'Desactivar' if u.activo else 'Activar' }}">
-                {{ 'Desactivar' if u.activo else 'Activar' }}
-            </button>
-        {% else %}
-            <span class="dim text-sm">Protegido</span>
-        {% endif %}
-        </td>
-    </tr>
-    {% else %}
-    <tr>
-        <td colspan="8" class="dim td-empty">
-            No se encontraron usuarios con esos filtros.
-        </td>
-    </tr>
-    {% endfor %}
-{% endcall %}
+<div id="tabla-paginada">
+{% include "admin/_usuarios_partial.html" %}
+</div>
 
 
 {# ── Modal crear/editar ── #}
@@ -261,6 +193,5 @@
 {% endblock %}
 
 {% block scripts %}
-    <script type="application/json" id="usuariosData">{{ usuarios | tojson }}</script>
     <script type="module" src="{{ url_for('static', filename='js/pages/usuarios.js') }}"></script>
 {% endblock %}

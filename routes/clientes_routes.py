@@ -34,13 +34,15 @@ def clientes():
     pagina = request.args.get("pagina", 1, type=int)
     incluir_eliminados = request.args.get("eliminados") == "1"
     data = listar_clientes_service(q=q, pagina=pagina, incluir_eliminados=incluir_eliminados)
-    return render_template(
-        "clientes/clientes.html",
+    ctx = dict(
         clientes=data["clientes"], q=q, pagina=pagina,
         total_paginas=data["total_paginas"],
         total_clientes=data["total_clientes"],
         incluir_eliminados=incluir_eliminados
     )
+    if request.args.get('partial') == '1':
+        return render_template("clientes/_clientes_partial.html", **ctx)
+    return render_template("clientes/clientes.html", **ctx)
 
 
 @clientes_bp.route("/clientes/guardar", methods=["POST"])

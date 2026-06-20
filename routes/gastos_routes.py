@@ -40,12 +40,14 @@ def gastos():
         fecha_fin=fecha_fin, pagina=pagina,
         incluir_eliminados=incluir_eliminados
     )
-    return render_template(
-        "admin/gastos.html",
+    ctx = dict(
         gastos=data["gastos"], negocios=obtener_negocios(),
         pagina=pagina, total_paginas=data["total_paginas"],
         incluir_eliminados=incluir_eliminados
     )
+    if request.args.get('partial') == '1':
+        return render_template("admin/_gastos_partial.html", **ctx)
+    return render_template("admin/gastos.html", **ctx)
 
 
 @gastos_bp.route("/gastos/guardar", methods=["POST"])

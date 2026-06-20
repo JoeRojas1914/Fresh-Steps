@@ -140,6 +140,8 @@ def ventas_listas():
 
     data = listar_ventas_listas_service(id_negocio, pagina, id_venta, q=q)
 
+    if request.args.get('partial') == '1':
+        return render_template("ventas/_listas_partial.html", **data)
     return render_template("ventas/ventas_listas.html", **data)
 
 
@@ -154,6 +156,8 @@ def ventas_pendientes():
 
         data = listar_entregas_pendientes_service(id_negocio, pagina, id_venta, q=q)
 
+        if request.args.get('partial') == '1':
+            return render_template("ventas/_pendientes_partial.html", **data)
         return render_template("ventas/ventas_pendientes.html", **data)
 
     except Exception:
@@ -255,6 +259,8 @@ def historial_ventas():
         q=q, id_venta=id_venta, estado=estado, tipo_fecha=tipo_fecha,
     )
 
+    if request.args.get('partial') == '1':
+        return render_template("ventas/_historial_partial.html", **data)
     return render_template("ventas/historial_ventas.html", **data)
 
 

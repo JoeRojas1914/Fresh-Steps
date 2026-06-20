@@ -2,11 +2,12 @@ import { abrirModal } from '../components/modal.js';
 import { escapeHtml } from '../base/helpers.js';
 import { toggleDetalles } from './detalles_venta.js';
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".btn-historial-venta");
+    if (btn) verHistorialVenta(btn.dataset.id);
+});
 
-    document.querySelectorAll(".btn-historial-venta").forEach(btn => {
-        btn.addEventListener("click", () => verHistorialVenta(btn.dataset.id));
-    });
+document.addEventListener("DOMContentLoaded", () => {
 
     const toggleEliminadas = document.getElementById("toggle-eliminadas");
     if (toggleEliminadas) {

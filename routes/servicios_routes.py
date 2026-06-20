@@ -45,8 +45,7 @@ def servicios():
 
     negocios = obtener_negocios()
 
-    return render_template(
-        "admin/servicios.html",
+    ctx = dict(
         servicios=data["servicios"],
         negocios=negocios,
         id_negocio=id_negocio,
@@ -56,6 +55,9 @@ def servicios():
         total_servicios=data["total"],
         incluir_eliminados=incluir_eliminados
     )
+    if request.args.get('partial') == '1':
+        return render_template("admin/_servicios_partial.html", **ctx)
+    return render_template("admin/servicios.html", **ctx)
 
 
 

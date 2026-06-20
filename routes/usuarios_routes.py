@@ -17,26 +17,28 @@ usuarios_bp = Blueprint("usuarios", __name__)
 @usuarios_bp.route("/usuarios")
 @admin_required
 def listar_usuarios():
-    q      = request.args.get("q", "").strip()
-    rol    = request.args.get("rol", "")
-    activo = request.args.get("activo", "")
+    q                = request.args.get("q", "").strip()
+    pagina           = request.args.get("pagina", 1, type=int)
+    mostrar_inactivos = request.args.get("inactivos") == "1"
+    activo_val       = None if mostrar_inactivos else 1
 
-    activo_val = None
-    if activo == "1":   activo_val = 1
-    elif activo == "0": activo_val = 0
-
-    usuarios = listar_usuarios_service(
+    data = listar_usuarios_service(
         q=q or None,
-        rol=rol or None,
-        activo=activo_val
+        activo=activo_val,
+        pagina=pagina,
     )
 
-    return render_template(
-        "admin/usuarios.html",
-        usuarios=usuarios,
-        total_usuarios=len(usuarios),
-        q=q, rol=rol, activo=activo
+    ctx = dict(
+        usuarios=data["usuarios"],
+        total_usuarios=data["total"],
+        total_paginas=data["total_paginas"],
+        pagina=pagina,
+        q=q,
+        mostrar_inactivos=mostrar_inactivos,
     )
+    if request.args.get("partial") == "1":
+        return render_template("admin/_usuarios_partial.html", **ctx)
+    return render_template("admin/usuarios.html", **ctx)
 
 
 @usuarios_bp.route("/usuarios/guardar", methods=["POST"])

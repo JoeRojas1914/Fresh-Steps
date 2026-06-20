@@ -1,0 +1,88 @@
+{% from "components/table.html" import table %}
+{% from "components/pagination.html" import pagination %}
+
+{% call table([
+    "Usuario", "Nombre completo", "Teléfono", "Correo",
+    "Rol", "Estado", "Creado", "Acciones"
+]) %}
+    {% for u in usuarios %}
+    <tr>
+        <td><strong>{{ u.usuario }}</strong></td>
+
+        <td>
+            {% if u.nombre or u.apellido %}
+                {{ u.nombre or '' }} {{ u.apellido or '' }}
+            {% else %}
+                <span class="dim">—</span>
+            {% endif %}
+        </td>
+
+        <td>{{ u.telefono or '—' }}</td>
+        <td>{{ u.correo   or '—' }}</td>
+
+        <td>
+            {% if u.rol == 'admin' %}
+                <span class="status status-completado">Admin</span>
+            {% else %}
+                <span class="status status-pendiente">Caja</span>
+            {% endif %}
+        </td>
+
+        <td>
+            {% if u.activo %}
+                <span class="status status-completado">Activo</span>
+            {% else %}
+                <span class="status status-pendiente">Inactivo</span>
+            {% endif %}
+        </td>
+
+        <td>{{ u.creado_en.strftime('%d/%m/%Y') if u.creado_en else '—' }}</td>
+
+        <td>
+        {% if u.rol != 'admin' %}
+            <button class="btn btn--info btn--sm no-row-click js-editar-usuario"
+                data-id="{{ u.id_usuario }}"
+                data-usuario="{{ u.usuario }}"
+                data-nombre="{{ u.nombre or '' }}"
+                data-apellido="{{ u.apellido or '' }}"
+                data-telefono="{{ u.telefono or '' }}"
+                data-correo="{{ u.correo or '' }}"
+                data-cp="{{ u.cp or '' }}"
+                data-rol="{{ u.rol or 'caja' }}">
+                Editar
+            </button>
+
+            <button class="btn btn--warning btn--sm no-row-click js-ver-historial-usuario"
+                data-id="{{ u.id_usuario }}">
+                Cambios
+            </button>
+
+            <button type="button"
+                    class="btn btn--danger btn--sm no-row-click js-confirmar-toggle"
+                    data-id="{{ u.id_usuario }}"
+                    data-accion="{{ 'Desactivar' if u.activo else 'Activar' }}">
+                {{ 'Desactivar' if u.activo else 'Activar' }}
+            </button>
+        {% else %}
+            <span class="dim text-sm">Protegido</span>
+        {% endif %}
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="8" class="dim td-empty">
+            No se encontraron usuarios con esos filtros.
+        </td>
+    </tr>
+    {% endfor %}
+{% endcall %}
+
+{{ pagination(
+    pagina,
+    total_paginas,
+    'usuarios.listar_usuarios',
+    {
+        "q": q,
+        "inactivos": "1" if mostrar_inactivos else None
+    }
+) }}

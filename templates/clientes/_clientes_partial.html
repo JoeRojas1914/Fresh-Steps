@@ -1,0 +1,94 @@
+{% from "components/table.html" import table %}
+{% from "components/pagination.html" import pagination %}
+
+{% call table([
+    "Nombre",
+    "Teléfono",
+    "Cód. Postal",
+    "Pedidos",
+    "Estado",
+    "Acciones"
+]) %}
+
+    {% for c in clientes %}
+    <tr
+        data-href="{{ url_for('clientes.ver_cliente', id_cliente=c.id_cliente) }}"
+        class="clickable-row"
+    >
+
+        <td>{{ c.nombre }} {{ c.apellido }}</td>
+
+        <td>{{ c.telefono }}</td>
+
+        <td>
+            {% if c.direccion %}
+                {{ c.direccion }}
+            {% else %}
+                <span class="dim">—</span>
+            {% endif %}
+        </td>
+
+        <td>{{ c.total_pedidos }}</td>
+
+        <td>
+            {% if c.activo %}
+                <span class="status status-completado">Activo</span>
+            {% else %}
+                <span class="status status-pendiente">Eliminado</span>
+            {% endif %}
+        </td>
+
+        <td>
+        {% if c.activo %}
+
+            <button type="button"
+                class="btn btn--info btn--sm no-row-click js-editar-cliente"
+                data-id="{{ c.id_cliente }}"
+                data-nombre="{{ c.nombre }}"
+                data-apellido="{{ c.apellido }}"
+                data-correo="{{ c.correo or '' }}"
+                data-telefono="{{ c.telefono }}"
+                data-direccion="{{ c.direccion or '' }}">
+                Editar
+            </button>
+
+            <a href="{{ url_for('clientes.ver_cliente', id_cliente=c.id_cliente) }}"
+               class="btn btn--success btn--sm no-underline no-row-click">
+                Ver perfil
+            </a>
+
+            <button type="button"
+                    class="btn btn--warning btn--sm no-row-click js-ver-historial-cliente"
+                    data-id="{{ c.id_cliente }}">
+                Cambios
+            </button>
+
+            <button type="button"
+                    class="btn btn--danger btn--sm no-row-click js-confirmar-eliminar-cliente"
+                    data-id="{{ c.id_cliente }}">
+                Eliminar
+            </button>
+
+        {% else %}
+
+            <button type="button"
+                    class="btn btn--primary btn--sm no-row-click js-restaurar-cliente"
+                    data-id="{{ c.id_cliente }}">
+                Restaurar
+            </button>
+
+        {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+
+{% endcall %}
+
+{{ pagination(
+    pagina,
+    total_paginas,
+    'clientes.clientes',
+    {
+      "eliminados": request.args.get('eliminados')
+    }
+) }}

@@ -1,51 +1,36 @@
 import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, normalizar, escapeHtml } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, escapeHtml } from '../base/helpers.js';
 import { validarRequerido, validarTelefono, validarPassword, validarPin, validarUsername } from '../base/form_validators.js';
 import { abrirHistorial } from '../base/historial_helpers.js';
-
-const _usuariosMap = (() => {
-    const el = document.getElementById("usuariosData");
-    if (!el) return {};
-    try {
-        const lista = JSON.parse(el.textContent);
-        return Object.fromEntries(lista.map(u => [u.id_usuario, u]));
-    } catch { return {}; }
-})();
 
 (function () {
     const input       = document.getElementById("buscar-input");
     const toggleInact = document.getElementById("toggle-inactivos");
-    const tbody       = document.querySelector("tbody");
 
-    if (!input) return;
-
-    function aplicarFiltros() {
-        const q            = normalizar(input.value);
-        const verInactivos = toggleInact.checked;
-
-        const filas = Array.from(document.querySelectorAll("tbody tr[data-id]"));
-
-        filas.forEach(fila => {
-            const texto  = normalizar(fila.dataset.buscar || "");
-            const activo = fila.dataset.activo === "1";
-            const esAdmin = fila.dataset.rol === "admin";
-
-            const okQ      = !q || texto.includes(q);
-            const okActivo = esAdmin || activo || verInactivos;
-
-            fila.style.display = (okQ && okActivo) ? "" : "none";
+    if (input) {
+        let debounceTimer;
+        input.addEventListener("input", () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const url = new URL(window.location.href);
+                const q = input.value.trim();
+                url.searchParams.delete("pagina");
+                if (q) url.searchParams.set("q", q);
+                else   url.searchParams.delete("q");
+                window.location.href = url.toString();
+            }, 500);
         });
-
-        const adminFila = filas.find(f => f.dataset.rol === "admin");
-        if (adminFila && tbody) {
-            tbody.prepend(adminFila);
-        }
     }
 
-    input.addEventListener("input", aplicarFiltros);
-    toggleInact.addEventListener("change", aplicarFiltros);
-
-    aplicarFiltros();
+    if (toggleInact) {
+        toggleInact.addEventListener("change", () => {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("pagina");
+            if (toggleInact.checked) url.searchParams.set("inactivos", "1");
+            else                     url.searchParams.delete("inactivos");
+            window.location.href = url.toString();
+        });
+    }
 }());
 
 
@@ -87,18 +72,19 @@ function abrirModalUsuario() {
 }
 
 
-function editarUsuario(e, u) {
+function editarUsuario(e, btn) {
     e.stopPropagation();
+    const d = btn.dataset;
 
     document.getElementById("modalTitulo").innerText = "Editar usuario";
-    document.getElementById("id_usuario").value      = u.id_usuario;
-    document.getElementById("usuario").value         = u.usuario     || "";
-    document.getElementById("u_nombre").value        = u.nombre      || "";
-    document.getElementById("u_apellido").value      = u.apellido    || "";
-    document.getElementById("u_telefono").value      = u.telefono    || "";
-    document.getElementById("u_correo").value        = u.correo      || "";
-    document.getElementById("u_cp").value            = u.cp          || "";
-    document.getElementById("u_rol").value           = u.rol         || "caja";
+    document.getElementById("id_usuario").value      = d.id;
+    document.getElementById("usuario").value         = d.usuario   || "";
+    document.getElementById("u_nombre").value        = d.nombre    || "";
+    document.getElementById("u_apellido").value      = d.apellido  || "";
+    document.getElementById("u_telefono").value      = d.telefono  || "";
+    document.getElementById("u_correo").value        = d.correo    || "";
+    document.getElementById("u_cp").value            = d.cp        || "";
+    document.getElementById("u_rol").value           = d.rol       || "caja";
     document.getElementById("password").value        = "";
     document.getElementById("pin").value             = "";
 
@@ -168,12 +154,7 @@ document.addEventListener("click", function (e) {
     if (btnAbrir) { abrirModalUsuario(); return; }
 
     const btnEditar = e.target.closest(".js-editar-usuario");
-    if (btnEditar) {
-        e.stopPropagation();
-        const u = _usuariosMap[parseInt(btnEditar.dataset.id)];
-        if (u) editarUsuario(e, u);
-        return;
-    }
+    if (btnEditar) { editarUsuario(e, btnEditar); return; }
 
     const btnToggle = e.target.closest(".js-confirmar-toggle");
     if (btnToggle) { confirmarToggleUsuario(parseInt(btnToggle.dataset.id), btnToggle.dataset.accion); return; }

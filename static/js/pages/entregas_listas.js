@@ -25,15 +25,14 @@ document.addEventListener("DOMContentLoaded", () => {
         btnConfirmarRevertir.addEventListener("click", confirmarRevertir);
     }
 
-    document.querySelectorAll(".btn-entregar").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const idVenta = parseInt(btn.dataset.id);
-            const deuda   = parseFloat(btn.dataset.deuda);
-            const pagado  = parseFloat(btn.dataset.pagado);
-            const total   = parseFloat(btn.dataset.total);
-
-            abrirModalEntrega(idVenta, deuda, pagado, total);
-        });
+    document.addEventListener("click", function (e) {
+        const btn = e.target.closest(".btn-entregar");
+        if (!btn) return;
+        const idVenta = parseInt(btn.dataset.id);
+        const deuda   = parseFloat(btn.dataset.deuda);
+        const pagado  = parseFloat(btn.dataset.pagado);
+        const total   = parseFloat(btn.dataset.total);
+        abrirModalEntrega(idVenta, deuda, pagado, total);
     });
 
     const metodoPagoFinal = document.getElementById("metodoPagoFinal");

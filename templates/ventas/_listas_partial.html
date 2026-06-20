@@ -1,0 +1,134 @@
+{% from "macros/badges.html" import badge_negocio %}
+{% from "components/table.html" import table %}
+{% from "components/pagination.html" import pagination %}
+
+{% if ventas %}
+
+<div id="toast-container"></div>
+
+<div id="tabla-ventas">
+{% call table([
+"Recibo",
+"Negocio",
+"Cliente",
+"Teléfono",
+"Fecha Recibo",
+"Fecha estimada",
+"Total",
+"Monto prepago",
+"Pago a deber",
+"Detalles",
+"Acción"
+]) %}
+
+{% set meses = {
+    1:'enero', 2:'febrero', 3:'marzo', 4:'abril',
+    5:'mayo', 6:'junio', 7:'julio', 8:'agosto',
+    9:'septiembre', 10:'octubre', 11:'noviembre', 12:'diciembre'
+} %}
+
+{% for v in ventas %}
+    {% set total = v.total | float(0) %}
+    {% set pagado = v.total_pagado | float(0) %}
+    {% set deuda = v.saldo_pendiente | float(0) %}
+
+<tr>
+    <td>#{{ v.id_venta }}</td>
+    <td>{{ badge_negocio(v.negocio) }}</td>
+    <td>{{ v.nombre }} {{ v.apellido }}</td>
+
+    <td>
+        {% if v.telefono %}
+            {{ v.telefono }}
+        {% else %}
+            <span class="dim">Sin teléfono</span>
+        {% endif %}
+    </td>
+
+    <td>
+        {{ v.fecha_recibo.day }} {{ meses[v.fecha_recibo.month] }}
+        {{ "%02d:%02d"|format(v.fecha_recibo.hour, v.fecha_recibo.minute) }}
+    </td>
+
+    <td>
+        {{ v.fecha_estimada.day }} {{ meses[v.fecha_estimada.month] }}
+        {{ "%02d:%02d"|format(v.fecha_estimada.hour, v.fecha_estimada.minute) }}
+    </td>
+
+    <td>${{ total | round(2) }}</td>
+
+    <td>
+        {% if v.total_pagado > 0 %}
+            ${{ pagado | round(2) }}
+        {% else %}
+            <span class="dim-soft">Sin prepago</span>
+        {% endif %}
+    </td>
+
+    <td>${{ deuda | round(2) }}</td>
+
+    <td>
+        <button class="btn btn--info btn--sm btn-detalles" data-id="{{ v.id_venta }}">
+            <i data-lucide="chevron-down" width="14" height="14" class="chevron-icon transition-transform"></i> Detalles
+        </button>
+    </td>
+
+    <td>
+        <button
+            class="btn btn--success btn--sm btn-entregar"
+            data-id="{{ v.id_venta }}"
+            data-deuda="{{ deuda }}"
+            data-pagado="{{ pagado }}"
+            data-total="{{ total }}">
+            <i data-lucide="check-circle" width="14" height="14"></i> Entregar
+        </button>
+    </td>
+</tr>
+
+<tr id="detalles-{{ v.id_venta }}" class="table--details d-none">
+    <td colspan="11">
+        <div class="detalles-box">
+            <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta</div>
+
+            <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}">
+                <li class="dim-soft">Cargando detalles...</li>
+            </ul>
+
+            <div class="btn-row">
+                {% if session.get("rol") == "admin" %}
+                <button type="button"
+                        class="btn btn--danger btn--sm btn-eliminar"
+                        data-id="{{ v.id_venta }}">
+                    Eliminar
+                </button>
+                <button type="button"
+                        class="btn btn--warning btn--sm btn-revertir"
+                        data-id="{{ v.id_venta }}">
+                    <i data-lucide="undo-2" width="14" height="14"></i> Regresar a pendiente
+                </button>
+                {% endif %}
+                <button type="button"
+                        class="btn btn--info btn--sm js-ver-ticket"
+                        data-url="{{ url_for('ventas.venta_ticket', id_venta=v.id_venta) }}">
+                    <i data-lucide="receipt" width="14" height="14"></i> Ver ticket
+                </button>
+            </div>
+        </div>
+    </td>
+</tr>
+
+{% endfor %}
+
+{% endcall %}
+</div>
+
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon"><i data-lucide="package" width="48" height="48"></i></div>
+    <h3>Sin entregas procesadas</h3>
+    <p>No hay ventas listas para entregar en este momento.</p>
+</div>
+{% endif %}
+
+{{ pagination(pagina, total_paginas, "ventas.ventas_listas",
+    {"id_negocio": id_negocio, "id_venta": id_venta, "q": q}) }}

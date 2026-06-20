@@ -2,32 +2,38 @@ import json
 from db import get_db
 
 
-def obtener_usuarios(q=None, rol=None, activo=None):
+def obtener_usuarios(q=None, rol=None, activo=None, pagina=1, por_pagina=20):
     with get_db() as (_, cursor):
-        sql = """
-            SELECT id_usuario, usuario, nombre, apellido,
-                   telefono, correo, cp, rol, activo, creado_en
-            FROM usuario
-            WHERE 1=1
-        """
+        where = "FROM usuario WHERE 1=1"
         params = []
 
         if q:
-            sql += " AND (usuario LIKE %s OR nombre LIKE %s OR apellido LIKE %s OR telefono LIKE %s)"
+            where += " AND (usuario LIKE %s OR nombre LIKE %s OR apellido LIKE %s OR telefono LIKE %s)"
             like = f"%{q}%"
             params += [like, like, like, like]
 
         if rol:
-            sql += " AND rol = %s"
+            where += " AND rol = %s"
             params.append(rol)
 
         if activo is not None:
-            sql += " AND activo = %s"
+            where += " AND activo = %s"
             params.append(activo)
 
-        sql += " ORDER BY CASE WHEN rol = 'admin' THEN 0 ELSE 1 END, creado_en DESC"
-        cursor.execute(sql, params)
-        return cursor.fetchall()
+        cursor.execute(f"SELECT COUNT(*) AS cnt {where}", params)
+        total = cursor.fetchone()["cnt"]
+        total_paginas = max(1, (total + por_pagina - 1) // por_pagina)
+
+        offset = (pagina - 1) * por_pagina
+        cursor.execute(
+            f"""SELECT id_usuario, usuario, nombre, apellido,
+                       telefono, correo, cp, rol, activo, creado_en
+                {where}
+                ORDER BY CASE WHEN rol = 'admin' THEN 0 ELSE 1 END, creado_en DESC
+                LIMIT %s OFFSET %s""",
+            params + [por_pagina, offset],
+        )
+        return {"usuarios": cursor.fetchall(), "total": total, "total_paginas": total_paginas}
 
 
 def obtener_usuario_por_id(id_usuario):
