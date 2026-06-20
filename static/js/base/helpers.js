@@ -151,11 +151,12 @@ export function crearEliminarHandler(modalId) {
         ejecutar() {
             if (!_pendingUrl) return;
             const url = _pendingUrl;
-            if (_pendingRow) {
-                _pendingRow.classList.add("row--removing");
-                _pendingRow.addEventListener("animationend", () => {
-                    location.href = url;
-                }, { once: true });
+            const row = _pendingRow;
+            _pendingUrl = null;
+            _pendingRow = null;
+            if (row) {
+                row.classList.add("row--removing");
+                setTimeout(() => { location.href = url; }, 300);
             } else {
                 location.href = url;
             }

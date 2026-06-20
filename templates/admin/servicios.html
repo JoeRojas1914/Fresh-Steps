@@ -144,7 +144,8 @@
 
             <button type="button"
                     class="btn btn--danger btn--sm js-confirmar-eliminar-servicio"
-                    data-id="{{ s.id_servicio }}">
+                    data-id="{{ s.id_servicio }}"
+                    data-nombre="{{ s.nombre }}">
                 Eliminar
             </button>
 
@@ -194,8 +195,7 @@
       <i data-lucide="trash-2" width="32" height="32"></i>
     </div>
   </div>
-  <p class="modal-confirm__title">¿Eliminar este servicio?</p>
-  <p class="modal-confirm__sub">Esta acción no se puede deshacer.</p>
+  <p class="modal-confirm__title" id="servicioNombreEliminar">¿Eliminar este servicio?</p>
 </div>
 {% endif %}
 {% if section == 'footer' %}

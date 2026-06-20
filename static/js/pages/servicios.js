@@ -91,7 +91,12 @@ document.addEventListener("click", function (e) {
     if (btnHistorial) { verHistorialServicio(parseInt(btnHistorial.dataset.id)); return; }
 
     const btnEliminar = e.target.closest(".js-confirmar-eliminar-servicio");
-    if (btnEliminar) { _eliminarServicio.confirmar(`/servicios/eliminar/${btnEliminar.dataset.id}`, btnEliminar.closest("tr")); return; }
+    if (btnEliminar) {
+        const el = document.getElementById("servicioNombreEliminar");
+        if (el) el.innerHTML = `¿Seguro que deseas eliminar?<br><span>${btnEliminar.dataset.nombre}</span>`;
+        _eliminarServicio.confirmar(`/servicios/eliminar/${btnEliminar.dataset.id}`, btnEliminar.closest("tr"));
+        return;
+    }
 
     const btnEjecutar = e.target.closest(".js-ejecutar-eliminar-servicio");
     if (btnEjecutar) { ejecutarEliminarServicio(); return; }
