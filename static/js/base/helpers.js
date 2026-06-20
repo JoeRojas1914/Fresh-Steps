@@ -209,6 +209,18 @@ export function initModalForm(form, submitBtn) {
 }
 
 
+export function scrollToFirstError(container) {
+    const root  = container || document;
+    const first = root.querySelector(".field--invalid");
+    if (!first) return;
+    first.scrollIntoView({ behavior: "smooth", block: "center" });
+    first.classList.remove("field--error-pulse");
+    void first.offsetWidth;
+    first.classList.add("field--error-pulse");
+    first.addEventListener("animationend", () => first.classList.remove("field--error-pulse"), { once: true });
+}
+
+
 export function shakeEl(el) {
     if (!el) return;
     el.classList.remove("shake");

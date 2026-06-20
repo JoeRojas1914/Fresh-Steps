@@ -94,10 +94,19 @@ export function calcularTotal(bruto = false) {
     return total;
 }
 
+let _prevTotal = null;
+
 export function actualizarTotal() {
+    const el    = document.getElementById("total-venta");
     const total = calcularTotal();
-    document.getElementById("total-venta").innerText =
-        `Total: $${total.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    el.innerText = `Total: $${total.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (_prevTotal !== null && total !== _prevTotal) {
+        el.classList.remove("total-amount--pulse");
+        void el.offsetWidth;
+        el.classList.add("total-amount--pulse");
+        el.addEventListener("animationend", () => el.classList.remove("total-amount--pulse"), { once: true });
+    }
+    _prevTotal = total;
 }
 
 /* ─── Validación ─────────────────────────────────────────────────────────── */

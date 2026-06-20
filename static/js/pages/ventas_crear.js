@@ -1,5 +1,5 @@
 import { ventaState } from './ventas_state.js';
-import { mostrarFeedback, initModalForm } from '../base/helpers.js';
+import { mostrarFeedback, initModalForm, scrollToFirstError } from '../base/helpers.js';
 import { buscarClientes, crearCliente } from './ventas_clientes.js';
 import { seleccionarNegocio, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado } from './ventas_servicios.js';
 import { agregarArticulo, cerrarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
@@ -14,7 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const q     = document.getElementById("buscar-cliente").value.trim();
         const lista = document.getElementById("lista-clientes");
         if (q.length < 2) { lista.innerHTML = ""; return; }
-        lista.innerHTML = `<div class="result-item resultado-buscando">Buscando...</div>`;
+        lista.innerHTML = `
+            <div class="skeleton-result"><div class="skeleton" style="width:65%;height:13px;border-radius:6px"></div><div class="skeleton" style="width:40%;height:11px;border-radius:6px"></div></div>
+            <div class="skeleton-result"><div class="skeleton" style="width:75%;height:13px;border-radius:6px"></div><div class="skeleton" style="width:50%;height:11px;border-radius:6px"></div></div>
+            <div class="skeleton-result"><div class="skeleton" style="width:55%;height:13px;border-radius:6px"></div><div class="skeleton" style="width:45%;height:11px;border-radius:6px"></div></div>
+        `;
         _buscarTimer = setTimeout(buscarClientes, 350);
     });
 
@@ -76,6 +80,12 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 window.open(`/ventas/ticket/${data.id_venta}?copias=2`, "_blank");
             }
+            if (btnCrear) {
+                btnCrear.disabled = false;
+                btnCrear.classList.replace("btn--primary", "btn--success");
+                btnCrear.textContent = "✓ Venta registrada";
+            }
+            await new Promise(r => setTimeout(r, 650));
             window.location.href = "/";
 
         } catch (err) {
@@ -160,6 +170,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const box           = btn.closest(".servicios-box");
             const indexArticulo = parseInt(box?.dataset?.articulo ?? "0");
             eliminarServicioPro(btn, indexArticulo);
+        }
+    });
+
+    /* ── Scroll al primer error al intentar enviar con btn deshabilitado ── */
+    document.getElementById("btn-crear").addEventListener("click", () => {
+        if (document.getElementById("btn-crear").disabled) {
+            scrollToFirstError(document.getElementById("formVenta"));
         }
     });
 

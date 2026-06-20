@@ -259,6 +259,31 @@
   color: var(--color-primary-dark);
   text-align: center;
   margin-bottom: 12px;
+  border-radius: 8px;
+  display: inline-block;
+  width: 100%;
+  padding: 4px 0;
+}
+
+@keyframes totalPulse {
+  0%   { color: var(--color-primary-dark); transform: scale(1); }
+  40%  { color: #b45309;                  transform: scale(1.05); }
+  100% { color: var(--color-primary-dark); transform: scale(1); }
+}
+
+.total-amount--pulse { animation: totalPulse 0.4s ease; }
+
+.skeleton-result {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e8eef5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#btn-crear:disabled {
+  pointer-events: auto;
+  cursor: not-allowed;
 }
 
 .error-msg {

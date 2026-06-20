@@ -1,5 +1,24 @@
 lucide.createIcons();
 
+(function () {
+    const loader = document.getElementById("page-loader");
+    if (!loader) return;
+
+    window.addEventListener("pageshow", () => {
+        loader.className = "is-done";
+        setTimeout(() => { loader.className = ""; }, 500);
+    });
+
+    document.addEventListener("click", e => {
+        const link = e.target.closest("a[href]");
+        if (!link) return;
+        const href = link.getAttribute("href");
+        if (!href || href.startsWith("#") || href.startsWith("javascript") ||
+            link.target === "_blank" || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        loader.className = "is-loading";
+    });
+}());
+
 document.addEventListener("click", function(e) {
     const btn = e.target.closest(".btn");
     if (!btn || btn.disabled) return;
