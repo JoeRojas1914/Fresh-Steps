@@ -36,6 +36,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    const metodoPagoFinal = document.getElementById("metodoPagoFinal");
+    if (metodoPagoFinal) {
+        metodoPagoFinal.addEventListener("change", function () {
+            if (saldoPendienteActual > 0) {
+                document.getElementById("btnConfirmarEntrega").disabled = !this.value;
+            }
+        });
+    }
+
 });
 
 
@@ -58,7 +67,8 @@ function abrirModalEntrega(idVenta, deuda, pagado, total) {
         bloquePago.style.display    = "block";
 
         document.getElementById("montoPendiente").innerText = `$${deuda.toFixed(2)}`;
-        btnConfirmar.onclick = confirmarPagoYEntrega;
+        btnConfirmar.disabled = true;
+        btnConfirmar.onclick  = confirmarPagoYEntrega;
     }
 }
 
@@ -131,6 +141,9 @@ function cerrarModalEntrega() {
 
     const metodo = document.getElementById("metodoPagoFinal");
     if (metodo) metodo.value = "";
+
+    const btnConfirmar = document.getElementById("btnConfirmarEntrega");
+    if (btnConfirmar) btnConfirmar.disabled = false;
 
     const texto  = document.getElementById("textoSinDeuda");
     const bloque = document.getElementById("bloquePago");
