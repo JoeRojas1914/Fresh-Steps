@@ -1,3 +1,5 @@
+.flash-source { display: none; }
+
 /* ── Keyframes ── */
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(20px); }

@@ -75,7 +75,7 @@ _is_dev = os.getenv("FLASK_ENV") == "development"
 _CSP = {
     "default-src": "'self'",
     "script-src": "'self'",
-    "style-src": ["'self'", "fonts.googleapis.com", "'unsafe-inline'"],
+    "style-src": ["'self'", "fonts.googleapis.com"],
     "font-src": ["'self'", "fonts.gstatic.com"],
     "img-src": ["'self'", "data:"],
     "connect-src": "'self'",
@@ -195,6 +195,7 @@ def index():
 
 
 @app.route("/api/index/kpis")
+@limiter.limit("60 per minute")
 def api_index_kpis():
     if not session.get("id_usuario"):
         return jsonify({"error": "No autorizado"}), 401

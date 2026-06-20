@@ -1,3 +1,8 @@
+#btn-exportar-stats {
+    align-self: flex-end;
+    white-space: nowrap;
+}
+
 .stats-page {
     display: flex;
     gap: 20px;

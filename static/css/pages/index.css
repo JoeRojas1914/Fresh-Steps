@@ -1,6 +1,10 @@
 [data-kpi] { transition: opacity 0.12s; }
 [data-kpi].kpi-loading { opacity: 0.35; }
 
+.pill-dot--calzado    { background: #3b82f6; }
+.pill-dot--confeccion { background: #22c55e; }
+.pill-dot--maquila    { background: #f97316; }
+
 .home-header {
     display: flex;
     align-items: flex-end;

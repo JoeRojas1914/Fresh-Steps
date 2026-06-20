@@ -12,14 +12,14 @@
     <button class="modo-btn active" data-modo="mes"><i data-lucide="calendar" width="14" height="14"></i> Mes</button>
     <button class="modo-btn" data-modo="personalizado"><i data-lucide="search" width="14" height="14"></i> Personalizado</button>
 
-    <div class="filtro-item filtro-item--max200" style="margin-left:auto;">
-        <label style="font-size:0.75rem;color:var(--text-muted,#64748b);margin-bottom:3px;display:block;">Filtrar por</label>
-        <select id="tipo-fecha" style="font-size:0.8rem;">
+    <div class="filtro-item filtro-item--max200 filtro-item--ml-auto">
+        <label class="filtro-sublabel">Filtrar por</label>
+        <select id="tipo-fecha" class="select--sm">
             <option value="fecha_recibo">Fecha de recibo</option>
             <option value="fecha_entrega">Fecha de entrega</option>
         </select>
     </div>
-    <button id="btn-exportar-stats" class="btn btn--success btn--sm" style="align-self:flex-end;white-space:nowrap;">
+    <button id="btn-exportar-stats" class="btn btn--success btn--sm">
         <i data-lucide="download" width="14" height="14"></i> Exportar Excel
     </button>
 </div>
