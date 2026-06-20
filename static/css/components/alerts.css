@@ -50,6 +50,23 @@
     border-left: 4px solid #3b82f6;
 }
 
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    border-radius: 0 0 12px 12px;
+    background: currentColor;
+    opacity: 0.35;
+    width: 100%;
+    animation: toastProgress 4.5s linear forwards;
+}
+
+@keyframes toastProgress {
+    from { width: 100%; }
+    to   { width: 0%; }
+}
+
 #toast-container {
     position: fixed;
     top: 24px;
@@ -72,6 +89,8 @@
     pointer-events: auto;
     cursor: pointer;
     animation: slideDown 0.25s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 @media (max-width: 480px) {

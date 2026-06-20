@@ -539,20 +539,20 @@ async function cargarDashboard() {
         } else { if(cardN) cardN.style.display="none"; }
 
         const elCU = document.getElementById("clientesUnicos");
-        if (elCU && data.clientes_unicos !== undefined) elCU.textContent = fmtN(data.clientes_unicos);
+        if (elCU && data.clientes_unicos !== undefined) countUp(elCU, Number(data.clientes_unicos), false);
 
         const elCN = document.getElementById("clientesNuevos");
-        if (elCN && data.clientes_nuevos !== undefined) elCN.textContent = fmtN(data.clientes_nuevos);
+        if (elCN && data.clientes_nuevos !== undefined) countUp(elCN, Number(data.clientes_nuevos), false);
 
         if (data.tasa_retorno) {
             const elTR  = document.getElementById("tasaRetorno");
             const elSub = document.getElementById("tasaRetornoSub");
-            if (elTR)  elTR.textContent  = `${data.tasa_retorno.tasa}%`;
+            if (elTR)  countUp(elTR, Number(data.tasa_retorno.tasa), false);
             if (elSub) elSub.textContent = `${fmtN(data.tasa_retorno.recurrentes)} de ${fmtN(data.tasa_retorno.total)} clientes`;
         }
 
         const elGP = document.getElementById("gastoPorCliente");
-        if (elGP && data.gasto_prom_cliente !== undefined) elGP.textContent = fmt$(data.gasto_prom_cliente);
+        if (elGP && data.gasto_prom_cliente !== undefined) countUp(elGP, Number(data.gasto_prom_cliente), true);
 
         renderTopClientes(data.top_clientes||[]);
 

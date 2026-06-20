@@ -23,7 +23,7 @@
 }
 
 .btn:hover   { transform: translateY(-1px); }
-.btn:active  { transform: translateY(0); box-shadow: none; }
+.btn:active  { transform: scale(0.95) translateY(1px); box-shadow: none; transition-duration: 0.08s; }
 
 .btn--primary       { background: #1e7fd6; }
 .btn--primary:hover { background: #1568b8; box-shadow: 0 6px 16px rgba(30,127,214,0.32); }

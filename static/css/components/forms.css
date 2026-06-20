@@ -8,12 +8,20 @@ input {
   border: 1px solid var(--color-border);
   font-size: 14px;
   box-sizing: border-box;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(47, 164, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(30, 127, 214, 0.15);
+  animation: inputFocusGlow 0.35s ease;
+}
+
+@keyframes inputFocusGlow {
+  0%   { box-shadow: 0 0 0 0px rgba(30, 127, 214, 0.4); }
+  60%  { box-shadow: 0 0 0 5px rgba(30, 127, 214, 0.12); }
+  100% { box-shadow: 0 0 0 3px rgba(30, 127, 214, 0.15); }
 }
 
 select {

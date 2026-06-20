@@ -20,8 +20,11 @@ function _appendToast(texto, tipo) {
     const container = _getContainer();
     if (!container || !texto) return;
     const div = document.createElement("div");
-    div.className   = `alert ${tipo}`;
+    div.className = `alert ${tipo}`;
     div.textContent = texto;
+    const bar = document.createElement("div");
+    bar.className = "toast-progress";
+    div.appendChild(bar);
     container.appendChild(div);
     _scheduleDismiss(div);
 }
