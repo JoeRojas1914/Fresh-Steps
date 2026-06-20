@@ -135,7 +135,7 @@ def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, of
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
             sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
             params.extend([like, like, like])
-        sql += " ORDER BY v.id_venta ASC"
+        sql += " ORDER BY v.id_negocio ASC, v.id_venta ASC"
         if limit is not None:
             sql += " LIMIT %s OFFSET %s"
             params.extend([limit, offset])
