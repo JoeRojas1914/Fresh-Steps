@@ -3,10 +3,10 @@ from datetime import datetime
 
 from services.auth_service import (
     login_password_service,
-    login_pin_service
+    login_pin_service,
+    invalidar_session_token_service,
 )
 from extensions import limiter
-from models.usuario import actualizar_session_token
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -103,7 +103,7 @@ def logout():
     id_usuario     = session.get("id_usuario")
 
     if id_usuario:
-        actualizar_session_token(id_usuario, None)
+        invalidar_session_token_service(id_usuario)
 
     session.clear()
 

@@ -1,3 +1,4 @@
+from utils import calcular_paginacion
 from models.gastos import (
     crear_gasto,
     actualizar_gasto,
@@ -17,14 +18,13 @@ def listar_gastos(
     por_pagina: int = 10,
     incluir_eliminados: bool = False,
 ) -> dict:
-    offset = (pagina - 1) * por_pagina
-
     total = contar_gastos(
         id_negocio=id_negocio,
         fecha_inicio=fecha_inicio,
         fecha_fin=fecha_fin,
         incluir_eliminados=incluir_eliminados
     )
+    offset, total_paginas = calcular_paginacion(total, pagina, por_pagina)
 
     gastos = obtener_gastos(
         id_negocio=id_negocio,
@@ -34,8 +34,6 @@ def listar_gastos(
         offset=offset,
         incluir_eliminados=incluir_eliminados
     )
-
-    total_paginas = (total + por_pagina - 1) // por_pagina
 
     return {
         "gastos":        gastos,

@@ -1,3 +1,4 @@
+from utils import calcular_paginacion
 from validators import validar_nombre, validar_correo, validar_telefono
 from models.clientes import (
     buscar_clientes,
@@ -23,10 +24,9 @@ def listar_clientes_service(
     por_pagina: int = 10,
     incluir_eliminados: bool = False,
 ) -> dict:
-    offset = (pagina - 1) * por_pagina
     total = contar_clientes(q, incluir_eliminados)
+    offset, total_paginas = calcular_paginacion(total, pagina, por_pagina)
     clientes = obtener_clientes(q, por_pagina, offset, incluir_eliminados)
-    total_paginas = (total + por_pagina - 1) // por_pagina
 
     ids = [c["id_cliente"] for c in clientes]
     pedidos_map = contar_pedidos_por_cliente(ids)
@@ -93,11 +93,9 @@ def obtener_cliente_detalle_service(
     fecha_fin    = filtros.get("fecha_fin")
     pagina       = int(filtros.get("pagina", 1))
 
-    offset = (pagina - 1) * pedidos_por_pagina
-
     cliente       = obtener_cliente_por_id(id_cliente)
     total_pedidos = contar_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin)
-    total_paginas = (total_pedidos + pedidos_por_pagina - 1) // pedidos_por_pagina
+    offset, total_paginas = calcular_paginacion(total_pedidos, pagina, pedidos_por_pagina)
     pedidos       = obtener_ventas_cliente(
         id_cliente, id_negocio, fecha_inicio, fecha_fin,
         pedidos_por_pagina, offset
@@ -127,3 +125,26 @@ def obtener_cliente_detalle_service(
         "pagina":        pagina,
         "total_paginas": total_paginas,
     }
+
+
+def exportar_clientes_service(incluir_eliminados: bool) -> tuple[list, dict]:
+    from config import MAX_FILAS_EXPORTAR
+    clientes    = obtener_clientes(limit=MAX_FILAS_EXPORTAR, offset=0, incluir_eliminados=incluir_eliminados)
+    ids         = [cl["id_cliente"] for cl in clientes]
+    pedidos_map = contar_pedidos_por_cliente(ids)
+    return clientes, pedidos_map
+
+
+def exportar_cliente_service(
+    id_cliente: int,
+    id_negocio=None,
+    fecha_inicio=None,
+    fecha_fin=None,
+) -> tuple[dict, list, dict, dict]:
+    from config import MAX_FILAS_EXPORTAR
+    cliente      = obtener_cliente_por_id(id_cliente)
+    pedidos      = obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limit=MAX_FILAS_EXPORTAR, offset=0)
+    ids_venta    = [p["id_venta"] for p in pedidos]
+    detalles_map = obtener_detalles_venta(ids_venta)
+    pagos_map    = obtener_pagos_venta(ids_venta)
+    return cliente, pedidos, detalles_map, pagos_map

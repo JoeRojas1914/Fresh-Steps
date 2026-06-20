@@ -22,7 +22,9 @@ from services.clientes_service import (
     restaurar_cliente_service,
     buscar_clientes_service,
     obtener_cliente_detalle_service,
-    obtener_historial_cliente_service
+    obtener_historial_cliente_service,
+    exportar_clientes_service,
+    exportar_cliente_service,
 )
 
 clientes_bp = Blueprint("clientes", __name__)
@@ -122,12 +124,8 @@ def api_crear_cliente():
 @clientes_bp.route("/clientes/exportar")
 @admin_required
 def exportar_clientes_excel():
-    from models.clientes import obtener_clientes, contar_pedidos_por_cliente
-
     incluir_eliminados = request.args.get("eliminados") == "1"
-    clientes = obtener_clientes(limit=MAX_FILAS_EXPORTAR, offset=0, incluir_eliminados=incluir_eliminados)
-    ids = [cl["id_cliente"] for cl in clientes]
-    pedidos_map = contar_pedidos_por_cliente(ids)
+    clientes, pedidos_map = exportar_clientes_service(incluir_eliminados)
 
     wb = Workbook()
     ws = wb.active
@@ -157,19 +155,13 @@ def exportar_clientes_excel():
 @clientes_bp.route("/clientes/<int:id_cliente>/exportar")
 @admin_required
 def exportar_cliente_excel(id_cliente):
-    from models.ventas_detalles import obtener_ventas_cliente, obtener_detalles_venta
-    from models.pagos import obtener_pagos_venta
-    from models.clientes import obtener_cliente_por_id
-
     id_negocio   = request.args.get("id_negocio")  or None
     fecha_inicio = request.args.get("fecha_inicio") or None
     fecha_fin    = request.args.get("fecha_fin")    or None
 
-    cliente      = obtener_cliente_por_id(id_cliente)
-    pedidos      = obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limit=MAX_FILAS_EXPORTAR, offset=0)
-    ids_venta    = [p["id_venta"] for p in pedidos]
-    detalles_map = obtener_detalles_venta(ids_venta)
-    pagos_map    = obtener_pagos_venta(ids_venta)
+    cliente, pedidos, detalles_map, pagos_map = exportar_cliente_service(
+        id_cliente, id_negocio, fecha_inicio, fecha_fin
+    )
 
     nombre_cliente = f"{cliente['nombre']} {cliente['apellido']}"
     filtro_txt = "  ".join(filter(None, [

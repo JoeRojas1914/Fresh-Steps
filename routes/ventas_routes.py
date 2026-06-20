@@ -3,7 +3,6 @@ import os
 import subprocess
 from datetime import date, datetime
 from flask import Blueprint, render_template, jsonify, session, request, send_file
-from models.ventas import obtener_historial_venta
 from services.excel_helpers import send_excel
 from services.excel_ventas_service import exportar_historial_service
 
@@ -17,6 +16,7 @@ from services.ventas_service import (
     marcar_entregada,
     obtener_venta,
     obtener_detalles_venta,
+    obtener_historial_venta,
     eliminar_venta_service,
     historial_ventas_service,
 )

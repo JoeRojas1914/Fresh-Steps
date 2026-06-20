@@ -30,6 +30,13 @@ def build_where(filters):
     return where, params
 
 
+def calcular_paginacion(total: int, pagina: int, por_pagina: int) -> tuple[int, int]:
+    """Devuelve (offset, total_paginas). Garantiza mínimo 1 página."""
+    offset        = (pagina - 1) * por_pagina
+    total_paginas = max(1, (total + por_pagina - 1) // por_pagina)
+    return offset, total_paginas
+
+
 def registrar_historial(
     cursor, tabla, campo_id, id_entidad, accion, id_usuario, antes=None, despues=None
 ):

@@ -113,3 +113,7 @@ def login_pin_service(pin: str, ip: str) -> dict | str | None:
             return "LOCKED"
 
     return None
+
+
+def invalidar_session_token_service(id_usuario: int) -> None:
+    actualizar_session_token(id_usuario, None)

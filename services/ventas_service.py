@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from config import METODOS_PAGO_VALIDOS, POR_PAGINA_VENTAS_ACTIVAS
+from utils import calcular_paginacion
 from models.ventas import (
     eliminar_venta,
     marcar_entregada,
@@ -12,6 +13,7 @@ from models.ventas import (
     obtener_detalles_venta,
     obtener_entregas_pendientes,
     obtener_historial_ventas,
+    obtener_historial_venta,
     contar_historial_ventas,
     contar_entregas_listas,
     contar_entregas_pendientes,
@@ -35,11 +37,8 @@ def _paginar_ventas(
     pagina: int,
     q: str | None = None,
 ) -> tuple[list, int, int]:
-    offset          = (pagina - 1) * POR_PAGINA_VENTAS_ACTIVAS
-    total_registros = contar_fn(id_negocio, id_venta, q)
-    total_paginas   = max(
-        1, (total_registros + POR_PAGINA_VENTAS_ACTIVAS - 1) // POR_PAGINA_VENTAS_ACTIVAS
-    )
+    total_registros          = contar_fn(id_negocio, id_venta, q)
+    offset, total_paginas    = calcular_paginacion(total_registros, pagina, POR_PAGINA_VENTAS_ACTIVAS)
     ventas = obtener_fn(
         id_negocio, id_venta=id_venta, q=q,
         limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset,
@@ -357,14 +356,11 @@ def historial_ventas_service(
     estado: str | None = None,
     tipo_fecha: str = "fecha_recibo",
 ) -> dict:
-    offset          = (pagina - 1) * POR_PAGINA_HISTORIAL
-    total_registros = contar_historial_ventas(
+    total_registros       = contar_historial_ventas(
         id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas,
         q=q, id_venta=id_venta, estado=estado, tipo_fecha=tipo_fecha,
     )
-    total_paginas   = max(
-        1, (total_registros + POR_PAGINA_HISTORIAL - 1) // POR_PAGINA_HISTORIAL
-    )
+    offset, total_paginas = calcular_paginacion(total_registros, pagina, POR_PAGINA_HISTORIAL)
 
     ventas   = obtener_historial_ventas(
         id_negocio, fecha_inicio, fecha_fin,
