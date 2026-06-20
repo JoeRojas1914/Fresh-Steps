@@ -48,6 +48,64 @@
     margin-top: 28px;
 }
 
+/* ── Selector de negocio ── */
+.negocio-pills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.negocio-pills-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-right: 4px;
+}
+
+.negocio-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid #e2e8f0;
+    color: #64748b;
+    background: #fff;
+    text-decoration: none;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+    cursor: pointer;
+}
+
+.negocio-pill:hover {
+    border-color: #1e7fd6;
+    color: #1e7fd6;
+    background: #f0f7ff;
+}
+
+.negocio-pill.active {
+    background: #1e7fd6;
+    color: #fff;
+    border-color: #1e7fd6;
+    box-shadow: 0 2px 8px rgba(30, 127, 214, 0.28);
+}
+
+.negocio-pill.active .pill-dot {
+    background: rgba(255, 255, 255, 0.7) !important;
+}
+
+.pill-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
 /* ── Acciones rápidas ── */
 .acciones-grid {
     display: grid;

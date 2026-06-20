@@ -137,26 +137,32 @@ def index():
     hoy_dt = date.today()
     fecha_bonita = f"{dias[hoy_dt.weekday()]} {hoy_dt.day} de {meses[hoy_dt.month-1]}, {hoy_dt.year}"
 
-    total_entregas, total_pendientes = contar_entregas_resumen()
+    _NEGOCIOS_VALIDOS = {"all", "1", "2", "3"}
+    negocio = request.args.get("negocio", "all")
+    if negocio not in _NEGOCIOS_VALIDOS:
+        negocio = "all"
+    negocio_filtro = negocio if negocio != "all" else None
+
+    total_entregas, total_pendientes = contar_entregas_resumen(id_negocio=negocio_filtro)
 
     lunes         = hoy_dt - timedelta(days=hoy_dt.weekday())
     sabado        = lunes + timedelta(days=5)
-    ventas_semana = contar_ventas_por_dia_rango(lunes, sabado, "all")
-    idx_hoy       = min(hoy_dt.weekday(), 5)       
+    ventas_semana = contar_ventas_por_dia_rango(lunes, sabado, negocio)
+    idx_hoy       = min(hoy_dt.weekday(), 5)
     ventas_hoy    = ventas_semana[idx_hoy]["total"] if ventas_semana else 0
     chart_labels  = [x["label"] for x in ventas_semana]
     chart_data    = [x["total"]  for x in ventas_semana]
 
-    unidades_recibidas_hoy  = contar_unidades_hoy(hoy_dt, "fecha_recibo")
-    unidades_entregadas_hoy = contar_unidades_hoy(hoy_dt, "fecha_entrega")
+    unidades_recibidas_hoy  = contar_unidades_hoy(hoy_dt, "fecha_recibo",  negocio)
+    unidades_entregadas_hoy = contar_unidades_hoy(hoy_dt, "fecha_entrega", negocio)
 
     ingresos_hoy = None
     kpis_mes     = None
     if session.get("rol") == "admin":
-        ingresos_hoy   = float(obtener_total_ingresos(hoy_dt, hoy_dt, "all"))
+        ingresos_hoy   = float(obtener_total_ingresos(hoy_dt, hoy_dt, negocio))
         primer_dia_mes = date(hoy_dt.year, hoy_dt.month, 1)
-        ing_mes  = float(obtener_total_ingresos(primer_dia_mes, hoy_dt, "all"))
-        gas_mes  = float(obtener_total_gastos(primer_dia_mes, hoy_dt, "all"))
+        ing_mes  = float(obtener_total_ingresos(primer_dia_mes, hoy_dt, negocio))
+        gas_mes  = float(obtener_total_gastos(primer_dia_mes, hoy_dt, negocio))
         kpis_mes = {"ingresos": ing_mes, "gastos": gas_mes, "ganancia": ing_mes - gas_mes}
 
     return render_template(
@@ -172,6 +178,7 @@ def index():
         chart_data              = chart_data,
         unidades_recibidas_hoy  = unidades_recibidas_hoy,
         unidades_entregadas_hoy = unidades_entregadas_hoy,
+        negocio_sel             = negocio,
     )
 
 

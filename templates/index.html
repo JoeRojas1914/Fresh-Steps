@@ -15,6 +15,21 @@
     <span class="home-fecha">{{ fecha_bonita }}</span>
 </div>
 
+{# ── Selector de negocio ── #}
+<div class="negocio-pills">
+    <span class="negocio-pills-label">Negocio</span>
+    <a href="/" class="negocio-pill{% if negocio_sel == 'all' %} active{% endif %}">Todos</a>
+    <a href="/?negocio=1" class="negocio-pill{% if negocio_sel == '1' %} active{% endif %}">
+        <span class="pill-dot" style="background:#3b82f6"></span> Calzado
+    </a>
+    <a href="/?negocio=2" class="negocio-pill{% if negocio_sel == '2' %} active{% endif %}">
+        <span class="pill-dot" style="background:#22c55e"></span> Confección
+    </a>
+    <a href="/?negocio=3" class="negocio-pill{% if negocio_sel == '3' %} active{% endif %}">
+        <span class="pill-dot" style="background:#f97316"></span> Maquila
+    </a>
+</div>
+
 {# ── Resumen del mes — solo admin ── #}
 {% if session.rol == "admin" and kpis_mes %}
 <div class="mes-grid">
