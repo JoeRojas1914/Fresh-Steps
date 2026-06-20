@@ -1,31 +1,40 @@
 import { abrirModal } from '../components/modal.js';
-import { mostrarFeedback, crearEliminarHandler } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl } from '../base/helpers.js';
 import { validarRequerido, validarTelefono } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const form = document.querySelector(".modal-form");
+    const form      = document.getElementById("modalClienteForm");
+    const submitBtn = document.querySelector('[form="modalClienteForm"][type="submit"]');
+    const modalEl   = document.getElementById("modalCliente");
+
+    let revalidate = () => {};
+    if (form && submitBtn) {
+        revalidate = initModalForm(form, submitBtn);
+        modalEl?.addEventListener("modal:opened", () => revalidate());
+    }
 
     if (form) form.addEventListener("submit", function (e) {
-        const nombre   = document.querySelector("[name=nombre]").value;
-        const apellido = document.querySelector("[name=apellido]").value;
-        const telefono = document.querySelector("[name=telefono]").value;
+        const nombre   = form.querySelector("[name=nombre]").value;
+        const apellido = form.querySelector("[name=apellido]").value;
+        const telefono = form.querySelector("[name=telefono]").value;
 
         if (!validarRequerido(nombre) || !validarRequerido(apellido) || !validarRequerido(telefono)) {
             mostrarFeedback("Nombre, apellido y teléfono son obligatorios.", "error");
+            shakeEl(form);
             e.preventDefault();
             return;
         }
 
         if (!validarTelefono(telefono)) {
             mostrarFeedback("El teléfono debe tener exactamente 10 dígitos.", "error");
+            shakeEl(form.querySelector("[name=telefono]"));
             e.preventDefault();
             return;
         }
 
-        const btn = this.querySelector('[type="submit"]');
-        if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Guardando..."; }
     });
 
 });

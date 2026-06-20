@@ -1,5 +1,5 @@
 import { ventaState } from './ventas_state.js';
-import { mostrarFeedback } from '../base/helpers.js';
+import { mostrarFeedback, initModalForm } from '../base/helpers.js';
 import { buscarClientes, crearCliente } from './ventas_clientes.js';
 import { seleccionarNegocio, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado } from './ventas_servicios.js';
 import { agregarArticulo, cerrarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
@@ -162,6 +162,15 @@ document.addEventListener("DOMContentLoaded", () => {
             eliminarServicioPro(btn, indexArticulo);
         }
     });
+
+    /* ── Validación modal nuevo cliente ── */
+    const formNuevoCliente = document.getElementById("formNuevoCliente");
+    const btnNuevoCliente  = document.querySelector('[form="formNuevoCliente"][type="submit"]');
+    const modalCliente     = document.getElementById("modalCliente");
+    if (formNuevoCliente && btnNuevoCliente) {
+        const revalidateCliente = initModalForm(formNuevoCliente, btnNuevoCliente);
+        modalCliente?.addEventListener("modal:opened", () => revalidateCliente());
+    }
 
     /* ── Inicialización ── */
     bloquearFechaMinima();

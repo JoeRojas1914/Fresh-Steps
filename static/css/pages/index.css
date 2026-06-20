@@ -183,6 +183,13 @@
     gap: 6px;
     min-width: 170px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.kpi-hoy-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(30,127,214,.16);
+    border-color: #1e7fd6;
 }
 
 .hoy-kpis--solo .kpi-hoy-card {

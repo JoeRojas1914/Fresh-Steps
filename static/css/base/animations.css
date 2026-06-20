@@ -101,6 +101,29 @@
   to   { opacity: 0; transform: translateY(12px) scale(0.97); }
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-7px); }
+  40%       { transform: translateX(7px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+
+.shake { animation: shake 0.4s ease; }
+
+@keyframes btnRipple {
+  to { transform: scale(4); opacity: 0; }
+}
+
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  transform: scale(0);
+  pointer-events: none;
+  animation: btnRipple 0.55s ease-out forwards;
+}
+
 /* ── Clases utilitarias ── */
 .animate-slide-in { animation: slideIn 0.25s ease both; }
 .animate-slide-up { animation: slideUp 0.25s ease both; }

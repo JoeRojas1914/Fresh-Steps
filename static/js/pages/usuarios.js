@@ -1,5 +1,5 @@
 import { abrirModal } from '../components/modal.js';
-import { mostrarFeedback, normalizar, escapeHtml } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, normalizar, escapeHtml } from '../base/helpers.js';
 import { validarRequerido, validarTelefono, validarPassword, validarPin, validarUsername } from '../base/form_validators.js';
 import { abrirHistorial } from '../base/historial_helpers.js';
 
@@ -65,8 +65,6 @@ function ejecutarToggleUsuario() {
 
 
 function abrirModalUsuario() {
-    abrirModal("modalUsuario");
-
     document.getElementById("modalTitulo").innerText  = "Agregar usuario";
     document.getElementById("id_usuario").value       = "";
     document.getElementById("usuario").value          = "";
@@ -79,17 +77,18 @@ function abrirModalUsuario() {
     document.getElementById("u_cp").value             = "";
     document.getElementById("u_rol").value            = "caja";
 
-    document.getElementById("password").required                  = true;
-    document.getElementById("pin").required                       = true;
-    document.getElementById("pass-requerido").style.display       = "inline";
-    document.getElementById("pass-opcional").style.display        = "none";
-    document.getElementById("pin-requerido").style.display        = "inline";
+    document.getElementById("password").required            = true;
+    document.getElementById("pin").required                 = true;
+    document.getElementById("pass-requerido").style.display = "inline";
+    document.getElementById("pass-opcional").style.display  = "none";
+    document.getElementById("pin-requerido").style.display  = "inline";
+
+    abrirModal("modalUsuario");
 }
 
 
 function editarUsuario(e, u) {
     e.stopPropagation();
-    abrirModal("modalUsuario");
 
     document.getElementById("modalTitulo").innerText = "Editar usuario";
     document.getElementById("id_usuario").value      = u.id_usuario;
@@ -108,11 +107,22 @@ function editarUsuario(e, u) {
     document.getElementById("pass-requerido").style.display = "none";
     document.getElementById("pass-opcional").style.display  = "inline";
     document.getElementById("pin-requerido").style.display  = "none";
+
+    abrirModal("modalUsuario");
 }
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.querySelector("#formUsuario");
+    const form      = document.getElementById("formUsuario");
+    const submitBtn = form?.querySelector('[type="submit"]');
+    const modalEl   = document.getElementById("modalUsuario");
+
+    let revalidate = () => {};
+    if (form && submitBtn) {
+        revalidate = initModalForm(form, submitBtn);
+        modalEl?.addEventListener("modal:opened", () => revalidate());
+    }
+
     if (!form) return;
 
     form.addEventListener("submit", function (e) {

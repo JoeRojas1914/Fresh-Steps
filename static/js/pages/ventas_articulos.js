@@ -332,6 +332,15 @@ function articuloCompleto(item) {
 
 export function validarArticuloVisual(item) {
     if (!item) return;
+
+    item.querySelectorAll("input[required], select[required]").forEach(field => {
+        field.classList.toggle("field--invalid", field.value.trim() === "");
+    });
+
+    item.querySelectorAll(".servicio-item select").forEach(sel => {
+        sel.classList.toggle("field--invalid", !sel.value);
+    });
+
     item.classList.remove("completo", "incompleto");
     item.classList.add(articuloCompleto(item) ? "completo" : "incompleto");
 }

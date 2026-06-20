@@ -1,30 +1,40 @@
 import { abrirModal } from '../components/modal.js';
-import { mostrarFeedback, crearEliminarHandler } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl } from '../base/helpers.js';
 import { validarRequerido, validarPrecio } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.querySelector(".modal-form");
+    const form      = document.getElementById("formServicio");
+    const submitBtn = document.querySelector('[form="formServicio"][type="submit"]');
+    const modalEl   = document.getElementById("modalServicio");
+
+    let revalidate = () => {};
+    if (form && submitBtn) {
+        revalidate = initModalForm(form, submitBtn);
+        modalEl?.addEventListener("modal:opened", () => revalidate());
+    }
+
     if (form) {
         form.addEventListener("submit", function (e) {
-            const negocio = document.getElementById("id_negocio").value;
-            const nombre  = document.querySelector("[name=nombre]").value;
-            const precio  = document.querySelector("[name=precio]").value;
+            const negocio = form.querySelector("[name=id_negocio]").value;
+            const nombre  = form.querySelector("[name=nombre]").value;
+            const precio  = form.querySelector("[name=precio]").value;
 
             if (!validarRequerido(negocio) || !validarRequerido(nombre) || !validarRequerido(precio)) {
                 mostrarFeedback("Negocio, nombre y precio son obligatorios.", "error");
+                shakeEl(form);
                 e.preventDefault();
                 return;
             }
 
             if (!validarPrecio(precio)) {
                 mostrarFeedback("El precio no puede ser negativo.", "error");
+                shakeEl(form.querySelector("[name=precio]"));
                 e.preventDefault();
                 return;
             }
 
-            const btn = this.querySelector('[type="submit"]');
-            if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Guardando..."; }
         });
     }
 
@@ -58,12 +68,11 @@ function ejecutarEliminarServicio()    { _eliminarServicio.ejecutar(); }
 
 
 function abrirNuevoServicio() {
-    abrirModal("modalServicio");
-
-    document.getElementById("modalServicio_title").innerText = "Agregar servicio";
+    const f = document.getElementById("formServicio");
+    if (f) f.reset();
     document.getElementById("id_servicio").value             = "";
-
-    document.querySelector(".modal-form").reset();
+    document.getElementById("modalServicio_title").innerText = "Agregar servicio";
+    abrirModal("modalServicio");
 }
 
 

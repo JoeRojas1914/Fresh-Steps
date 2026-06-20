@@ -186,6 +186,38 @@ export function confirmarEliminarVenta(idVenta) {
 }
 
 
+export function initModalForm(form, submitBtn) {
+    function validate() {
+        const fields = Array.from(form.querySelectorAll("[required]"));
+        let allValid = true;
+        fields.forEach(field => {
+            const empty = field.value.trim() === "";
+            field.classList.toggle("field--invalid", empty);
+            if (empty) allValid = false;
+        });
+        form.querySelectorAll(".field--invalid").forEach(el => {
+            if (!el.required) el.classList.remove("field--invalid");
+        });
+        if (submitBtn) submitBtn.disabled = !allValid;
+        return allValid;
+    }
+
+    form.addEventListener("input", validate);
+    form.addEventListener("change", validate);
+    validate();
+    return validate;
+}
+
+
+export function shakeEl(el) {
+    if (!el) return;
+    el.classList.remove("shake");
+    void el.offsetWidth;
+    el.classList.add("shake");
+    el.addEventListener("animationend", () => el.classList.remove("shake"), { once: true });
+}
+
+
 export function countUp(el, target, monetary = false, duration = 900) {
     const start = performance.now();
     const fmt = monetary

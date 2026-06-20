@@ -155,6 +155,14 @@ export function obtenerMotivosBloqueo() {
 }
 
 export function validarFormulario() {
+    const negocioEl = document.getElementById("id_negocio");
+    const fechaEl   = document.getElementById("fecha_estimada_fecha");
+    const horaEl    = document.getElementById("fecha_estimada_hora");
+
+    if (negocioEl) negocioEl.classList.toggle("field--invalid", !negocioEl.value);
+    if (fechaEl)   fechaEl.classList.toggle("field--invalid",   !fechaEl.value);
+    if (horaEl)    horaEl.classList.toggle("field--invalid",    !horaEl.value);
+
     const negocio       = document.getElementById("id_negocio").value;
     const fechaEstimada = document.getElementById("fecha_estimada").value;
     const prepago       = document.getElementById("prepago").value;

@@ -9,6 +9,7 @@ export function abrirModal(id) {
   document.documentElement.classList.add("modal-open");
   const focusable = modal.querySelector("button, input, select, textarea, [tabindex]");
   if (focusable) focusable.focus({ preventScroll: true });
+  modal.dispatchEvent(new Event("modal:opened"));
 }
 
 export function cerrarModal(id) {
@@ -26,7 +27,15 @@ export function cerrarModal(id) {
 
 document.addEventListener("click", e => {
   const btnOpen = e.target.closest("[data-modal-open]");
-  if (btnOpen) { abrirModal(btnOpen.dataset.modalOpen); return; }
+  if (btnOpen) {
+    const modalEl = document.getElementById(btnOpen.dataset.modalOpen);
+    if (modalEl) {
+      const form = modalEl.querySelector("form");
+      if (form) form.reset();
+    }
+    abrirModal(btnOpen.dataset.modalOpen);
+    return;
+  }
 
   const btnClose = e.target.closest("[data-modal-close]");
   if (btnClose) { cerrarModal(btnClose.dataset.modalClose); return; }

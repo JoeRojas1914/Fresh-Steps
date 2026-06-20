@@ -13,11 +13,26 @@ function countUp(el, target, monetary, duration) {
     requestAnimationFrame(tick);
 }
 
+var _countObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        _countObserver.unobserve(entry.target);
+        var el      = entry.target;
+        var target  = parseFloat(el.dataset.countTarget);
+        var monetary = el.dataset.countMonetary === "1";
+        if (!isNaN(target)) countUp(el, target, monetary);
+    });
+}, { threshold: 0.2 });
+
 document.querySelectorAll(".kpi-hoy-num, .accion-num, .mes-num").forEach(function(el) {
     var raw = el.textContent.trim();
     var monetary = raw.startsWith("$");
     var target = parseFloat(raw.replace(/[$,]/g, ""));
-    if (!isNaN(target) && target > 0) countUp(el, target, monetary);
+    if (!isNaN(target) && target > 0) {
+        el.dataset.countTarget  = target;
+        el.dataset.countMonetary = monetary ? "1" : "0";
+        _countObserver.observe(el);
+    }
 });
 
 const raw    = JSON.parse(document.getElementById("indexChartData").textContent);

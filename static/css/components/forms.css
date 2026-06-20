@@ -24,6 +24,17 @@ input:focus {
   100% { box-shadow: 0 0 0 3px rgba(30, 127, 214, 0.15); }
 }
 
+.field--invalid {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12) !important;
+}
+
+.field--invalid:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(30, 127, 214, 0.15) !important;
+  animation: inputFocusGlow 0.35s ease;
+}
+
 select {
   width: 100%;
   max-width: 100%;

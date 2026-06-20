@@ -16,6 +16,9 @@
   color: #fff;
   background: #1e7fd6;
 
+  position: relative;
+  overflow: hidden;
+
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease,
@@ -51,11 +54,13 @@
 .btn:disabled,
 .btn--disabled {
   background: #cbd5e1;
-  color: #64748b;
+  color: #94a3b8;
   cursor: not-allowed;
   box-shadow: none;
-  transform: none;
-  opacity: 0.75;
+  transform: none !important;
+  opacity: 0.6;
+  pointer-events: none;
+  transition: opacity 0.2s ease, background 0.2s ease;
 }
 
 
