@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from flask_wtf import CSRFProtect
 from flask_talisman import Talisman
+from flask_compress import Compress
 from extensions import limiter
 
 # ================= LOGGING =================
@@ -68,6 +69,7 @@ app.config.update({
 csrf = CSRFProtect()
 csrf.init_app(app)
 limiter.init_app(app)
+Compress(app)
 
 _is_dev = os.getenv("FLASK_ENV") == "development"
 _CSP = {
@@ -202,7 +204,10 @@ def api_index_kpis():
         negocio = "all"
 
     kpis = _kpis_index(negocio, session.get("rol") == "admin")
-    return jsonify(kpis)
+    resp = jsonify(kpis)
+    resp.cache_control.private = True
+    resp.cache_control.max_age = 30
+    return resp
 
 
 

@@ -12,6 +12,10 @@
     <script defer src="{{ url_for('static', filename='vendor/lucide.min.js') }}"></script>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FreshStepsLogo.png') }}">
     {% block head %}{% endblock %}
+    {% if session.get("id_usuario") %}
+    <link rel="prefetch" href="/ventas/pendientes">
+    <link rel="prefetch" href="/ventas/listas">
+    {% endif %}
 </head>
 <body>
 
