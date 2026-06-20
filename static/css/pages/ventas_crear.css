@@ -148,6 +148,7 @@
   margin-bottom: 10px;
   animation: slideUp 0.25s ease;
   border-radius: 14px;
+  transition: padding 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
 .articulo-item.abierto {
@@ -284,6 +285,53 @@
 #btn-crear:disabled {
   pointer-events: auto;
   cursor: not-allowed;
+}
+
+/* ── Tooltip botón deshabilitado ── */
+.btn-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: #1e293b;
+  color: #fff;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  max-width: 260px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.btn-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.btn-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1e293b;
+}
+
+/* ── Acordeón artículos ── */
+@keyframes articuloOpen {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes articuloClose {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-6px); }
+}
+.articulo-detalle.is-opening {
+  animation: articuloOpen 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.articulo-detalle.is-closing {
+  animation: articuloClose 0.16s ease-in forwards;
 }
 
 .error-msg {

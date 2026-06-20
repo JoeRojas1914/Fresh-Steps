@@ -173,11 +173,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    /* ── Scroll al primer error al intentar enviar con btn deshabilitado ── */
-    document.getElementById("btn-crear").addEventListener("click", () => {
-        if (document.getElementById("btn-crear").disabled) {
-            scrollToFirstError(document.getElementById("formVenta"));
-        }
+    /* ── Tooltip + scroll al primer error en botón deshabilitado ── */
+    const btnCrear   = document.getElementById("btn-crear");
+    const btnTooltip = document.createElement("div");
+    btnTooltip.className = "btn-tooltip";
+    document.body.appendChild(btnTooltip);
+
+    btnCrear.addEventListener("mouseover", () => {
+        if (!btnCrear.disabled) return;
+        const text = document.getElementById("mensaje-bloqueo")?.textContent?.trim();
+        if (!text) return;
+        btnTooltip.textContent = text;
+        btnTooltip.classList.add("visible");
+        requestAnimationFrame(() => {
+            const rect = btnCrear.getBoundingClientRect();
+            btnTooltip.style.left = Math.max(8, rect.left + rect.width / 2 - btnTooltip.offsetWidth / 2) + "px";
+            btnTooltip.style.top  = (rect.top - btnTooltip.offsetHeight - 12) + "px";
+        });
+    });
+
+    btnCrear.addEventListener("mouseleave", () => btnTooltip.classList.remove("visible"));
+
+    btnCrear.addEventListener("click", () => {
+        if (btnCrear.disabled) scrollToFirstError(document.getElementById("formVenta"));
     });
 
     /* ── Validación modal nuevo cliente ── */

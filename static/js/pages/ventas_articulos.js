@@ -127,8 +127,13 @@ export function agregarArticulo() {
 
     const detalle = div.querySelector(".articulo-detalle");
     const resumen = div.querySelector(".articulo-resumen");
-    if (detalle) detalle.style.display = "block";
     if (resumen) resumen.style.display = "none";
+    if (detalle) {
+        detalle.style.display = "block";
+        void detalle.offsetWidth;
+        detalle.classList.add("is-opening");
+        detalle.addEventListener("animationend", () => detalle.classList.remove("is-opening"), { once: true });
+    }
 
     actualizarOpcionesServiciosDelArticulo(index);
     validarArticuloVisual(div);
@@ -212,11 +217,16 @@ export function cerrarArticulo(item) {
     const resumen = item.querySelector(".articulo-resumen");
 
     generarResumenArticulo(item);
-    detalle.style.display = "none";
-    resumen.style.display = "block";
-    if (window.lucide) lucide.createIcons();
-
     item.classList.remove("abierto");
+
+    detalle.classList.add("is-closing");
+    detalle.addEventListener("animationend", () => {
+        detalle.classList.remove("is-closing");
+        detalle.style.display = "none";
+        resumen.style.display = "block";
+        if (window.lucide) lucide.createIcons();
+    }, { once: true });
+
     validarArticuloVisual(item);
 }
 
@@ -227,8 +237,14 @@ function abrirArticuloDesdeResumen(resumenDiv) {
         if (a !== item) cerrarArticulo(a);
     });
 
-    item.querySelector(".articulo-detalle").style.display = "block";
-    item.querySelector(".articulo-resumen").style.display = "none";
+    const detalle = item.querySelector(".articulo-detalle");
+    const resumen = item.querySelector(".articulo-resumen");
+    resumen.style.display = "none";
+    detalle.style.display = "block";
+    detalle.classList.remove("is-opening");
+    void detalle.offsetWidth;
+    detalle.classList.add("is-opening");
+    detalle.addEventListener("animationend", () => detalle.classList.remove("is-opening"), { once: true });
     item.classList.add("abierto");
 }
 

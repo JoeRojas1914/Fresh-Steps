@@ -224,11 +224,6 @@ export function validarFormulario() {
     const btn     = document.getElementById("btn-crear");
     const msg     = document.getElementById("mensaje-bloqueo");
 
-    btn.disabled = !valido || motivos.length > 0;
-    if (motivos.length > 0) {
-        msg.innerText     = "Falta: " + motivos.join(" · ");
-        msg.style.display = "block";
-    } else {
-        msg.style.display = "none";
-    }
+    btn.disabled    = !valido || motivos.length > 0;
+    msg.textContent = motivos.length > 0 ? "Falta: " + motivos.join(" · ") : "";
 }
