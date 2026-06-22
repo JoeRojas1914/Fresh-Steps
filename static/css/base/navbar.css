@@ -186,13 +186,24 @@
     gap: 8px;
     padding: 10px 14px;
     text-decoration: none;
-    color: #c0392b;
-    font-weight: 600;
+    color: #374151;
+    font-weight: 500;
     border-radius: 0;
+    transition: background 0.15s;
 }
 
 .nav-user-menu a:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.nav-user-menu a:last-child {
+    color: #dc2626;
+}
+
+.nav-user-menu a:last-child:hover {
     background: #fff5f5;
+    color: #b91c1c;
 }
 
 

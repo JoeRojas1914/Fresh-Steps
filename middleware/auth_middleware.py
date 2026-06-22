@@ -48,6 +48,7 @@ RUTAS_CAJA = {
     "ventas.guardar_venta",
 
     "auth.logout",
+    "usuarios.mi_perfil",
 }
 
 

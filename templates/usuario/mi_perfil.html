@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/mi_perfil.css') }}">
+{% endblock %}
+
+{% block content %}
+{% from "components/alerts.html" import alerts %}
+{{ alerts(get_flashed_messages(with_categories=true)) }}
+
+<div class="perfil-layout">
+
+  {# ── Columna izquierda ── #}
+  <aside class="perfil-card">
+    <div class="perfil-card__avatar">
+      {{ usuario.usuario[0].upper() if usuario.usuario else '?' }}
+    </div>
+
+    <h1 class="perfil-card__nombre">
+      {% if usuario.nombre %}
+        {{ usuario.nombre }}{% if usuario.apellido %} {{ usuario.apellido }}{% endif %}
+      {% else %}
+        {{ usuario.usuario }}
+      {% endif %}
+    </h1>
+
+    {% if usuario.nombre %}
+      <p class="perfil-card__usuario">@{{ usuario.usuario }}</p>
+    {% endif %}
+
+    <div class="perfil-card__badges">
+      <span class="perfil-badge">
+        {% if usuario.rol == "admin" %}
+          <i data-lucide="shield" width="13" height="13"></i> Administrador
+        {% else %}
+          <i data-lucide="monitor" width="13" height="13"></i> Caja
+        {% endif %}
+      </span>
+      {% if usuario.activo %}
+        <span class="perfil-badge perfil-badge--green">
+          <i data-lucide="circle-check" width="13" height="13"></i> Activo
+        </span>
+      {% else %}
+        <span class="perfil-badge perfil-badge--red">
+          <i data-lucide="circle-x" width="13" height="13"></i> Inactivo
+        </span>
+      {% endif %}
+    </div>
+
+    <div class="perfil-card__desde">
+      Miembro desde
+      {{ usuario.creado_en.strftime("%d/%m/%Y") if usuario.creado_en else '—' }}
+    </div>
+  </aside>
+
+  {# ── Panel derecho ── #}
+  <div class="perfil-panel">
+
+    <div class="perfil-section">
+      <div class="perfil-section__header">Datos personales</div>
+      <div class="perfil-fields">
+
+        <div class="perfil-field">
+          <span class="perfil-field__icon"><i data-lucide="user" width="16" height="16"></i></span>
+          <div class="perfil-field__text">
+            <span class="perfil-field__label">Nombre</span>
+            <span class="perfil-field__value">{{ usuario.nombre or '—' }}</span>
+          </div>
+        </div>
+
+        <div class="perfil-field">
+          <span class="perfil-field__icon"><i data-lucide="user" width="16" height="16"></i></span>
+          <div class="perfil-field__text">
+            <span class="perfil-field__label">Apellido</span>
+            <span class="perfil-field__value">{{ usuario.apellido or '—' }}</span>
+          </div>
+        </div>
+
+        <div class="perfil-field">
+          <span class="perfil-field__icon"><i data-lucide="phone" width="16" height="16"></i></span>
+          <div class="perfil-field__text">
+            <span class="perfil-field__label">Teléfono</span>
+            <span class="perfil-field__value">{{ usuario.telefono or '—' }}</span>
+          </div>
+        </div>
+
+        <div class="perfil-field">
+          <span class="perfil-field__icon"><i data-lucide="mail" width="16" height="16"></i></span>
+          <div class="perfil-field__text">
+            <span class="perfil-field__label">Correo</span>
+            <span class="perfil-field__value">{{ usuario.correo or '—' }}</span>
+          </div>
+        </div>
+
+        <div class="perfil-field">
+          <span class="perfil-field__icon"><i data-lucide="map-pin" width="16" height="16"></i></span>
+          <div class="perfil-field__text">
+            <span class="perfil-field__label">Código postal</span>
+            <span class="perfil-field__value">{{ usuario.cp or '—' }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="perfil-section">
+      <div class="perfil-section__header">Cuenta</div>
+      <div class="perfil-fields">
+
+        <div class="perfil-field">
+          <span class="perfil-field__icon"><i data-lucide="at-sign" width="16" height="16"></i></span>
+          <div class="perfil-field__text">
+            <span class="perfil-field__label">Usuario</span>
+            <span class="perfil-field__value">{{ usuario.usuario }}</span>
+          </div>
+        </div>
+
+        <div class="perfil-field">
+          <span class="perfil-field__icon"><i data-lucide="shield-check" width="16" height="16"></i></span>
+          <div class="perfil-field__text">
+            <span class="perfil-field__label">Rol</span>
+            <span class="perfil-field__value">{{ usuario.rol.capitalize() }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

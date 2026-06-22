@@ -68,6 +68,10 @@
                     <i data-lucide="chevron-down" width="14" height="14"></i>
                 </button>
                 <div class="nav-user-menu" id="userMenu">
+                    <a href="{{ url_for('usuarios.mi_perfil') }}">
+                        <i data-lucide="user" width="16" height="16"></i>
+                        Mi perfil
+                    </a>
                     <a href="{{ url_for('auth.logout') }}">
                         <i data-lucide="log-out" width="16" height="16"></i>
                         Cerrar sesión

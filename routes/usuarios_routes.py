@@ -10,6 +10,7 @@ from services.usuarios_service import (
     toggle_usuario_service,
     obtener_historial_usuario_service
 )
+from models.usuario import obtener_usuario_por_id
 
 usuarios_bp = Blueprint("usuarios", __name__)
 
@@ -97,3 +98,10 @@ def toggle_usuario(id):
 @admin_required
 def historial_usuario(id):
     return jsonify(obtener_historial_usuario_service(id))
+
+
+@usuarios_bp.route("/mi-perfil")
+def mi_perfil():
+    id_usuario = session.get("id_usuario")
+    usuario    = obtener_usuario_por_id(id_usuario)
+    return render_template("usuario/mi_perfil.html", usuario=usuario)
