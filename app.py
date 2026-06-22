@@ -135,8 +135,8 @@ def _kpis_index(negocio: str, es_admin: bool) -> dict:
     idx_hoy       = min(hoy_dt.weekday(), 5)
     ventas_hoy    = ventas_semana[idx_hoy]["total"] if ventas_semana else 0
 
-    unidades_recibidas_hoy  = contar_unidades_hoy(hoy_dt, "fecha_recibo",  negocio)
-    unidades_entregadas_hoy = contar_unidades_hoy(hoy_dt, "fecha_entrega", negocio)
+    unidades_recibidas_hoy  = contar_unidades_hoy("fecha_recibo",  negocio)
+    unidades_entregadas_hoy = contar_unidades_hoy("fecha_entrega", negocio)
 
     ingresos_hoy = None
     kpis_mes     = None

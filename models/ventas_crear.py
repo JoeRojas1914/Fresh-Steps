@@ -1,5 +1,4 @@
 from decimal import Decimal, InvalidOperation
-from datetime import datetime
 from db import get_db
 from .negocio import cargar_tipos_por_negocio
 from .ventas_historial import registrar_historial_venta
@@ -99,8 +98,8 @@ def crear_venta(
             INSERT INTO venta (
                 id_negocio, id_cliente, fecha_recibo, fecha_estimada,
                 aplica_descuento, cantidad_descuento, total, id_usuario_creo
-            ) VALUES (%s, %s, %s, %s, %s, %s, 0, %s)
-        """, (id_negocio, id_cliente, datetime.now(), fecha_estimada,
+            ) VALUES (%s, %s, NOW(), %s, %s, %s, 0, %s)
+        """, (id_negocio, id_cliente, fecha_estimada,
               aplica_descuento, cantidad_descuento, id_usuario_creo))
 
         id_venta      = cursor.lastrowid
