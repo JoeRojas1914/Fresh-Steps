@@ -266,3 +266,27 @@ def obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limi
         params.extend([limit, offset])
         cursor.execute(sql, params)
         return cursor.fetchall()
+
+
+def obtener_kpis_cliente(id_cliente: int) -> dict:
+    with get_db() as (_, cursor):
+        cursor.execute("""
+            SELECT
+                COALESCE(SUM(v.total), 0) AS total_gastado,
+                COALESCE((
+                    SELECT SUM(pv.monto)
+                    FROM pago_venta pv
+                    JOIN venta v3 ON pv.id_venta = v3.id_venta
+                    WHERE v3.id_cliente = %s AND v3.eliminado = 0
+                ), 0) AS total_pagado
+            FROM venta v
+            WHERE v.id_cliente = %s AND v.eliminado = 0
+        """, (id_cliente, id_cliente))
+        row = cursor.fetchone()
+
+    total_gastado = float(row["total_gastado"] or 0)
+    total_pagado  = float(row["total_pagado"]  or 0)
+    return {
+        "total_gastado":         total_gastado,
+        "saldo_pendiente_total": max(round(total_gastado - total_pagado, 2), 0),
+    }

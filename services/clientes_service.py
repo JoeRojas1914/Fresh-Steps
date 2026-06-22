@@ -16,6 +16,7 @@ from models.clientes import (
 from models.pagos import obtener_pagos_venta
 from models.negocio import obtener_negocios
 from models.ventas import contar_ventas_cliente, obtener_detalles_venta, obtener_ventas_cliente
+from models.ventas_detalles import obtener_kpis_cliente
 
 
 def listar_clientes_service(
@@ -116,6 +117,7 @@ def obtener_cliente_detalle_service(
         p["saldo_pendiente"] = float(p["total"]) - total_pagado
 
     negocios = obtener_negocios()
+    kpis     = obtener_kpis_cliente(id_cliente)
 
     return {
         "cliente":       cliente,
@@ -124,6 +126,7 @@ def obtener_cliente_detalle_service(
         "negocios":      negocios,
         "pagina":        pagina,
         "total_paginas": total_paginas,
+        "kpis":          kpis,
     }
 
 

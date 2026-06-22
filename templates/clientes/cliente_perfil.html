@@ -2,6 +2,8 @@
 {% from "macros/badges.html" import badge_negocio %}
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
+{% from "components/modal.html" import modal %}
+{% from "components/alerts.html" import alerts %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/cliente_perfil.css') }}">
@@ -10,9 +12,11 @@
 {% block content %}
 <div class="page-content">
 
-  {# ── Cabecera del cliente ───────────────────────────────── #}
-  <div class="cliente-header">
-    <div class="cliente-avatar">
+  {{ alerts(get_flashed_messages(with_categories=true)) }}
+
+  {# ── Perfil del cliente ────────────────────────────────── #}
+  <div class="cliente-card">
+    <div class="cliente-avatar-wrap">
       {% if cliente.avatar_url %}
         <img src="{{ cliente.avatar_url }}" alt="Avatar" class="avatar-img">
       {% else %}
@@ -22,20 +26,58 @@
       {% endif %}
     </div>
 
-    <div class="cliente-info">
-      <div><strong>Nombre:</strong> {{ cliente.nombre }} {{ cliente.apellido }}</div>
-      <div><strong>Teléfono:</strong> {{ cliente.telefono or 'N/A' }}</div>
-      <div><strong>Correo:</strong> {{ cliente.correo or 'N/A' }}</div>
-      <div><strong>Dirección:</strong> {{ cliente.direccion or 'N/A' }}</div>
-      <div><strong>Fecha registro:</strong> {{ cliente.fecha_registro_fmt }}</div>
-      <div><strong>Total pedidos:</strong> {{ total_pedidos }}</div>
+    <div class="cliente-body">
+      <h1 class="cliente-nombre">{{ cliente.nombre }} {{ cliente.apellido }}</h1>
+      <div class="cliente-meta">
+        {% if cliente.telefono %}
+        <span class="cliente-meta__item">
+          <i data-lucide="phone" width="13" height="13"></i> {{ cliente.telefono }}
+        </span>
+        {% endif %}
+        {% if cliente.correo %}
+        <span class="cliente-meta__item">
+          <i data-lucide="mail" width="13" height="13"></i> {{ cliente.correo }}
+        </span>
+        {% endif %}
+        <span class="cliente-meta__item">
+          <i data-lucide="map-pin" width="13" height="13"></i> {{ cliente.direccion or '—' }}
+        </span>
+        <span class="cliente-meta__item">
+          <i data-lucide="calendar" width="13" height="13"></i> Cliente desde {{ cliente.fecha_registro_fmt }}
+        </span>
+      </div>
+    </div>
+
+    <div class="cliente-actions">
+      <button type="button"
+              data-modal-open="modalEditarCliente"
+              class="btn btn--secondary btn--sm">
+        <i data-lucide="edit-2" width="14" height="14"></i> Editar
+      </button>
+    </div>
+  </div>
+
+  {# ── KPIs ──────────────────────────────────────────────── #}
+  <div class="cliente-kpis">
+    <div class="kpi-card">
+      <div class="kpi-card__label"><i data-lucide="shopping-bag" width="13" height="13"></i> Total pedidos</div>
+      <div class="kpi-card__value">{{ total_pedidos }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card__label"><i data-lucide="dollar-sign" width="13" height="13"></i> Total gastado</div>
+      <div class="kpi-card__value">${{ "%.2f"|format(kpis.total_gastado) }}</div>
+    </div>
+    <div class="kpi-card kpi-card--alert">
+      <div class="kpi-card__label"><i data-lucide="clock" width="13" height="13"></i> Saldo pendiente</div>
+      <div class="kpi-card__value">${{ "%.2f"|format(kpis.saldo_pendiente_total) }}</div>
     </div>
   </div>
 
   <h2 class="mb-20"><i data-lucide="package" width="22" height="22"></i> Historial de pedidos</h2>
 
   {# ── Filtros ────────────────────────────────────────────── #}
-  <form method="GET"
+  <form id="form-filtro-cliente"
+        method="GET"
         action="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}"
         class="filtro-box">
     <div class="filtro-row">
@@ -64,7 +106,8 @@
       <div class="filtro-actions">
         <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
         {% if request.args.get('id_negocio') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
-          <a href="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}"
+          <a id="btn-limpiar-filtro"
+             href="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}"
              class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
         {% endif %}
         <a href="{{ url_for('clientes.exportar_cliente_excel', id_cliente=cliente.id_cliente,
@@ -79,148 +122,67 @@
   </form>
 
   {# ── Tabla ──────────────────────────────────────────────── #}
-  {% if pedidos %}
-
-  {% set meses = {
-      1:'enero', 2:'febrero', 3:'marzo', 4:'abril',
-      5:'mayo', 6:'junio', 7:'julio', 8:'agosto',
-      9:'septiembre', 10:'octubre', 11:'noviembre', 12:'diciembre'
-  } %}
-
-  <div id="toast-container"></div>
-
-  {% call table([
-      "Recibo", "Negocio",
-      "Fecha recibo", "Fecha estimada", "Fecha lista",
-      "Fecha entrega", "Total", "Estado", "Detalles"
-  ]) %}
-
-  {% for p in pedidos %}
-    {% if p.fecha_entrega %}
-      {% set estado = "entregada" %}
-    {% elif p.fecha_lista %}
-      {% set estado = "lista" %}
-    {% else %}
-      {% set estado = "pendiente" %}
-    {% endif %}
-
-    <tr>
-      <td>#{{ p.id_venta }}</td>
-      <td>{{ badge_negocio(p.negocio) }}</td>
-
-      <td>
-        {{ p.fecha_recibo.day }} {{ meses[p.fecha_recibo.month] }}
-        {{ "%02d:%02d" | format(p.fecha_recibo.hour, p.fecha_recibo.minute) }}
-      </td>
-      <td>
-        {{ p.fecha_estimada.day }} {{ meses[p.fecha_estimada.month] }}
-        {{ "%02d:%02d" | format(p.fecha_estimada.hour, p.fecha_estimada.minute) }}
-      </td>
-      <td>
-        {% if p.fecha_lista %}
-          {{ p.fecha_lista.day }} {{ meses[p.fecha_lista.month] }}
-          {{ "%02d:%02d" | format(p.fecha_lista.hour, p.fecha_lista.minute) }}
-        {% else %}<span class="dim">—</span>{% endif %}
-      </td>
-      <td>
-        {% if p.fecha_entrega %}
-          {{ p.fecha_entrega.day }} {{ meses[p.fecha_entrega.month] }}
-          {{ "%02d:%02d" | format(p.fecha_entrega.hour, p.fecha_entrega.minute) }}
-        {% else %}<span class="dim">—</span>{% endif %}
-      </td>
-
-      <td>${{ "%.2f" | format(p.total) }}</td>
-
-      <td>
-        <span class="badge-estado {{ estado }}">
-          {% if estado == 'pendiente' %}Pendiente
-          {% elif estado == 'lista' %}Lista
-          {% else %}Entregada{% endif %}
-        </span>
-      </td>
-
-      <td>
-        <button class="btn btn--info btn--sm btn-detalles" data-id="{{ p.id_venta }}">
-          <i data-lucide="chevron-down" width="14" height="14" class="chevron-icon transition-transform"></i> Detalles
-        </button>
-      </td>
-    </tr>
-
-    {# ── Fila expandible ── #}
-    <tr id="detalles-{{ p.id_venta }}" class="table--details d-none">
-      <td colspan="9">
-        <div class="detalles-box">
-          <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles del pedido</div>
-
-          <ul class="detalles-list" id="lista-detalles-{{ p.id_venta }}">
-            <li class="dim-soft">Cargando detalles...</li>
-          </ul>
-
-          <div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
-          {% if p.pagos %}
-            {% for pg in p.pagos %}
-            <div class="pago-fila">
-              <span class="pago-tipo">
-                {{ pg.tipo_pago or '—' }}
-                {% if pg.tipo_pago_venta %}
-                  <span class="pago-tag">{{ pg.tipo_pago_venta }}</span>
-                {% endif %}
-              </span>
-              <span class="pago-monto">${{ "%.2f" | format(pg.monto | float) }}</span>
-            </div>
-            {% endfor %}
-          {% else %}
-            <div class="dim-soft text-sm nota-italic">Sin pagos registrados</div>
-          {% endif %}
-
-          {% if p.saldo_pendiente > 0 %}
-          <div class="text-sm saldo-pendiente">
-            Saldo pendiente: ${{ "%.2f" | format(p.saldo_pendiente) }}
-          </div>
-          {% else %}
-          <div class="text-sm pedido-liquidado">
-            <i data-lucide="check" width="14" height="14"></i> Pedido liquidado
-          </div>
-          {% endif %}
-
-          <div class="btn-row">
-            <button type="button"
-                    class="btn btn--info btn--sm js-ver-ticket"
-                    data-url="{{ url_for('ventas.venta_ticket', id_venta=p.id_venta) }}">
-              <i data-lucide="receipt" width="14" height="14"></i> Ver ticket
-            </button>
-          </div>
-        </div>
-      </td>
-    </tr>
-  {% endfor %}
-
-  {% endcall %}
-
-  {{ pagination(
-      pagina,
-      total_paginas,
-      'clientes.ver_cliente',
-      {
-        "id_cliente":   cliente.id_cliente,
-        "id_negocio":   request.args.get('id_negocio'),
-        "fecha_inicio": request.args.get('fecha_inicio'),
-        "fecha_fin":    request.args.get('fecha_fin')
-      }
-  ) }}
-
-  {% else %}
-  <div class="empty-state">
-    <div class="empty-icon"><i data-lucide="package" width="48" height="48"></i></div>
-    <h3>Sin pedidos registrados</h3>
-    <p>Este cliente aún no tiene pedidos.<br>
-       Cuando se registre alguno, se mostrará aquí.</p>
+  <div id="tabla-paginada">
+    {% include "clientes/_cliente_pedidos_partial.html" %}
   </div>
-  {% endif %}
 
 </div>
+
+{# ── Modal editar cliente ─────────────────────────────── #}
+{% call(section) modal("modalEditarCliente", "Editar cliente", "md") %}
+
+{% if section == 'body' %}
+<form id="modalEditarClienteForm" method="POST" action="/clientes/guardar" class="modal-form modal-form--grid">
+  <input type="hidden" name="id_cliente"  value="{{ cliente.id_cliente }}">
+  <input type="hidden" name="next"        value="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}">
+
+  <div class="modal-field">
+    <label for="edit_nombre">Nombre</label>
+    <input id="edit_nombre" type="text" name="nombre"
+           value="{{ cliente.nombre }}" required>
+  </div>
+
+  <div class="modal-field">
+    <label for="edit_apellido">Apellido</label>
+    <input id="edit_apellido" type="text" name="apellido"
+           value="{{ cliente.apellido }}" required>
+  </div>
+
+  <div class="modal-field">
+    <label for="edit_telefono">Teléfono</label>
+    <input id="edit_telefono" type="text" name="telefono"
+           value="{{ cliente.telefono or '' }}" required pattern="[0-9]{10}">
+  </div>
+
+  <div class="modal-field">
+    <label for="edit_correo">Correo (opcional)</label>
+    <input id="edit_correo" type="email" name="correo"
+           value="{{ cliente.correo or '' }}">
+  </div>
+
+  <div class="modal-field modal-field--full">
+    <label for="edit_direccion">Dirección (opcional)</label>
+    <input id="edit_direccion" type="text" name="direccion"
+           value="{{ cliente.direccion or '' }}">
+  </div>
+</form>
+{% endif %}
+
+{% if section == 'footer' %}
+<button type="button"
+        class="btn btn--danger btn--sm"
+        data-modal-close="modalEditarCliente">Cancelar</button>
+<button type="submit"
+        form="modalEditarClienteForm"
+        class="btn btn--primary btn--lg">Guardar cambios</button>
+{% endif %}
+
+{% endcall %}
+
 {% endblock %}
 
 {% block scripts %}
 <script type="module" src="{{ url_for('static', filename='js/pages/detalles_venta.js') }}"></script>
+<script src="{{ url_for('static', filename='js/components/pagination_ajax.js') }}" defer></script>
+<script type="module" src="{{ url_for('static', filename='js/pages/cliente_perfil.js') }}"></script>
 {% endblock %}

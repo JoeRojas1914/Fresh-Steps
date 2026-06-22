@@ -62,6 +62,9 @@ def guardar_cliente():
     except Exception:
         logger.exception("Error al guardar cliente id_usuario=%s", id_usuario)
         flash("Error al guardar el cliente. Verifica los datos.", "error")
+    next_url = request.form.get('next', '').strip()
+    if next_url and next_url.startswith('/') and not next_url.startswith('//'):
+        return redirect(next_url)
     return redirect(url_for("clientes.clientes"))
 
 
@@ -110,6 +113,8 @@ def api_clientes():
 def ver_cliente(id_cliente):
     filtros = request.args
     data = obtener_cliente_detalle_service(id_cliente, filtros)
+    if request.args.get('partial') == '1':
+        return render_template("clientes/_cliente_pedidos_partial.html", **data)
     return render_template("clientes/cliente_perfil.html", **data)
 
 

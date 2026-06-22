@@ -1,0 +1,135 @@
+{% from "macros/badges.html" import badge_negocio %}
+{% from "components/table.html" import table %}
+{% from "components/pagination.html" import pagination %}
+
+{% if pedidos %}
+
+{% set meses = {
+    1:'enero', 2:'febrero', 3:'marzo', 4:'abril',
+    5:'mayo', 6:'junio', 7:'julio', 8:'agosto',
+    9:'septiembre', 10:'octubre', 11:'noviembre', 12:'diciembre'
+} %}
+
+<div id="toast-container"></div>
+
+{% call table([
+    "Recibo", "Negocio",
+    "Fecha recibo", "Fecha estimada", "Fecha lista",
+    "Fecha entrega", "Total", "Estado", "Detalles"
+]) %}
+
+{% for p in pedidos %}
+  {% if p.fecha_entrega %}
+    {% set estado = "entregada" %}
+  {% elif p.fecha_lista %}
+    {% set estado = "lista" %}
+  {% else %}
+    {% set estado = "pendiente" %}
+  {% endif %}
+
+  <tr>
+    <td>#{{ p.id_venta }}</td>
+    <td>{{ badge_negocio(p.negocio) }}</td>
+    <td>
+      {{ p.fecha_recibo.day }} {{ meses[p.fecha_recibo.month] }}
+      {{ "%02d:%02d" | format(p.fecha_recibo.hour, p.fecha_recibo.minute) }}
+    </td>
+    <td>
+      {{ p.fecha_estimada.day }} {{ meses[p.fecha_estimada.month] }}
+      {{ "%02d:%02d" | format(p.fecha_estimada.hour, p.fecha_estimada.minute) }}
+    </td>
+    <td>
+      {% if p.fecha_lista %}
+        {{ p.fecha_lista.day }} {{ meses[p.fecha_lista.month] }}
+        {{ "%02d:%02d" | format(p.fecha_lista.hour, p.fecha_lista.minute) }}
+      {% else %}<span class="dim">—</span>{% endif %}
+    </td>
+    <td>
+      {% if p.fecha_entrega %}
+        {{ p.fecha_entrega.day }} {{ meses[p.fecha_entrega.month] }}
+        {{ "%02d:%02d" | format(p.fecha_entrega.hour, p.fecha_entrega.minute) }}
+      {% else %}<span class="dim">—</span>{% endif %}
+    </td>
+    <td>${{ "%.2f" | format(p.total) }}</td>
+    <td>
+      <span class="badge-estado {{ estado }}">
+        {% if estado == 'pendiente' %}Pendiente
+        {% elif estado == 'lista' %}Lista
+        {% else %}Entregada{% endif %}
+      </span>
+    </td>
+    <td>
+      <button class="btn btn--info btn--sm btn-detalles" data-id="{{ p.id_venta }}">
+        <i data-lucide="chevron-down" width="14" height="14" class="chevron-icon transition-transform"></i> Detalles
+      </button>
+    </td>
+  </tr>
+
+  <tr id="detalles-{{ p.id_venta }}" class="table--details d-none">
+    <td colspan="9">
+      <div class="detalles-box">
+        <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles del pedido</div>
+        <ul class="detalles-list" id="lista-detalles-{{ p.id_venta }}">
+          <li class="dim-soft">Cargando detalles...</li>
+        </ul>
+        <div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
+        {% if p.pagos %}
+          {% for pg in p.pagos %}
+          <div class="pago-fila">
+            <span class="pago-tipo">
+              {{ pg.tipo_pago or '—' }}
+              {% if pg.tipo_pago_venta %}
+                <span class="pago-tag">{{ pg.tipo_pago_venta }}</span>
+              {% endif %}
+            </span>
+            <span class="pago-monto">${{ "%.2f" | format(pg.monto | float) }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="dim-soft text-sm nota-italic">Sin pagos registrados</div>
+        {% endif %}
+
+        {% if p.saldo_pendiente > 0 %}
+        <div class="text-sm saldo-pendiente">
+          Saldo pendiente: ${{ "%.2f" | format(p.saldo_pendiente) }}
+        </div>
+        {% else %}
+        <div class="text-sm pedido-liquidado">
+          <i data-lucide="check" width="14" height="14"></i> Pedido liquidado
+        </div>
+        {% endif %}
+
+        <div class="btn-row">
+          <button type="button"
+                  class="btn btn--info btn--sm js-ver-ticket"
+                  data-url="{{ url_for('ventas.venta_ticket', id_venta=p.id_venta) }}">
+            <i data-lucide="receipt" width="14" height="14"></i> Ver ticket
+          </button>
+        </div>
+      </div>
+    </td>
+  </tr>
+{% endfor %}
+
+{% endcall %}
+
+{{ pagination(
+    pagina,
+    total_paginas,
+    'clientes.ver_cliente',
+    {
+      "id_cliente":   cliente.id_cliente,
+      "id_negocio":   request.args.get('id_negocio'),
+      "fecha_inicio": request.args.get('fecha_inicio'),
+      "fecha_fin":    request.args.get('fecha_fin')
+    }
+) }}
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon"><i data-lucide="package" width="48" height="48"></i></div>
+  <h3>Sin pedidos registrados</h3>
+  <p>Este cliente aún no tiene pedidos.<br>
+     Cuando se registre alguno, se mostrará aquí.</p>
+</div>
+{% endif %}
