@@ -52,6 +52,7 @@
             <a href="/clientes"         {% if request.path.startswith("/clientes")    %}aria-current="page"{% endif %}>Clientes</a>
             <a href="/servicios"        {% if request.path.startswith("/servicios")   %}aria-current="page"{% endif %}>Servicios</a>
             <a href="/gastos"           {% if request.path.startswith("/gastos")      %}aria-current="page"{% endif %}>Gastos</a>
+            <a href="/pagos"            {% if request.path.startswith("/pagos")       %}aria-current="page"{% endif %}>Pagos</a>
             <a href="/usuarios"         {% if request.path.startswith("/usuarios")    %}aria-current="page"{% endif %}>Usuarios</a>
             <a href="/ventas/historial" {% if request.path == "/ventas/historial"     %}aria-current="page"{% endif %}>Historial</a>
             <a href="/estadisticas"     {% if request.path.startswith("/estadisticas")%}aria-current="page"{% endif %}>Estadísticas</a>

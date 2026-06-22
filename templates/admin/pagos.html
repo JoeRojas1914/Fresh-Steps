@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% from "components/alerts.html" import alerts %}
+{% from "components/pagination.html" import pagination %}
+{% from "components/table.html" import table %}
+
+<h1><i data-lucide="credit-card" width="24" height="24"></i> Historial de Pagos</h1>
+<p class="page-sub">Registro de todos los pagos recibidos</p>
+
+{{ alerts(get_flashed_messages(with_categories=true)) }}
+
+<form method="GET"
+      action="{{ url_for('pagos.historial_pagos') }}"
+      id="form-filtro-pagos"
+      class="filtro-box">
+
+  <div class="filtro-row">
+    <div class="filtro-item">
+      <label for="filtro-negocio-pago">Negocio</label>
+      <select name="id_negocio" id="filtro-negocio-pago">
+        <option value="">Todos</option>
+        {% for n in negocios %}
+          <option value="{{ n.id_negocio }}"
+            {% if request.args.get('id_negocio') == n.id_negocio|string %}selected{% endif %}>
+            {{ n.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filtro-item">
+      <label for="filtro-tipo-pago">Método de pago</label>
+      <select name="tipo_pago" id="filtro-tipo-pago">
+        <option value="">Todos</option>
+        {% for m in metodos_pago %}
+          <option value="{{ m }}"
+            {% if request.args.get('tipo_pago') == m %}selected{% endif %}>
+            {{ m.capitalize() }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filtro-item">
+      <label for="filtro-tipo-pago-venta">Tipo</label>
+      <select name="tipo_pago_venta" id="filtro-tipo-pago-venta">
+        <option value="">Todos</option>
+        {% for t in tipos_pago_venta %}
+          <option value="{{ t }}"
+            {% if request.args.get('tipo_pago_venta') == t %}selected{% endif %}>
+            {{ t.capitalize() }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filtro-item">
+      <label for="filtro-fecha-inicio-pago">Desde</label>
+      <input type="date" name="fecha_inicio" id="filtro-fecha-inicio-pago"
+             value="{{ request.args.get('fecha_inicio', '') }}">
+    </div>
+
+    <div class="filtro-item">
+      <label for="filtro-fecha-fin-pago">Hasta</label>
+      <input type="date" name="fecha_fin" id="filtro-fecha-fin-pago"
+             value="{{ request.args.get('fecha_fin', '') }}">
+    </div>
+
+    <div class="filtro-actions">
+      <button type="submit" class="btn btn--primary btn--sm">
+        <i data-lucide="search" width="14" height="14"></i> Filtrar
+      </button>
+      <a href="{{ url_for('pagos.historial_pagos') }}"
+         id="btn-limpiar-filtro"
+         class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
+      <a href="{{ url_for('pagos.exportar_pagos_excel',
+                  id_negocio=request.args.get('id_negocio') or '',
+                  tipo_pago=request.args.get('tipo_pago') or '',
+                  tipo_pago_venta=request.args.get('tipo_pago_venta') or '',
+                  fecha_inicio=request.args.get('fecha_inicio') or '',
+                  fecha_fin=request.args.get('fecha_fin') or '') }}"
+         class="btn btn--success btn--sm no-underline">
+        <i data-lucide="download" width="14" height="14"></i> Exportar Excel
+      </a>
+    </div>
+  </div>
+
+</form>
+
+<hr>
+
+<div id="tabla-paginada">
+{% include "admin/_pagos_partial.html" %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/components/pagination_ajax.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/pages/pagos.js') }}"></script>
+{% endblock %}

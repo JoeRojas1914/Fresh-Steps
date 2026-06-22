@@ -47,6 +47,7 @@ from routes.estadisticas_routes import estadisticas_bp
 from routes.auth_routes import auth_bp
 from routes.usuarios_routes import usuarios_bp
 from routes.ventas_routes import ventas_bp
+from routes.pagos_routes import pagos_bp
 from middleware.auth_middleware import init_auth_middleware
 from models.ventas import contar_entregas_resumen
 from models.estadisticas_ventas import contar_ventas_por_dia_rango, obtener_total_ingresos, contar_unidades_hoy
@@ -96,6 +97,7 @@ app.register_blueprint(estadisticas_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(ventas_bp)
+app.register_blueprint(pagos_bp)
 init_auth_middleware(app)
 
 

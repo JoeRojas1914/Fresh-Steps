@@ -26,6 +26,11 @@
         } finally {
             container.style.opacity = '';
             container.style.pointerEvents = '';
+            const loader = document.getElementById('page-loader');
+            if (loader) {
+                loader.className = 'is-done';
+                setTimeout(() => { loader.className = ''; }, 500);
+            }
         }
     });
 })();

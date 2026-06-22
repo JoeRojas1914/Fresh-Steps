@@ -1,0 +1,89 @@
+{% from "macros/badges.html" import badge_negocio %}
+{% from "components/table.html" import table %}
+{% from "components/pagination.html" import pagination %}
+
+{% set meses = {1:"Ene",2:"Feb",3:"Mar",4:"Abr",5:"May",6:"Jun",
+                7:"Jul",8:"Ago",9:"Sep",10:"Oct",11:"Nov",12:"Dic"} %}
+
+{% call table([
+    "Negocio",
+    "Recibo",
+    "Cliente",
+    "Fecha pago",
+    "Tipo",
+    "Método",
+    "Monto",
+    "Cobrado por",
+    "Ticket"
+]) %}
+
+    {% for p in pagos %}
+    <tr>
+        <td>{{ badge_negocio(p.negocio) }}</td>
+
+        <td>#{{ p.id_venta }}</td>
+
+        <td>{{ p.cliente_nombre }} {{ p.cliente_apellido }}</td>
+
+        <td>
+            {% if p.fecha_pago %}
+                {{ "%02d"|format(p.fecha_pago.day) }}
+                {{ meses[p.fecha_pago.month] }}
+                {{ p.fecha_pago.year }}
+                {{ p.fecha_pago.strftime("%H:%M") }}
+            {% else %}—{% endif %}
+        </td>
+
+        <td>
+            {% if p.tipo_pago_venta == "prepago" %}
+                <span class="status status-pendiente">Prepago</span>
+            {% elif p.tipo_pago_venta == "final" %}
+                <span class="status status-completado">Final</span>
+            {% else %}—{% endif %}
+        </td>
+
+        <td>
+            {% if p.tipo_pago == "efectivo" %}
+                <span class="status status-completado">Efectivo</span>
+            {% elif p.tipo_pago == "transferencia" %}
+                <span class="status status-pendiente">Transferencia</span>
+            {% elif p.tipo_pago == "tarjeta" %}
+                <span class="status status-pendiente">Tarjeta</span>
+            {% else %}{{ p.tipo_pago or "—" }}{% endif %}
+        </td>
+
+        <td>${{ "%.2f"|format(p.monto) }}</td>
+
+        <td>{{ p.cobrado_por or "—" }}</td>
+
+        <td>
+            <a href="{{ url_for('ventas.venta_ticket', id_venta=p.id_venta) }}"
+               target="_blank"
+               rel="noopener"
+               class="btn btn--secondary btn--sm no-underline">
+                <i data-lucide="receipt" width="14" height="14"></i> Ver ticket
+            </a>
+        </td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="9" class="dim td-empty">
+            No se encontraron pagos con esos filtros.
+        </td>
+    </tr>
+    {% endfor %}
+
+{% endcall %}
+
+{{ pagination(
+    pagina,
+    total_paginas,
+    'pagos.historial_pagos',
+    {
+      "id_negocio":      request.args.get('id_negocio'),
+      "tipo_pago":       request.args.get('tipo_pago'),
+      "tipo_pago_venta": request.args.get('tipo_pago_venta'),
+      "fecha_inicio":    request.args.get('fecha_inicio'),
+      "fecha_fin":       request.args.get('fecha_fin')
+    }
+) }}
