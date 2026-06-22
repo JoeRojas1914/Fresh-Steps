@@ -44,6 +44,19 @@
              value="{{ request.args.get('fecha_fin', '') }}">
     </div>
 
+    <div class="filtro-item">
+      <label for="filtro-categoria-gasto">Categoría</label>
+      <select name="id_categoria" id="filtro-categoria-gasto">
+        <option value="">Todas</option>
+        {% for c in categorias %}
+          <option value="{{ c.id_categoria }}"
+            {% if request.args.get('id_categoria') == c.id_categoria|string %}selected{% endif %}>
+            {{ c.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
     <div class="filtro-item filtro-item--auto">
       <label>&nbsp;</label>
       <div class="filtro-toggle filtro-toggle--compact">
@@ -61,12 +74,13 @@
 
     <div class="filtro-actions">
       <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
-      {% if request.args.get('id_negocio') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
+      {% if request.args.get('id_negocio') or request.args.get('id_categoria') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
         <a href="{{ url_for('gastos.gastos') }}"
            class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
       {% endif %}
       <a href="{{ url_for('gastos.exportar_gastos_excel',
                   id_negocio=request.args.get('id_negocio') or '',
+                  id_categoria=request.args.get('id_categoria') or '',
                   fecha_inicio=request.args.get('fecha_inicio') or '',
                   fecha_fin=request.args.get('fecha_fin') or '',
                   eliminados='1' if incluir_eliminados else '') }}"
@@ -75,6 +89,9 @@
       </a>
       <button type="button" data-modal-open="modalGasto" class="btn btn--primary btn--sm">
         <i data-lucide="plus" width="14" height="14"></i> Agregar gasto
+      </button>
+      <button type="button" id="btn-gestionar-categorias" class="btn btn--secondary btn--sm">
+        <i data-lucide="tag" width="14" height="14"></i> Categorías
       </button>
     </div>
   </div>
@@ -103,6 +120,18 @@
     <div class="modal-field modal-field--full">
         <label for="gasto_descripcion">Descripción</label>
         <input id="gasto_descripcion" type="text" name="descripcion" required>
+    </div>
+
+    <div class="modal-field modal-field--full">
+        <label for="gasto_categoria">Categoría</label>
+        <div class="select-wrapper">
+            <select name="id_categoria" id="gasto_categoria">
+                <option value="">Sin categoría</option>
+                {% for c in categorias %}
+                    <option value="{{ c.id_categoria }}">{{ c.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 
     <div class="modal-field modal-field--full">
@@ -139,6 +168,11 @@
                 <option value="transferencia">Transferencia</option>
             </select>
         </div>
+    </div>
+
+    <div class="modal-field modal-field--full">
+        <label for="gasto_notas">Notas</label>
+        <textarea id="gasto_notas" name="notas" rows="2" placeholder="Información adicional (opcional)"></textarea>
     </div>
 
 </form>
@@ -201,6 +235,35 @@
 <button class="btn btn--primary btn--sm" data-modal-close="modalConfirmarEliminarGasto">Cancelar</button>
 <button class="btn btn--danger btn--sm js-ejecutar-eliminar-gasto">Sí, eliminar</button>
 {% endif %}
+{% endcall %}
+
+
+{% call(section) modal("modalCategorias", "Gestionar categorías", "sm") %}
+
+{% if section == 'body' %}
+<div id="categorias-lista-wrap">
+    {% include "admin/_categorias_lista.html" %}
+</div>
+
+<hr class="modal-divider">
+
+<div class="cat-nueva-form">
+    <input type="text"
+           id="nueva-cat-nombre"
+           class="input-nueva-cat"
+           placeholder="Nueva categoría..."
+           maxlength="100">
+    <button type="button" id="btn-agregar-cat" class="btn btn--primary btn--sm">
+        <i data-lucide="plus" width="14" height="14"></i> Agregar
+    </button>
+</div>
+<div id="cat-feedback" class="cat-feedback" hidden></div>
+{% endif %}
+
+{% if section == 'footer' %}
+<button class="btn btn--primary btn--sm" data-modal-close="modalCategorias">Cerrar</button>
+{% endif %}
+
 {% endcall %}
 
 

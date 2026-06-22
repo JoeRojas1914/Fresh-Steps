@@ -201,3 +201,61 @@ select:focus {
 .filtro-toggle--compact { margin: 0; }
 
 .select--full { max-width: none; }
+
+/* ── Modal gestión de categorías ── */
+.cat-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--color-bg-soft, #f8f9fa);
+}
+
+.cat-nombre { flex: 1; font-size: 14px; }
+
+.cat-acciones { display: flex; gap: 6px; flex-shrink: 0; }
+
+.cat-edit-input {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 14px;
+  border: 1px solid var(--color-border, #dee2e6);
+  border-radius: 4px;
+}
+
+.cat-nueva-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.input-nueva-cat {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid var(--color-border, #dee2e6);
+  border-radius: 6px;
+}
+
+.modal-divider { margin: 14px 0; border: none; border-top: 1px solid var(--color-border, #dee2e6); }
+
+.cat-feedback {
+  margin-top: 8px;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 5px;
+}
+.cat-feedback--error { background: #fde8e8; color: #c0392b; }
+.cat-feedback--ok    { background: #e6f9ee; color: #1a7a42; }

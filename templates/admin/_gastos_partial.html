@@ -5,6 +5,7 @@
 {% call table([
     "Negocio",
     "Descripción",
+    "Categoría",
     "Proveedor",
     "Total",
     "Comprobante",
@@ -18,6 +19,7 @@
     <tr>
         <td>{{ badge_negocio(g.negocio) }}</td>
         <td>{{ g.descripcion }}</td>
+        <td>{{ g.categoria or "—" }}</td>
         <td>{{ g.proveedor }}</td>
         <td>${{ "%.2f"|format(g.total) }}</td>
 
@@ -56,12 +58,14 @@
                 class="btn btn--info btn--sm js-editar-gasto"
                 data-id="{{ g.id_gasto }}"
                 data-id-negocio="{{ g.id_negocio }}"
+                data-id-categoria="{{ g.id_categoria or '' }}"
                 data-descripcion="{{ g.descripcion }}"
                 data-proveedor="{{ g.proveedor }}"
                 data-total="{{ g.total }}"
                 data-fecha="{{ g.fecha_registro.strftime('%Y-%m-%d') if g.fecha_registro else '' }}"
                 data-tipo-comprobante="{{ g.tipo_comprobante }}"
-                data-tipo-pago="{{ g.tipo_pago }}">
+                data-tipo-pago="{{ g.tipo_pago }}"
+                data-notas="{{ g.notas or '' }}">
                 Editar
             </button>
 
@@ -90,7 +94,7 @@
     </tr>
     {% else %}
     <tr>
-        <td colspan="9" class="dim td-empty">
+        <td colspan="10" class="dim td-empty">
             No se encontraron gastos con esos filtros.
         </td>
     </tr>
@@ -103,9 +107,10 @@
     total_paginas,
     'gastos.gastos',
     {
-      "id_negocio": request.args.get('id_negocio'),
+      "id_negocio":  request.args.get('id_negocio'),
+      "id_categoria": request.args.get('id_categoria'),
       "fecha_inicio": request.args.get('fecha_inicio'),
-      "fecha_fin": request.args.get('fecha_fin'),
-      "eliminados": request.args.get('eliminados')
+      "fecha_fin":    request.args.get('fecha_fin'),
+      "eliminados":   request.args.get('eliminados')
     }
 ) }}

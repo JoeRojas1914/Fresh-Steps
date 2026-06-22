@@ -1,0 +1,25 @@
+{% if categorias %}
+<ul class="cat-lista">
+    {% for c in categorias %}
+    <li class="cat-item" data-id="{{ c.id_categoria }}">
+        <span class="cat-nombre">{{ c.nombre }}</span>
+        <div class="cat-acciones">
+            <button type="button"
+                    class="btn btn--info btn--sm js-editar-cat"
+                    data-id="{{ c.id_categoria }}"
+                    data-nombre="{{ c.nombre }}">
+                Editar
+            </button>
+            <button type="button"
+                    class="btn btn--danger btn--sm js-eliminar-cat"
+                    data-id="{{ c.id_categoria }}"
+                    data-nombre="{{ c.nombre }}">
+                Eliminar
+            </button>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="dim">No hay categorías registradas.</p>
+{% endif %}

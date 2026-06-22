@@ -1,5 +1,5 @@
 import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, csrfFetch } from '../base/helpers.js';
 import { validarRequerido, validarPrecio } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
@@ -60,16 +60,18 @@ function confirmarEliminarGasto(id) { _eliminarGasto.confirmar(`/gastos/eliminar
 function ejecutarEliminarGasto()    { _eliminarGasto.ejecutar(); }
 
 
-function editarGasto(id, id_negocio, descripcion, proveedor, total, fecha_registro, tipo_comprobante, tipo_pago) {
-    document.getElementById("modalGasto_title").innerText           = "Editar gasto";
-    document.getElementById("id_gasto").value                       = id;
-    document.getElementById("id_negocio").value                     = id_negocio;
-    document.querySelector("[name=descripcion]").value              = descripcion;
-    document.querySelector("[name=proveedor]").value                = proveedor;
-    document.querySelector("[name=total]").value                    = total;
-    document.querySelector("[name=fecha_registro]").value           = fecha_registro || "";
-    document.querySelector("[name=tipo_comprobante]").value         = tipo_comprobante;
-    document.querySelector("[name=tipo_pago]").value                = tipo_pago;
+function editarGasto(id, id_negocio, id_categoria, descripcion, proveedor, total, fecha_registro, tipo_comprobante, tipo_pago, notas) {
+    document.getElementById("modalGasto_title").innerText   = "Editar gasto";
+    document.getElementById("id_gasto").value               = id;
+    document.getElementById("id_negocio").value             = id_negocio;
+    document.getElementById("gasto_categoria").value        = id_categoria || "";
+    document.querySelector("[name=descripcion]").value      = descripcion;
+    document.querySelector("[name=proveedor]").value        = proveedor;
+    document.querySelector("[name=total]").value            = total;
+    document.querySelector("[name=fecha_registro]").value   = fecha_registro || "";
+    document.querySelector("[name=tipo_comprobante]").value = tipo_comprobante;
+    document.querySelector("[name=tipo_pago]").value        = tipo_pago;
+    document.querySelector("[name=notas]").value            = notas || "";
     abrirModal("modalGasto");
 }
 
@@ -77,7 +79,7 @@ document.addEventListener("click", function (e) {
     const btnEditar = e.target.closest(".js-editar-gasto");
     if (btnEditar) {
         const d = btnEditar.dataset;
-        editarGasto(d.id, d.idNegocio, d.descripcion, d.proveedor, d.total, d.fecha, d.tipoComprobante, d.tipoPago);
+        editarGasto(d.id, d.idNegocio, d.idCategoria, d.descripcion, d.proveedor, d.total, d.fecha, d.tipoComprobante, d.tipoPago, d.notas);
         return;
     }
 
@@ -105,3 +107,116 @@ function verHistorial(id) {
         h => renderDiff(h, "Gasto")
     );
 }
+
+
+// ── Gestión de categorías ────────────────────────────────────────────────────
+
+const btnGestionarCats = document.getElementById("btn-gestionar-categorias");
+if (btnGestionarCats) {
+    btnGestionarCats.addEventListener("click", () => abrirModal("modalCategorias"));
+}
+
+async function recargarListaCategorias() {
+    const wrap = document.getElementById("categorias-lista-wrap");
+    if (!wrap) return;
+    const res  = await fetch("/gastos/categorias/lista");
+    wrap.innerHTML = await res.text();
+}
+
+function mostrarFeedbackCat(msg, tipo = "error") {
+    const el = document.getElementById("cat-feedback");
+    if (!el) return;
+    el.textContent = msg;
+    el.className   = `cat-feedback cat-feedback--${tipo}`;
+    el.hidden      = false;
+    setTimeout(() => { el.hidden = true; }, 4000);
+}
+
+async function enviarCategoria(id, nombre) {
+    const body = { nombre };
+    if (id) body.id_categoria = id;
+    const res = await csrfFetch("/gastos/categorias/guardar", {
+        method: "POST",
+        body: JSON.stringify(body),
+    });
+    return res.json();
+}
+
+document.getElementById("btn-agregar-cat")?.addEventListener("click", async () => {
+    const input = document.getElementById("nueva-cat-nombre");
+    const nombre = input?.value.trim();
+    if (!nombre) { mostrarFeedbackCat("Escribe el nombre de la categoría."); return; }
+    const data = await enviarCategoria(null, nombre);
+    if (data.ok) {
+        input.value = "";
+        mostrarFeedbackCat("Categoría agregada.", "ok");
+        await recargarListaCategorias();
+    } else {
+        mostrarFeedbackCat(data.mensaje || "Error al agregar.");
+    }
+});
+
+document.addEventListener("click", async function (e) {
+
+    const btnEditarCat = e.target.closest(".js-editar-cat");
+    if (btnEditarCat) {
+        const id     = btnEditarCat.dataset.id;
+        const nombre = btnEditarCat.dataset.nombre;
+        const item   = btnEditarCat.closest(".cat-item");
+        if (!item || item.classList.contains("editando")) return;
+
+        item.classList.add("editando");
+        const nombreEl = item.querySelector(".cat-nombre");
+        const accsEl   = item.querySelector(".cat-acciones");
+
+        const originalNombre = nombreEl.textContent;
+        nombreEl.innerHTML = `<input class="cat-edit-input" value="${originalNombre}" maxlength="100">`;
+
+        accsEl.innerHTML = `
+            <button class="btn btn--primary btn--sm js-guardar-cat" data-id="${id}">Guardar</button>
+            <button class="btn btn--secondary btn--sm js-cancelar-cat">Cancelar</button>
+        `;
+        item.querySelector(".cat-edit-input")?.focus();
+        return;
+    }
+
+    const btnGuardarCat = e.target.closest(".js-guardar-cat");
+    if (btnGuardarCat) {
+        const id    = btnGuardarCat.dataset.id;
+        const item  = btnGuardarCat.closest(".cat-item");
+        const input = item?.querySelector(".cat-edit-input");
+        const nombre = input?.value.trim();
+        if (!nombre) { mostrarFeedbackCat("El nombre no puede estar vacío."); return; }
+        const data = await enviarCategoria(id, nombre);
+        if (data.ok) {
+            mostrarFeedbackCat("Categoría actualizada.", "ok");
+            await recargarListaCategorias();
+        } else {
+            mostrarFeedbackCat(data.mensaje || "Error al guardar.");
+        }
+        return;
+    }
+
+    const btnCancelarCat = e.target.closest(".js-cancelar-cat");
+    if (btnCancelarCat) {
+        await recargarListaCategorias();
+        return;
+    }
+
+    const btnEliminarCat = e.target.closest(".js-eliminar-cat");
+    if (btnEliminarCat) {
+        const id     = btnEliminarCat.dataset.id;
+        const nombre = btnEliminarCat.dataset.nombre;
+        if (!confirm(`¿Eliminar la categoría "${nombre}"?`)) return;
+
+        const res  = await csrfFetch(`/gastos/categorias/eliminar/${id}`, { method: "POST" });
+        const data = await res.json();
+        if (data.ok) {
+            mostrarFeedbackCat("Categoría eliminada.", "ok");
+            await recargarListaCategorias();
+        } else {
+            mostrarFeedbackCat(data.mensaje || "Error al eliminar.");
+        }
+        return;
+    }
+});
