@@ -40,6 +40,44 @@ def obtener_gastos_por_semana_y_proveedor(inicio: date, fin: date, id_negocio: s
     }
 
 
+def obtener_gastos_por_semana_y_categoria(inicio: date, fin: date, id_negocio: str):
+    semanas = generar_semanas_rango(inicio, fin)
+    data_por_cat = defaultdict(lambda: [0.0] * len(semanas))
+
+    yw_to_idx = {
+        s["inicio"].isocalendar()[0] * 100 + s["inicio"].isocalendar()[1]: i
+        for i, s in enumerate(semanas)
+    }
+
+    sql = """
+        SELECT YEARWEEK(g.fecha_registro, 1) AS yw,
+               COALESCE(c.nombre, 'Sin categoría') AS categoria,
+               SUM(g.total) AS total
+        FROM gastos g
+        LEFT JOIN categoria_gasto c ON g.id_categoria = c.id_categoria
+        WHERE g.fecha_registro >= %s
+          AND g.fecha_registro <= %s
+          AND g.activo = 1
+    """
+    params = [inicio, fin]
+    if id_negocio != "all":
+        sql += " AND g.id_negocio = %s"
+        params.append(id_negocio)
+    sql += " GROUP BY yw, c.id_categoria, c.nombre"
+
+    with get_db() as (_, cursor):
+        cursor.execute(sql, params)
+        for r in cursor.fetchall():
+            idx = yw_to_idx.get(r["yw"])
+            if idx is not None:
+                data_por_cat[r["categoria"]][idx] = float(r["total"] or 0)
+
+    return {
+        "labels":   [s["label"] for s in semanas],
+        "datasets": [{"label": c, "data": v} for c, v in data_por_cat.items()],
+    }
+
+
 def obtener_total_gastos(inicio: date, fin: date, id_negocio: str):
     sql = """
         SELECT COALESCE(SUM(total), 0) AS total

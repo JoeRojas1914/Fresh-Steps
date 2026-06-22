@@ -110,7 +110,13 @@
             <canvas id="ingresosChart"></canvas>
         </div>
         <div class="card stats-card">
-            <h2 class="stats-title" id="titulo-gastos">Gastos</h2>
+            <div class="stats-card-header">
+                <h2 class="stats-title" id="titulo-gastos">Gastos</h2>
+                <div class="agrupacion-toggle" id="gastos-agrupacion">
+                    <button class="agrupacion-btn active" data-agrupacion="proveedor">Proveedor</button>
+                    <button class="agrupacion-btn" data-agrupacion="categoria">Categoría</button>
+                </div>
+            </div>
             <canvas id="gastosChart"></canvas>
         </div>
     </div>

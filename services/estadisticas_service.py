@@ -7,6 +7,7 @@ from models.negocio import obtener_negocios
 from models.estadisticas import (
     contar_ventas_por_semana,
     obtener_gastos_por_semana_y_proveedor,
+    obtener_gastos_por_semana_y_categoria,
     obtener_total_gastos,
     obtener_total_ingresos,
     obtener_unidades_por_semana,
@@ -103,7 +104,7 @@ def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio, col: 
     return pcts, periodo_anterior_str
 
 
-def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, col: str = "fecha_recibo") -> dict:
+def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, col: str = "fecha_recibo", agrupacion_gastos: str = "proveedor") -> dict:
     if granularidad == "hora":
         ventas_semanales   = contar_ventas_por_hora(inicio, fin, id_negocio, col)
         ingresos_semanales = obtener_ingresos_por_hora(inicio, fin, id_negocio)
@@ -117,7 +118,10 @@ def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, col: 
         ingresos_semanales = obtener_ingresos_por_semana(inicio, fin, id_negocio)
         unidades_semanales = obtener_unidades_por_semana(inicio, fin, id_negocio, col)
 
-    gastos_semanales   = obtener_gastos_por_semana_y_proveedor(inicio, fin, id_negocio)
+    if agrupacion_gastos == "categoria":
+        gastos_semanales = obtener_gastos_por_semana_y_categoria(inicio, fin, id_negocio)
+    else:
+        gastos_semanales = obtener_gastos_por_semana_y_proveedor(inicio, fin, id_negocio)
     ventas_prepago     = obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio, col)
     uso_servicios      = obtener_uso_servicios(inicio, fin, id_negocio, col)
     ventas_por_dia     = obtener_ventas_por_dia(inicio, fin, id_negocio, col)
@@ -267,9 +271,13 @@ def dashboard_api_service(args):
     if (fin - inicio).days > MAX_DIAS_RANGO:
         return None, f"El rango máximo permitido es {MAX_DIAS_RANGO} días (~6 meses)"
 
+    agrupacion_gastos = args.get("agrupacion_gastos", "proveedor")
+    if agrupacion_gastos not in {"proveedor", "categoria"}:
+        agrupacion_gastos = "proveedor"
+
     kpis                       = _calcular_kpis(inicio, fin, id_negocio, col)
     pcts, periodo_anterior_str = _calcular_comparativa(kpis, inicio, fin, id_negocio, col)
-    series                     = _cargar_series(inicio, fin, id_negocio, args.get("granularidad", "semana"), col)
+    series                     = _cargar_series(inicio, fin, id_negocio, args.get("granularidad", "semana"), col, agrupacion_gastos)
 
     return {
         **series,

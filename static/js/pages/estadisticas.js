@@ -103,6 +103,7 @@ const pieOpts = (label="") => ({
 });
 
 let modoActual = "mes";
+let agrupacionGastos = "proveedor";
 
 let gastosChart, ingresosChart, ventasSemanaChart, unidadesSemanaChart,
     tipoPagoChart, serviciosChart, ventasPorDiaChart, ingresosNegocioChart,
@@ -462,7 +463,7 @@ async function cargarDashboard() {
     actualizarTitulos();
 
     try {
-        const url = `/api/estadisticas/dashboard?inicio=${p.inicio}&fin=${p.fin}&id_negocio=${p.id_negocio}&granularidad=${p.granularidad||"semana"}&tipo_fecha=${p.tipo_fecha||"fecha_recibo"}`;
+        const url = `/api/estadisticas/dashboard?inicio=${p.inicio}&fin=${p.fin}&id_negocio=${p.id_negocio}&granularidad=${p.granularidad||"semana"}&tipo_fecha=${p.tipo_fecha||"fecha_recibo"}&agrupacion_gastos=${agrupacionGastos}`;
         const res = await fetch(url);
         if (!res.ok) { const j=await res.json().catch(()=>({})); mostrarError(j.error||`Error ${res.status}`); return; }
         const data = await res.json();
@@ -637,6 +638,15 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("click", function (e) {
         const btnModo = e.target.closest(".modo-btn[data-modo]");
         if (btnModo) { setModo(btnModo.dataset.modo, btnModo); return; }
+
+        const btnAgrupacion = e.target.closest(".agrupacion-btn[data-agrupacion]");
+        if (btnAgrupacion) {
+            agrupacionGastos = btnAgrupacion.dataset.agrupacion;
+            document.querySelectorAll("#gastos-agrupacion .agrupacion-btn").forEach(b => b.classList.remove("active"));
+            btnAgrupacion.classList.add("active");
+            cargarDashboard();
+            return;
+        }
 
         const btnTab = e.target.closest(".tab-btn[data-tab]");
         if (btnTab) { switchTab(btnTab.dataset.tab, btnTab); return; }

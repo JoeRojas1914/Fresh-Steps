@@ -29,6 +29,7 @@ from .estadisticas_ventas import (
 )
 from .estadisticas_gastos import (
     obtener_gastos_por_semana_y_proveedor,
+    obtener_gastos_por_semana_y_categoria,
     obtener_total_gastos,
     obtener_gastos_por_mes,
 )
