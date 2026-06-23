@@ -22,9 +22,9 @@
     ]) %}
 
     {% set meses = {
-        1:'enero', 2:'febrero', 3:'marzo', 4:'abril',
-        5:'mayo', 6:'junio', 7:'julio', 8:'agosto',
-        9:'septiembre', 10:'octubre', 11:'noviembre', 12:'diciembre'
+        1:'ene', 2:'feb', 3:'mar', 4:'abr',
+        5:'may', 6:'jun', 7:'jul', 8:'ago',
+        9:'sep', 10:'oct', 11:'nov', 12:'dic'
     } %}
 
     {% for v in ventas %}
@@ -49,14 +49,15 @@
         </td>
 
         <td>
-            {{ v.fecha_estimada.day }} {{ meses[v.fecha_estimada.month] }}
-            {{ "%02d:%02d"|format(v.fecha_estimada.hour, v.fecha_estimada.minute) }}
-
-            {% if v.fecha_estimada.date() < hoy %}
-                <span class="badge-atrasado">ATRASADO</span>
-            {% elif v.fecha_estimada.date() == hoy %}
-                <span class="badge-hoy">HOY</span>
-            {% endif %}
+            <span class="fecha-estimada-cell">
+                <span>{{ v.fecha_estimada.day }} {{ meses[v.fecha_estimada.month] }}
+                {{ "%02d:%02d"|format(v.fecha_estimada.hour, v.fecha_estimada.minute) }}</span>
+                {% if v.fecha_estimada.date() < hoy %}
+                    <span class="badge-atrasado">ATRASADO</span>
+                {% elif v.fecha_estimada.date() == hoy %}
+                    <span class="badge-hoy">HOY</span>
+                {% endif %}
+            </span>
         </td>
 
         <td>${{ total | round(2) }}</td>

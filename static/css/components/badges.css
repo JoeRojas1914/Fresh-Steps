@@ -33,18 +33,29 @@
 .status-pendiente  { background-color: #fef9c3; color: #854d0e; }
 
 /* ── Badges de entrega ── */
+.fecha-estimada-cell {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.fecha-estimada-cell > span:first-child {
+  display: inline-block;
+  min-width: 7.5ch;
+}
+
 .badge-hoy {
   background: #b45309;
   color: white;
   font-size: 0.75rem;
-  margin-left: 6px;
 }
 
 .badge-atrasado {
   background: #dc2626;
   color: white;
   font-size: 0.75rem;
-  margin-left: 6px;
 }
 
 .entrega-atrasada { background-color: #fdecea; }

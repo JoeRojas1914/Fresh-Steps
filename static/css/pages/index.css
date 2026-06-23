@@ -257,9 +257,8 @@
     border-color: #1e7fd6;
 }
 
-.hoy-kpis--solo .kpi-hoy-card {
-    flex: 1;
-    min-width: unset;
+.hoy-kpis--solo .kpi-hoy-card:last-child {
+    grid-column: span 2;
 }
 
 .kpi-hoy-label {
