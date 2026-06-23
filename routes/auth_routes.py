@@ -45,7 +45,8 @@ def login():
 
             session["id_usuario"]       = usuario["id_usuario"]
             session["usuario"]          = usuario["usuario"]
-            session["nombre"]           = usuario.get("nombre") or usuario["usuario"].capitalize()
+            session["nombre"]           = usuario.get("nombre") or ""
+            session["apellido"]         = usuario.get("apellido") or ""
             session["rol"]              = usuario["rol"]
             session["ultima_actividad"] = datetime.now().isoformat()
             session["session_token"]    = usuario.get("_session_token")
@@ -89,7 +90,8 @@ def pin_login():
     session["pin_habilitado"]   = True
     session["id_usuario"]       = usuario["id_usuario"]
     session["usuario"]          = usuario["usuario"]
-    session["nombre"]           = usuario.get("nombre") or usuario["usuario"].capitalize()
+    session["nombre"]           = usuario.get("nombre") or ""
+    session["apellido"]         = usuario.get("apellido") or ""
     session["rol"]              = "caja"
     session["ultima_actividad"] = datetime.now().isoformat()
     session["session_token"]    = usuario.get("_session_token")
