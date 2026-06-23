@@ -21,6 +21,7 @@ from services.ventas_service import (
     historial_ventas_service,
 )
 
+from services.ventas_editar_service import obtener_venta_editar_service, editar_venta_service
 from middleware.auth_middleware import admin_required
 from extensions import limiter
 
@@ -288,3 +289,31 @@ def historial_venta_por_id(id_venta):
                 r[k] = v.isoformat()
         result.append(r)
     return jsonify(result)
+
+
+@ventas_bp.route("/ventas/pendientes/<int:id_venta>/editar", methods=["GET"])
+@admin_required
+def editar_venta_get(id_venta):
+    try:
+        data = obtener_venta_editar_service(id_venta)
+        return render_template("ventas/ventas_editar.html", **data)
+    except ValueError:
+        return render_template("errors/404.html"), 404
+    except Exception:
+        logger.exception("Error en editar_venta_get id_venta=%s", id_venta)
+        return render_template("errors/500.html"), 500
+
+
+@ventas_bp.route("/ventas/pendientes/<int:id_venta>/editar", methods=["POST"])
+@admin_required
+@limiter.limit("20 per minute")
+def editar_venta_post(id_venta):
+    id_usuario = session.get("id_usuario")
+    try:
+        result = editar_venta_service(id_venta, request.form, id_usuario)
+        return jsonify({"ok": True, "total_nuevo": result["total_nuevo"]}), 200
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
+    except Exception:
+        logger.exception("Error en editar_venta_post id_venta=%s id_usuario=%s", id_venta, id_usuario)
+        return jsonify({"ok": False, "error": "Error interno del servidor"}), 500

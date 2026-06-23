@@ -75,6 +75,13 @@ export function recargarConFeedback(texto, tipo = "success", delay = 300) {
     setTimeout(() => location.reload(), delay);
 }
 
+export function redirigirConFeedback(url, texto, tipo = "success", delay = 300) {
+    try {
+        sessionStorage.setItem(_TOAST_KEY, JSON.stringify({ texto, tipo }));
+    } catch {}
+    setTimeout(() => { location.href = url; }, delay);
+}
+
 
 export function apiAction({
     url, method = "POST", body = null,

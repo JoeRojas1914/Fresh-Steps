@@ -42,7 +42,7 @@ def _extraer_datos(tipo, fila):
             "tipo": fila["cf_tipo"], "marca": fila["cf_marca"],
             "material": fila["cf_material"], "color_base": fila["cf_color_base"],
             "color_secundario": fila["cf_color_secundario"],
-            "cantidad": fila["cf_cantidad"], "agujetas": fila["cf_agujetas"],
+            "cantidad": fila["cf_cantidad"],
         }
     return {
         "tipo": fila["m_tipo"], "cantidad": fila["m_cantidad"],
@@ -64,7 +64,7 @@ def obtener_detalles_venta(ids_venta):
             "  ac.color_agujetas AS c_color_agujetas,"
             "  acf.tipo AS cf_tipo, acf.marca AS cf_marca, acf.material AS cf_material,"
             "  acf.color_base AS cf_color_base, acf.color_secundario AS cf_color_secundario,"
-            "  acf.cantidad AS cf_cantidad, acf.agujetas AS cf_agujetas,"
+            "  acf.cantidad AS cf_cantidad,"
             "  am.tipo AS m_tipo, am.cantidad AS m_cantidad, am.precio_unitario AS m_precio_unitario"
             " FROM articulo a"
             " LEFT JOIN articulo_calzado    ac  ON ac.id_articulo  = a.id_articulo"

@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/ventas_crear.css') }}">
+    <script type="module" src="{{ url_for('static', filename='js/pages/ventas_editar.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+{% from "components/modal.html" import modal %}
+
+{# ── Modal de confirmación de cambios ── #}
+{% call(section) modal("modalConfirmarEdicion", "Confirmar cambios", "md") %}
+{% if section == 'body' %}
+<div class="modal-confirm">
+    <div class="modal-confirm__hero">
+        <div class="modal-confirm__icon modal-confirm__icon--editar">
+            <i data-lucide="pencil" width="32" height="32"></i>
+        </div>
+    </div>
+    <p class="modal-confirm__title">¿Guardar estos cambios?</p>
+    <p class="modal-confirm__sub">Revisa los cambios antes de confirmar. Esta acción quedará registrada en el historial.</p>
+    <div id="resumen-cambios" class="resumen-cambios"></div>
+</div>
+{% endif %}
+{% if section == 'footer' %}
+<button type="button" class="btn btn--danger btn--sm" data-modal-close="modalConfirmarEdicion">Cancelar</button>
+<button id="btnConfirmarEdicion" class="btn btn--primary btn--sm">Confirmar cambios</button>
+{% endif %}
+{% endcall %}
+
+<div class="page-header">
+    <div>
+        <h1><i data-lucide="pencil" width="22" height="22"></i> Editar venta #{{ venta.id_venta }}</h1>
+        <p class="page-sub">{{ venta.nombre_cliente }} &mdash; {{ venta.negocio_nombre }}</p>
+    </div>
+</div>
+
+<form id="formEditarVenta" class="venta-layout"
+      data-venta-id="{{ venta.id_venta }}"
+      data-total-actual="{{ venta.total | float }}"
+      data-total-pagado="{{ venta.total_pagado | float }}"
+      data-fecha-original="{{ venta.fecha_estimada.strftime('%Y-%m-%d %H:%M') if venta.fecha_estimada else '' }}">
+
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {# id_negocio debe ser un <select> para que agregarArticulo() funcione con selectedOptions #}
+    <select id="id_negocio" class="d-none" disabled>
+        <option value="{{ venta.id_negocio }}" selected>{{ venta.negocio_nombre }}</option>
+    </select>
+
+    {# Stubs requeridos por ventas_validacion.js y ventas_articulos.js #}
+    <div class="d-none" aria-hidden="true">
+        <input id="id_cliente" value="stub" readonly>
+        <input id="fecha_estimada" value="stub" readonly>
+        <input id="fecha_estimada_fecha" value="stub" readonly>
+        <input id="fecha_estimada_hora" value="stub" readonly>
+        <input id="prepago" value="no" readonly>
+        <input id="aplica_descuento" value="no" readonly>
+        <input id="monto_prepago" value="0" readonly>
+        <select id="tipo_pago"><option value=""></option></select>
+        <div id="error-prepago"></div>
+        <div id="error-descuento"></div>
+        <div id="error-negocio"></div>
+        <button id="btn-crear" type="button" disabled></button>
+        <div id="mensaje-bloqueo"></div>
+    </div>
+
+    <div class="venta-main">
+
+        {# ── Zona A: Artículos existentes (read-only + agregar servicios) ── #}
+        <div class="venta-seccion">
+            <div class="venta-seccion-header">
+                <div class="venta-step-num">1</div>
+                <h2>Artículos existentes</h2>
+            </div>
+            <div class="venta-seccion-body">
+                {% if articulos_existentes %}
+                    {% for art in articulos_existentes %}
+                    {% set is_serviciable = art.tipo_articulo in ("calzado", "confeccion") %}
+                    <div class="articulo-item articulo-item--readonly art-ro-collapsed"
+                         data-tipo="{{ art.tipo_articulo }}"
+                         data-cantidad="{{ art.datos.cantidad if art.tipo_articulo == 'confeccion' else 1 }}">
+                        <div class="articulo-detalle articulo-detalle--open">
+                            <div class="art-ro-header">
+                                <i data-lucide="receipt" width="14" height="14"></i>
+                                <span class="art-ro-num">Artículo {{ loop.index }}</span>
+                                <span class="art-ro-badge">{{ art.tipo_articulo | capitalize }}</span>
+                                {% if art.datos.tipo is defined and art.datos.tipo %}
+                                <span class="art-ro-badge">{{ art.datos.tipo }}</span>
+                                {% endif %}
+                                <i data-lucide="chevron-up" width="14" height="14" class="art-ro-chevron"></i>
+                            </div>
+                            <div class="art-ro-summary">
+                                {% if art.tipo_articulo == "calzado" %}
+                                    {{- art.datos.tipo or "" -}}
+                                    {%- if art.datos.marca %} {{ art.datos.marca }}{% endif %}
+                                    {%- if art.datos.material %} · {{ art.datos.material }}{% endif %}
+                                    {%- if art.servicios %} · {{ art.servicios | length }} servicio{{ "s" if art.servicios | length != 1 else "" }}{% endif %}
+                                {% elif art.tipo_articulo == "confeccion" %}
+                                    {{- art.datos.tipo or "" -}}
+                                    {%- if art.datos.marca %} {{ art.datos.marca }}{% endif %}
+                                    {%- if art.datos.cantidad %} · {{ art.datos.cantidad }} pzas{% endif %}
+                                    {%- if art.servicios %} · {{ art.servicios | length }} servicio{{ "s" if art.servicios | length != 1 else "" }}{% endif %}
+                                {% elif art.tipo_articulo == "maquila" %}
+                                    {{- art.datos.tipo or "" -}}
+                                    {%- if art.datos.cantidad and art.datos.precio_unitario %} · {{ art.datos.cantidad }} × ${{ art.datos.precio_unitario | float | round(2) }}{% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="art-ro-body">
+
+                            {% if art.tipo_articulo == "calzado" %}
+                            <div class="form-group form-row articulo-row">
+                                <div class="campo-item"><label class="form-label">Tipo</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][tipo]" value="{{ art.datos.tipo or '' }}" data-original="{{ art.datos.tipo or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Marca</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][marca]" value="{{ art.datos.marca or '' }}" data-original="{{ art.datos.marca or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Material</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][material]" value="{{ art.datos.material or '' }}" data-original="{{ art.datos.material or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Color base</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][color_base]" value="{{ art.datos.color_base or '' }}" data-original="{{ art.datos.color_base or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Color secundario</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][color_secundario]" value="{{ art.datos.color_secundario or '' }}" data-original="{{ art.datos.color_secundario or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Color agujetas</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][color_agujetas]" value="{{ art.datos.color_agujetas or '' }}" data-original="{{ art.datos.color_agujetas or '' }}"></div>
+                            </div>
+                            {% elif art.tipo_articulo == "confeccion" %}
+                            <div class="form-group form-row articulo-row">
+                                <div class="campo-item"><label class="form-label">Tipo</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][tipo]" value="{{ art.datos.tipo or '' }}" data-original="{{ art.datos.tipo or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Marca</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][marca]" value="{{ art.datos.marca or '' }}" data-original="{{ art.datos.marca or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Material</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][material]" value="{{ art.datos.material or '' }}" data-original="{{ art.datos.material or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Color base</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][color_base]" value="{{ art.datos.color_base or '' }}" data-original="{{ art.datos.color_base or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Color secundario</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][color_secundario]" value="{{ art.datos.color_secundario or '' }}" data-original="{{ art.datos.color_secundario or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Cantidad</label><input type="number" min="1" class="form-input" name="art_edit[{{ art.id_articulo }}][cantidad]" value="{{ art.datos.cantidad or '' }}" data-original="{{ art.datos.cantidad or '' }}"></div>
+                            </div>
+                            {% elif art.tipo_articulo == "maquila" %}
+                            <div class="form-group form-row articulo-row">
+                                <div class="campo-item"><label class="form-label">Tipo</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][tipo]" value="{{ art.datos.tipo or '' }}" data-original="{{ art.datos.tipo or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Cantidad</label><input type="number" min="1" class="form-input" name="art_edit[{{ art.id_articulo }}][cantidad]" value="{{ art.datos.cantidad or '' }}" data-original="{{ art.datos.cantidad or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Precio unitario</label><input type="number" min="0.01" step="0.01" class="form-input" name="art_edit[{{ art.id_articulo }}][precio_unitario]" value="{{ art.datos.precio_unitario | float | round(2) }}" data-original="{{ art.datos.precio_unitario | float | round(2) }}"></div>
+                            </div>
+                            {% endif %}
+                            <hr class="art-ro-divider">
+
+                            {% if art.servicios %}
+                            <div class="form-group servicios-box servicios-box--readonly edit-art-fields">
+                                <div class="servicios-header">
+                                    <label class="form-label">Servicios actuales</label>
+                                </div>
+                                <div class="servicios-lista">
+                                    {% for s in art.servicios %}
+                                    <div class="servicio-ro-item"
+                                         data-precio-original="{{ s.precio_aplicado | float }}"
+                                         data-nombre="{{ s.nombre | e }}">
+                                        <span class="servicio-ro-nombre">{{ s.nombre }}</span>
+                                        <div class="servicio-ro-actions">
+                                            <input type="number"
+                                                   class="servicio-ro-precio-input"
+                                                   name="existing_edit[{{ art.id_articulo }}][{{ s.id_servicio }}][precio_aplicado]"
+                                                   value="{{ s.precio_aplicado | float | round(2) }}"
+                                                   min="0" step="0.01"
+                                                   aria-label="Precio de {{ s.nombre }}">
+                                            <button type="button"
+                                                    class="btn btn--danger btn--sm btn-delete-existing-srv"
+                                                    aria-label="Eliminar {{ s.nombre }}">
+                                                <i data-lucide="x" width="14" height="14"></i>
+                                            </button>
+                                        </div>
+                                        <input type="hidden"
+                                               class="existing-delete-flag"
+                                               name="existing_delete[{{ art.id_articulo }}][{{ s.id_servicio }}]"
+                                               value="0">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if is_serviciable %}
+                            <div class="form-group servicios-box agregar-servicios-existente edit-art-fields"
+                                 data-articulo-id="{{ art.id_articulo }}"
+                                 data-articulo-num="{{ loop.index }}"
+                                 data-tipo="{{ art.tipo_articulo }}"
+                                 data-cantidad="{{ art.datos.cantidad if art.tipo_articulo == 'confeccion' else 1 }}">
+                                <div class="servicios-header">
+                                    <label class="form-label">Agregar servicios a este artículo</label>
+                                    <button type="button"
+                                            class="btn btn--info btn--sm js-add-existing-service"
+                                            data-articulo-id="{{ art.id_articulo }}">
+                                        <i data-lucide="plus" width="14" height="14"></i> Agregar
+                                    </button>
+                                </div>
+                                <div class="servicios-lista" id="existingServiciosLista_{{ art.id_articulo }}">
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if art.comentario %}
+                            <div class="campo-item edit-art-fields">
+                                <label class="form-label">Comentario</label>
+                                <span class="campo-readonly">{{ art.comentario }}</span>
+                            </div>
+                            {% endif %}
+
+                            </div>{# /art-ro-body #}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="dim-soft">Esta venta no tiene artículos registrados.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {# ── Zona B: Nuevos artículos ── #}
+        <div class="venta-seccion">
+            <div class="venta-seccion-header">
+                <div class="venta-step-num">2</div>
+                <h2>Agregar nuevos artículos</h2>
+            </div>
+            <div class="venta-seccion-body">
+                <div id="articulos-container">
+                    <div id="empty-articulos" class="empty-articulos">
+                        <i id="empty-articulos-icon" data-lucide="package" width="36" height="36"></i>
+                        <p id="empty-articulos-msg">Agrega artículos nuevos si es necesario</p>
+                    </div>
+                </div>
+                <button type="button" id="btn-agregar-articulo" class="btn btn--primary btn--sm edit-agregar-btn">
+                    <i data-lucide="plus" width="14" height="14"></i> Agregar artículo
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    {# ── Sidebar ── #}
+    <div class="venta-side">
+      <div class="venta-side-scroll">
+
+        <div class="venta-seccion">
+            <div class="venta-seccion-header">
+                <div class="venta-step-num">3</div>
+                <h2>Fecha estimada</h2>
+            </div>
+            <div class="venta-seccion-body">
+                <div class="form-group">
+                    <label class="form-label" for="fecha_estimada_fecha_vis">Fecha</label>
+                    <input type="date" id="fecha_estimada_fecha_vis"
+                           value="{{ venta.fecha_estimada.strftime('%Y-%m-%d') if venta.fecha_estimada else '' }}">
+                </div>
+                <div class="form-group mt-10">
+                    <label class="form-label" for="fecha_estimada_hora_vis">Hora</label>
+                    <input type="time" id="fecha_estimada_hora_vis"
+                           value="{{ venta.fecha_estimada.strftime('%H:%M') if venta.fecha_estimada else '' }}">
+                </div>
+                <input type="hidden" name="fecha_estimada_fecha" id="fecha_estimada_fecha_hidden"
+                       value="{{ venta.fecha_estimada.strftime('%Y-%m-%d') if venta.fecha_estimada else '' }}">
+                <input type="hidden" name="fecha_estimada_hora" id="fecha_estimada_hora_hidden"
+                       value="{{ venta.fecha_estimada.strftime('%H:%M') if venta.fecha_estimada else '' }}">
+            </div>
+        </div>
+
+        {% if venta.total_pagado > 0 %}
+        <div class="venta-seccion">
+            <div class="venta-seccion-body">
+                <div class="info-row">
+                    <span class="dim-soft">Pagado hasta ahora</span>
+                    <strong>${{ venta.total_pagado | float | round(2) }}</strong>
+                </div>
+                <div class="info-row">
+                    <span class="dim-soft">Total mínimo permitido</span>
+                    <strong>${{ venta.total_pagado | float | round(2) }}</strong>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <div class="venta-side-footer">
+          <div id="total-venta" class="total-amount">
+              Total: ${{ venta.total | float | round(2) }}
+          </div>
+          <button type="submit" class="btn btn--primary btn--lg btn--full" id="btn-guardar" disabled>
+              Guardar cambios
+          </button>
+          <div id="editar-error" class="error-msg d-none" role="alert" aria-live="assertive"></div>
+      </div>
+    </div>
+
+</form>
+
+{% endblock %}

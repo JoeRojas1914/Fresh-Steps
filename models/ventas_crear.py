@@ -57,11 +57,11 @@ def _insertar_confeccion(cursor, id_articulo: int, art: dict) -> Decimal:
     cursor.execute("""
         INSERT INTO articulo_confeccion (
             id_articulo, tipo, marca, material,
-            color_base, color_secundario, cantidad, agujetas
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            color_base, color_secundario, cantidad
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s)
     """, (
         id_articulo, d["tipo"], d["marca"], d["material"],
-        d["color_base"], d.get("color_secundario"), int(cantidad), d["agujetas"],
+        d["color_base"], d.get("color_secundario"), int(cantidad),
     ))
     return cantidad * _insertar_servicios(cursor, id_articulo, art["servicios"])
 

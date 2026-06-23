@@ -206,7 +206,6 @@ _CAMPOS_ARTICULO: dict[str, dict[str, object]] = {
         "color_base":       str,
         "color_secundario": str,
         "cantidad":         lambda v: int(v or 1),
-        "agujetas":         lambda v: v == "1",
     },
     "maquila": {
         "tipo":            str,

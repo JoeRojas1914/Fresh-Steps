@@ -35,6 +35,16 @@ input:focus {
   animation: inputFocusGlow 0.35s ease;
 }
 
+.field--editado {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12) !important;
+}
+
+.field--editado:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(30, 127, 214, 0.15) !important;
+}
+
 select {
   width: 100%;
   max-width: 100%;

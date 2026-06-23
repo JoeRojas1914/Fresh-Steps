@@ -164,7 +164,6 @@ CREATE TABLE IF NOT EXISTS articulo_confeccion (
     color_base       VARCHAR(50),
     color_secundario VARCHAR(50),
     cantidad         INT NOT NULL DEFAULT 1,
-    agujetas         TINYINT(1) DEFAULT 0,
     CONSTRAINT chk_confeccion_cantidad CHECK (cantidad >= 1),
     FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo)
 );
