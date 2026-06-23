@@ -1,0 +1,18 @@
+{% from "components/modal.html" import modal %}
+{% call(section) modal("modalSalirSinGuardar", "¿Salir sin guardar?", "sm") %}
+{% if section == 'body' %}
+<div class="modal-confirm">
+    <div class="modal-confirm__hero modal-confirm__hero--danger">
+        <div class="modal-confirm__icon modal-confirm__icon--danger">
+            <i data-lucide="alert-triangle" width="32" height="32"></i>
+        </div>
+    </div>
+    <p class="modal-confirm__title">¿Salir sin guardar?</p>
+    <p class="modal-confirm__sub">Tienes cambios sin guardar. Si sales ahora se perderán.</p>
+</div>
+{% endif %}
+{% if section == 'footer' %}
+<button type="button" class="btn btn--primary btn--sm" data-modal-close="modalSalirSinGuardar">Seguir editando</button>
+<button id="btnConfirmarSalir" class="btn btn--danger btn--sm">Salir sin guardar</button>
+{% endif %}
+{% endcall %}

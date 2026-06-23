@@ -9,6 +9,8 @@
 
 {% from "components/modal.html" import modal %}
 
+{% include "components/_salir_sin_guardar_modal.html" %}
+
 {% call(section) modal("modalCliente", "Nuevo cliente", "md") %}
 {% if section == 'body' %}
 <form id="formNuevoCliente" class="modal-form modal-form--grid">

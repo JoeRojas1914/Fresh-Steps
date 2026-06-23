@@ -1,6 +1,7 @@
 import { ventaState } from './ventas_state.js';
 import { mostrarFeedback, redirigirConFeedback, escapeHtml } from '../base/helpers.js';
 import { abrirModal, cerrarModal } from '../components/modal.js';
+import { initNavigationGuard } from '../base/navigation_guard.js';
 import { cargarServicios, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado } from './ventas_servicios.js';
 import { agregarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
 
@@ -735,4 +736,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             _cerrarArticuloRo(card);
         }
     });
+
+    initNavigationGuard(() => !ventaState.enProceso && hayCambios());
 });

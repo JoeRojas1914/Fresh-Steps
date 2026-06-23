@@ -1,5 +1,6 @@
 import { ventaState } from './ventas_state.js';
 import { mostrarFeedback, initModalForm, scrollToFirstError } from '../base/helpers.js';
+import { initNavigationGuard } from '../base/navigation_guard.js';
 import { buscarClientes, crearCliente } from './ventas_clientes.js';
 import { seleccionarNegocio, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado } from './ventas_servicios.js';
 import { agregarArticulo, cerrarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
@@ -212,4 +213,10 @@ document.addEventListener("DOMContentLoaded", () => {
     togglePrepago();
     toggleDescuento();
     validarFormulario();
+
+    initNavigationGuard(() => {
+        if (ventaState.enProceso) return false;
+        return document.querySelectorAll("#articulos-container .articulo-item").length > 0
+            || !!document.getElementById("id_cliente")?.value;
+    });
 });
