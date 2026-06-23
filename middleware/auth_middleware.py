@@ -31,6 +31,7 @@ RUTAS_PUBLICAS = [
 
 RUTAS_CAJA = {
     "index",
+    "api_index_kpis",
 
     "ventas.ventas",
     "ventas.ventas_listas",
