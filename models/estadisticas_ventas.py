@@ -2,11 +2,14 @@ from collections import defaultdict
 from datetime import date, timedelta
 from db import get_db
 
-_COLS_FECHA_VENTA = frozenset({"fecha_recibo", "fecha_entrega"})
+_COLS_FECHA: dict[str, str] = {
+    "fecha_recibo":  "fecha_recibo",
+    "fecha_entrega": "fecha_entrega",
+}
 
 
 def _col_v(col: str) -> str:
-    return col if col in _COLS_FECHA_VENTA else "fecha_recibo"
+    return _COLS_FECHA.get(col, "fecha_recibo")
 
 
 def generar_semanas_rango(inicio: date, fin: date):

@@ -53,15 +53,15 @@ def guardar_usuario():
 
         guardar_usuario_service(
             id_usuario,
-            request.form.get("usuario"),
+            (request.form.get("usuario") or "").strip(),
             request.form.get("password"),
             request.form.get("rol"),
             request.form.get("pin"),
-            nombre   = request.form.get("nombre")   or None,
-            apellido = request.form.get("apellido") or None,
+            nombre   = (request.form.get("nombre")   or "").strip() or None,
+            apellido = (request.form.get("apellido") or "").strip() or None,
             telefono = request.form.get("telefono") or None,
             correo   = request.form.get("correo")   or None,
-            cp       = request.form.get("cp")       or None,
+            cp       = (request.form.get("cp")       or "").strip() or None,
         )
         flash("Usuario editado correctamente." if id_usuario else "Usuario creado correctamente.", "success")
     except ValueError as e:

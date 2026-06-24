@@ -67,13 +67,13 @@ def guardar_gasto():
         datos = (
             int(request.form["id_negocio"]),
             int(raw_categoria) if raw_categoria else None,
-            request.form["descripcion"],
-            request.form["proveedor"],
+            request.form["descripcion"].strip(),
+            request.form["proveedor"].strip(),
             float(request.form["total"]),
             request.form["fecha_registro"],
             request.form["tipo_comprobante"],
             request.form["tipo_pago"],
-            request.form.get("notas") or None,
+            (request.form.get("notas") or "").strip() or None,
         )
         resultado = guardar_gasto_service(id_gasto, datos, id_usuario)
         flash("Gasto editado correctamente." if resultado == "actualizado"

@@ -64,23 +64,23 @@ def _enriquecer_ventas(
 
         if con_pagos:
             pagos        = pagos_map.get(v["id_venta"], [])
-            total        = float(v.get("total") or 0)
-            total_pagado = sum(float(p["monto"]) for p in pagos)
+            total        = Decimal(str(v.get("total") or 0))
+            total_pagado = sum(Decimal(str(p["monto"])) for p in pagos)
             v["pagos"]           = pagos
             v["total"]           = total
             v["total_pagado"]    = total_pagado
-            v["saldo_pendiente"] = max(total - total_pagado, 0)
+            v["saldo_pendiente"] = max(total - total_pagado, Decimal(0))
             v["tiene_pagos"]     = total_pagado > 0
             v["esta_pagada"]     = v["saldo_pendiente"] == 0
 
         if calcular_estado:
             pagos        = pagos_map.get(v["id_venta"], [])
-            total        = float(v.get("total") or 0)
-            total_pagado = float(v.get("total_pagado") or 0)
+            total        = Decimal(str(v.get("total") or 0))
+            total_pagado = Decimal(str(v.get("total_pagado") or 0))
             v["pagos"]           = pagos
             v["total"]           = total
             v["total_pagado"]    = total_pagado
-            v["saldo_pendiente"] = max(total - total_pagado, 0)
+            v["saldo_pendiente"] = max(total - total_pagado, Decimal(0))
             v["esta_pagada"]     = v["saldo_pendiente"] == 0
 
             if v.get("eliminado"):
@@ -318,12 +318,20 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> int:
         venta_creada = obtener_venta(id_venta)
         if venta_creada and monto_prepago > Decimal(str(venta_creada["total"] or 0)):
             raise ValueError("El prepago no puede ser mayor al total de la venta.")
-        registrar_pago(
-            id_venta=id_venta,
-            monto=monto_prepago,
-            tipo_pago=tipo_pago,
-            id_usuario_cobro=id_usuario_creo,
-        )
+        try:
+            registrar_pago(
+                id_venta=id_venta,
+                monto=monto_prepago,
+                tipo_pago=tipo_pago,
+                id_usuario_cobro=id_usuario_creo,
+            )
+        except Exception:
+            # Compensación: si el prepago falla, revertimos la venta para evitar datos huérfanos.
+            try:
+                eliminar_venta(id_venta, id_usuario_creo)
+            except Exception:
+                pass
+            raise ValueError("Error al registrar el prepago. La venta no fue guardada.")
 
     return id_venta
 

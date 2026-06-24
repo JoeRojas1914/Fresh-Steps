@@ -81,7 +81,7 @@
                     </div>
                     <div class="cliente-negocio-col">
                         <label class="form-label" for="id_negocio">Negocio</label>
-                        <select name="id_negocio" id="id_negocio" class="select--full">
+                        <select name="id_negocio" id="id_negocio" class="select--full" aria-describedby="error-negocio">
                             <option value="">-- Selecciona --</option>
                             <option value="1">Fresh Steps</option>
                             <option value="2">Confección</option>
@@ -134,11 +134,11 @@
             <div class="venta-seccion-body">
                 <div class="form-group">
                     <label class="form-label" for="fecha_estimada_fecha">Fecha</label>
-                    <input type="date" id="fecha_estimada_fecha">
+                    <input type="date" id="fecha_estimada_fecha" aria-describedby="error-fecha">
                 </div>
                 <div class="form-group mt-10">
                     <label class="form-label" for="fecha_estimada_hora">Hora</label>
-                    <input type="time" id="fecha_estimada_hora">
+                    <input type="time" id="fecha_estimada_hora" aria-describedby="error-fecha">
                 </div>
                 <input type="hidden" name="fecha_estimada" id="fecha_estimada">
                 <div id="error-fecha" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
@@ -182,7 +182,7 @@
                         <label class="form-label" for="monto_prepago">Monto ($)</label>
                         <input type="number" min="0" step="0.01"
                                name="monto_prepago" id="monto_prepago"
-                               placeholder="0.00">
+                               placeholder="0.00" aria-describedby="error-prepago">
                         <div id="error-prepago" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
                             <i data-lucide="alert-triangle" width="12" height="12"></i> El prepago no puede ser mayor al total.
                         </div>
@@ -209,7 +209,7 @@
                         <label class="form-label" for="cantidad_descuento">Descuento ($)</label>
                         <input type="number" min="0" step="0.01"
                                name="cantidad_descuento" id="cantidad_descuento"
-                               placeholder="0.00">
+                               placeholder="0.00" aria-describedby="error-descuento">
                         <div id="error-descuento" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
                             <i data-lucide="alert-triangle" width="12" height="12"></i> El descuento no puede ser mayor al total.
                         </div>

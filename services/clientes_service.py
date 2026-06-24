@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from utils import calcular_paginacion
 from validators import validar_nombre, validar_correo, validar_telefono
 from models.clientes import (
@@ -109,12 +111,12 @@ def obtener_cliente_detalle_service(
     for p in pedidos:
         detalles     = detalles_map.get(p["id_venta"], [])
         pagos        = pagos_map.get(p["id_venta"], [])
-        total_pagado = sum(float(pg["monto"]) for pg in pagos)
+        total_pagado = sum(Decimal(str(pg["monto"])) for pg in pagos)
 
-        p["detalles"]       = detalles
-        p["pagos"]          = pagos
-        p["total_pagado"]   = total_pagado
-        p["saldo_pendiente"] = float(p["total"]) - total_pagado
+        p["detalles"]        = detalles
+        p["pagos"]           = pagos
+        p["total_pagado"]    = total_pagado
+        p["saldo_pendiente"] = Decimal(str(p["total"])) - total_pagado
 
     negocios = obtener_negocios()
     kpis     = obtener_kpis_cliente(id_cliente)

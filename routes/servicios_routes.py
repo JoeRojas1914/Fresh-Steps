@@ -70,7 +70,7 @@ def guardar_servicio():
     id_usuario = session.get("id_usuario")
     try:
         id_negocio = int(request.form["id_negocio"])
-        nombre = request.form["nombre"]
+        nombre = request.form["nombre"].strip()
         precio = float(request.form["precio"])
         resultado = guardar_servicio_service(id_servicio, id_negocio, nombre, precio, id_usuario)
         flash("Servicio actualizado correctamente." if resultado == "actualizado"
