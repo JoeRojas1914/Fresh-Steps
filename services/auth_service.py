@@ -113,5 +113,9 @@ def login_pin_service(pin: str, ip: str) -> dict | str | None:
     return None
 
 
+def registrar_logout_service(id_usuario: int, username: str, ip: str) -> None:
+    registrar_login_log(username, "logout", True, ip, id_usuario=id_usuario)
+
+
 def invalidar_session_token_service(id_usuario: int) -> None:
     actualizar_session_token(id_usuario, None)

@@ -26,7 +26,8 @@ def admin_required(f):
 
 RUTAS_PUBLICAS = [
     "auth.login",
-    "static"
+    "static",
+    "health",
 ]
 
 RUTAS_CAJA = {

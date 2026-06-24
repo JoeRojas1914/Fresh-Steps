@@ -3,6 +3,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from datetime import date, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from db import get_db
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from flask_wtf import CSRFProtect
@@ -214,6 +215,20 @@ def api_index_kpis():
 
 
 
+
+
+# ================= HEALTH =================
+@app.route("/health")
+@limiter.limit("10 per minute")
+def health():
+    try:
+        with get_db() as (_, cursor):
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+        return jsonify({"status": "ok", "db": "ok"}), 200
+    except Exception:
+        logger.exception("Health check failed")
+        return jsonify({"status": "error", "db": "error"}), 503
 
 
 # ================= RUN =================

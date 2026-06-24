@@ -5,6 +5,7 @@ from services.auth_service import (
     login_password_service,
     login_pin_service,
     invalidar_session_token_service,
+    registrar_logout_service,
 )
 from extensions import limiter
 
@@ -99,8 +100,11 @@ def pin_login():
 def logout():
     pin_habilitado = session.get("pin_habilitado")
     id_usuario     = session.get("id_usuario")
+    username       = session.get("usuario")
 
     if id_usuario:
+        if username:
+            registrar_logout_service(id_usuario, username, request.remote_addr)
         invalidar_session_token_service(id_usuario)
 
     session.clear()
