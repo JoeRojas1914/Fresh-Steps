@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: freshsteps
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install system dependencies for mysqlclient
+        run: sudo apt-get install -y default-libmysqlclient-dev build-essential pkg-config
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create DB user and apply schema
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        run: |
+          mysql -h 127.0.0.1 -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "
+            CREATE USER IF NOT EXISTS 'FreshStepsTest'@'%' IDENTIFIED BY '${TEST_DB_PASSWORD}';
+            GRANT ALL PRIVILEGES ON freshsteps.* TO 'FreshStepsTest'@'%';
+            FLUSH PRIVILEGES;
+          "
+          for f in migrations/001_schema_completo.sql \
+                   migrations/002_indices_performance.sql \
+                   migrations/003_gastos_categoria_notas.sql \
+                   migrations/004_indices.sql; do
+            mysql -h 127.0.0.1 -uroot -p"${MYSQL_ROOT_PASSWORD}" freshsteps < "$f"
+          done
+
+      - name: Write test env file
+        env:
+          TEST_DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+        run: |
+          {
+            echo "FLASK_ENV=development"
+            echo "SECRET_KEY=ci-secret-key-not-for-production"
+            echo "DB_HOST=127.0.0.1"
+            echo "DB_USER=FreshStepsTest"
+            echo "DB_PASSWORD=${TEST_DB_PASSWORD}"
+            echo "DB_NAME=freshsteps"
+            echo "DB_PORT=3306"
+          } > scripts/.env.test
+
+      - name: Run tests
+        run: python -m pytest tests/ -v --tb=short --cov=. --cov-report=term-missing
