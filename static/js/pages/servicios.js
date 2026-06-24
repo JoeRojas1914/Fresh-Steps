@@ -1,5 +1,5 @@
 import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, escapeHtml } from '../base/helpers.js';
 import { validarRequerido, validarPrecio } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
@@ -110,7 +110,7 @@ document.addEventListener("click", function (e) {
     const btnEliminar = e.target.closest(".js-confirmar-eliminar-servicio");
     if (btnEliminar) {
         const el = document.getElementById("servicioNombreEliminar");
-        if (el) el.innerHTML = `¿Seguro que deseas eliminar?<br><span>${btnEliminar.dataset.nombre}</span>`;
+        if (el) el.innerHTML = `¿Seguro que deseas eliminar?<br><span>${escapeHtml(btnEliminar.dataset.nombre)}</span>`;
         _eliminarServicio.confirmar(`/servicios/eliminar/${btnEliminar.dataset.id}`, btnEliminar.closest("tr"));
         return;
     }

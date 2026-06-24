@@ -1,5 +1,5 @@
 import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, csrfFetch } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, csrfFetch, escapeHtml } from '../base/helpers.js';
 import { validarRequerido, validarPrecio } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
@@ -89,7 +89,7 @@ document.addEventListener("click", function (e) {
     const btnEliminar = e.target.closest(".js-confirmar-eliminar-gasto");
     if (btnEliminar) {
         const el = document.getElementById("gastoNombreEliminar");
-        if (el) el.innerHTML = `¿Seguro que deseas eliminar?<br><span>${btnEliminar.dataset.descripcion}</span>`;
+        if (el) el.innerHTML = `¿Seguro que deseas eliminar?<br><span>${escapeHtml(btnEliminar.dataset.descripcion)}</span>`;
         _eliminarGasto.confirmar(`/gastos/eliminar/${btnEliminar.dataset.id}`, btnEliminar.closest("tr"));
         return;
     }
