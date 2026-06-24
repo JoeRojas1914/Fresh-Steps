@@ -189,7 +189,7 @@ def index():
 
     return render_template(
         "index.html",
-        nombre_usuario          = session.get("nombre") or session.get("usuario", "").capitalize(),
+        nombre_usuario          = " ".join(filter(None, [session.get("nombre"), session.get("apellido")])) or session.get("usuario", "").capitalize(),
         fecha_bonita            = fecha_bonita,
         negocio_sel             = negocio,
         **kpis,
