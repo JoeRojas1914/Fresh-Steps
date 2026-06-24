@@ -102,6 +102,22 @@ def registrar_historial_usuario(id_usuario, accion, antes, despues, admin):
         ))
 
 
+def obtener_pines_caja_activos(excluir_id=None):
+    with get_db() as (_, cursor):
+        if excluir_id:
+            cursor.execute("""
+                SELECT pin_hash FROM usuario
+                WHERE rol = 'caja' AND activo = 1
+                  AND id_usuario != %s AND pin_hash IS NOT NULL
+            """, (excluir_id,))
+        else:
+            cursor.execute("""
+                SELECT pin_hash FROM usuario
+                WHERE rol = 'caja' AND activo = 1 AND pin_hash IS NOT NULL
+            """)
+        return cursor.fetchall()
+
+
 def actualizar_pin(id_usuario, pin_hash):
     with get_db() as (_, cursor):
         cursor.execute("""

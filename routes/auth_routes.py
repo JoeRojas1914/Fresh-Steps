@@ -80,7 +80,7 @@ def pin_login():
     )
 
     if usuario == "LOCKED":
-        flash("PIN bloqueado por demasiados intentos fallidos. Inténtalo de nuevo en 30 minutos.", "error")
+        flash("PIN bloqueado por demasiados intentos. Inténtalo de nuevo en 30 minutos.", "error")
         return render_template("auth/pin.html")
 
     if not usuario:

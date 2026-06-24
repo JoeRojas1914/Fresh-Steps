@@ -1,7 +1,13 @@
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 import models.usuario as usuario
 from validators import validar_correo, validar_telefono, validar_pin, validar_password
+
+
+def _verificar_pin_unico(pin: str, excluir_id: int | None = None) -> None:
+    for row in usuario.obtener_pines_caja_activos(excluir_id=excluir_id):
+        if check_password_hash(row["pin_hash"], pin):
+            raise ValueError("Este PIN ya está en uso por otro usuario.")
 
 
 def guardar_usuario_service(
@@ -26,6 +32,7 @@ def guardar_usuario_service(
         if not pin:
             raise ValueError("PIN obligatorio")
         validar_pin(pin)
+        _verificar_pin_unico(pin)
 
         rol = rol or "caja"
         password_hash = generate_password_hash(password)
@@ -61,6 +68,7 @@ def guardar_usuario_service(
 
     if pin:
         validar_pin(pin)
+        _verificar_pin_unico(pin, excluir_id=id_usuario)
         usuario.actualizar_pin(id_usuario, generate_password_hash(pin))
 
     despues = usuario.obtener_usuario_por_id(id_usuario)

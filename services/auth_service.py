@@ -5,7 +5,6 @@ from flask import request
 
 from models.login import (
     obtener_usuario_por_username,
-    obtener_usuario_caja_activo,
     obtener_usuarios_caja_activos,
     registrar_login_log,
     obtener_intentos,
@@ -107,7 +106,6 @@ def login_pin_service(pin: str, ip: str) -> dict | str | None:
 
         _fallo(username, "pin_caja", ip, max_intentos=MAX_INTENTOS_PIN, bloqueo_min=BLOQUEO_MIN_PIN)
 
-    # Verificar si todos están bloqueados
     for usuario in usuarios:
         if _esta_bloqueado(usuario["usuario"], ip, "pin_caja", usuario["id_usuario"]):
             return "LOCKED"
