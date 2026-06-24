@@ -11,6 +11,16 @@ from extensions import limiter
 auth_bp = Blueprint("auth", __name__)
 
 
+def _poblar_sesion(usuario: dict, rol: str) -> None:
+    session["id_usuario"]       = usuario["id_usuario"]
+    session["usuario"]          = usuario["usuario"]
+    session["nombre"]           = usuario.get("nombre") or ""
+    session["apellido"]         = usuario.get("apellido") or ""
+    session["rol"]              = rol
+    session["ultima_actividad"] = datetime.now().isoformat()
+    session["session_token"]    = usuario.get("_session_token")
+
+
 @auth_bp.route("/login", methods=["GET", "POST"])
 @limiter.limit("10 per minute", methods=["POST"])
 def login():
@@ -42,15 +52,7 @@ def login():
 
 
         if admin_mode == "1":
-
-            session["id_usuario"]       = usuario["id_usuario"]
-            session["usuario"]          = usuario["usuario"]
-            session["nombre"]           = usuario.get("nombre") or ""
-            session["apellido"]         = usuario.get("apellido") or ""
-            session["rol"]              = usuario["rol"]
-            session["ultima_actividad"] = datetime.now().isoformat()
-            session["session_token"]    = usuario.get("_session_token")
-
+            _poblar_sesion(usuario, usuario["rol"])
             return redirect(url_for("index"))
 
 
@@ -87,14 +89,8 @@ def pin_login():
 
 
     session.clear()
-    session["pin_habilitado"]   = True
-    session["id_usuario"]       = usuario["id_usuario"]
-    session["usuario"]          = usuario["usuario"]
-    session["nombre"]           = usuario.get("nombre") or ""
-    session["apellido"]         = usuario.get("apellido") or ""
-    session["rol"]              = "caja"
-    session["ultima_actividad"] = datetime.now().isoformat()
-    session["session_token"]    = usuario.get("_session_token")
+    session["pin_habilitado"] = True
+    _poblar_sesion(usuario, "caja")
 
     return redirect(url_for("index"))
 
