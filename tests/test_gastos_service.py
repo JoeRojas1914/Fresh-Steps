@@ -13,30 +13,6 @@ DATOS_GASTO = ("1", None, "Compra de material pytest", "ProveedorTest", "250.00"
                "2030-01-15", "ticket", "efectivo", None)
 
 
-@pytest.fixture
-def gasto_test(db_conn, usuario_admin):
-    """Gasto de prueba insertado directamente en BD."""
-    cursor = db_conn.cursor()
-    cursor.execute(
-        """INSERT INTO gastos
-           (id_negocio, descripcion, proveedor, total, fecha_registro,
-            tipo_comprobante, tipo_pago, id_usuario, activo)
-           VALUES (1, 'GastoTest', 'ProveedorTest', 100.00, '2030-01-01',
-                   'ticket', 'efectivo', %s, 1)""",
-        (usuario_admin["id_usuario"],),
-    )
-    db_conn.commit()
-    gid = cursor.lastrowid
-    cursor.close()
-
-    yield {"id_gasto": gid}
-
-    cursor = db_conn.cursor()
-    cursor.execute("DELETE FROM gastos_historial WHERE id_gasto = %s", (gid,))
-    cursor.execute("DELETE FROM gastos           WHERE id_gasto = %s", (gid,))
-    db_conn.commit()
-    cursor.close()
-
 
 def test_crear_gasto_retorna_creado(db_conn, usuario_admin):
     resultado = guardar_gasto_service(None, DATOS_GASTO, usuario_admin["id_usuario"])
