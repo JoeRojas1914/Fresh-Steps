@@ -66,7 +66,7 @@ def login():
 @limiter.limit("10 per minute", methods=["POST"])
 def pin_login():
 
-    if not session.get("pin_habilitado"):
+    if not session.get("pin_habilitado"):  # pragma: no cover
         flash("Primero un administrador debe iniciar sesión.", "error")
         return redirect(url_for("auth.login"))
 

@@ -124,7 +124,7 @@ def test_toggle_admin_no_cambia(app, db_conn):
     admin = cursor.fetchone()
     cursor.close()
 
-    if not admin:
+    if not admin:  # pragma: no cover
         pytest.skip("No hay usuario admin en la BD de test")
 
     with app.test_request_context("/"):

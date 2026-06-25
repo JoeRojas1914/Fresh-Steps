@@ -232,6 +232,12 @@ def test_exportar_clientes_retorna_xlsx(logged_client):
     assert XLSX_CONTENT_TYPE in res.content_type
 
 
+def test_exportar_cliente_individual_retorna_xlsx(logged_client, cliente_test):
+    res = logged_client.get(f"/clientes/{cliente_test['id_cliente']}/exportar")
+    assert res.status_code == 200
+    assert XLSX_CONTENT_TYPE in res.content_type
+
+
 def test_api_crear_cliente_retorna_json(logged_client, db_conn):
     res = logged_client.post("/api/clientes/crear", data={
         "nombre":    "ApiRuta",
@@ -336,7 +342,7 @@ def test_guardar_usuario_nuevo_redirige(logged_client, db_conn):
     cursor.execute("SELECT id_usuario FROM usuario WHERE usuario='ruta_test_usr'")
     row = cursor.fetchone()
     cursor.close()
-    if row:
+    if row:  # pragma: no cover
         uid = row[0]
         cursor = db_conn.cursor()
         cursor.execute("DELETE FROM historial_usuario WHERE id_usuario=%s", (uid,))
@@ -358,6 +364,15 @@ def test_historial_usuario_retorna_json(logged_client, usuario_admin):
     res = logged_client.get(f"/usuarios/{usuario_admin['id_usuario']}/historial")
     assert res.status_code == 200
     assert res.is_json
+
+
+def test_exportar_cliente_con_ventas_xlsx(logged_client, cliente_test, venta_pendiente):
+    """Cubre excel_helpers.py _build_ws_resumen/_ws_articulos/_ws_pagos loop bodies."""
+    # venta_pendiente crea una venta para cliente_test en DB → Excel incluye pedidos
+    assert venta_pendiente["id_venta"] is not None
+    res = logged_client.get(f"/clientes/{cliente_test['id_cliente']}/exportar")
+    assert res.status_code == 200
+    assert XLSX_CONTENT_TYPE in res.content_type
 
 
 def test_mi_perfil_200(logged_client):

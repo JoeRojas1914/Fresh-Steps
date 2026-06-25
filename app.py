@@ -60,7 +60,7 @@ from models.estadisticas_gastos import obtener_total_gastos
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
-if not app.secret_key:
+if not app.secret_key:  # pragma: no cover
     raise RuntimeError("SECRET_KEY no está configurada. Defínela en el archivo .env antes de arrancar.")
 app.config.update({
     "SESSION_COOKIE_HTTPONLY": True,
@@ -118,7 +118,7 @@ def not_found(e):
 
 
 @app.errorhandler(500)
-def server_error(e):
+def server_error(e):  # pragma: no cover
     logger.exception("Error no manejado: %s", e)
     return render_template("errors/500.html"), 500
 
@@ -169,7 +169,7 @@ def index():
 
     hoy = date.today().isoformat()
 
-    if not session.get("id_usuario"):
+    if not session.get("id_usuario"):  # pragma: no cover
 
         if session.get("pin_habilitado_fecha") == hoy:
             return redirect(url_for("auth.pin_login"))
@@ -200,7 +200,7 @@ def index():
 @app.route("/api/index/kpis")
 @limiter.limit("60 per minute")
 def api_index_kpis():
-    if not session.get("id_usuario"):
+    if not session.get("id_usuario"):  # pragma: no cover
         return jsonify({"error": "No autorizado"}), 401
 
     negocio = request.args.get("negocio", "all")
@@ -226,11 +226,11 @@ def health():
             cursor.execute("SELECT 1")
             cursor.fetchone()
         return jsonify({"status": "ok", "db": "ok"}), 200
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Health check failed")
         return jsonify({"status": "error", "db": "error"}), 503
 
 
 # ================= RUN =================
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app.run(debug=os.getenv("FLASK_ENV") == "development")

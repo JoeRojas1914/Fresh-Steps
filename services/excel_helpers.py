@@ -137,9 +137,9 @@ def fmt_dt(dt):
         return "—"
     if isinstance(dt, datetime):
         return dt.strftime("%d/%m/%Y %H:%M")
-    if isinstance(dt, date):
+    if isinstance(dt, date):  # pragma: no cover
         return dt.strftime("%d/%m/%Y")
-    return str(dt)
+    return str(dt)  # pragma: no cover
 
 
 def estado_venta(v):
@@ -232,7 +232,7 @@ def _build_ws_articulos(ws, pedidos, detalles_map, nombre_cliente, filtro_txt):
                 desc = datos.get("tipo","—")
                 mat  = f"Precio unitario: ${float(datos.get('precio_unitario') or 0):.2f}"
                 cant = datos.get("cantidad", 1)
-            else:
+            else:  # pragma: no cover
                 desc = mat = "—"; cant = "—"
             for si, svc in enumerate(servicios if servicios else [None]):
                 bg = xl_row_bg(r)

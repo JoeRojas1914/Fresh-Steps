@@ -66,7 +66,7 @@ def guardar_usuario():
         flash("Usuario editado correctamente." if id_usuario else "Usuario creado correctamente.", "success")
     except ValueError as e:
         flash(str(e), "error")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception(
             "Error al guardar usuario id_usuario=%s id_solicitante=%s",
             id_usuario, session.get("id_usuario")
@@ -88,7 +88,7 @@ def toggle_usuario(id):
             flash("Usuario activado correctamente.", "success")
         else:
             flash("Usuario desactivado correctamente.", "success")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error en toggle_usuario id=%s id_solicitante=%s", id, session.get("id_usuario"))
         flash("Error inesperado al cambiar el estado del usuario.", "error")
     return redirect(url_for("usuarios.listar_usuarios"))

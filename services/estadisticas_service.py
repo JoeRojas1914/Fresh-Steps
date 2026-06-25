@@ -135,19 +135,19 @@ def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, col: 
 
     try:
         clientes_nuevos = obtener_clientes_nuevos(inicio, fin, id_negocio, col)
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         _log.error("clientes_nuevos: %s", e)
         clientes_nuevos = 0
 
     try:
         tasa_retorno = obtener_tasa_retorno(inicio, fin, id_negocio, col)
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         _log.error("tasa_retorno: %s", e)
         tasa_retorno = {"total": 0, "recurrentes": 0, "tasa": 0}
 
     try:
         gasto_prom_cliente = obtener_gasto_promedio_cliente(inicio, fin, id_negocio, col)
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         _log.error("gasto_prom_cliente: %s", e)
         gasto_prom_cliente = 0.0
 

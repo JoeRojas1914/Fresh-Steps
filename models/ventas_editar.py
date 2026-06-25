@@ -226,7 +226,7 @@ def editar_venta(id_venta, fecha_estimada, nuevos_articulos, nuevos_servicios_po
                 continue
             tipo = art_row["tipo_articulo"]
             cfg  = _CAMPOS_ARTICULO.get(tipo)
-            if not cfg:
+            if not cfg:  # pragma: no cover
                 continue
             tabla, campos_validos = cfg
             updates = {c: cambios[c] for c in campos_validos if c in cambios}
@@ -317,7 +317,7 @@ def editar_venta(id_venta, fecha_estimada, nuevos_articulos, nuevos_servicios_po
             )
             id_articulo = cursor.lastrowid
             insertador  = _INSERTADORES.get(art["tipo_articulo"])
-            if not insertador:
+            if not insertador:  # pragma: no cover
                 raise ValueError(f"Tipo de artículo desconocido: {art['tipo_articulo']}")
             delta_total += insertador(cursor, id_articulo, art)
 

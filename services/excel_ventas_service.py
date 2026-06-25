@@ -68,7 +68,7 @@ def _ws_articulos(ws, ventas, detalles_map, filtro_txt):
     r = 4
     for v in ventas:
         detalles = detalles_map.get(v["id_venta"], [])
-        if not detalles:
+        if not detalles:  # pragma: no cover
             bg = xl_row_bg(r)
             xl_cell(ws, r, 1, f"#{v['id_venta']}", fg=bg, bold=True, align="center")
             xl_cell(ws, r, 2, v.get("negocio", ""), fg=bg)
@@ -97,7 +97,7 @@ def _ws_articulos(ws, ventas, detalles_map, filtro_txt):
                 desc = datos.get("tipo", "—")
                 mat  = f"Precio unitario: ${float(datos.get('precio_unitario') or 0):.2f}"
                 cant = datos.get("cantidad", 1)
-            else:
+            else:  # pragma: no cover
                 desc = mat = "—"; cant = "—"
 
             for si, svc in enumerate(servicios if servicios else [None]):

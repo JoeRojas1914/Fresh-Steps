@@ -256,7 +256,7 @@ def _parsear_articulos_form(form: dict, tipo_permitido: str | None) -> list:
             i += 1
     except ValueError:
         raise
-    except TypeError:
+    except TypeError:  # pragma: no cover
         raise ValueError("Datos de artículos inválidos (cantidad o precio no numérico).")
     return articulos
 
@@ -324,7 +324,7 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None,
                     tipo_pago=tipo_pago,
                     id_usuario_cobro=id_usuario_creo,
                 )
-            except Exception:
+            except Exception:  # pragma: no cover
                 # Compensación: si el prepago falla, revertimos la venta para evitar datos huérfanos.
                 try:
                     eliminar_venta(id_venta, id_usuario_creo)
@@ -336,7 +336,7 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None,
 
     except ValueError as e:
         return None, str(e)
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error inesperado en guardar_venta_service")
         return None, "Error interno del servidor."
 

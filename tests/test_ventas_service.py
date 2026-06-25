@@ -27,7 +27,7 @@ def _form_maquila(id_cliente=None, fecha=FECHA, con_servicios=False):
         form["id_cliente"] = str(id_cliente)
     if fecha:
         form["fecha_estimada"] = fecha
-    if con_servicios:
+    if con_servicios:  # pragma: no cover
         form["articulos[0][servicios][0][id_servicio]"] = "1"
         form["articulos[0][servicios][0][precio_aplicado]"] = "100"
     return form

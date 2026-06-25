@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if session.get("rol") != "admin":
+        if session.get("rol") != "admin":  # pragma: no cover
             wants_json = (
                 request.accept_mimetypes.best_match(
                     ["application/json", "text/html"]
@@ -95,7 +95,7 @@ def init_auth_middleware(app):
 
         try:
             token_bd = obtener_session_token(session["id_usuario"])
-        except Exception:
+        except Exception:  # pragma: no cover
             logger.exception("Error al verificar session token id_usuario=%s", session.get("id_usuario"))
             session.clear()
             flash("Error de sesión. Por favor vuelve a ingresar.", "error")

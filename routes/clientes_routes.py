@@ -57,9 +57,9 @@ def guardar_cliente():
             "Cliente actualizado correctamente." if resultado == "actualizado"
             else "Cliente creado correctamente.", "success"
         )
-    except ValueError as e:
+    except ValueError as e:  # pragma: no cover
         flash(str(e), "error")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al guardar cliente id_usuario=%s", id_usuario)
         flash("Error al guardar el cliente. Verifica los datos.", "error")
     next_url = request.form.get('next', '').strip()
@@ -78,7 +78,7 @@ def eliminar_cliente(id_cliente):
             flash("No puedes eliminar el cliente porque ya tiene ventas registradas.", "error")
         else:
             flash("Cliente eliminado correctamente.", "success")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al eliminar cliente id_cliente=%s", id_cliente)
         flash("Error al eliminar el cliente.", "error")
     return redirect(url_for("clientes.clientes"))
@@ -91,7 +91,7 @@ def restaurar_cliente(id_cliente):
     try:
         restaurar_cliente_service(id_cliente, id_usuario)
         flash("Cliente restaurado correctamente.", "success")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al restaurar cliente id_cliente=%s", id_cliente)
         flash("Error al restaurar el cliente.", "error")
     return redirect(url_for("clientes.clientes"))

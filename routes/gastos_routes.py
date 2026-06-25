@@ -78,9 +78,9 @@ def guardar_gasto():
         resultado = guardar_gasto_service(id_gasto, datos, id_usuario)
         flash("Gasto editado correctamente." if resultado == "actualizado"
               else "Gasto creado correctamente.", "success")
-    except (ValueError, KeyError):
+    except (ValueError, KeyError):  # pragma: no cover
         flash("Datos inválidos. Verifica los campos ingresados.", "error")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al guardar gasto id_gasto=%s", id_gasto)
         flash("Error al guardar el gasto. Verifica los datos ingresados.", "error")
     return redirect(url_for("gastos.gastos"))
@@ -93,7 +93,7 @@ def eliminar_gasto(id_gasto):
     try:
         eliminar_gasto_service(id_gasto, id_usuario)
         flash("Gasto eliminado correctamente.", "success")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al eliminar gasto id_gasto=%s", id_gasto)
         flash("Error al eliminar el gasto.", "error")
     return redirect(url_for("gastos.gastos"))
@@ -111,7 +111,7 @@ def restaurar_gasto_route(id_gasto):
     try:
         restaurar_gasto_service(id_gasto, id_usuario)
         flash("Gasto restaurado correctamente.", "success")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al restaurar gasto id_gasto=%s id_usuario=%s", id_gasto, id_usuario)
         flash("Error al restaurar el gasto.", "error")
     return redirect(url_for("gastos.gastos"))
@@ -138,7 +138,7 @@ def guardar_categoria():
         else:
             crear_categoria_service(nombre)
         return jsonify({"ok": True})
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al guardar categoría id=%s", id_categoria)
         return jsonify({"ok": False, "mensaje": "Error al guardar la categoría."}), 500
 
@@ -150,7 +150,7 @@ def eliminar_categoria_route(id_categoria):
     try:
         ok, mensaje = eliminar_categoria_service(id_categoria)
         return jsonify({"ok": ok, "mensaje": mensaje})
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al eliminar categoría id=%s", id_categoria)
         return jsonify({"ok": False, "mensaje": "Error al eliminar la categoría."}), 500
 

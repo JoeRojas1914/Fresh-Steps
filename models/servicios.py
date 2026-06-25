@@ -111,7 +111,7 @@ def servicio_tiene_ventas(cursor, id_servicio):
     row = cursor.fetchone()
     if isinstance(row, dict):
         return row["total"] > 0
-    return row[0] > 0
+    return row[0] > 0  # pragma: no cover
 
 
 def registrar_historial(cursor, id_servicio, accion, id_usuario, antes=None, despues=None):

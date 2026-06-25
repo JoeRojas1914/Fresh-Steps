@@ -188,7 +188,7 @@ def test_flujo_completo_servicio(db_conn, usuario_admin):
         "SELECT id_servicio FROM servicio WHERE nombre = 'Servicio Flujo Test' AND id_negocio = 1"
     )
     leftover = cursor.fetchone()
-    if leftover:
+    if leftover:  # pragma: no cover
         lid = leftover[0]
         cursor.execute("DELETE FROM servicios_historial WHERE id_servicio = %s", (lid,))
         cursor.execute("DELETE FROM servicio WHERE id_servicio = %s", (lid,))

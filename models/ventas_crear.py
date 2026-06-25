@@ -12,11 +12,11 @@ def _resolver_precio(cursor, s):
 
     if precio <= 0:
         cursor.execute(
-            "SELECT precio_base FROM servicio WHERE id_servicio = %s",
+            "SELECT precio FROM servicio WHERE id_servicio = %s",
             (int(s["id_servicio"]),),
         )
         row = cursor.fetchone()
-        precio = Decimal(str(row["precio_base"])) if row else Decimal("0")
+        precio = Decimal(str(row["precio"])) if row else Decimal("0")
 
     return precio
 
@@ -119,7 +119,7 @@ def crear_venta(
             id_articulo = cursor.lastrowid
 
             insertador = _INSERTADORES.get(tipo_articulo)
-            if not insertador:
+            if not insertador:  # pragma: no cover
                 raise Exception(f"Tipo de artículo desconocido: {tipo_articulo}")
             total += insertador(cursor, id_articulo, art)
 

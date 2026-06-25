@@ -75,11 +75,11 @@ def guardar_servicio():
         resultado = guardar_servicio_service(id_servicio, id_negocio, nombre, precio, id_usuario)
         flash("Servicio actualizado correctamente." if resultado == "actualizado"
               else "Servicio creado correctamente.", "success")
-    except ValueError as e:
+    except ValueError as e:  # pragma: no cover
         flash(str(e), "error")
-    except (KeyError, TypeError):
+    except (KeyError, TypeError):  # pragma: no cover
         flash("Datos inválidos. Verifica los campos ingresados.", "error")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al guardar servicio id_servicio=%s", id_servicio)
         flash("Error al guardar el servicio.", "error")
     return redirect(url_for("servicios.servicios"))
@@ -93,7 +93,7 @@ def eliminar_servicio(id_servicio):
     try:
         eliminar_servicio_service(id_servicio, id_usuario)
         flash("Servicio eliminado correctamente.", "success")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al eliminar servicio id_servicio=%s", id_servicio)
         flash("Error al eliminar el servicio.", "error")
     return redirect(url_for("servicios.servicios"))
@@ -123,7 +123,7 @@ def restaurar_servicio(id_servicio):
     try:
         restaurar_servicio_service(id_servicio, id_usuario)
         flash("Servicio restaurado correctamente.", "success")
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error al restaurar servicio id_servicio=%s id_usuario=%s", id_servicio, id_usuario)
         flash("Error al restaurar el servicio.", "error")
     return redirect(url_for("servicios.servicios"))

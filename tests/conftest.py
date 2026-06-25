@@ -167,6 +167,107 @@ def servicio_confeccion(db_conn):
 
 
 @pytest.fixture
+def venta_pendiente(app, db_conn, usuario_admin, cliente_test, servicio_calzado):
+    """Venta calzado en estado pendiente, para tests de rutas y edición."""
+    from services.ventas_service import guardar_venta_service
+    sid = servicio_calzado["id_servicio"]
+    form = {
+        "id_negocio": "1",
+        "id_cliente": str(cliente_test["id_cliente"]),
+        "fecha_estimada": "2030-12-31 10:00:00",
+        "articulos[0][tipo_articulo]": "calzado",
+        "articulos[0][tipo]": "Tenis",
+        "articulos[0][marca]": "Nike",
+        "articulos[0][material]": "Piel",
+        "articulos[0][color_base]": "Blanco",
+        f"articulos[0][servicios][0][id_servicio]": str(sid),
+        f"articulos[0][servicios][0][precio_aplicado]": "150.00",
+    }
+    with app.test_request_context("/"):
+        id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
+    assert error is None, f"Setup venta_pendiente falló: {error}"
+
+    cursor = db_conn.cursor(dictionary=True)
+    cursor.execute("SELECT id_articulo FROM articulo WHERE id_venta = %s LIMIT 1", (id_venta,))
+    row = cursor.fetchone()
+    cursor.close()
+
+    yield {
+        "id_venta": id_venta,
+        "id_articulo": row["id_articulo"] if row else None,
+        "id_servicio": sid,
+    }
+
+    cleanup_venta(db_conn, id_venta)
+
+
+@pytest.fixture
+def venta_confeccion(app, db_conn, usuario_admin, cliente_test, servicio_confeccion):
+    """Venta confección en estado pendiente, cantidad=2, precio_aplicado=200."""
+    from services.ventas_service import guardar_venta_service
+    sid = servicio_confeccion["id_servicio"]
+    form = {
+        "id_negocio": "2",
+        "id_cliente": str(cliente_test["id_cliente"]),
+        "fecha_estimada": "2030-12-31 10:00:00",
+        "articulos[0][tipo_articulo]": "confeccion",
+        "articulos[0][tipo]": "Camiseta",
+        "articulos[0][marca]": "Marca",
+        "articulos[0][material]": "Tela",
+        "articulos[0][color_base]": "Rojo",
+        "articulos[0][cantidad]": "2",
+        f"articulos[0][servicios][0][id_servicio]": str(sid),
+        f"articulos[0][servicios][0][precio_aplicado]": "200.00",
+    }
+    with app.test_request_context("/"):
+        id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
+    assert error is None, f"Setup venta_confeccion falló: {error}"
+
+    cursor = db_conn.cursor(dictionary=True)
+    cursor.execute("SELECT id_articulo FROM articulo WHERE id_venta = %s LIMIT 1", (id_venta,))
+    row = cursor.fetchone()
+    cursor.close()
+
+    yield {
+        "id_venta": id_venta,
+        "id_articulo": row["id_articulo"] if row else None,
+        "id_servicio": sid,
+    }
+
+    cleanup_venta(db_conn, id_venta)
+
+
+@pytest.fixture
+def venta_maquila(app, db_conn, usuario_admin, cliente_test):
+    """Venta maquila en estado pendiente, 10 unidades a $50."""
+    from services.ventas_service import guardar_venta_service
+    form = {
+        "id_negocio": "3",
+        "id_cliente": str(cliente_test["id_cliente"]),
+        "fecha_estimada": "2030-12-31 10:00:00",
+        "articulos[0][tipo_articulo]": "maquila",
+        "articulos[0][tipo]": "Playera",
+        "articulos[0][cantidad]": "10",
+        "articulos[0][precio_unitario]": "50.00",
+    }
+    with app.test_request_context("/"):
+        id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
+    assert error is None, f"Setup venta_maquila falló: {error}"
+
+    cursor = db_conn.cursor(dictionary=True)
+    cursor.execute("SELECT id_articulo FROM articulo WHERE id_venta = %s LIMIT 1", (id_venta,))
+    row = cursor.fetchone()
+    cursor.close()
+
+    yield {
+        "id_venta": id_venta,
+        "id_articulo": row["id_articulo"] if row else None,
+    }
+
+    cleanup_venta(db_conn, id_venta)
+
+
+@pytest.fixture
 def gasto_test(db_conn, usuario_admin):
     """Gasto de prueba insertado directamente en BD."""
     cursor = db_conn.cursor()

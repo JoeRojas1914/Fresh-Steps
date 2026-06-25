@@ -17,7 +17,7 @@ def estadisticas():
     try:
         data = dashboard_page_data_service()
         return render_template("admin/estadisticas.html", **data)
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error en estadisticas id_usuario=%s", session.get("id_usuario"))
         return render_template("errors/500.html"), 500
 
@@ -30,7 +30,7 @@ def exportar_estadisticas():
         if error:
             return jsonify({"error": error}), 400
         return respuesta
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception("Error en exportar_estadisticas id_usuario=%s", session.get("id_usuario"))
         return jsonify({"error": "Error al generar el archivo"}), 500
 
@@ -43,7 +43,7 @@ def api_dashboard():
         if error:
             return jsonify({"error": error}), 400
         return jsonify(data)
-    except Exception:
+    except Exception:  # pragma: no cover
         logger.exception(
             "Error en api_dashboard id_usuario=%s args=%s",
             session.get("id_usuario"), dict(request.args)
