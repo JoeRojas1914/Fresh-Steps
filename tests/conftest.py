@@ -62,10 +62,18 @@ def usuario_admin(db_conn):
     yield {"id_usuario": uid, "usuario": username, "password": password, "rol": "admin"}
 
     cursor = db_conn.cursor()
-    cursor.execute("DELETE FROM historial_usuario WHERE id_usuario = %s", (uid,))
-    cursor.execute("DELETE FROM login_log          WHERE id_usuario = %s", (uid,))
-    cursor.execute("DELETE FROM login_intentos     WHERE usuario   = %s", (username,))
-    cursor.execute("DELETE FROM usuario            WHERE id_usuario = %s", (uid,))
+    # Borrar dependencias con FK a usuario antes de borrar el usuario
+    cursor.execute("SELECT id_gasto FROM gastos WHERE id_usuario = %s", (uid,))
+    for (gid,) in cursor.fetchall():
+        cursor.execute("DELETE FROM gastos_historial WHERE id_gasto = %s", (gid,))
+        cursor.execute("DELETE FROM gastos WHERE id_gasto = %s", (gid,))
+    cursor.execute("DELETE FROM servicios_historial WHERE id_usuario = %s", (uid,))
+    cursor.execute("DELETE FROM clientes_historial  WHERE id_usuario = %s", (uid,))
+    cursor.execute("DELETE FROM venta_historial      WHERE id_usuario = %s", (uid,))
+    cursor.execute("DELETE FROM historial_usuario    WHERE id_usuario = %s", (uid,))
+    cursor.execute("DELETE FROM login_log            WHERE id_usuario = %s", (uid,))
+    cursor.execute("DELETE FROM login_intentos       WHERE usuario   = %s", (username,))
+    cursor.execute("DELETE FROM usuario              WHERE id_usuario = %s", (uid,))
     db_conn.commit()
     cursor.close()
 

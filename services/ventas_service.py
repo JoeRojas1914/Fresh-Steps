@@ -141,16 +141,16 @@ def listar_entregas_pendientes_service(
     }
 
 
-def registrar_pago_final_service(data: dict, id_usuario: int) -> str:
+def registrar_pago_final_service(data: dict, id_usuario: int) -> tuple[bool, str]:
     id_venta    = data.get("id_venta")
     monto       = data.get("monto")
     metodo_pago = data.get("metodo_pago")
 
     if not id_venta or not monto or not metodo_pago:
-        raise ValueError("Datos incompletos para el pago final")
+        return False, "Datos incompletos para el pago final"
 
     if metodo_pago not in METODOS_PAGO_VALIDOS:
-        raise ValueError(f"Método de pago no válido: '{metodo_pago}'")
+        return False, f"Método de pago no válido: '{metodo_pago}'"
 
     registrar_pago_final_db(
         id_venta=id_venta,
@@ -161,7 +161,7 @@ def registrar_pago_final_service(data: dict, id_usuario: int) -> str:
 
     marcar_entregada(id_venta, id_usuario)
 
-    return "Pago final registrado y venta marcada como entregada"
+    return True, "Pago final registrado y venta marcada como entregada"
 
 
 def eliminar_venta_service(id_venta: int, id_usuario: int | None = None) -> None:
@@ -277,63 +277,68 @@ def _validar_reglas_negocio(tipo_negocio: str | None, articulos: list) -> None:
                 raise ValueError("Maquila no permite servicios.")
 
 
-def guardar_venta_service(form: dict, id_usuario_creo: int) -> int:
+def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None, str | None]:
     try:
-        id_negocio = int(form["id_negocio"])
-    except (KeyError, ValueError):
-        raise ValueError("Negocio inválido.")
+        try:
+            id_negocio = int(form["id_negocio"])
+        except (KeyError, ValueError):
+            return None, "Negocio inválido."
 
-    id_cliente     = form.get("id_cliente") or None
-    fecha_estimada = form.get("fecha_estimada") or None
+        id_cliente     = form.get("id_cliente") or None
+        fecha_estimada = form.get("fecha_estimada") or None
 
-    prepago, monto_prepago   = _parsear_prepago(form)
-    aplica_descuento, cantidad_descuento = _parsear_descuento(form)
-    tipo_negocio = cargar_tipos_por_negocio().get(id_negocio)
-    articulos = _parsear_articulos_form(form, tipo_negocio)
+        prepago, monto_prepago   = _parsear_prepago(form)
+        aplica_descuento, cantidad_descuento = _parsear_descuento(form)
+        tipo_negocio = cargar_tipos_por_negocio().get(id_negocio)
+        articulos = _parsear_articulos_form(form, tipo_negocio)
 
-    if not id_cliente or not fecha_estimada:
-        raise ValueError(
-            "Faltan datos obligatorios (cliente, negocio, fecha estimada o tipo de pago)."
+        if not id_cliente or not fecha_estimada:
+            return None, "Faltan datos obligatorios (cliente, negocio, fecha estimada o tipo de pago)."
+
+        if not articulos:
+            return None, "Debes agregar al menos 1 artículo."
+
+        _validar_reglas_negocio(tipo_negocio, articulos)
+
+        id_venta = crear_venta(
+            id_negocio=id_negocio,
+            id_cliente=id_cliente,
+            fecha_estimada=fecha_estimada,
+            aplica_descuento=aplica_descuento,
+            cantidad_descuento=cantidad_descuento,
+            articulos=articulos,
+            id_usuario_creo=id_usuario_creo,
         )
 
-    if not articulos:
-        raise ValueError("Debes agregar al menos 1 artículo.")
-
-    _validar_reglas_negocio(tipo_negocio, articulos)
-
-    id_venta = crear_venta(
-        id_negocio=id_negocio,
-        id_cliente=id_cliente,
-        fecha_estimada=fecha_estimada,
-        aplica_descuento=aplica_descuento,
-        cantidad_descuento=cantidad_descuento,
-        articulos=articulos,
-        id_usuario_creo=id_usuario_creo,
-    )
-
-    if prepago and monto_prepago > 0:
-        tipo_pago = form.get("tipo_pago")
-        if not tipo_pago:
-            raise ValueError("Debes seleccionar el tipo de pago del prepago.")
-        venta_creada = obtener_venta(id_venta)
-        if venta_creada and monto_prepago > Decimal(str(venta_creada["total"] or 0)):
-            raise ValueError("El prepago no puede ser mayor al total de la venta.")
-        try:
-            registrar_pago(
-                id_venta=id_venta,
-                monto=monto_prepago,
-                tipo_pago=tipo_pago,
-                id_usuario_cobro=id_usuario_creo,
-            )
-        except Exception:
-            # Compensación: si el prepago falla, revertimos la venta para evitar datos huérfanos.
+        if prepago and monto_prepago > 0:
+            tipo_pago = form.get("tipo_pago")
+            if not tipo_pago:
+                return None, "Debes seleccionar el tipo de pago del prepago."
+            venta_creada = obtener_venta(id_venta)
+            if venta_creada and monto_prepago > Decimal(str(venta_creada["total"] or 0)):
+                return None, "El prepago no puede ser mayor al total de la venta."
             try:
-                eliminar_venta(id_venta, id_usuario_creo)
+                registrar_pago(
+                    id_venta=id_venta,
+                    monto=monto_prepago,
+                    tipo_pago=tipo_pago,
+                    id_usuario_cobro=id_usuario_creo,
+                )
             except Exception:
-                pass
-            raise ValueError("Error al registrar el prepago. La venta no fue guardada.")
+                # Compensación: si el prepago falla, revertimos la venta para evitar datos huérfanos.
+                try:
+                    eliminar_venta(id_venta, id_usuario_creo)
+                except Exception:
+                    pass
+                return None, "Error al registrar el prepago. La venta no fue guardada."
 
-    return id_venta
+        return id_venta, None
+
+    except ValueError as e:
+        return None, str(e)
+    except Exception:
+        logger.exception("Error inesperado en guardar_venta_service")
+        return None, "Error interno del servidor."
 
 
 def _parsear_servicios(form: dict, i: int) -> list[dict]:

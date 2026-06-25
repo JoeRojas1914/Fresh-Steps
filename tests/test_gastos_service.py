@@ -9,8 +9,8 @@ from services.gastos_service import (
     listar_gastos,
 )
 
-DATOS_GASTO = ("1", "Compra de material pytest", "ProveedorTest", "250.00",
-               "2030-01-15", "ticket", "efectivo")
+DATOS_GASTO = ("1", None, "Compra de material pytest", "ProveedorTest", "250.00",
+               "2030-01-15", "ticket", "efectivo", None)
 
 
 @pytest.fixture
@@ -59,8 +59,8 @@ def test_crear_gasto_retorna_creado(db_conn, usuario_admin):
 
 
 def test_actualizar_gasto_retorna_actualizado(db_conn, gasto_test, usuario_admin):
-    datos_actualizados = ("1", "Descripcion Actualizada", "ProveedorTest",
-                          "300.00", "2030-01-15", "factura", "transferencia")
+    datos_actualizados = ("1", None, "Descripcion Actualizada", "ProveedorTest",
+                          "300.00", "2030-01-15", "factura", "transferencia", None)
     resultado = guardar_gasto_service(
         str(gasto_test["id_gasto"]), datos_actualizados, usuario_admin["id_usuario"]
     )

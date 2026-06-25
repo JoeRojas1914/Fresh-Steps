@@ -135,10 +135,10 @@ def test_toggle_admin_no_cambia(app, db_conn):
 
 
 def test_listar_usuarios_filtra_por_rol(db_conn):
-    usuarios = listar_usuarios_service(rol="admin")
-    assert all(u["rol"] == "admin" for u in usuarios)
+    resultado = listar_usuarios_service(rol="admin")
+    assert all(u["rol"] == "admin" for u in resultado["usuarios"])
 
 
 def test_listar_usuarios_filtra_activos(db_conn):
-    usuarios = listar_usuarios_service(activo=1)
-    assert all(u["activo"] == 1 for u in usuarios)
+    resultado = listar_usuarios_service(activo=1)
+    assert all(u["activo"] == 1 for u in resultado["usuarios"])

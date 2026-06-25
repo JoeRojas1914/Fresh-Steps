@@ -77,14 +77,11 @@ def guardar_venta():
     id_usuario = session.get("id_usuario")
     if not id_usuario:
         return jsonify({"ok": False, "error": "Sesión expirada. Vuelve a iniciar sesión."}), 401
-    try:
-        id_venta = guardar_venta_service(request.form, id_usuario)
-        return jsonify({"ok": True, "id_venta": id_venta}), 200
-    except ValueError as e:
-        return jsonify({"ok": False, "error": str(e)}), 400
-    except Exception:
-        logger.exception("Error en guardar_venta id_usuario=%s", id_usuario)
-        return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
+    id_venta, error = guardar_venta_service(request.form, id_usuario)
+    if error:
+        status = 500 if "interno" in error.lower() else 400
+        return jsonify({"ok": False, "error": error}), status
+    return jsonify({"ok": True, "id_venta": id_venta}), 200
 
 
 @ventas_bp.route("/ventas")
@@ -197,14 +194,10 @@ def registrar_pago_final():
     data = request.get_json(silent=True) or {}
     id_usuario = session.get("id_usuario")
 
-    try:
-        mensaje = registrar_pago_final_service(data, id_usuario)
-        return jsonify({"ok": True, "message": mensaje})
-    except ValueError as e:
-        return jsonify({"ok": False, "error": str(e)}), 400
-    except Exception:
-        logger.exception("Error en registrar_pago_final id_usuario=%s", id_usuario)
-        return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
+    ok, mensaje = registrar_pago_final_service(data, id_usuario)
+    if not ok:
+        return jsonify({"ok": False, "error": mensaje}), 400
+    return jsonify({"ok": True, "message": mensaje})
 
 
 @ventas_bp.route("/ventas/revertir-lista/<int:id_venta>", methods=["POST"])

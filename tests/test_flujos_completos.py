@@ -50,7 +50,8 @@ def test_flujo_completo_cliente(db_conn, usuario_admin):
     assert row["activo"] == 1
 
     try:
-        # 2. Actualizar
+        # 2. Actualizar — commit para salir del snapshot de la lectura anterior (REPEATABLE READ)
+        db_conn.commit()
         resultado = guardar_cliente_service(
             {"id_cliente": str(cid), "nombre": "FlujoEditado", "apellido": "FlujoApellido",
              "telefono": "5512340001", "correo": "", "direccion": ""},
@@ -58,6 +59,7 @@ def test_flujo_completo_cliente(db_conn, usuario_admin):
         )
         assert resultado == "actualizado"
 
+        db_conn.commit()
         cursor = db_conn.cursor(dictionary=True)
         cursor.execute("SELECT nombre FROM cliente WHERE id_cliente = %s", (cid,))
         assert cursor.fetchone()["nombre"] == "FlujoEditado"
@@ -71,6 +73,7 @@ def test_flujo_completo_cliente(db_conn, usuario_admin):
         ok = eliminar_cliente_service(cid, id_usuario=id_u)
         assert ok is not False
 
+        db_conn.commit()
         cursor = db_conn.cursor(dictionary=True)
         cursor.execute("SELECT activo FROM cliente WHERE id_cliente = %s", (cid,))
         assert cursor.fetchone()["activo"] == 0
@@ -79,6 +82,7 @@ def test_flujo_completo_cliente(db_conn, usuario_admin):
         # 5. Restaurar
         restaurar_cliente_service(cid, id_usuario=id_u)
 
+        db_conn.commit()
         cursor = db_conn.cursor(dictionary=True)
         cursor.execute("SELECT activo FROM cliente WHERE id_cliente = %s", (cid,))
         assert cursor.fetchone()["activo"] == 1
@@ -99,28 +103,32 @@ def test_flujo_completo_cliente(db_conn, usuario_admin):
 def test_flujo_completo_gasto(db_conn, usuario_admin):
     """Crear → actualizar → verificar listado → eliminar → restaurar."""
     id_u = usuario_admin["id_usuario"]
-    datos_crear = (1, "Renta local test", "ProveedorTest", 500.00, "efectivo", "factura", None)
+    # (id_negocio, id_categoria, descripcion, proveedor, total, fecha_registro, tipo_comprobante, tipo_pago, notas)
+    datos_crear = (1, None, "Renta local test", "ProveedorTest", 500.00, "2030-01-15", "factura", "efectivo", None)
 
     # 1. Crear
     resultado = guardar_gasto_service(None, datos_crear, id_usuario=id_u)
     assert resultado == "creado"
 
+    db_conn.commit()
     cursor = db_conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT id_gasto, activo, eliminado FROM gastos WHERE descripcion = 'Renta local test' ORDER BY id_gasto DESC LIMIT 1"
+        "SELECT id_gasto, activo FROM gastos WHERE descripcion = 'Renta local test' ORDER BY id_gasto DESC LIMIT 1"
     )
     row = cursor.fetchone()
     cursor.close()
     assert row is not None
     gid = row["id_gasto"]
-    assert row["eliminado"] == 0
+    assert row["activo"] == 1
 
     try:
         # 2. Actualizar
-        datos_editar = (1, "Renta local editada", "ProveedorTest", 600.00, "transferencia", "ticket", None)
+        db_conn.commit()
+        datos_editar = (1, None, "Renta local editada", "ProveedorTest", 600.00, "2030-01-15", "ticket", "transferencia", None)
         resultado = guardar_gasto_service(str(gid), datos_editar, id_usuario=id_u)
         assert resultado == "actualizado"
 
+        db_conn.commit()
         cursor = db_conn.cursor(dictionary=True)
         cursor.execute("SELECT descripcion, total FROM gastos WHERE id_gasto = %s", (gid,))
         row = cursor.fetchone()
@@ -136,9 +144,10 @@ def test_flujo_completo_gasto(db_conn, usuario_admin):
         # 4. Eliminar (soft delete)
         eliminar_gasto_service(gid, id_usuario=id_u)
 
+        db_conn.commit()
         cursor = db_conn.cursor(dictionary=True)
-        cursor.execute("SELECT eliminado FROM gastos WHERE id_gasto = %s", (gid,))
-        assert cursor.fetchone()["eliminado"] == 1
+        cursor.execute("SELECT activo FROM gastos WHERE id_gasto = %s", (gid,))
+        assert cursor.fetchone()["activo"] == 0
         cursor.close()
 
         # 5. No aparece en listado activo pero sí con incluir_eliminados
@@ -151,9 +160,10 @@ def test_flujo_completo_gasto(db_conn, usuario_admin):
         # 6. Restaurar
         restaurar_gasto_service(gid, id_usuario=id_u)
 
+        db_conn.commit()
         cursor = db_conn.cursor(dictionary=True)
-        cursor.execute("SELECT eliminado FROM gastos WHERE id_gasto = %s", (gid,))
-        assert cursor.fetchone()["eliminado"] == 0
+        cursor.execute("SELECT activo FROM gastos WHERE id_gasto = %s", (gid,))
+        assert cursor.fetchone()["activo"] == 1
         cursor.close()
 
     finally:
@@ -172,6 +182,19 @@ def test_flujo_completo_servicio(db_conn, usuario_admin):
     """Crear → actualizar → verificar nombre único → eliminar → restaurar."""
     id_u = usuario_admin["id_usuario"]
 
+    # Limpieza previa por si quedó huérfano de una ejecución interrumpida
+    cursor = db_conn.cursor()
+    cursor.execute(
+        "SELECT id_servicio FROM servicio WHERE nombre = 'Servicio Flujo Test' AND id_negocio = 1"
+    )
+    leftover = cursor.fetchone()
+    if leftover:
+        lid = leftover[0]
+        cursor.execute("DELETE FROM servicios_historial WHERE id_servicio = %s", (lid,))
+        cursor.execute("DELETE FROM servicio WHERE id_servicio = %s", (lid,))
+        db_conn.commit()
+    cursor.close()
+
     # 1. Crear
     resultado = guardar_servicio_service(
         id_servicio=None,
@@ -182,9 +205,10 @@ def test_flujo_completo_servicio(db_conn, usuario_admin):
     )
     assert resultado == "creado"
 
+    db_conn.commit()
     cursor = db_conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT id_servicio, activo, eliminado FROM servicio WHERE nombre = 'Servicio Flujo Test' AND id_negocio = 1"
+        "SELECT id_servicio, activo FROM servicio WHERE nombre = 'Servicio Flujo Test' AND id_negocio = 1"
     )
     row = cursor.fetchone()
     cursor.close()
@@ -194,6 +218,7 @@ def test_flujo_completo_servicio(db_conn, usuario_admin):
 
     try:
         # 2. Actualizar precio
+        db_conn.commit()
         resultado = guardar_servicio_service(
             id_servicio=str(sid),
             id_negocio=1,
@@ -203,6 +228,7 @@ def test_flujo_completo_servicio(db_conn, usuario_admin):
         )
         assert resultado == "actualizado"
 
+        db_conn.commit()
         cursor = db_conn.cursor(dictionary=True)
         cursor.execute("SELECT nombre, precio FROM servicio WHERE id_servicio = %s", (sid,))
         row = cursor.fetchone()
@@ -225,6 +251,7 @@ def test_flujo_completo_servicio(db_conn, usuario_admin):
         ok = eliminar_servicio_service(sid, id_usuario=id_u)
         assert ok is not False
 
+        db_conn.commit()
         cursor = db_conn.cursor(dictionary=True)
         cursor.execute("SELECT activo FROM servicio WHERE id_servicio = %s", (sid,))
         assert cursor.fetchone()["activo"] == 0
@@ -233,6 +260,7 @@ def test_flujo_completo_servicio(db_conn, usuario_admin):
         # 5. Restaurar
         restaurar_servicio_service(sid, id_usuario=id_u)
 
+        db_conn.commit()
         cursor = db_conn.cursor(dictionary=True)
         cursor.execute("SELECT activo FROM servicio WHERE id_servicio = %s", (sid,))
         assert cursor.fetchone()["activo"] == 1
