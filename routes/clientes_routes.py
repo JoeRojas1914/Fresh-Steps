@@ -68,33 +68,30 @@ def guardar_cliente():
     return redirect(url_for("clientes.clientes"))
 
 
-@clientes_bp.route("/clientes/eliminar/<int:id_cliente>")
+@clientes_bp.route("/clientes/eliminar/<int:id_cliente>", methods=["POST"])
 @admin_required
 def eliminar_cliente(id_cliente):
     id_usuario = session.get("id_usuario")
     try:
         ok = eliminar_cliente_service(id_cliente, id_usuario)
         if not ok:
-            flash("No puedes eliminar el cliente porque ya tiene ventas registradas.", "error")
-        else:
-            flash("Cliente eliminado correctamente.", "success")
+            return jsonify({"ok": False, "error": "No puedes eliminar el cliente porque ya tiene ventas registradas."})
+        return jsonify({"ok": True, "message": "Cliente eliminado correctamente."})
     except Exception:  # pragma: no cover
         logger.exception("Error al eliminar cliente id_cliente=%s", id_cliente)
-        flash("Error al eliminar el cliente.", "error")
-    return redirect(url_for("clientes.clientes"))
+        return jsonify({"ok": False, "error": "Error al eliminar el cliente."}), 500
 
 
-@clientes_bp.route("/clientes/restaurar/<int:id_cliente>")
+@clientes_bp.route("/clientes/restaurar/<int:id_cliente>", methods=["POST"])
 @admin_required
 def restaurar_cliente(id_cliente):
     id_usuario = session.get("id_usuario")
     try:
         restaurar_cliente_service(id_cliente, id_usuario)
-        flash("Cliente restaurado correctamente.", "success")
+        return jsonify({"ok": True, "message": "Cliente restaurado correctamente."})
     except Exception:  # pragma: no cover
         logger.exception("Error al restaurar cliente id_cliente=%s", id_cliente)
-        flash("Error al restaurar el cliente.", "error")
-    return redirect(url_for("clientes.clientes"))
+        return jsonify({"ok": False, "error": "Error al restaurar el cliente."}), 500
 
 
 @clientes_bp.route("/clientes/<int:id_cliente>/historial")

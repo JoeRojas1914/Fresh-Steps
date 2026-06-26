@@ -39,12 +39,11 @@ def test_guardar_cliente_con_next_redirige(logged_client, db_conn):
 
 
 def test_eliminar_cliente_con_ventas_flash_error(logged_client, cliente_test, venta_pendiente):
-    """Cubre clientes_routes.py line 78: flash error cuando cliente tiene ventas."""
-    res = logged_client.get(
-        f"/clientes/eliminar/{cliente_test['id_cliente']}",
-        follow_redirects=False,
-    )
-    assert res.status_code == 302
+    """Cubre clientes_routes.py: ok=False cuando cliente tiene ventas."""
+    res = logged_client.post(f"/clientes/eliminar/{cliente_test['id_cliente']}")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["ok"] is False
 
 
 def test_ver_cliente_partial_200(logged_client, cliente_test):
@@ -74,16 +73,15 @@ def test_guardar_usuario_edita_caja_exito(logged_client, usuario_caja, db_conn):
 
 
 def test_toggle_admin_usuario_retorna_error(logged_client, usuario_admin):
-    """Cubre usuarios_routes.py line 86: flash error al intentar toggle de admin."""
-    res = logged_client.get(
-        f"/usuarios/toggle/{usuario_admin['id_usuario']}",
-        follow_redirects=False,
-    )
-    assert res.status_code == 302
+    """Cubre usuarios_routes.py: ok=False cuando se intenta toggle de admin."""
+    res = logged_client.post(f"/usuarios/toggle/{usuario_admin['id_usuario']}")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["ok"] is False
 
 
 def test_toggle_usuario_activa_route(logged_client, usuario_caja, db_conn):
-    """Cubre usuarios_routes.py line 88: flash 'activado' al reactivar usuario."""
+    """Cubre usuarios_routes.py: ok=True con mensaje 'activado' al reactivar usuario."""
     cursor = db_conn.cursor()
     cursor.execute(
         "UPDATE usuario SET activo = 0 WHERE id_usuario = %s",
@@ -92,11 +90,11 @@ def test_toggle_usuario_activa_route(logged_client, usuario_caja, db_conn):
     db_conn.commit()
     cursor.close()
 
-    res = logged_client.get(
-        f"/usuarios/toggle/{usuario_caja['id_usuario']}",
-        follow_redirects=False,
-    )
-    assert res.status_code == 302
+    res = logged_client.post(f"/usuarios/toggle/{usuario_caja['id_usuario']}")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["ok"] is True
+    assert "activado" in data["message"].lower()
 
 
 # ===========================================================================
@@ -126,7 +124,7 @@ def test_actualizar_categoria_route(logged_client, db_conn):
 
 
 def test_eliminar_categoria_route(logged_client, db_conn):
-    """Cubre gastos_routes.py lines 150-152: eliminar categoría sin gastos."""
+    """Cubre gastos_routes.py line 151: ok=True al eliminar categoría sin gastos."""
     res = logged_client.post(
         "/gastos/categorias/guardar",
         json={"nombre": "CatParaEliminar"},
@@ -142,8 +140,34 @@ def test_eliminar_categoria_route(logged_client, db_conn):
 
     res = logged_client.post(f"/gastos/categorias/eliminar/{cat_id}")
     assert res.status_code == 200
-    data = res.get_json()
-    assert "ok" in data
+    assert res.get_json()["ok"] is True
+
+
+def test_eliminar_categoria_en_uso_via_ruta(logged_client, db_conn, usuario_admin):
+    """Cubre gastos_routes.py line 152: ok=False cuando categoría tiene gastos."""
+    cursor = db_conn.cursor()
+    cursor.execute("INSERT INTO categoria_gasto (nombre) VALUES ('CatEnUso2_pytest')")
+    id_cat = cursor.lastrowid
+    cursor.execute(
+        "INSERT INTO gastos (id_negocio, descripcion, proveedor, total, "
+        "fecha_registro, tipo_comprobante, tipo_pago, id_usuario, activo, id_categoria) "
+        "VALUES (1, 'desc', 'prov', 10.00, '2030-01-01', 'ticket', 'efectivo', %s, 1, %s)",
+        (usuario_admin["id_usuario"], id_cat),
+    )
+    id_gasto = cursor.lastrowid
+    db_conn.commit()
+    cursor.close()
+
+    res = logged_client.post(f"/gastos/categorias/eliminar/{id_cat}")
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is False
+
+    cursor = db_conn.cursor()
+    cursor.execute("DELETE FROM gastos_historial WHERE id_gasto = %s", (id_gasto,))
+    cursor.execute("DELETE FROM gastos           WHERE id_gasto = %s", (id_gasto,))
+    cursor.execute("DELETE FROM categoria_gasto  WHERE id_categoria = %s", (id_cat,))
+    db_conn.commit()
+    cursor.close()
 
 
 # ===========================================================================

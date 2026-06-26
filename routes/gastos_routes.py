@@ -86,17 +86,16 @@ def guardar_gasto():
     return redirect(url_for("gastos.gastos"))
 
 
-@gastos_bp.route("/gastos/eliminar/<int:id_gasto>")
+@gastos_bp.route("/gastos/eliminar/<int:id_gasto>", methods=["POST"])
 @limiter.limit("30 per minute")
 def eliminar_gasto(id_gasto):
     id_usuario = session.get("id_usuario")
     try:
         eliminar_gasto_service(id_gasto, id_usuario)
-        flash("Gasto eliminado correctamente.", "success")
+        return jsonify({"ok": True, "message": "Gasto eliminado correctamente."})
     except Exception:  # pragma: no cover
         logger.exception("Error al eliminar gasto id_gasto=%s", id_gasto)
-        flash("Error al eliminar el gasto.", "error")
-    return redirect(url_for("gastos.gastos"))
+        return jsonify({"ok": False, "error": "Error al eliminar el gasto."}), 500
 
 
 @gastos_bp.route("/gastos/<int:id_gasto>/historial")
@@ -104,17 +103,16 @@ def historial_gasto(id_gasto):
     return jsonify(obtener_historial_gasto(id_gasto))
 
 
-@gastos_bp.route("/gastos/restaurar/<int:id_gasto>")
+@gastos_bp.route("/gastos/restaurar/<int:id_gasto>", methods=["POST"])
 @limiter.limit("30 per minute")
 def restaurar_gasto_route(id_gasto):
     id_usuario = session.get("id_usuario")
     try:
         restaurar_gasto_service(id_gasto, id_usuario)
-        flash("Gasto restaurado correctamente.", "success")
+        return jsonify({"ok": True, "message": "Gasto restaurado correctamente."})
     except Exception:  # pragma: no cover
         logger.exception("Error al restaurar gasto id_gasto=%s id_usuario=%s", id_gasto, id_usuario)
-        flash("Error al restaurar el gasto.", "error")
-    return redirect(url_for("gastos.gastos"))
+        return jsonify({"ok": False, "error": "Error al restaurar el gasto."}), 500
 
 
 @gastos_bp.route("/gastos/categorias/lista")
@@ -131,7 +129,7 @@ def guardar_categoria():
     id_categoria = data.get("id_categoria") or None
     nombre       = (data.get("nombre") or "").strip()
     if not nombre:
-        return jsonify({"ok": False, "mensaje": "El nombre no puede estar vacío."}), 400
+        return jsonify({"ok": False, "error": "El nombre no puede estar vacío."}), 400
     try:
         if id_categoria:
             actualizar_categoria_service(int(id_categoria), nombre)
@@ -140,7 +138,7 @@ def guardar_categoria():
         return jsonify({"ok": True})
     except Exception:  # pragma: no cover
         logger.exception("Error al guardar categoría id=%s", id_categoria)
-        return jsonify({"ok": False, "mensaje": "Error al guardar la categoría."}), 500
+        return jsonify({"ok": False, "error": "Error al guardar la categoría."}), 500
 
 
 @gastos_bp.route("/gastos/categorias/eliminar/<int:id_categoria>", methods=["POST"])
@@ -149,10 +147,12 @@ def guardar_categoria():
 def eliminar_categoria_route(id_categoria):
     try:
         ok, mensaje = eliminar_categoria_service(id_categoria)
-        return jsonify({"ok": ok, "mensaje": mensaje})
+        if ok:
+            return jsonify({"ok": True, "message": mensaje})
+        return jsonify({"ok": False, "error": mensaje})
     except Exception:  # pragma: no cover
         logger.exception("Error al eliminar categoría id=%s", id_categoria)
-        return jsonify({"ok": False, "mensaje": "Error al eliminar la categoría."}), 500
+        return jsonify({"ok": False, "error": "Error al eliminar la categoría."}), 500
 
 
 @gastos_bp.route("/gastos/exportar")

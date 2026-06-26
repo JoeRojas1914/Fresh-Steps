@@ -85,18 +85,17 @@ def guardar_servicio():
     return redirect(url_for("servicios.servicios"))
 
 
-@servicios_bp.route("/servicios/eliminar/<int:id_servicio>")
+@servicios_bp.route("/servicios/eliminar/<int:id_servicio>", methods=["POST"])
 @admin_required
 @limiter.limit("30 per minute")
 def eliminar_servicio(id_servicio):
     id_usuario = session.get("id_usuario")
     try:
         eliminar_servicio_service(id_servicio, id_usuario)
-        flash("Servicio eliminado correctamente.", "success")
+        return jsonify({"ok": True, "message": "Servicio eliminado correctamente."})
     except Exception:  # pragma: no cover
         logger.exception("Error al eliminar servicio id_servicio=%s", id_servicio)
-        flash("Error al eliminar el servicio.", "error")
-    return redirect(url_for("servicios.servicios"))
+        return jsonify({"ok": False, "error": "Error al eliminar el servicio."}), 500
 
 
 
@@ -115,18 +114,17 @@ def historial_servicio(id_servicio):
     return jsonify(data)
 
 
-@servicios_bp.route("/servicios/restaurar/<int:id_servicio>")
+@servicios_bp.route("/servicios/restaurar/<int:id_servicio>", methods=["POST"])
 @admin_required
 @limiter.limit("30 per minute")
 def restaurar_servicio(id_servicio):
     id_usuario = session.get("id_usuario")
     try:
         restaurar_servicio_service(id_servicio, id_usuario)
-        flash("Servicio restaurado correctamente.", "success")
+        return jsonify({"ok": True, "message": "Servicio restaurado correctamente."})
     except Exception:  # pragma: no cover
         logger.exception("Error al restaurar servicio id_servicio=%s id_usuario=%s", id_servicio, id_usuario)
-        flash("Error al restaurar el servicio.", "error")
-    return redirect(url_for("servicios.servicios"))
+        return jsonify({"ok": False, "error": "Error al restaurar el servicio."}), 500
 
 
 @servicios_bp.route("/servicios/exportar")

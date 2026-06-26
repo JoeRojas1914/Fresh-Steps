@@ -57,15 +57,17 @@ def test_guardar_gasto_nuevo_redirige(logged_client, usuario_admin, db_conn):
 
 
 def test_eliminar_gasto_redirige(logged_client, gasto_test):
-    res = logged_client.get(f"/gastos/eliminar/{gasto_test['id_gasto']}", follow_redirects=False)
-    assert res.status_code == 302
+    res = logged_client.post(f"/gastos/eliminar/{gasto_test['id_gasto']}")
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True
 
 
 def test_restaurar_gasto_redirige(logged_client, gasto_test, usuario_admin, db_conn):
     from services.gastos_service import eliminar_gasto_service
     eliminar_gasto_service(gasto_test["id_gasto"], usuario_admin["id_usuario"])
-    res = logged_client.get(f"/gastos/restaurar/{gasto_test['id_gasto']}", follow_redirects=False)
-    assert res.status_code == 302
+    res = logged_client.post(f"/gastos/restaurar/{gasto_test['id_gasto']}")
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True
 
 
 def test_historial_gasto_retorna_json(logged_client, gasto_test):
@@ -147,21 +149,17 @@ def test_guardar_servicio_nuevo_redirige(logged_client, db_conn):
 
 
 def test_eliminar_servicio_redirige(logged_client, servicio_calzado):
-    res = logged_client.get(
-        f"/servicios/eliminar/{servicio_calzado['id_servicio']}",
-        follow_redirects=False,
-    )
-    assert res.status_code == 302
+    res = logged_client.post(f"/servicios/eliminar/{servicio_calzado['id_servicio']}")
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True
 
 
 def test_restaurar_servicio_redirige(logged_client, servicio_calzado, usuario_admin):
     from services.servicios_service import eliminar_servicio_service
     eliminar_servicio_service(servicio_calzado["id_servicio"], usuario_admin["id_usuario"])
-    res = logged_client.get(
-        f"/servicios/restaurar/{servicio_calzado['id_servicio']}",
-        follow_redirects=False,
-    )
-    assert res.status_code == 302
+    res = logged_client.post(f"/servicios/restaurar/{servicio_calzado['id_servicio']}")
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True
 
 
 def test_api_servicios_retorna_lista(logged_client, servicio_calzado):
@@ -198,21 +196,17 @@ def test_clientes_lista_partial_200(logged_client):
 
 
 def test_eliminar_cliente_redirige(logged_client, cliente_test):
-    res = logged_client.get(
-        f"/clientes/eliminar/{cliente_test['id_cliente']}",
-        follow_redirects=False,
-    )
-    assert res.status_code == 302
+    res = logged_client.post(f"/clientes/eliminar/{cliente_test['id_cliente']}")
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True
 
 
 def test_restaurar_cliente_redirige(logged_client, cliente_test, usuario_admin):
     from services.clientes_service import eliminar_cliente_service
     eliminar_cliente_service(cliente_test["id_cliente"], id_usuario=usuario_admin["id_usuario"])
-    res = logged_client.get(
-        f"/clientes/restaurar/{cliente_test['id_cliente']}",
-        follow_redirects=False,
-    )
-    assert res.status_code == 302
+    res = logged_client.post(f"/clientes/restaurar/{cliente_test['id_cliente']}")
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True
 
 
 def test_historial_cliente_retorna_json(logged_client, cliente_test):
@@ -353,11 +347,9 @@ def test_guardar_usuario_nuevo_redirige(logged_client, db_conn):
 
 
 def test_toggle_usuario_redirige(logged_client, usuario_caja):
-    res = logged_client.get(
-        f"/usuarios/toggle/{usuario_caja['id_usuario']}",
-        follow_redirects=False,
-    )
-    assert res.status_code == 302
+    res = logged_client.post(f"/usuarios/toggle/{usuario_caja['id_usuario']}")
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True
 
 
 def test_historial_usuario_retorna_json(logged_client, usuario_admin):

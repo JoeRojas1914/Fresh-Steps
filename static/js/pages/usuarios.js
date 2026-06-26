@@ -1,5 +1,5 @@
 import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, escapeHtml } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, escapeHtml, apiAction } from '../base/helpers.js';
 import { validarRequerido, validarTelefono, validarPassword, validarPin, validarUsername } from '../base/form_validators.js';
 import { abrirHistorial } from '../base/historial_helpers.js';
 
@@ -45,7 +45,15 @@ function confirmarToggleUsuario(id, accion) {
 }
 
 function ejecutarToggleUsuario() {
-    if (_pendingToggleUrl) location.href = _pendingToggleUrl;
+    if (!_pendingToggleUrl) return;
+    const url = _pendingToggleUrl;
+    _pendingToggleUrl = null;
+    apiAction({
+        url,
+        msgError: "No se pudo cambiar el estado del usuario.",
+        reload: true,
+        reloadDelay: 300,
+    });
 }
 
 

@@ -36,7 +36,7 @@ def _cleanup(db_conn, id_venta):
 
 def test_insertar_calzado_sin_servicios_raises():
     from models.ventas_crear import _insertar_calzado
-    with pytest.raises(Exception, match="sin servicios"):
+    with pytest.raises(ValueError, match="sin servicios"):
         _insertar_calzado(None, 999999, {"datos": {}, "servicios": []})
 
 
@@ -46,7 +46,7 @@ def test_insertar_calzado_sin_servicios_raises():
 
 def test_insertar_confeccion_sin_servicios_raises():
     from models.ventas_crear import _insertar_confeccion
-    with pytest.raises(Exception, match="sin servicios"):
+    with pytest.raises(ValueError, match="sin servicios"):
         _insertar_confeccion(None, 999999, {"datos": {}, "servicios": []})
 
 
@@ -127,7 +127,7 @@ def test_crear_venta_con_descuento(servicio_calzado, cliente_test, usuario_admin
 def test_crear_venta_tipo_articulo_incorrecto_raises(cliente_test, usuario_admin):
     """Line 113: tipo_articulo no coincide con el tipo del negocio → Exception."""
     from models.ventas_crear import crear_venta
-    with pytest.raises(Exception, match="solo permite"):
+    with pytest.raises(ValueError, match="solo permite"):
         crear_venta(
             id_negocio=1,
             id_cliente=cliente_test["id_cliente"],

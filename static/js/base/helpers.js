@@ -161,12 +161,13 @@ export function crearEliminarHandler(modalId) {
             const row = _pendingRow;
             _pendingUrl = null;
             _pendingRow = null;
-            if (row) {
-                row.classList.add("row--removing");
-                setTimeout(() => { location.href = url; }, 300);
-            } else {
-                location.href = url;
-            }
+            apiAction({
+                url,
+                msgError: "No se pudo completar la acción.",
+                reload: true,
+                reloadDelay: 500,
+                onSuccess: () => { if (row) row.classList.add("row--removing"); },
+            });
         }
     };
 }

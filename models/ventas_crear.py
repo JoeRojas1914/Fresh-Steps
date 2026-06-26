@@ -35,7 +35,7 @@ def _insertar_servicios(cursor, id_articulo: int, servicios: list) -> Decimal:
 
 def _insertar_calzado(cursor, id_articulo: int, art: dict) -> Decimal:
     if not art.get("servicios"):
-        raise Exception("Artículo de calzado sin servicios")
+        raise ValueError("Artículo de calzado sin servicios")
     d = art["datos"]
     cursor.execute("""
         INSERT INTO articulo_calzado (
@@ -51,7 +51,7 @@ def _insertar_calzado(cursor, id_articulo: int, art: dict) -> Decimal:
 
 def _insertar_confeccion(cursor, id_articulo: int, art: dict) -> Decimal:
     if not art.get("servicios"):
-        raise Exception("Artículo de confección sin servicios")
+        raise ValueError("Artículo de confección sin servicios")
     d = art["datos"]
     cantidad = Decimal(str(d.get("cantidad", 1)))
     cursor.execute("""
@@ -110,7 +110,7 @@ def crear_venta(
             tipo_articulo = art["tipo_articulo"]
             tipo_esperado = tipos_negocio.get(id_negocio)
             if tipo_esperado and tipo_articulo != tipo_esperado:
-                raise Exception(f"Tipo de artículo inválido. Este negocio solo permite: {tipo_esperado}")
+                raise ValueError(f"Tipo de artículo inválido. Este negocio solo permite: {tipo_esperado}")
 
             cursor.execute(
                 "INSERT INTO articulo (id_venta, tipo_articulo, comentario) VALUES (%s, %s, %s)",

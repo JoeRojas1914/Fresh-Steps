@@ -1,5 +1,5 @@
 import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, apiAction } from '../base/helpers.js';
 import { validarRequerido, validarTelefono } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
@@ -74,7 +74,12 @@ function confirmarEliminarCliente(id) { _eliminarCliente.confirmar(`/clientes/el
 function ejecutarEliminarCliente()    { _eliminarCliente.ejecutar(); }
 
 function restaurarCliente(idCliente) {
-    window.location.href = `/clientes/restaurar/${idCliente}`;
+    apiAction({
+        url: `/clientes/restaurar/${idCliente}`,
+        msgError: "No se pudo restaurar el cliente.",
+        reload: true,
+        reloadDelay: 300,
+    });
 }
 
 document.addEventListener("click", function (e) {

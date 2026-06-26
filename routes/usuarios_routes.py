@@ -76,22 +76,19 @@ def guardar_usuario():
     return redirect(url_for("usuarios.listar_usuarios"))
 
 
-@usuarios_bp.route("/usuarios/toggle/<int:id>")
+@usuarios_bp.route("/usuarios/toggle/<int:id>", methods=["POST"])
 @admin_required
 @limiter.limit("20 per minute")
 def toggle_usuario(id):
     try:
         nuevo_activo = toggle_usuario_service(id)
         if nuevo_activo is None:
-            flash("No se puede cambiar el estado de este usuario.", "error")
-        elif nuevo_activo:
-            flash("Usuario activado correctamente.", "success")
-        else:
-            flash("Usuario desactivado correctamente.", "success")
+            return jsonify({"ok": False, "error": "No se puede cambiar el estado de este usuario."})
+        msg = "Usuario activado correctamente." if nuevo_activo else "Usuario desactivado correctamente."
+        return jsonify({"ok": True, "message": msg})
     except Exception:  # pragma: no cover
         logger.exception("Error en toggle_usuario id=%s id_solicitante=%s", id, session.get("id_usuario"))
-        flash("Error inesperado al cambiar el estado del usuario.", "error")
-    return redirect(url_for("usuarios.listar_usuarios"))
+        return jsonify({"ok": False, "error": "Error inesperado al cambiar el estado del usuario."}), 500
 
 
 @usuarios_bp.route("/usuarios/<int:id>/historial")
