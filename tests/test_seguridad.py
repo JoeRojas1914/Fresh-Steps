@@ -125,11 +125,11 @@ def test_rate_limit_usuarios_bloquea_al_superar(app, usuario_admin):
     for _ in range(20):
         client.post("/usuarios/guardar",
                     environ_overrides={"REMOTE_ADDR": _IP_RATE},
-                    data={"usuario": "x", "password": "Test1234!", "pin": "1234", "rol": "caja"})
+                    json={"usuario": "x", "password": "Test1234!", "pin": "1234", "rol": "caja"})
 
     res = client.post("/usuarios/guardar",
                       environ_overrides={"REMOTE_ADDR": _IP_RATE},
-                      data={"usuario": "x", "password": "Test1234!", "pin": "1234", "rol": "caja"})
+                      json={"usuario": "x", "password": "Test1234!", "pin": "1234", "rol": "caja"})
     assert res.status_code == 429
 
 

@@ -1,5 +1,5 @@
-import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, escapeHtml, apiAction } from '../base/helpers.js';
+import { abrirModal, cerrarModal } from '../components/modal.js';
+import { initModalForm, mostrarFeedback, escapeHtml, apiAction, csrfFetch, recargarConFeedback } from '../base/helpers.js';
 import { validarRequerido, validarTelefono, validarPassword, validarPin, validarUsername } from '../base/form_validators.js';
 import { abrirHistorial } from '../base/historial_helpers.js';
 
@@ -119,7 +119,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!form) return;
 
-    form.addEventListener("submit", function (e) {
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
         const creando  = !document.getElementById("id_usuario").value;
         const password = document.getElementById("password").value.trim();
         const pin      = document.getElementById("pin").value.trim();
@@ -128,31 +130,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (creando && !validarRequerido(password)) {
             mostrarFeedback("La contraseña es obligatoria al crear un usuario.", "error");
-            e.preventDefault(); return;
+            return;
         }
-
         if (password && !validarPassword(password)) {
             mostrarFeedback("La contraseña debe tener mínimo 6 caracteres y al menos 1 número.", "error");
-            e.preventDefault(); return;
+            return;
         }
-
         if (creando && !validarPin(pin)) {
             mostrarFeedback("El PIN debe tener entre 4 y 6 dígitos numéricos.", "error");
-            e.preventDefault(); return;
+            return;
         }
-
         if (!validarUsername(username)) {
             mostrarFeedback("El usuario debe tener mínimo 3 caracteres (letras, números o _).", "error");
-            e.preventDefault(); return;
+            return;
         }
-
         if (telefono && !validarTelefono(telefono)) {
             mostrarFeedback("El teléfono debe tener exactamente 10 dígitos.", "error");
-            e.preventDefault(); return;
+            return;
         }
 
-        const btn = this.querySelector('[type="submit"]');
+        const btn = form.querySelector('[type="submit"]');
+        const textoOriginal = btn ? btn.textContent : "";
         if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
+
+        try {
+            const r = await csrfFetch("/usuarios/guardar", {
+                method: "POST",
+                body: JSON.stringify({
+                    id_usuario: document.getElementById("id_usuario").value,
+                    usuario:    username,
+                    password:   password,
+                    pin:        pin,
+                    nombre:     document.getElementById("u_nombre").value.trim(),
+                    apellido:   document.getElementById("u_apellido").value.trim(),
+                    telefono:   telefono,
+                    correo:     document.getElementById("u_correo").value.trim(),
+                    cp:         document.getElementById("u_cp").value.trim(),
+                    rol:        document.getElementById("u_rol").value,
+                })
+            });
+            const res = await r.json();
+            if (res.ok) {
+                cerrarModal("modalUsuario");
+                recargarConFeedback(res.message || "Usuario guardado correctamente.");
+            } else {
+                mostrarFeedback(res.error || "Error al guardar el usuario.", "error");
+                if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+            }
+        } catch {
+            mostrarFeedback("Error de conexión. Intenta de nuevo.", "error");
+            if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+        }
     });
 });
 

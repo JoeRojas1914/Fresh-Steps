@@ -59,8 +59,8 @@ def test_ver_cliente_partial_200(logged_client, cliente_test):
 # ===========================================================================
 
 def test_guardar_usuario_edita_caja_exito(logged_client, usuario_caja, db_conn):
-    """Cubre usuarios_routes.py line 66: flash éxito al editar usuario no-admin."""
-    res = logged_client.post("/usuarios/guardar", data={
+    """Cubre usuarios_routes.py: retorna ok=True al editar usuario no-admin."""
+    res = logged_client.post("/usuarios/guardar", json={
         "id_usuario": str(usuario_caja["id_usuario"]),
         "usuario":    usuario_caja["usuario"],
         "password":   "",
@@ -68,8 +68,9 @@ def test_guardar_usuario_edita_caja_exito(logged_client, usuario_caja, db_conn):
         "pin":        "",
         "nombre":     "NombreEditado",
         "apellido":   "",
-    }, follow_redirects=False)
-    assert res.status_code == 302
+    })
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True
 
 
 def test_toggle_admin_usuario_retorna_error(logged_client, usuario_admin):

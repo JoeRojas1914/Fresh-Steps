@@ -57,8 +57,7 @@
             <button class="modal__close" data-modal-close="modalUsuario">&times;</button>
         </div>
 
-        <form method="POST" action="/usuarios/guardar" id="formUsuario">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <form id="formUsuario">
         <input type="hidden" name="id_usuario" id="id_usuario">
 
         <div class="modal__body modal__body--grid-2">

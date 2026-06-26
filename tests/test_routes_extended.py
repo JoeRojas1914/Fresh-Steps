@@ -321,22 +321,23 @@ def test_listar_usuarios_partial_200(logged_client):
     assert res.status_code == 200
 
 
-def test_guardar_usuario_nuevo_redirige(logged_client, db_conn):
-    res = logged_client.post("/usuarios/guardar", data={
+def test_guardar_usuario_nuevo_retorna_json(logged_client, db_conn):
+    res = logged_client.post("/usuarios/guardar", json={
         "usuario":  "ruta_test_usr",
         "password": "Segura1x",
-        "rol":      "admin",
-        "pin":      "",
+        "rol":      "caja",
+        "pin":      "4321",
         "nombre":   "Ruta",
         "apellido": "Test",
-    }, follow_redirects=False)
-    assert res.status_code == 302
+    })
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True
 
     cursor = db_conn.cursor()
     cursor.execute("SELECT id_usuario FROM usuario WHERE usuario='ruta_test_usr'")
     row = cursor.fetchone()
     cursor.close()
-    if row:  # pragma: no cover
+    if row:
         uid = row[0]
         cursor = db_conn.cursor()
         cursor.execute("DELETE FROM historial_usuario WHERE id_usuario=%s", (uid,))
