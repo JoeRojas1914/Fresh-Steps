@@ -51,4 +51,6 @@ def validar_password(password: str | None, obligatorio: bool = False) -> str | N
         raise ValueError("La contraseña debe contener al menos una mayúscula")
     if not re.search(r'\d', password):
         raise ValueError("La contraseña debe contener al menos un número")
+    if not re.search(r'[^a-zA-Z0-9]', password):
+        raise ValueError("La contraseña debe contener al menos un carácter especial")
     return password

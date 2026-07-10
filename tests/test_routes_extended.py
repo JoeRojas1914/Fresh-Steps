@@ -324,7 +324,7 @@ def test_listar_usuarios_partial_200(logged_client):
 def test_guardar_usuario_nuevo_retorna_json(logged_client, db_conn):
     res = logged_client.post("/usuarios/guardar", json={
         "usuario":  "ruta_test_usr",
-        "password": "Segura1x",
+        "password": "Segura1x!",
         "rol":      "caja",
         "pin":      "4321",
         "nombre":   "Ruta",

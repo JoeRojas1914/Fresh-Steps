@@ -139,7 +139,7 @@ def test_pin_con_letras_lanza_error():
 # ---------------------------------------------------------------------------
 
 def test_password_valida():
-    assert validar_password("Segura1x") == "Segura1x"
+    assert validar_password("Segura1x!") == "Segura1x!"
 
 
 def test_password_vacia_no_obligatoria_devuelve_none():
@@ -157,18 +157,23 @@ def test_password_vacia_obligatoria_lanza_error():
 
 def test_password_corta_lanza_error():
     with pytest.raises(ValueError, match="8"):
-        validar_password("Ab1")
+        validar_password("Ab1!")
 
 
 def test_password_sin_mayuscula_lanza_error():
     with pytest.raises(ValueError, match="mayúscula"):
-        validar_password("password1")
+        validar_password("password1!")
 
 
 def test_password_sin_numero_lanza_error():
     with pytest.raises(ValueError, match="número"):
-        validar_password("Passwords")
+        validar_password("Passwords!")
+
+
+def test_password_sin_caracter_especial_lanza_error():
+    with pytest.raises(ValueError, match="especial"):
+        validar_password("Password1")
 
 
 def test_password_limite_inferior_valida():
-    assert validar_password("Abcdef1x") is not None
+    assert validar_password("Abcdef1!") is not None

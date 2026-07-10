@@ -80,12 +80,12 @@
 
             <div class="modal-field">
                 <label for="u_correo">Correo</label>
-                <input type="email" name="correo" id="u_correo" placeholder="correo@ejemplo.com" required>
+                <input type="email" name="correo" id="u_correo" placeholder="correo@ejemplo.com">
             </div>
 
             <div class="modal-field">
                 <label for="u_cp">Código postal</label>
-                <input type="text" name="cp" id="u_cp" placeholder="78000" maxlength="10" required>
+                <input type="text" name="cp" id="u_cp" placeholder="78000" maxlength="10">
             </div>
 
             <div class="modal-field">
@@ -117,7 +117,16 @@
                     <span id="pass-opcional" class="dim text-2xs d-none">(dejar vacío para no cambiar)</span>
                 </label>
                 <input type="password" name="password" id="password"
-                       minlength="6" placeholder="Mínimo 6 caracteres y 1 número">
+                       minlength="8" placeholder="Mín. 8 caracteres, 1 mayúscula, 1 número y 1 especial">
+            </div>
+
+            <div class="modal-field modal-field--full">
+                <label for="password_confirmar">
+                    Confirmar contraseña
+                    <span id="pass-confirmar-requerido" class="text-danger">*</span>
+                </label>
+                <input type="password" name="password_confirmar" id="password_confirmar"
+                       minlength="8" placeholder="Repite la contraseña">
             </div>
 
         </div>

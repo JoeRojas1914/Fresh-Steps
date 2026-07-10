@@ -174,7 +174,7 @@ def test_guardar_usuario_service_editar_con_password(app, usuario_caja):
         guardar_usuario_service(
             usuario_caja["id_usuario"],
             usuario_caja["usuario"],
-            "NuevaPass123",
+            "NuevaPass123!",
             "caja",
             None,
         )

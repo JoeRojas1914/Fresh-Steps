@@ -24,6 +24,10 @@ def guardar_usuario_service(
 ) -> None:
     admin = session.get("usuario")
 
+    if not username or not username.strip():
+        raise ValueError("El usuario es obligatorio")
+    username = username.strip()
+
     telefono = validar_telefono(telefono)
     correo   = validar_correo(correo)
 

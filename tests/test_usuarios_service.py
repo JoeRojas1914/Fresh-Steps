@@ -73,6 +73,47 @@ def test_crear_usuario_sin_password_lanza_error(app):
             )
 
 
+def test_crear_usuario_sin_username_lanza_error(app):
+    with app.test_request_context("/"):
+        from flask import session
+        session["usuario"] = "admin_test"
+        with pytest.raises(ValueError, match="usuario es obligatorio"):
+            guardar_usuario_service(
+                id_usuario=None,
+                username="",
+                password="TestPass123!",
+                rol="caja",
+                pin="1234",
+            )
+
+
+def test_crear_usuario_sin_correo_ni_cp(app, db_conn):
+    """correo y cp deben ser opcionales al crear un usuario."""
+    username = "test_sin_correo_cp_pytest"
+    with app.test_request_context("/"):
+        from flask import session
+        session["usuario"] = "admin_test"
+        guardar_usuario_service(
+            id_usuario=None,
+            username=username,
+            password="TestPass123!",
+            rol="caja",
+            pin="4322",
+            nombre="Nuevo",
+        )
+
+    cursor = db_conn.cursor(dictionary=True)
+    cursor.execute("SELECT id_usuario, correo, cp FROM usuario WHERE usuario = %s", (username,))
+    row = cursor.fetchone()
+    cursor.close()
+
+    assert row is not None
+    assert row["correo"] is None
+    assert row["cp"] is None
+
+    _cleanup_usuario(db_conn, row["id_usuario"], username)
+
+
 def test_editar_usuario_actualiza_nombre(app, db_conn):
     username = "test_editar_pytest"
     uid = _crear_usuario_caja(db_conn, username)

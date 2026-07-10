@@ -58,23 +58,26 @@ function ejecutarToggleUsuario() {
 
 
 function abrirModalUsuario() {
-    document.getElementById("modalTitulo").innerText  = "Agregar usuario";
-    document.getElementById("id_usuario").value       = "";
-    document.getElementById("usuario").value          = "";
-    document.getElementById("password").value         = "";
-    document.getElementById("pin").value              = "";
-    document.getElementById("u_nombre").value         = "";
-    document.getElementById("u_apellido").value       = "";
-    document.getElementById("u_telefono").value       = "";
-    document.getElementById("u_correo").value         = "";
-    document.getElementById("u_cp").value             = "";
-    document.getElementById("u_rol").value            = "caja";
+    document.getElementById("modalTitulo").innerText     = "Agregar usuario";
+    document.getElementById("id_usuario").value          = "";
+    document.getElementById("usuario").value             = "";
+    document.getElementById("password").value            = "";
+    document.getElementById("password_confirmar").value  = "";
+    document.getElementById("pin").value                 = "";
+    document.getElementById("u_nombre").value            = "";
+    document.getElementById("u_apellido").value          = "";
+    document.getElementById("u_telefono").value          = "";
+    document.getElementById("u_correo").value            = "";
+    document.getElementById("u_cp").value                = "";
+    document.getElementById("u_rol").value               = "caja";
 
-    document.getElementById("password").required            = true;
-    document.getElementById("pin").required                 = true;
-    document.getElementById("pass-requerido").style.display = "inline";
-    document.getElementById("pass-opcional").style.display  = "none";
-    document.getElementById("pin-requerido").style.display  = "inline";
+    document.getElementById("password").required                      = true;
+    document.getElementById("password_confirmar").required             = true;
+    document.getElementById("pin").required                            = true;
+    document.getElementById("pass-requerido").style.display            = "inline";
+    document.getElementById("pass-opcional").style.display             = "none";
+    document.getElementById("pass-confirmar-requerido").style.display  = "inline";
+    document.getElementById("pin-requerido").style.display             = "inline";
 
     abrirModal("modalUsuario");
 }
@@ -94,13 +97,16 @@ function editarUsuario(e, btn) {
     document.getElementById("u_cp").value            = d.cp        || "";
     document.getElementById("u_rol").value           = d.rol       || "caja";
     document.getElementById("password").value        = "";
+    document.getElementById("password_confirmar").value = "";
     document.getElementById("pin").value             = "";
 
-    document.getElementById("password").required            = false;
-    document.getElementById("pin").required                 = false;
-    document.getElementById("pass-requerido").style.display = "none";
-    document.getElementById("pass-opcional").style.display  = "inline";
-    document.getElementById("pin-requerido").style.display  = "none";
+    document.getElementById("password").required                     = false;
+    document.getElementById("password_confirmar").required            = false;
+    document.getElementById("pin").required                           = false;
+    document.getElementById("pass-requerido").style.display           = "none";
+    document.getElementById("pass-opcional").style.display            = "inline";
+    document.getElementById("pass-confirmar-requerido").style.display = "none";
+    document.getElementById("pin-requerido").style.display            = "none";
 
     abrirModal("modalUsuario");
 }
@@ -122,18 +128,23 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", async function (e) {
         e.preventDefault();
 
-        const creando  = !document.getElementById("id_usuario").value;
-        const password = document.getElementById("password").value.trim();
-        const pin      = document.getElementById("pin").value.trim();
-        const username = document.getElementById("usuario").value.trim();
-        const telefono = document.getElementById("u_telefono").value.trim();
+        const creando    = !document.getElementById("id_usuario").value;
+        const password   = document.getElementById("password").value.trim();
+        const passwordConfirmar = document.getElementById("password_confirmar").value.trim();
+        const pin        = document.getElementById("pin").value.trim();
+        const username   = document.getElementById("usuario").value.trim();
+        const telefono   = document.getElementById("u_telefono").value.trim();
 
         if (creando && !validarRequerido(password)) {
             mostrarFeedback("La contraseña es obligatoria al crear un usuario.", "error");
             return;
         }
         if (password && !validarPassword(password)) {
-            mostrarFeedback("La contraseña debe tener mínimo 6 caracteres y al menos 1 número.", "error");
+            mostrarFeedback("La contraseña debe tener mínimo 8 caracteres, incluir al menos 1 letra mayúscula, 1 número y 1 carácter especial.", "error");
+            return;
+        }
+        if (password && password !== passwordConfirmar) {
+            mostrarFeedback("Las contraseñas no coinciden.", "error");
             return;
         }
         if (creando && !validarPin(pin)) {
