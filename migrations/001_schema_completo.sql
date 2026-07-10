@@ -207,20 +207,41 @@ CREATE TABLE IF NOT EXISTS pago_venta (
 -- -------------------------------------------------------------
 -- Gastos
 -- -------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS categoria_gasto (
+    id_categoria  INT          NOT NULL AUTO_INCREMENT,
+    nombre        VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id_categoria)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT IGNORE INTO categoria_gasto (nombre) VALUES
+    ('Materia Prima'),
+    ('Servicios (luz, agua, internet)'),
+    ('Nómina'),
+    ('Renta'),
+    ('Transporte'),
+    ('Mantenimiento'),
+    ('Publicidad'),
+    ('Equipo y Herramientas'),
+    ('Otros');
+
 CREATE TABLE IF NOT EXISTS gastos (
     id_gasto         INT AUTO_INCREMENT PRIMARY KEY,
     id_negocio       INT NOT NULL,
+    id_categoria     INT NULL DEFAULT NULL,
     descripcion      TEXT,
     proveedor        VARCHAR(150),
     total            DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     fecha_registro   DATE,
     tipo_comprobante VARCHAR(50),
     tipo_pago        VARCHAR(50),
+    notas            TEXT,
     id_usuario       INT,
-    eliminado        TINYINT(1) NOT NULL DEFAULT 0,
+    activo           TINYINT(1) NOT NULL DEFAULT 1,
     CONSTRAINT chk_gasto_total CHECK (total >= 0),
-    FOREIGN KEY (id_negocio) REFERENCES negocio(id_negocio),
-    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+    FOREIGN KEY (id_negocio)   REFERENCES negocio(id_negocio),
+    FOREIGN KEY (id_usuario)   REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_categoria) REFERENCES categoria_gasto(id_categoria)
+        ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS gastos_historial (
@@ -304,7 +325,7 @@ CREATE INDEX IF NOT EXISTS idx_pago_venta_fecha_pago       ON pago_venta(fecha_p
 
 -- gastos
 CREATE INDEX IF NOT EXISTS idx_gastos_fecha_registro       ON gastos(fecha_registro);
-CREATE INDEX IF NOT EXISTS idx_gastos_id_negocio           ON gastos(id_negocio, eliminado);
+CREATE INDEX IF NOT EXISTS idx_gastos_id_negocio           ON gastos(id_negocio, activo);
 
 -- login_intentos
 CREATE INDEX IF NOT EXISTS idx_login_intentos_usuario      ON login_intentos(usuario);
