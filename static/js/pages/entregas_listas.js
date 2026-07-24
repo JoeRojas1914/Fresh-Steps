@@ -1,5 +1,5 @@
 import { abrirModal, cerrarModal } from '../components/modal.js';
-import { mostrarFeedback, recargarConFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
+import { mostrarFeedback, redirigirConFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
 
 let ventaEntregaActual  = null;
 let saldoPendienteActual = 0;
@@ -83,7 +83,7 @@ function confirmarEntregaSinPago() {
         .then(res => {
             if (res.ok) {
                 cerrarModalEntrega();
-                recargarConFeedback(res.message, "success");
+                redirigirConFeedback(location.pathname, res.message, "success");
             } else {
                 if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
                 mostrarFeedback(res.error || "Error al entregar", "error");
@@ -122,7 +122,7 @@ function confirmarPagoYEntrega() {
     .then(res => {
         if (res.ok) {
             cerrarModalEntrega();
-            recargarConFeedback(res.message, "success");
+            redirigirConFeedback(location.pathname, res.message, "success");
         } else {
             if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
             mostrarFeedback(res.error || "Error al registrar pago", "error");
@@ -164,7 +164,7 @@ function confirmarRevertir() {
         .then(res => {
             cerrarModal("modalRevertir");
             if (res.ok) {
-                recargarConFeedback(res.message, "success");
+                redirigirConFeedback(location.pathname, res.message, "success");
             } else {
                 if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
                 mostrarFeedback(res.error || "Error al revertir la venta", "error");

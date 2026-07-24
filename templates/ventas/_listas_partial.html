@@ -124,9 +124,15 @@
 
 {% else %}
 <div class="empty-state">
+    {% if q or id_negocio or id_venta %}
+    <div class="empty-icon"><i data-lucide="search-x" width="48" height="48"></i></div>
+    <h3>Sin resultados</h3>
+    <p>No se encontró ninguna venta con ese filtro.</p>
+    {% else %}
     <div class="empty-icon"><i data-lucide="package" width="48" height="48"></i></div>
     <h3>Sin entregas procesadas</h3>
     <p>No hay ventas listas para entregar en este momento.</p>
+    {% endif %}
 </div>
 {% endif %}
 

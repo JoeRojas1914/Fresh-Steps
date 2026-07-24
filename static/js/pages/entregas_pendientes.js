@@ -1,5 +1,5 @@
 import { abrirModal, cerrarModal } from '../components/modal.js';
-import { mostrarFeedback, recargarConFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
+import { mostrarFeedback, redirigirConFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
 import { abrirWhatsApp } from '../base/whatsapp.js';
 
 let ventaSeleccionada = null;
@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             abrirWhatsApp(ventaTelefono, msg, ventaNegocioId)
                                 .then(r => { if (!r.ok) mostrarFeedback("No se pudo abrir WhatsApp", "error"); });
                         }
-                        recargarConFeedback(res.message, "success");
+                        redirigirConFeedback(location.pathname, res.message, "success");
                     } else {
                         btnConfirmar.disabled    = false;
                         btnConfirmar.textContent = textoOriginal;
