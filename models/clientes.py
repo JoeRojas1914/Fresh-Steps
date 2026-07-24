@@ -99,6 +99,7 @@ def buscar_clientes_por_nombre(texto):
 
 
 def buscar_clientes(q):
+    q_like = f"%{q}%"
     with get_db() as (_, cursor):
         cursor.execute("""
             SELECT
@@ -110,11 +111,15 @@ def buscar_clientes(q):
             FROM cliente c
             LEFT JOIN venta v ON v.id_cliente = c.id_cliente AND v.eliminado = 0
             WHERE c.activo = 1
-              AND (c.nombre LIKE %s OR c.apellido LIKE %s)
+              AND (
+                    c.nombre LIKE %s
+                 OR c.apellido LIKE %s
+                 OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s
+              )
             GROUP BY c.id_cliente
             ORDER BY c.nombre ASC
             LIMIT 50
-        """, (f"%{q}%", f"%{q}%"))
+        """, (q_like, q_like, q_like))
         return cursor.fetchall()
 
 
