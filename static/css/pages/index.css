@@ -310,6 +310,50 @@
 }
 
 /* ── Resumen del mes ── */
+.mes-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.btn-blur-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1.5px solid #bfdcfb;
+    background: #dbeafe;
+    color: #1e7fd6;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(30,127,214,.15);
+    transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+
+.btn-blur-toggle:hover {
+    background: #1e7fd6;
+    border-color: #1e7fd6;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30,127,214,.3);
+}
+
+.btn-blur-toggle .icon-eye-off { display: none; }
+.btn-blur-toggle[aria-pressed="true"] .icon-eye { display: none; }
+.btn-blur-toggle[aria-pressed="true"] .icon-eye-off { display: inline; }
+
+/* Datos sensibles (montos): ocultos con blur hasta que el admin los revele */
+.dato-sensible {
+    filter: blur(7px);
+    transition: filter .18s ease;
+}
+
+.dato-sensible.fs-visible {
+    filter: blur(0);
+}
+
 .mes-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

@@ -85,6 +85,30 @@ if (_canvas && _rawChart) {
     });
 }
 
+// ── Mostrar/ocultar montos sensibles ────────────────────────────────────────
+(function() {
+    var toggleBtn = document.getElementById("toggleMontos");
+    if (!toggleBtn) return;
+
+    var STORAGE_KEY = "fs_montos_visibles";
+
+    function aplicar(visible) {
+        document.querySelectorAll(".dato-sensible").forEach(function(el) {
+            el.classList.toggle("fs-visible", visible);
+        });
+        toggleBtn.setAttribute("aria-pressed", visible ? "true" : "false");
+        toggleBtn.title = visible ? "Ocultar montos" : "Mostrar montos";
+    }
+
+    aplicar(localStorage.getItem(STORAGE_KEY) === "1");
+
+    toggleBtn.addEventListener("click", function() {
+        var visible = toggleBtn.getAttribute("aria-pressed") !== "true";
+        aplicar(visible);
+        localStorage.setItem(STORAGE_KEY, visible ? "1" : "0");
+    });
+}());
+
 // ── Negocio pills — AJAX ──────────────────────────────────────────────────────
 var _isAdmin = document.querySelector("[data-kpi='ingresos_mes']") !== null;
 
