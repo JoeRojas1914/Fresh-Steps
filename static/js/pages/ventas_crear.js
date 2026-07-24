@@ -25,9 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ── Cambiar cliente ── */
     document.getElementById("btn-cambiar-cliente").addEventListener("click", () => {
-        document.getElementById("id_cliente").value               = "";
-        document.getElementById("cliente-seleccionado").innerText = "";
-        document.getElementById("cliente-box").style.display      = "none";
+        document.getElementById("id_cliente").value                = "";
+        document.getElementById("cliente-seleccionado").innerHTML  = "";
+        document.getElementById("cliente-box-avatar").textContent  = "";
+        document.getElementById("cliente-box").style.display       = "none";
         document.getElementById("busqueda-cliente").style.display = "block";
         document.getElementById("buscar-cliente").value           = "";
         document.getElementById("lista-clientes").innerHTML       = "";

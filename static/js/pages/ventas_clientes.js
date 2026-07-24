@@ -56,9 +56,12 @@ export function seleccionarCliente(cliente) {
     const ventasText = ventas > 0
         ? `${ventas} venta${ventas !== 1 ? "s" : ""} anteriores`
         : "Cliente nuevo";
+    const iniciales  = ((cliente.nombre || "")[0] || "").toUpperCase() + ((cliente.apellido || "")[0] || "").toUpperCase();
+
+    document.getElementById("cliente-box-avatar").textContent = iniciales;
 
     document.getElementById("cliente-seleccionado").innerHTML =
-        `<span>${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</span>`
+        `<span class="cliente-nombre-txt">${escapeHtml(cliente.nombre)} ${escapeHtml(cliente.apellido)}</span>`
         + `<span class="cliente-ventas-badge ${ventas > 0 ? "has-ventas" : "no-ventas"}">${escapeHtml(ventasText)}</span>`;
 
     document.getElementById("lista-clientes").innerHTML       = "";
