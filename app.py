@@ -135,8 +135,7 @@ def _kpis_index(negocio: str, es_admin: bool) -> dict:
     lunes         = hoy_dt - timedelta(days=hoy_dt.weekday())
     sabado        = lunes + timedelta(days=5)
     ventas_semana = contar_ventas_por_dia_rango(lunes, sabado, negocio)
-    idx_hoy       = min(hoy_dt.weekday(), 5)
-    ventas_hoy    = ventas_semana[idx_hoy]["total"] if ventas_semana else 0
+    ventas_hoy    = contar_ventas_por_dia_rango(hoy_dt, hoy_dt, negocio)[0]["total"]
 
     unidades_recibidas_hoy  = contar_unidades_hoy("fecha_recibo",  negocio)
     unidades_entregadas_hoy = contar_unidades_hoy("fecha_entrega", negocio)
