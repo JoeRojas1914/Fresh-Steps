@@ -67,6 +67,12 @@ def test_buscar_clientes_query_vacia_retorna_lista_vacia():
     assert resultados == []
 
 
+def test_buscar_clientes_por_telefono(cliente_test):
+    resultados = buscar_clientes_service("5512345678")
+    ids = [r["id_cliente"] for r in resultados]
+    assert cliente_test["id_cliente"] in ids
+
+
 def test_eliminar_cliente_sin_ventas(db_conn, usuario_admin):
     """Un cliente sin ventas se elimina (soft delete activo=0)."""
     cursor = db_conn.cursor()

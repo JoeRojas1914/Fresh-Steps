@@ -115,11 +115,12 @@ def buscar_clientes(q):
                     c.nombre LIKE %s
                  OR c.apellido LIKE %s
                  OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s
+                 OR c.telefono LIKE %s
               )
             GROUP BY c.id_cliente
             ORDER BY c.nombre ASC
             LIMIT 50
-        """, (q_like, q_like, q_like))
+        """, (q_like, q_like, q_like, q_like))
         return cursor.fetchall()
 
 
