@@ -7,6 +7,7 @@ from models.clientes import (
     contar_clientes,
     contar_pedidos_por_cliente,
     obtener_cliente_por_id,
+    obtener_cliente_por_telefono,
     obtener_clientes,
     crear_cliente,
     actualizar_cliente,
@@ -51,6 +52,14 @@ def guardar_cliente_service(form: dict, id_usuario: int, api: bool = False) -> s
     correo    = validar_correo(form.get("correo"))
     telefono  = validar_telefono(form.get("telefono"))
     direccion = form.get("direccion", "").strip() or None
+
+    if telefono:
+        duplicado = obtener_cliente_por_telefono(telefono, excluir_id=id_cliente)
+        if duplicado:
+            raise ValueError(
+                f"Ese teléfono ya está registrado a nombre de "
+                f"{duplicado['nombre']} {duplicado['apellido']}"
+            )
 
     if id_cliente:
         actualizar_cliente(id_cliente, nombre, apellido, correo, telefono, direccion, id_usuario)

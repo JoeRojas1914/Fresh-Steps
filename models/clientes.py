@@ -124,6 +124,25 @@ def buscar_clientes(q):
         return cursor.fetchall()
 
 
+def obtener_cliente_por_telefono(telefono, excluir_id=None):
+    with get_db() as (_, cursor):
+        if excluir_id:
+            cursor.execute("""
+                SELECT id_cliente, nombre, apellido
+                FROM cliente
+                WHERE telefono = %s AND activo = 1 AND id_cliente != %s
+                LIMIT 1
+            """, (telefono, excluir_id))
+        else:
+            cursor.execute("""
+                SELECT id_cliente, nombre, apellido
+                FROM cliente
+                WHERE telefono = %s AND activo = 1
+                LIMIT 1
+            """, (telefono,))
+        return cursor.fetchone()
+
+
 def obtener_cliente_por_id(id_cliente):
     with get_db() as (_, cursor):
         cursor.execute("""

@@ -1,6 +1,8 @@
 """
 Tests para services/clientes_service.py — CRUD de clientes.
 """
+import pytest
+
 from services.clientes_service import (
     guardar_cliente_service,
     buscar_clientes_service,
@@ -71,6 +73,65 @@ def test_buscar_clientes_por_telefono(cliente_test):
     resultados = buscar_clientes_service("5512345678")
     ids = [r["id_cliente"] for r in resultados]
     assert cliente_test["id_cliente"] in ids
+
+
+def test_crear_cliente_telefono_duplicado_lanza_error(cliente_test, usuario_admin):
+    """No se puede crear un cliente con un teléfono ya registrado por otro cliente activo."""
+    form = {
+        "nombre": "Otro",
+        "apellido": "ClienteDuplicado",
+        "telefono": "5512345678",
+        "correo": "",
+        "direccion": "",
+    }
+    with pytest.raises(ValueError, match="ya está registrado"):
+        guardar_cliente_service(form, id_usuario=usuario_admin["id_usuario"])
+
+
+def test_crear_cliente_telefono_duplicado_multiple_no_lanza_error_bd(db_conn, cliente_test, usuario_admin):
+    """Si ya existen 2+ clientes activos con el mismo teléfono (dato heredado sin la
+    validación), el chequeo de duplicado no debe romper la conexión por resultados
+    sin leer (LIMIT 1 en la consulta)."""
+    cursor = db_conn.cursor()
+    cursor.execute(
+        """INSERT INTO cliente (nombre, apellido, telefono, activo, id_usuario)
+           VALUES ('Duplicado', 'Heredado', '5512345678', 1, %s)""",
+        (usuario_admin["id_usuario"],),
+    )
+    db_conn.commit()
+    cid = cursor.lastrowid
+    cursor.close()
+
+    form = {
+        "nombre": "Tercero",
+        "apellido": "ClienteDuplicado",
+        "telefono": "5512345678",
+        "correo": "",
+        "direccion": "",
+    }
+    try:
+        with pytest.raises(ValueError, match="ya está registrado"):
+            guardar_cliente_service(form, id_usuario=usuario_admin["id_usuario"])
+    finally:
+        cursor = db_conn.cursor()
+        cursor.execute("DELETE FROM clientes_historial WHERE id_cliente = %s", (cid,))
+        cursor.execute("DELETE FROM cliente           WHERE id_cliente = %s", (cid,))
+        db_conn.commit()
+        cursor.close()
+
+
+def test_actualizar_cliente_mismo_telefono_no_lanza_error(cliente_test, usuario_admin):
+    """Editar un cliente conservando su propio teléfono no debe disparar el chequeo de duplicado."""
+    form = {
+        "id_cliente": str(cliente_test["id_cliente"]),
+        "nombre": cliente_test["nombre"],
+        "apellido": cliente_test["apellido"],
+        "telefono": "5512345678",
+        "correo": "",
+        "direccion": "",
+    }
+    resultado = guardar_cliente_service(form, id_usuario=usuario_admin["id_usuario"])
+    assert resultado == "actualizado"
 
 
 def test_eliminar_cliente_sin_ventas(db_conn, usuario_admin):

@@ -128,8 +128,12 @@ export async function crearCliente(e) {
 
         if (!res.ok) {
             if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
-            errorBox.innerText     = "Error al crear el cliente.";
-            errorBox.style.display = "block";
+            let mensaje = "Error al crear el cliente.";
+            try {
+                const data = await res.json();
+                if (data?.error) mensaje = data.error;
+            } catch {}
+            mostrarFeedback(mensaje, "error");
             return;
         }
 
@@ -139,7 +143,6 @@ export async function crearCliente(e) {
         mostrarFeedback("Cliente creado correctamente.", "success");
     } catch {
         if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
-        errorBox.innerText     = "Error de conexión.";
-        errorBox.style.display = "block";
+        mostrarFeedback("Error de conexión.", "error");
     }
 }

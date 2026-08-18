@@ -252,6 +252,20 @@ def test_api_crear_cliente_retorna_json(logged_client, db_conn):
     cursor.close()
 
 
+def test_api_crear_cliente_telefono_duplicado_retorna_400(logged_client, cliente_test):
+    res = logged_client.post("/api/clientes/crear", data={
+        "nombre":    "ApiDuplicado",
+        "apellido":  "TestCli",
+        "telefono":  "5512345678",
+        "correo":    "",
+        "direccion": "",
+    })
+    assert res.status_code == 400
+    data = res.get_json()
+    assert data["ok"] is False
+    assert "registrado" in data["error"]
+
+
 # ===========================================================================
 # PAGOS
 # ===========================================================================

@@ -119,7 +119,10 @@ def ver_cliente(id_cliente):
 @limiter.limit("30 per minute")
 def api_crear_cliente():
     id_usuario = session.get("id_usuario")
-    cliente = guardar_cliente_service(request.form, id_usuario, api=True)
+    try:
+        cliente = guardar_cliente_service(request.form, id_usuario, api=True)
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
     return jsonify(cliente)
 
 
