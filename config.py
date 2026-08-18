@@ -1,6 +1,6 @@
 # Timeouts de sesión por rol (minutos de inactividad)
-TIMEOUT_ADMIN = 15
-TIMEOUT_CAJA  = 20
+TIMEOUT_ADMIN = 10
+TIMEOUT_CAJA  = 60
 
 # Control de intentos de login fallidos — contraseña admin
 MAX_INTENTOS_LOGIN = 5
