@@ -79,7 +79,7 @@ def contar_clientes(q=None, incluir_eliminados=False):
     q_like = f"%{q}%" if q else None
     where, params = build_where([
         ("activo = %s", None if incluir_eliminados else 1),
-        ("(nombre LIKE %s OR apellido LIKE %s)", q_like, q_like),
+        ("(nombre LIKE %s OR apellido LIKE %s OR CONCAT(nombre, ' ', apellido) LIKE %s)", q_like, q_like, q_like),
     ])
     with get_db() as (_, cursor):
         cursor.execute("SELECT COUNT(*) AS total FROM cliente " + where, params)
@@ -176,7 +176,7 @@ def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False):
     q_like = f"%{q}%" if q else None
     where, params = build_where([
         ("activo = %s", None if incluir_eliminados else 1),
-        ("(nombre LIKE %s OR apellido LIKE %s)", q_like, q_like),
+        ("(nombre LIKE %s OR apellido LIKE %s OR CONCAT(nombre, ' ', apellido) LIKE %s)", q_like, q_like, q_like),
     ])
     params.extend([limit, offset])
     with get_db() as (_, cursor):

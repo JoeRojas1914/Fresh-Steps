@@ -8,9 +8,9 @@ def obtener_usuarios(q=None, rol=None, activo=None, pagina=1, por_pagina=20):
         params = []
 
         if q:
-            where += " AND (usuario LIKE %s OR nombre LIKE %s OR apellido LIKE %s OR telefono LIKE %s)"
+            where += " AND (usuario LIKE %s OR nombre LIKE %s OR apellido LIKE %s OR telefono LIKE %s OR CONCAT(nombre, ' ', apellido) LIKE %s)"
             like = f"%{q}%"
-            params += [like, like, like, like]
+            params += [like, like, like, like, like]
 
         if rol:
             where += " AND rol = %s"
