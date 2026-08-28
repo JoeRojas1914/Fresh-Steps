@@ -38,27 +38,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const select    = document.getElementById("select-negocio-servicios");
-    const toggle    = document.getElementById("toggle-eliminados-servicios");
     const formFiltro = document.getElementById("form-filtro-servicios");
-
-    if (formFiltro) {
-        if (select) {
-            select.addEventListener("change", () => formFiltro.submit());
-        }
-
-        if (toggle) {
-            toggle.addEventListener("change", () => {
-                const url = new URL(window.location.href);
-                if (toggle.checked) {
-                    url.searchParams.set("eliminados", "1");
-                } else {
-                    url.searchParams.delete("eliminados");
-                }
-                window.location.href = url.toString();
-            });
-        }
-    }
+    const container  = document.getElementById("tabla-paginada");
+    if (formFiltro && container) window.initFiltroAjax(formFiltro, container);
 });
 
 

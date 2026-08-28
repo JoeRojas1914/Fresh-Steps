@@ -4,33 +4,9 @@ import { validarRequerido, validarTelefono, validarPassword, validarPin, validar
 import { abrirHistorial } from '../base/historial_helpers.js';
 
 (function () {
-    const input       = document.getElementById("buscar-input");
-    const toggleInact = document.getElementById("toggle-inactivos");
-
-    if (input) {
-        let debounceTimer;
-        input.addEventListener("input", () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                const url = new URL(window.location.href);
-                const q = input.value.trim();
-                url.searchParams.delete("pagina");
-                if (q) url.searchParams.set("q", q);
-                else   url.searchParams.delete("q");
-                window.location.href = url.toString();
-            }, 500);
-        });
-    }
-
-    if (toggleInact) {
-        toggleInact.addEventListener("change", () => {
-            const url = new URL(window.location.href);
-            url.searchParams.delete("pagina");
-            if (toggleInact.checked) url.searchParams.set("inactivos", "1");
-            else                     url.searchParams.delete("inactivos");
-            window.location.href = url.toString();
-        });
-    }
+    const form      = document.getElementById("form-filtro-usuarios");
+    const container = document.getElementById("tabla-paginada");
+    if (form && container) window.initFiltroAjax(form, container);
 }());
 
 

@@ -9,18 +9,10 @@ document.addEventListener("click", function (e) {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const toggleEliminadas = document.getElementById("toggle-eliminadas");
-    if (toggleEliminadas) {
-        toggleEliminadas.addEventListener("change", () => {
-            const url = new URL(window.location.href);
-            if (toggleEliminadas.checked) {
-                url.searchParams.set("eliminadas", "1");
-            } else {
-                url.searchParams.delete("eliminadas");
-            }
-            window.location.href = url.toString();
-        });
-    }
+    const form      = document.getElementById("form-filtro-historial");
+    const container = document.getElementById("tabla-paginada");
+    const clearEl   = document.getElementById("btn-limpiar-filtro-historial");
+    if (form && container) window.initFiltroAjax(form, container, { clearEl });
 
 });
 

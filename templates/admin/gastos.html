@@ -76,6 +76,7 @@
       <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
       {% if request.args.get('id_negocio') or request.args.get('id_categoria') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
         <a href="{{ url_for('gastos.gastos') }}"
+           id="btn-limpiar-filtro-gastos"
            class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
       {% endif %}
       <a href="{{ url_for('gastos.exportar_gastos_excel',

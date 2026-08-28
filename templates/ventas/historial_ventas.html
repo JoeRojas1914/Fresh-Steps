@@ -12,7 +12,7 @@
 <h1><i data-lucide="clipboard-list" width="24" height="24"></i> Historial de ventas</h1>
 <p class="page-sub">Consulta y exportación del registro completo de ventas</p>
  
-<form method="GET" action="/ventas/historial">
+<form method="GET" action="/ventas/historial" id="form-filtro-historial">
     <div class="filtro-box">
         <div class="filtro-row">
  
@@ -89,7 +89,7 @@
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
                 {% if id_negocio or fecha_inicio or fecha_fin or q or id_venta or estado or (tipo_fecha and tipo_fecha != 'fecha_recibo') %}
-                <a href="/ventas/historial" class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
+                <a href="/ventas/historial" id="btn-limpiar-filtro-historial" class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
                 {% endif %}
                 <a href="{{ url_for('ventas.exportar_historial_excel',
                             id_negocio=id_negocio or '',

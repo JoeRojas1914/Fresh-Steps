@@ -13,11 +13,11 @@
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
-<div class="filtro-box">
+<form method="GET" action="{{ url_for('clientes.clientes') }}" id="form-filtro-clientes" class="filtro-box">
     <div class="filtro-row">
         <div class="filtro-item filtro-item--max280">
             <label>Buscar cliente</label>
-            <input type="text" id="buscar-cliente-input"
+            <input type="text" id="buscar-cliente-input" name="q"
                    placeholder="Nombre o apellido..."
                    value="{{ q or '' }}"
                    autocomplete="off">
@@ -27,6 +27,8 @@
                 <label class="switch">
                     <input type="checkbox"
                            id="toggle-eliminados"
+                           name="eliminados"
+                           value="1"
                            {% if incluir_eliminados %}checked{% endif %}>
                     <span class="slider"></span>
                 </label>
@@ -42,7 +44,7 @@
             </button>
         </div>
     </div>
-</div>
+</form>
 
 
 {% call(section) modal("modalCliente", "Agregar cliente", "md") %}

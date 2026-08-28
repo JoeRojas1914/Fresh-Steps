@@ -1,5 +1,6 @@
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
+{% from "components/empty_state.html" import fila_vacia %}
 
 {% call table([
     "Nombre",
@@ -80,6 +81,8 @@
         {% endif %}
         </td>
     </tr>
+    {% else %}
+    {% call fila_vacia(6) %}No se encontraron clientes con esos filtros.{% endcall %}
     {% endfor %}
 
 {% endcall %}

@@ -1,6 +1,7 @@
 {% from "macros/badges.html" import badge_negocio %}
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
+{% from "components/empty_state.html" import fila_vacia %}
 
 {% call table([
     "Negocio",
@@ -57,11 +58,7 @@
         </td>
     </tr>
     {% else %}
-    <tr>
-        <td colspan="5" class="dim td-empty">
-            No se encontraron servicios con esos filtros.
-        </td>
-    </tr>
+    {% call fila_vacia(5) %}No se encontraron servicios con esos filtros.{% endcall %}
     {% endfor %}
 
 {% endcall %}

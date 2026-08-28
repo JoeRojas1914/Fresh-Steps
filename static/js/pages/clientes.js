@@ -108,37 +108,7 @@ document.addEventListener("click", function (e) {
 
 
 (function () {
-    const input = document.getElementById("buscar-cliente-input");
-    if (!input) return;
-
-    let debounceTimer;
-    input.addEventListener("input", () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            const url = new URL(window.location.href);
-            const q = input.value.trim();
-            if (q) {
-                url.searchParams.set("q", q);
-            } else {
-                url.searchParams.delete("q");
-            }
-            url.searchParams.delete("pagina");
-            window.location.href = url.toString();
-        }, 400);
-    });
-}());
-
-(function () {
-    const toggle = document.getElementById("toggle-eliminados");
-    if (!toggle) return;
-
-    toggle.addEventListener("change", () => {
-        const url = new URL(window.location.href);
-        if (toggle.checked) {
-            url.searchParams.set("eliminados", "1");
-        } else {
-            url.searchParams.delete("eliminados");
-        }
-        window.location.href = url.toString();
-    });
+    const form      = document.getElementById("form-filtro-clientes");
+    const container = document.getElementById("tabla-paginada");
+    if (form && container) window.initFiltroAjax(form, container);
 }());

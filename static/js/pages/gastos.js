@@ -5,18 +5,10 @@ import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const toggleEliminados = document.getElementById("toggle-eliminados-gastos");
-    if (toggleEliminados) {
-        toggleEliminados.addEventListener("change", () => {
-            const url = new URL(window.location.href);
-            if (toggleEliminados.checked) {
-                url.searchParams.set("eliminados", "1");
-            } else {
-                url.searchParams.delete("eliminados");
-            }
-            window.location.href = url.toString();
-        });
-    }
+    const formFiltro = document.getElementById("form-filtro-gastos");
+    const container   = document.getElementById("tabla-paginada");
+    const clearEl     = document.getElementById("btn-limpiar-filtro-gastos");
+    if (formFiltro && container) window.initFiltroAjax(formFiltro, container, { clearEl });
 
     const form      = document.getElementById("formGasto");
     const submitBtn = document.querySelector('[form="formGasto"][type="submit"]');

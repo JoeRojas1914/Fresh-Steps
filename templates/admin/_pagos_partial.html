@@ -1,6 +1,7 @@
 {% from "macros/badges.html" import badge_negocio %}
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
+{% from "components/empty_state.html" import fila_vacia %}
 
 {% set meses = {1:"Ene",2:"Feb",3:"Mar",4:"Abr",5:"May",6:"Jun",
                 7:"Jul",8:"Ago",9:"Sep",10:"Oct",11:"Nov",12:"Dic"} %}
@@ -66,11 +67,7 @@
         </td>
     </tr>
     {% else %}
-    <tr>
-        <td colspan="9" class="dim td-empty">
-            No se encontraron pagos con esos filtros.
-        </td>
-    </tr>
+    {% call fila_vacia(9) %}No se encontraron pagos con esos filtros.{% endcall %}
     {% endfor %}
 
 {% endcall %}

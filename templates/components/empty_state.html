@@ -1,0 +1,7 @@
+{% macro fila_vacia(colspan) %}
+<tr>
+    <td colspan="{{ colspan }}" class="dim td-empty">
+        {{ caller() }}
+    </td>
+</tr>
+{% endmacro %}

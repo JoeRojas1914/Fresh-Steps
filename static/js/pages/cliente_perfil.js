@@ -5,47 +5,9 @@ import { validarRequerido, validarTelefono } from '../base/form_validators.js';
 (function () {
     const form      = document.getElementById('form-filtro-cliente');
     const container = document.getElementById('tabla-paginada');
-    if (!form || !container) return;
+    const clearEl   = document.getElementById('btn-limpiar-filtro');
 
-    async function cargarTabla(pushUrl) {
-        container.style.opacity       = '0.5';
-        container.style.pointerEvents = 'none';
-        try {
-            const fetchUrl = new URL(pushUrl, window.location.href);
-            fetchUrl.searchParams.set('partial', '1');
-            const resp = await fetch(fetchUrl.toString());
-            if (!resp.ok) throw new Error();
-            container.innerHTML = await resp.text();
-            history.pushState(null, '', pushUrl);
-            if (window.lucide) window.lucide.createIcons();
-        } catch {
-            window.location.href = pushUrl;
-        } finally {
-            container.style.opacity       = '';
-            container.style.pointerEvents = '';
-        }
-    }
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const params = new URLSearchParams(new FormData(form));
-        for (const [k, v] of [...params.entries()]) {
-            if (!v) params.delete(k);
-        }
-        const url = params.toString()
-            ? `${form.action}?${params}`
-            : form.action;
-        cargarTabla(url);
-    });
-
-    document.addEventListener('click', function (e) {
-        const btn = e.target.closest('#btn-limpiar-filtro');
-        if (!btn) return;
-        e.preventDefault();
-        form.querySelectorAll('select').forEach(s => { s.selectedIndex = 0; });
-        form.querySelectorAll('input[type=date]').forEach(i => { i.value = ''; });
-        cargarTabla(btn.href);
-    });
+    window.initFiltroAjax(form, container, { clearEl });
 })();
 
 // ── Edit modal validation ────────────────────────────────────

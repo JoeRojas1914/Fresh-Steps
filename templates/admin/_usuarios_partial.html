@@ -1,5 +1,6 @@
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
+{% from "components/empty_state.html" import fila_vacia %}
 
 {% call table([
     "Usuario", "Nombre completo", "Teléfono", "Correo",
@@ -69,11 +70,7 @@
         </td>
     </tr>
     {% else %}
-    <tr>
-        <td colspan="8" class="dim td-empty">
-            No se encontraron usuarios con esos filtros.
-        </td>
-    </tr>
+    {% call fila_vacia(8) %}No se encontraron usuarios con esos filtros.{% endcall %}
     {% endfor %}
 {% endcall %}
 

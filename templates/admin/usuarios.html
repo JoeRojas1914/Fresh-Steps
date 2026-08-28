@@ -12,12 +12,12 @@
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
 {# ── Filtros ── #}
-<div class="filtro-box">
+<form method="GET" action="{{ url_for('usuarios.listar_usuarios') }}" id="form-filtro-usuarios" class="filtro-box">
     <div class="filtro-row">
 
         <div class="filtro-item filtro-item--max260">
             <label for="buscar-input">Buscar</label>
-            <input type="text" id="buscar-input"
+            <input type="text" id="buscar-input" name="q"
                    placeholder="Usuario, nombre, apellido o teléfono..."
                    value="{{ q or '' }}"
                    autocomplete="off">
@@ -26,6 +26,7 @@
         <div class="filtro-toggle filtro-toggle--compact">
             <label class="switch">
                 <input type="checkbox" id="toggle-inactivos"
+                       name="inactivos" value="1"
                        {% if mostrar_inactivos %}checked{% endif %}>
                 <span class="slider"></span>
             </label>
@@ -33,13 +34,13 @@
         </div>
 
         <div class="filtro-actions--right">
-            <button class="btn btn--primary btn--sm js-abrir-modal-usuario">
+            <button type="button" class="btn btn--primary btn--sm js-abrir-modal-usuario">
                 <i data-lucide="plus" width="14" height="14"></i> Agregar usuario
             </button>
         </div>
 
     </div>
-</div>
+</form>
 
 <hr>
 
