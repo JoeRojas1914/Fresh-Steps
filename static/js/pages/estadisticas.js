@@ -584,7 +584,7 @@ function renderTopClientes(clientes) {
                 </div>
             </div>
             <div class="tc-meta">
-                <div class="tc-monto">${fmt$(cl.total_gastado)}</div>
+                <div class="tc-monto dato-sensible">${fmt$(cl.total_gastado)}</div>
                 <div class="tc-visitas">${fmtN(cl.visitas)} visita${cl.visitas !== 1 ? 's' : ''}</div>
             </div>
         </div>`;
@@ -619,8 +619,21 @@ function _cargarDashboardDebounced() {
     _dashTimer = setTimeout(cargarDashboard, 400);
 }
 
+// Montos siempre censurados al entrar; el estado no se guarda entre visitas
+function initToggleMontos() {
+    const toggleBtn = document.getElementById("toggleMontos");
+    if (!toggleBtn) return;
+    toggleBtn.addEventListener("click", () => {
+        const visible = toggleBtn.getAttribute("aria-pressed") !== "true";
+        document.body.classList.toggle("montos-visibles", visible);
+        toggleBtn.setAttribute("aria-pressed", visible ? "true" : "false");
+        toggleBtn.title = visible ? "Ocultar montos" : "Mostrar montos";
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     initCharts();
+    initToggleMontos();
 
     const inputs = [
         "fecha-dia", "fecha-semana", "fecha-mes",

@@ -219,3 +219,10 @@
 .tc-bar--3 { background: #b45309; }
 .tc-bar--4 { background: #6366f1; }
 .tc-bar--5 { background: #22c55e; }
+
+/* ── Toggle de censura de montos ── */
+.kpis-header {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 0 -8px;
+}

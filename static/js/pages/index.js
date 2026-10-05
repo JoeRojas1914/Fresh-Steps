@@ -93,9 +93,7 @@ if (_canvas && _rawChart) {
     var STORAGE_KEY = "fs_montos_visibles";
 
     function aplicar(visible) {
-        document.querySelectorAll(".dato-sensible").forEach(function(el) {
-            el.classList.toggle("fs-visible", visible);
-        });
+        document.body.classList.toggle("montos-visibles", visible);
         toggleBtn.setAttribute("aria-pressed", visible ? "true" : "false");
         toggleBtn.title = visible ? "Ocultar montos" : "Mostrar montos";
     }
@@ -147,6 +145,7 @@ document.addEventListener("click", function(e) {
         _setKpi("ventas_hoy",          data.ventas_hoy,              false);
         _setKpi("unidades_recibidas",  data.unidades_recibidas_hoy,  false);
         _setKpi("unidades_entregadas", data.unidades_entregadas_hoy, false);
+        _setKpi("ventas_entregadas_hoy", data.ventas_entregadas_hoy, false);
         _setKpi("total_pendientes",    data.total_pendientes,        false);
         _setKpi("total_entregas",      data.total_entregas,          false);
 

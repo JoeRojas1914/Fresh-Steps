@@ -78,19 +78,25 @@
 </div>
 
 {# ── KPI Cards ── #}
+<div class="kpis-header">
+    <button type="button" id="toggleMontos" class="btn-blur-toggle" aria-pressed="false" title="Mostrar montos">
+        <i data-lucide="eye" width="19" height="19" class="icon-eye"></i>
+        <i data-lucide="eye-off" width="19" height="19" class="icon-eye-off"></i>
+    </button>
+</div>
 <div class="monthly-cards">
-    <div class="monthly-card ventas"><h4><i data-lucide="dollar-sign" width="14" height="14"></i> Ingresos</h4><p id="ventasMes">$0</p></div>
-    <div class="monthly-card gastos"><h4><i data-lucide="banknote" width="14" height="14"></i> Gastos</h4><p id="gastosMes">$0</p></div>
-    <div class="monthly-card ganancia"><h4><i data-lucide="trending-up" width="14" height="14"></i> Ganancia</h4><p id="gananciaMes">$0</p></div>
+    <div class="monthly-card ventas"><h4><i data-lucide="dollar-sign" width="14" height="14"></i> Ingresos</h4><p id="ventasMes" class="dato-sensible">$0</p></div>
+    <div class="monthly-card gastos"><h4><i data-lucide="banknote" width="14" height="14"></i> Gastos</h4><p id="gastosMes" class="dato-sensible">$0</p></div>
+    <div class="monthly-card ganancia"><h4><i data-lucide="trending-up" width="14" height="14"></i> Ganancia</h4><p id="gananciaMes" class="dato-sensible">$0</p></div>
     <div class="monthly-card total-ventas"><h4><i data-lucide="shopping-cart" width="14" height="14"></i> Total ventas</h4><p id="totalVentas">0</p></div>
     <div class="monthly-card ticket">
         <h4><i data-lucide="receipt" width="14" height="14"></i> Ticket promedio</h4>
-        <p id="ticketPromedio">$0</p>
+        <p id="ticketPromedio" class="dato-sensible">$0</p>
         <span class="kpi-sub" id="ticketVentas">0 ventas</span>
     </div>
     <div class="monthly-card cobrar">
         <h4><i data-lucide="clock" width="14" height="14"></i> Por cobrar</h4>
-        <p id="saldoCobrar">$0</p>
+        <p id="saldoCobrar" class="dato-sensible">$0</p>
         <span class="kpi-sub">Saldo pendiente</span>
     </div>
 </div>
@@ -107,7 +113,7 @@
     <div class="stats-page">
         <div class="card stats-card">
             <h2 class="stats-title" id="titulo-ingresos">Ingresos</h2>
-            <canvas id="ingresosChart"></canvas>
+            <canvas id="ingresosChart" class="dato-sensible"></canvas>
         </div>
         <div class="card stats-card">
             <div class="stats-card-header">
@@ -117,7 +123,7 @@
                     <button class="agrupacion-btn" data-agrupacion="categoria">Categoría</button>
                 </div>
             </div>
-            <canvas id="gastosChart"></canvas>
+            <canvas id="gastosChart" class="dato-sensible"></canvas>
         </div>
     </div>
     <div class="stats-page">
@@ -133,7 +139,7 @@
     <div class="stats-page">
         <div class="card stats-card" id="card-ingresos-negocio">
             <h2 class="stats-title">Ingresos por negocio</h2>
-            <canvas id="ingresosNegocioChart"></canvas>
+            <canvas id="ingresosNegocioChart" class="dato-sensible"></canvas>
         </div>
     </div>
 </div>
@@ -199,7 +205,7 @@
         </div>
         <div class="monthly-card small teal">
             <h4><i data-lucide="dollar-sign" width="14" height="14"></i> Gasto promedio por cliente</h4>
-            <p id="gastoPorCliente">$0</p>
+            <p id="gastoPorCliente" class="dato-sensible">$0</p>
             <span class="kpi-sub">Promedio por visita única</span>
         </div>
     </div>
