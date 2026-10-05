@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ticket</title>
+  <title>Ticket {{ venta.id_venta }}{% if venta.nombre_cliente %} - {{ venta.nombre_cliente }}{% endif %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/ticket.css') }}">
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
 </head>
