@@ -2,6 +2,7 @@ import { ventaState } from './ventas_state.js';
 import { mostrarFeedback, escapeHtml } from '../base/helpers.js';
 import { validarFormulario, actualizarTotal } from './ventas_validacion.js';
 import { actualizarEmptyState } from './ventas_articulos.js';
+import '../components/selector_servicio.js';  
 
 /* ─── Carga de servicios por negocio ─────────────────────────────────────── */
 
@@ -42,14 +43,21 @@ export async function seleccionarNegocio() {
     }
 }
 
-/* ─── Helpers para generar HTML de servicios ─────────────────────────────── */
 
-function _opcionesServiciosHTML() {
+export function opcionesServiciosHTML() {
+    const servicios = [...ventaState.serviciosGlobales]
+        .map(s => ({
+            id:     s.id_servicio,
+            nombre: (s.nombre || "").trim(),
+            precio: parseFloat(s.precio_base ?? s.precio ?? 0) || 0,
+        }))
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" }));
+
     let html = `<option value="">-- Selecciona servicio --</option>`;
-    ventaState.serviciosGlobales.forEach(s => {
-        const precio = s.precio_base ?? s.precio ?? 0;
-        html += `<option value="${s.id_servicio}" data-precio="${precio}">${escapeHtml(s.nombre)} ($${precio})</option>`;
-    });
+    for (const s of servicios) {
+        const nombre = escapeHtml(s.nombre);
+        html += `<option value="${s.id}" data-precio="${s.precio}" data-nombre="${nombre}">${nombre}</option>`;
+    }
     return html;
 }
 
@@ -63,7 +71,7 @@ export function crearServiciosSelect(indexArticulo) {
                 </button>
             </div>
             <div class="servicios-lista" id="serviciosLista_${indexArticulo}">
-                ${crearFilaServicio(indexArticulo, 0, _opcionesServiciosHTML())}
+                ${crearFilaServicio(indexArticulo, 0, opcionesServiciosHTML())}
             </div>
         </div>
     `;
@@ -72,7 +80,7 @@ export function crearServiciosSelect(indexArticulo) {
 function crearFilaServicio(indexArticulo, indexServicio, opcionesHTML) {
     return `
         <div class="servicio-item" data-index-servicio="${indexServicio}">
-            <select name="articulos[${indexArticulo}][servicios][${indexServicio}][id_servicio]">
+            <select class="select-servicio" name="articulos[${indexArticulo}][servicios][${indexServicio}][id_servicio]">
                 ${opcionesHTML}
             </select>
             <input type="number" min="0" step="0.01"
@@ -96,7 +104,7 @@ export function marcarPrecioEditado(input) {
 export function agregarServicio(indexArticulo) {
     const contenedor    = document.getElementById(`serviciosLista_${indexArticulo}`);
     const indexServicio = contenedor.querySelectorAll(".servicio-item").length;
-    contenedor.insertAdjacentHTML("beforeend", crearFilaServicio(indexArticulo, indexServicio, _opcionesServiciosHTML()));
+    contenedor.insertAdjacentHTML("beforeend", crearFilaServicio(indexArticulo, indexServicio, opcionesServiciosHTML()));
     if (window.lucide) lucide.createIcons();
     actualizarOpcionesServiciosDelArticulo(indexArticulo);
     validarFormulario();
@@ -109,7 +117,7 @@ export function eliminarServicioPro(btn, indexArticulo) {
     fila.remove();
 
     if (contenedor.querySelectorAll(".servicio-item").length === 0) {
-        contenedor.insertAdjacentHTML("beforeend", crearFilaServicio(indexArticulo, 0, _opcionesServiciosHTML()));
+        contenedor.insertAdjacentHTML("beforeend", crearFilaServicio(indexArticulo, 0, opcionesServiciosHTML()));
     }
 
     actualizarOpcionesServiciosDelArticulo(indexArticulo);

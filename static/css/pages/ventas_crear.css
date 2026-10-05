@@ -644,6 +644,126 @@
 }
 
 .servicio-item select { min-width: 220px; max-width: 300px; }
+
+.srv-picker__nativo { display: none !important; }
+
+.srv-picker__btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 260px;
+  max-width: 340px;
+  flex: 1 1 260px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transition: border var(--transition-base), box-shadow var(--transition-base);
+}
+
+.srv-picker__btn:hover        { border-color: #93c5fd; }
+.srv-picker__btn:focus-visible,
+.srv-picker__btn.is-abierto {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(47, 164, 255, 0.2);
+}
+.srv-picker__btn:disabled     { opacity: .6; cursor: not-allowed; }
+
+.srv-picker__nombre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.srv-picker__btn.is-vacio .srv-picker__nombre { font-weight: 400; color: #94a3b8; }
+
+.srv-picker__precio {
+  font-weight: 600;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.srv-picker__chevron {
+  flex-shrink: 0;
+  color: #94a3b8;
+  transition: transform .15s ease;
+}
+.srv-picker__btn.is-abierto .srv-picker__chevron { transform: rotate(180deg); }
+
+.srv-picker__panel {
+  position: fixed;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, .14), 0 2px 6px rgba(15, 23, 42, .06);
+  padding: 6px;
+}
+
+.srv-picker__filtro {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+}
+.srv-picker__filtro:focus { outline: none; border-color: var(--color-primary); }
+
+.srv-picker__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.srv-picker__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.srv-picker__item[hidden]          { display: none; }   /* filtro: display:flex anula [hidden] */
+.srv-picker__item.is-activo        { background: #f0f7ff; }
+.srv-picker__item:not(.is-deshabilitado):hover {
+  background: #dbeafe;
+  color: var(--color-primary-dark);
+}
+.srv-picker__item.is-seleccionado  { font-weight: 600; color: var(--color-primary-dark); }
+.srv-picker__item.is-deshabilitado { opacity: .4; cursor: not-allowed; }
+
+.srv-picker__item-precio {
+  font-weight: 600;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.srv-picker__vacio {
+  padding: 12px 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  text-align: center;
+  list-style: none;
+}
 .servicio-item .precio-aplicado { width: 160px; max-width: 160px; }
 
 #fecha_estimada {

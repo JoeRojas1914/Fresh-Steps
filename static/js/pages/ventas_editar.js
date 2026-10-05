@@ -2,7 +2,7 @@ import { ventaState } from './ventas_state.js';
 import { mostrarFeedback, redirigirConFeedback, escapeHtml } from '../base/helpers.js';
 import { abrirModal, cerrarModal } from '../components/modal.js';
 import { initNavigationGuard } from '../base/navigation_guard.js';
-import { cargarServicios, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado } from './ventas_servicios.js';
+import { cargarServicios, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado, opcionesServiciosHTML } from './ventas_servicios.js';
 import { agregarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
 import { initSelectorHora, ajustarHorasPorFecha } from '../components/selector_hora.js';
 
@@ -253,18 +253,12 @@ function agregarServicioExistente(idArt) {
     const contenedor = document.getElementById(`existingServiciosLista_${idArt}`);
     if (!contenedor) return;
 
-    const j         = contenedor.querySelectorAll(".existing-servicio-item").length;
-    const servicios = ventaState.serviciosGlobales;
-    const optsHtml  = servicios.map(s => {
-        const precio = s.precio_base ?? s.precio ?? 0;
-        return `<option value="${s.id_servicio}" data-precio="${precio}">${escapeHtml(s.nombre)} ($${precio})</option>`;
-    }).join("");
+    const j = contenedor.querySelectorAll(".existing-servicio-item").length;
 
     contenedor.insertAdjacentHTML("beforeend", `
         <div class="existing-servicio-item servicio-item" data-index-servicio="${j}">
-            <select name="existing_servicios[${idArt}][${j}][id_servicio]">
-                <option value="">-- Selecciona servicio --</option>
-                ${optsHtml}
+            <select class="select-servicio" name="existing_servicios[${idArt}][${j}][id_servicio]">
+                ${opcionesServiciosHTML()}
             </select>
             <input type="number" min="0" step="0.01"
                    class="precio-aplicado"
@@ -371,7 +365,7 @@ function construirResumen(form, totalActual, totalPagado) {
         const tipo   = box.dataset.tipo;
         const nombres = [...box.querySelectorAll(".existing-servicio-item select")]
             .filter(s => s.value)
-            .map(s => escapeHtml((s.selectedOptions[0]?.text || "?").replace(/\s*\(\$[\d.,]+\)$/, "")));
+            .map(s => escapeHtml(s.selectedOptions[0]?.dataset.nombre || "?"));
         if (nombres.length > 0) { numNuevosSrv += nombres.length; detalleNuevosSrv.push({ num, tipo, nombres }); }
     });
 
@@ -572,7 +566,7 @@ function _validarServiciosExistentes() {
             if (!sel?.value) continue;
             const precio = parseFloat(fila.querySelector(".precio-aplicado")?.value ?? 0);
             if (isNaN(precio) || precio <= 0) {
-                const nombre = sel.selectedOptions[0]?.text || "Servicio nuevo";
+                const nombre = sel.selectedOptions[0]?.dataset.nombre || "Servicio nuevo";
                 return `Art. #${num}: el precio de "${nombre}" debe ser mayor a $0.`;
             }
         }

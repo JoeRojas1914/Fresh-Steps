@@ -294,7 +294,7 @@ function generarResumenArticulo(item) {
 
     const svcs = [...item.querySelectorAll(".servicio-item select")]
         .filter(s => s.value)
-        .map(s => s.selectedOptions[0]?.text.split(" ($")[0] || "")
+        .map(s => s.selectedOptions[0]?.dataset.nombre || "")
         .join(", ");
 
     const partes  = [color, mat, cant ? `x${cant}` : ""].filter(Boolean);
@@ -355,6 +355,8 @@ export function validarArticuloVisual(item) {
 
     item.querySelectorAll(".servicio-item select").forEach(sel => {
         sel.classList.toggle("field--invalid", !sel.value);
+        // El select está oculto: el borde rojo va en el botón del selector visual
+        sel._srvBoton?.classList.toggle("field--invalid", !sel.value);
     });
 
     item.classList.remove("completo", "incompleto");
