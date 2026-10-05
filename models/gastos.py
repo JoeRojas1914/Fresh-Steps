@@ -1,5 +1,5 @@
 from db import get_db
-from utils import build_where, registrar_historial as _registrar_historial
+from utils import build_where, construir_order_by, registrar_historial as _registrar_historial
 
 
 def obtener_categorias():
@@ -133,6 +133,19 @@ def eliminar_gasto(id_gasto, id_usuario):
         registrar_historial(cursor, id_gasto, "ELIMINADO", id_usuario, antes, None)
 
 
+COLUMNAS_ORDEN_GASTOS = {
+    "negocio":          "n.nombre",
+    "descripcion":      "g.descripcion",
+    "categoria":        "c.nombre",
+    "proveedor":        "g.proveedor",
+    "total":            "g.total",
+    "tipo_comprobante": "g.tipo_comprobante",
+    "tipo_pago":        "g.tipo_pago",
+    "fecha_registro":   "g.fecha_registro",
+    "activo":           "g.activo",
+}
+
+
 def obtener_gastos(
     id_negocio=None,
     id_categoria=None,
@@ -141,6 +154,8 @@ def obtener_gastos(
     limit=10,
     offset=0,
     incluir_eliminados=False,
+    orden=None,
+    direccion=None,
 ):
     where, params = build_where([
         ("g.id_negocio = %s",   id_negocio),
@@ -161,8 +176,10 @@ def obtener_gastos(
             " JOIN negocio n ON g.id_negocio = n.id_negocio"
             " JOIN usuario u ON g.id_usuario = u.id_usuario"
             " LEFT JOIN categoria_gasto c ON g.id_categoria = c.id_categoria "
-            + where +
-            " ORDER BY g.fecha_registro DESC LIMIT %s OFFSET %s",
+            + where
+            + construir_order_by(orden, direccion, "g.fecha_registro DESC",
+                                 COLUMNAS_ORDEN_GASTOS, "g.id_gasto")
+            + " LIMIT %s OFFSET %s",
             params
         )
         return cursor.fetchall()

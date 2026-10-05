@@ -1,6 +1,6 @@
 from db import get_db
 from config import TIPO_PAGO_FINAL
-from utils import build_where
+from utils import build_where, construir_order_by
 
 
 def registrar_pago(id_venta, monto, tipo_pago, id_usuario_cobro):
@@ -74,8 +74,21 @@ def _filtros_historial(id_negocio, tipo_pago, tipo_pago_venta, fecha_inicio, fec
     ])
 
 
+COLUMNAS_ORDEN_PAGOS = {
+    "negocio":         "n.nombre",
+    "recibo":          "pv.id_venta",
+    "cliente":         "CONCAT(c.nombre, ' ', c.apellido)",
+    "fecha_pago":      "pv.fecha_pago",
+    "tipo_pago_venta": "pv.tipo_pago_venta",
+    "tipo_pago":       "pv.tipo_pago",
+    "monto":           "pv.monto",
+    "cobrado_por":     "u.usuario",
+}
+
+
 def obtener_historial_pagos(id_negocio, tipo_pago, tipo_pago_venta,
-                             fecha_inicio, fecha_fin, limit, offset):
+                             fecha_inicio, fecha_fin, limit, offset,
+                             orden=None, direccion=None):
     where, params = _filtros_historial(
         id_negocio, tipo_pago, tipo_pago_venta, fecha_inicio, fecha_fin
     )
@@ -95,10 +108,10 @@ def obtener_historial_pagos(id_negocio, tipo_pago, tipo_pago_venta,
             JOIN cliente c ON c.id_cliente  = v.id_cliente
             JOIN negocio n ON n.id_negocio  = v.id_negocio
             LEFT JOIN usuario u ON u.id_usuario = pv.id_usuario_cobro
-            """ + where + """
-            ORDER BY pv.fecha_pago DESC
-            LIMIT %s OFFSET %s
-        """, params)
+            """ + where
+            + construir_order_by(orden, direccion, "pv.fecha_pago DESC",
+                                 COLUMNAS_ORDEN_PAGOS, "pv.id_pago")
+            + " LIMIT %s OFFSET %s", params)
         return cursor.fetchall()
 
 

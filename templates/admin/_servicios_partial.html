@@ -4,12 +4,12 @@
 {% from "components/empty_state.html" import fila_vacia %}
 
 {% call table([
-    "Negocio",
-    "Servicio",
-    "Precio",
-    "Estado",
+    {"label": "Negocio", "sort": "negocio"},
+    {"label": "Servicio", "sort": "nombre"},
+    {"label": "Precio", "sort": "precio"},
+    {"label": "Estado", "sort": "activo"},
     "Acciones"
-]) %}
+], request.args.get('orden'), request.args.get('dir')) %}
 
     {% for s in servicios %}
     <tr>
@@ -71,6 +71,9 @@
       "id_negocio": request.args.get('id_negocio'),
       "fecha_inicio": request.args.get('fecha_inicio'),
       "fecha_fin": request.args.get('fecha_fin'),
-      "eliminados": request.args.get('eliminados')
+      "eliminados": request.args.get('eliminados'),
+      "q":          request.args.get('q'),
+      "orden":        request.args.get('orden'),
+      "dir":          request.args.get('dir')
     }
 ) }}

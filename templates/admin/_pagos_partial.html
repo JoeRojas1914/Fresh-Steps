@@ -7,16 +7,16 @@
                 7:"Jul",8:"Ago",9:"Sep",10:"Oct",11:"Nov",12:"Dic"} %}
 
 {% call table([
-    "Negocio",
-    "Recibo",
-    "Cliente",
-    "Fecha pago",
-    "Tipo",
-    "Método",
-    "Monto",
-    "Cobrado por",
+    {"label": "Negocio", "sort": "negocio"},
+    {"label": "Recibo", "sort": "recibo"},
+    {"label": "Cliente", "sort": "cliente"},
+    {"label": "Fecha pago", "sort": "fecha_pago"},
+    {"label": "Tipo", "sort": "tipo_pago_venta"},
+    {"label": "Método", "sort": "tipo_pago"},
+    {"label": "Monto", "sort": "monto"},
+    {"label": "Cobrado por", "sort": "cobrado_por"},
     "Ticket"
-]) %}
+], request.args.get('orden'), request.args.get('dir')) %}
 
     {% for p in pagos %}
     <tr>
@@ -81,6 +81,8 @@
       "tipo_pago":       request.args.get('tipo_pago'),
       "tipo_pago_venta": request.args.get('tipo_pago_venta'),
       "fecha_inicio":    request.args.get('fecha_inicio'),
-      "fecha_fin":       request.args.get('fecha_fin')
+      "fecha_fin":       request.args.get('fecha_fin'),
+      "orden":        request.args.get('orden'),
+      "dir":          request.args.get('dir')
     }
 ) }}

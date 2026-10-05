@@ -33,7 +33,11 @@ def _filtros_request():
 def historial_pagos():
     f      = _filtros_request()
     pagina = request.args.get("pagina", 1, type=int)
-    data   = listar_pagos_service(**f, pagina=pagina)
+    data   = listar_pagos_service(
+        **f, pagina=pagina,
+        orden=request.args.get("orden") or None,
+        direccion=request.args.get("dir") or None,
+    )
 
     ctx = dict(
         pagos         = data["pagos"],

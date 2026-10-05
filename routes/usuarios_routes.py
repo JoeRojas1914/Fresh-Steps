@@ -27,6 +27,8 @@ def listar_usuarios():
         q=q or None,
         activo=activo_val,
         pagina=pagina,
+        orden=request.args.get("orden") or None,
+        direccion=request.args.get("dir") or None,
     )
 
     ctx = dict(

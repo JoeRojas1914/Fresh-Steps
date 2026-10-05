@@ -13,6 +13,8 @@ def listar_pagos_service(
     fecha_fin: date | None,
     pagina: int,
     por_pagina: int = 20,
+    orden: str | None = None,
+    direccion: str | None = None,
 ) -> dict[str, Any]:
     total = contar_historial_pagos(
         id_negocio, tipo_pago, tipo_pago_venta, fecha_inicio, fecha_fin
@@ -21,6 +23,7 @@ def listar_pagos_service(
     pagos = obtener_historial_pagos(
         id_negocio, tipo_pago, tipo_pago_venta, fecha_inicio, fecha_fin,
         limit=por_pagina, offset=offset,
+        orden=orden, direccion=direccion,
     )
     return {"pagos": pagos, "total": total, "total_paginas": total_paginas}
 

@@ -27,10 +27,13 @@ def listar_clientes_service(
     pagina: int = 1,
     por_pagina: int = 10,
     incluir_eliminados: bool = False,
+    orden: str | None = None,
+    direccion: str | None = None,
 ) -> dict:
     total = contar_clientes(q, incluir_eliminados)
     offset, total_paginas = calcular_paginacion(total, pagina, por_pagina)
-    clientes = obtener_clientes(q, por_pagina, offset, incluir_eliminados)
+    clientes = obtener_clientes(q, por_pagina, offset, incluir_eliminados,
+                                orden=orden, direccion=direccion)
 
     ids = [c["id_cliente"] for c in clientes]
     pedidos_map = contar_pedidos_por_cliente(ids)
@@ -110,7 +113,8 @@ def obtener_cliente_detalle_service(
     offset, total_paginas = calcular_paginacion(total_pedidos, pagina, pedidos_por_pagina)
     pedidos       = obtener_ventas_cliente(
         id_cliente, id_negocio, fecha_inicio, fecha_fin,
-        pedidos_por_pagina, offset
+        pedidos_por_pagina, offset,
+        orden=filtros.get("orden"), direccion=filtros.get("dir"),
     )
 
     ids_venta   = [p["id_venta"] for p in pedidos]

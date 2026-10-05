@@ -13,6 +13,8 @@
 <p class="page-sub">Consulta y exportación del registro completo de ventas</p>
  
 <form method="GET" action="/ventas/historial" id="form-filtro-historial">
+    <input type="hidden" name="orden" value="{{ orden or '' }}">
+    <input type="hidden" name="dir" value="{{ direccion or '' }}">
     <div class="filtro-box">
         <div class="filtro-row">
  

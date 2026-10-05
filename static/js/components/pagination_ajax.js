@@ -80,6 +80,7 @@
                 form.querySelectorAll('input[type=text], input[type=number], input[type=date], input[type=search]').forEach(el => { el.value = ''; });
                 form.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
                 form.querySelectorAll('input[type=checkbox], input[type=radio]').forEach(el => { el.checked = false; });
+                form.querySelectorAll('input[type=hidden][name=orden], input[type=hidden][name=dir]').forEach(el => { el.value = ''; });
                 cargarTablaAjax(clearEl.href || form.action, container);
             });
         }
@@ -94,6 +95,36 @@
 
         e.preventDefault();
         cargarTablaAjax(link.href, container);
+    });
+
+    // ── Ordenar al hacer clic en encabezados (th.th-sort) ──
+    // 1er clic: ascendente; clic de nuevo sobre la misma columna: descendente.
+    // El orden vive en inputs ocultos del formulario de filtros, así filtros
+    // y paginación lo conservan.
+    function ordenarPorColumna(th) {
+        const inputOrden = document.querySelector('form input[type=hidden][name=orden]');
+        const form       = inputOrden?.form;
+        if (!form) return;
+        const inputDir   = form.querySelector('input[type=hidden][name=dir]');
+
+        const nuevaDir = th.classList.contains('is-asc') ? 'desc' : 'asc';
+        inputOrden.value = th.dataset.sort;
+        if (inputDir) inputDir.value = nuevaDir;
+
+        form.requestSubmit();
+    }
+
+    document.addEventListener('click', function (e) {
+        const th = e.target.closest('th.th-sort[data-sort]');
+        if (th) ordenarPorColumna(th);
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const th = e.target.closest('th.th-sort[data-sort]');
+        if (!th) return;
+        e.preventDefault();
+        ordenarPorColumna(th);
     });
 
     window.cargarTablaAjax = cargarTablaAjax;

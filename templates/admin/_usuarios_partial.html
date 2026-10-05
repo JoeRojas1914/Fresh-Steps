@@ -3,9 +3,15 @@
 {% from "components/empty_state.html" import fila_vacia %}
 
 {% call table([
-    "Usuario", "Nombre completo", "Teléfono", "Correo",
-    "Rol", "Estado", "Creado", "Acciones"
-]) %}
+    {"label": "Usuario", "sort": "usuario"},
+    {"label": "Nombre completo", "sort": "nombre"},
+    {"label": "Teléfono", "sort": "telefono"},
+    {"label": "Correo", "sort": "correo"},
+    {"label": "Rol", "sort": "rol"},
+    {"label": "Estado", "sort": "activo"},
+    {"label": "Creado", "sort": "creado_en"},
+    "Acciones"
+], request.args.get('orden'), request.args.get('dir')) %}
     {% for u in usuarios %}
     <tr>
         <td><strong>{{ u.usuario }}</strong></td>
@@ -80,6 +86,8 @@
     'usuarios.listar_usuarios',
     {
         "q": q,
-        "inactivos": "1" if mostrar_inactivos else None
+        "inactivos": "1" if mostrar_inactivos else None,
+        "orden": request.args.get('orden'),
+        "dir": request.args.get('dir')
     }
 ) }}

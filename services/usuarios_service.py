@@ -102,8 +102,11 @@ def listar_usuarios_service(
     rol: str | None = None,
     activo: int | None = None,
     pagina: int = 1,
+    orden: str | None = None,
+    direccion: str | None = None,
 ) -> dict:
-    return usuario.obtener_usuarios(q=q, rol=rol, activo=activo, pagina=pagina)
+    return usuario.obtener_usuarios(q=q, rol=rol, activo=activo, pagina=pagina,
+                                    orden=orden, direccion=direccion)
 
 
 def obtener_historial_usuario_service(id_usuario: int) -> list[dict]:

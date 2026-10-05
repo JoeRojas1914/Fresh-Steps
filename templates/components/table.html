@@ -1,10 +1,25 @@
-{% macro table(headers) %}
+{#
+  headers: lista de strings, o dicts {"label": ..., "sort": "<clave>"} para
+  columnas ordenables. `orden` / `direccion` indican el orden activo.
+#}
+{% macro table(headers, orden=None, direccion=None) %}
 <div class="table-wrapper">
 <table class="table table--striped table--hover">
     <thead>
         <tr>
             {% for h in headers %}
-                <th scope="col">{{ h }}</th>
+                {% if h is mapping %}
+                    {% set activo = orden == h.sort %}
+                    <th scope="col"
+                        class="th-sort{% if activo %} is-{{ 'desc' if direccion == 'desc' else 'asc' }}{% endif %}"
+                        data-sort="{{ h.sort }}"
+                        aria-sort="{% if activo %}{{ 'descending' if direccion == 'desc' else 'ascending' }}{% else %}none{% endif %}"
+                        tabindex="0">
+                        {{ h.label }}<span class="th-sort-icon" aria-hidden="true"></span>
+                    </th>
+                {% else %}
+                    <th scope="col">{{ h }}</th>
+                {% endif %}
             {% endfor %}
         </tr>
     </thead>

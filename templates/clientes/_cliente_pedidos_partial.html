@@ -13,10 +13,16 @@
 <div id="toast-container"></div>
 
 {% call table([
-    "Recibo", "Negocio",
-    "Fecha recibo", "Fecha estimada", "Fecha lista",
-    "Fecha entrega", "Total", "Estado", "Detalles"
-]) %}
+    {"label": "Recibo", "sort": "id"},
+    {"label": "Negocio", "sort": "negocio"},
+    {"label": "Fecha recibo", "sort": "fecha_recibo"},
+    {"label": "Fecha estimada", "sort": "fecha_estimada"},
+    {"label": "Fecha lista", "sort": "fecha_lista"},
+    {"label": "Fecha entrega", "sort": "fecha_entrega"},
+    {"label": "Total", "sort": "total"},
+    {"label": "Estado", "sort": "estado"},
+    "Detalles"
+], request.args.get('orden'), request.args.get('dir')) %}
 
 {% for p in pedidos %}
   {% if p.fecha_entrega %}
@@ -121,7 +127,9 @@
       "id_cliente":   cliente.id_cliente,
       "id_negocio":   request.args.get('id_negocio'),
       "fecha_inicio": request.args.get('fecha_inicio'),
-      "fecha_fin":    request.args.get('fecha_fin')
+      "fecha_fin":    request.args.get('fecha_fin'),
+      "orden":        request.args.get('orden'),
+      "dir":          request.args.get('dir')
     }
 ) }}
 

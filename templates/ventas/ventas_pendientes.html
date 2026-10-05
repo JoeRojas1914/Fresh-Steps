@@ -11,6 +11,8 @@
     {{ alerts(get_flashed_messages(with_categories=true)) }}
 
     <form method="GET" action="{{ url_for('ventas.ventas_pendientes') }}">
+    <input type="hidden" name="orden" value="{{ orden or '' }}">
+    <input type="hidden" name="dir" value="{{ direccion or '' }}">
     <div class="filtro-box">
         <div class="filtro-row">
             <div class="filtro-item filtro-item--max280">

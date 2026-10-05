@@ -13,10 +13,14 @@
 } %}
 
 {% call table([
-    "Recibo", "Negocio", "Cliente", "Teléfono",
-    "Fecha recibo", "Fecha estimada", "Fecha lista",
-    "Fecha entrega", "Total", "Estado", "Detalles"
-]) %}
+    {"label": "Recibo", "sort": "id"}, {"label": "Negocio", "sort": "negocio"},
+    {"label": "Cliente", "sort": "cliente"}, "Teléfono",
+    {"label": "Fecha recibo", "sort": "fecha_recibo"},
+    {"label": "Fecha estimada", "sort": "fecha_estimada"},
+    {"label": "Fecha lista", "sort": "fecha_lista"},
+    {"label": "Fecha entrega", "sort": "fecha_entrega"},
+    {"label": "Total", "sort": "total"}, {"label": "Estado", "sort": "estado"}, "Detalles"
+], orden, direccion) %}
 
 {% for v in ventas %}
 <tr>
@@ -136,6 +140,8 @@
         "tipo_fecha":   tipo_fecha,
         "q":            q,
         "estado":       estado,
-        "eliminadas":   request.args.get('eliminadas')
+        "eliminadas":   request.args.get('eliminadas'),
+        "orden":        orden,
+        "dir":          direccion
     }
 ) }}

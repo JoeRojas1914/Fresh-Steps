@@ -1,5 +1,5 @@
 from db import get_db
-from utils import build_where, registrar_historial as _registrar_historial
+from utils import build_where, construir_order_by, registrar_historial as _registrar_historial
 
 
 def crear_cliente(nombre, apellido, correo, telefono, direccion, id_usuario):
@@ -172,7 +172,19 @@ def restaurar_cliente(id_cliente, id_usuario):
         registrar_historial(cursor, id_cliente, "RESTAURADO", id_usuario, antes, None)
 
 
-def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False):
+COLUMNAS_ORDEN_CLIENTES = {
+    "nombre":         "CONCAT(nombre, ' ', apellido)",
+    "telefono":       "telefono",
+    "direccion":      "direccion",
+    "pedidos":        "(SELECT COUNT(*) FROM venta vp"
+                      " WHERE vp.id_cliente = cliente.id_cliente AND vp.eliminado = 0)",
+    "activo":         "activo",
+    "fecha_registro": "fecha_registro",
+}
+
+
+def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False,
+                     orden=None, direccion=None):
     q_like = f"%{q}%" if q else None
     where, params = build_where([
         ("activo = %s", None if incluir_eliminados else 1),
@@ -181,10 +193,13 @@ def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False):
     params.extend([limit, offset])
     with get_db() as (_, cursor):
         cursor.execute(f"""
-            SELECT id_cliente, nombre, apellido, telefono, correo, direccion, activo
+            SELECT id_cliente, nombre, apellido, telefono, correo, direccion, activo,
+                   fecha_registro
             FROM cliente
             {where}
-            ORDER BY nombre ASC, apellido ASC LIMIT %s OFFSET %s
+            {construir_order_by(orden, direccion, "nombre ASC, apellido ASC",
+                                COLUMNAS_ORDEN_CLIENTES, "id_cliente")}
+            LIMIT %s OFFSET %s
         """, params)
         return cursor.fetchall()
 

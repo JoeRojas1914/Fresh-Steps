@@ -36,12 +36,15 @@ def _paginar_ventas(
     id_venta: str | None,
     pagina: int,
     q: str | None = None,
+    orden: str | None = None,
+    direccion: str | None = None,
 ) -> tuple[list, int, int]:
     total_registros          = contar_fn(id_negocio, id_venta, q)
     offset, total_paginas    = calcular_paginacion(total_registros, pagina, POR_PAGINA_VENTAS_ACTIVAS)
     ventas = obtener_fn(
         id_negocio, id_venta=id_venta, q=q,
         limit=POR_PAGINA_VENTAS_ACTIVAS, offset=offset,
+        orden=orden, direccion=direccion,
     )
     return ventas, total_registros, total_paginas
 
@@ -98,10 +101,13 @@ def listar_ventas_listas_service(
     pagina: int = 1,
     id_venta: str | None = None,
     q: str | None = None,
+    orden: str | None = None,
+    direccion: str | None = None,
 ) -> dict:
     ventas, total_registros, total_paginas = _paginar_ventas(
         contar_entregas_listas, obtener_ventas_listas,
         id_negocio, id_venta, pagina, q=q,
+        orden=orden, direccion=direccion,
     )
     _enriquecer_ventas(ventas, con_pagos=True)
     return {
@@ -114,6 +120,8 @@ def listar_ventas_listas_service(
         "pagina":          pagina,
         "total_paginas":   total_paginas,
         "total_registros": total_registros,
+        "orden":           orden,
+        "direccion":       direccion,
     }
 
 
@@ -122,10 +130,13 @@ def listar_entregas_pendientes_service(
     pagina: int = 1,
     id_venta: str | None = None,
     q: str | None = None,
+    orden: str | None = None,
+    direccion: str | None = None,
 ) -> dict:
     ventas, total_registros, total_paginas = _paginar_ventas(
         contar_entregas_pendientes, obtener_entregas_pendientes,
         id_negocio, id_venta, pagina, q=q,
+        orden=orden, direccion=direccion,
     )
     _enriquecer_ventas(ventas)
     return {
@@ -138,6 +149,8 @@ def listar_entregas_pendientes_service(
         "pagina":          pagina,
         "total_paginas":   total_paginas,
         "total_registros": total_registros,
+        "orden":           orden,
+        "direccion":       direccion,
     }
 
 
@@ -367,6 +380,8 @@ def historial_ventas_service(
     id_venta: int | None = None,
     estado: str | None = None,
     tipo_fecha: str = "fecha_recibo",
+    orden: str | None = None,
+    direccion: str | None = None,
 ) -> dict:
     total_registros       = contar_historial_ventas(
         id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas,
@@ -379,6 +394,7 @@ def historial_ventas_service(
         limit=POR_PAGINA_HISTORIAL, offset=offset,
         mostrar_eliminadas=mostrar_eliminadas, q=q, id_venta=id_venta,
         estado=estado, tipo_fecha=tipo_fecha,
+        orden=orden, direccion=direccion,
     )
     negocios = obtener_negocios()
 
@@ -399,6 +415,8 @@ def historial_ventas_service(
         "id_venta":           id_venta,
         "estado":             estado,
         "tipo_fecha":         tipo_fecha,
+        "orden":              orden,
+        "direccion":          direccion,
     }
 
 

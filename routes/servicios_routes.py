@@ -41,7 +41,9 @@ def servicios():
         q=q,
         pagina=pagina,
         por_pagina=10,
-        incluir_eliminados=incluir_eliminados 
+        incluir_eliminados=incluir_eliminados,
+        orden=request.args.get("orden") or None,
+        direccion=request.args.get("dir") or None,
     )
 
     negocios = obtener_negocios()

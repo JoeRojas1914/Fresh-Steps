@@ -35,7 +35,11 @@ def clientes():
     q = request.args.get("q", "")
     pagina = request.args.get("pagina", 1, type=int)
     incluir_eliminados = request.args.get("eliminados") == "1"
-    data = listar_clientes_service(q=q, pagina=pagina, incluir_eliminados=incluir_eliminados)
+    data = listar_clientes_service(
+        q=q, pagina=pagina, incluir_eliminados=incluir_eliminados,
+        orden=request.args.get("orden") or None,
+        direccion=request.args.get("dir") or None,
+    )
     ctx = dict(
         clientes=data["clientes"], q=q, pagina=pagina,
         total_paginas=data["total_paginas"],

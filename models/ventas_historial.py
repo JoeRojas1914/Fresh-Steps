@@ -1,5 +1,18 @@
 from db import get_db
-from utils import registrar_historial as _registrar_historial
+from utils import (
+    registrar_historial as _registrar_historial,
+    construir_order_by,
+    COLUMNAS_ORDEN_VENTAS,
+)
+
+# Estado en orden de flujo: pendiente → lista → entregada → eliminada
+# (misma precedencia que _enriquecer_ventas en services/ventas_service.py)
+COLUMNAS_ORDEN_HISTORIAL = {
+    **COLUMNAS_ORDEN_VENTAS,
+    "estado": "CASE WHEN v.eliminado = 1 THEN 3"
+              " WHEN v.fecha_entrega IS NOT NULL THEN 2"
+              " WHEN v.fecha_lista IS NOT NULL THEN 1 ELSE 0 END",
+}
 
 _COLS_FECHA_HISTORIAL = frozenset({"fecha_recibo", "fecha_lista", "fecha_entrega"})
 
@@ -88,6 +101,8 @@ def obtener_historial_ventas(
     id_venta=None,
     estado=None,
     tipo_fecha="fecha_recibo",
+    orden=None,
+    direccion=None,
 ):
     col = tipo_fecha if tipo_fecha in _COLS_FECHA_HISTORIAL else "fecha_recibo"
     with get_db() as (_, cursor):
@@ -138,7 +153,9 @@ def obtener_historial_ventas(
             sql += " AND v.id_venta = %s"
             params.append(id_venta)
 
-        sql += " GROUP BY v.id_venta ORDER BY v.id_venta DESC LIMIT %s OFFSET %s"
+        sql += " GROUP BY v.id_venta"
+        sql += construir_order_by(orden, direccion, "v.id_venta DESC", COLUMNAS_ORDEN_HISTORIAL)
+        sql += " LIMIT %s OFFSET %s"
         params.extend([limit, offset])
 
         cursor.execute(sql, params)

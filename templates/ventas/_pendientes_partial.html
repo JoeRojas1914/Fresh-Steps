@@ -7,18 +7,18 @@
 
 <div id="tabla-ventas">
     {% call table([
-    "Recibo",
-    "Negocio",
-    "Cliente",
+    {"label": "Recibo", "sort": "id"},
+    {"label": "Negocio", "sort": "negocio"},
+    {"label": "Cliente", "sort": "cliente"},
     "Teléfono",
-    "Fecha Recibo",
-    "Fecha estimada",
-    "Total",
+    {"label": "Fecha Recibo", "sort": "fecha_recibo"},
+    {"label": "Fecha estimada", "sort": "fecha_estimada"},
+    {"label": "Total", "sort": "total"},
     "Prepago",
     "Por cobrar",
     "Detalles",
     "Acción"
-    ]) %}
+    ], orden, direccion) %}
 
     {% set meses = {
         1:'ene', 2:'feb', 3:'mar', 4:'abr',
@@ -136,4 +136,4 @@
 </div>
 
 {{ pagination(pagina, total_paginas, "ventas.ventas_pendientes",
-    {"id_negocio": id_negocio, "id_venta": id_venta, "q": q}) }}
+    {"id_negocio": id_negocio, "id_venta": id_venta, "q": q, "orden": orden, "dir": direccion}) }}

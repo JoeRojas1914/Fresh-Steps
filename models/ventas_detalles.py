@@ -1,4 +1,12 @@
 from db import get_db
+from utils import construir_order_by, COLUMNAS_ORDEN_VENTAS
+
+# Sin "cliente": la consulta de pedidos de un cliente no hace JOIN con cliente
+COLUMNAS_ORDEN_PEDIDOS_CLIENTE = {
+    **{k: v for k, v in COLUMNAS_ORDEN_VENTAS.items() if k != "cliente"},
+    "estado": "CASE WHEN v.fecha_entrega IS NOT NULL THEN 2"
+              " WHEN v.fecha_lista IS NOT NULL THEN 1 ELSE 0 END",
+}
 
 
 def obtener_venta(id_venta):
@@ -103,7 +111,8 @@ def obtener_detalles_venta(ids_venta):
         return detalles_por_venta
 
 
-def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, offset=0):
+def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, offset=0,
+                          orden=None, direccion=None):
     with get_db() as (_, cursor):
         sql = """
             SELECT
@@ -135,7 +144,7 @@ def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, of
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
             sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
             params.extend([like, like, like])
-        sql += " ORDER BY v.id_negocio ASC, v.id_venta ASC"
+        sql += construir_order_by(orden, direccion, "v.id_negocio ASC, v.id_venta ASC")
         if limit is not None:
             sql += " LIMIT %s OFFSET %s"
             params.extend([limit, offset])
@@ -143,7 +152,8 @@ def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, of
         return cursor.fetchall()
 
 
-def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=None, offset=0):
+def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=None, offset=0,
+                                orden=None, direccion=None):
     with get_db() as (_, cursor):
         sql = """
             SELECT
@@ -178,7 +188,8 @@ def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=No
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
             sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
             params.extend([like, like, like])
-        sql += " GROUP BY v.id_venta ORDER BY v.fecha_estimada ASC, v.id_negocio ASC, v.id_venta ASC"
+        sql += " GROUP BY v.id_venta"
+        sql += construir_order_by(orden, direccion, "v.fecha_estimada ASC, v.id_negocio ASC, v.id_venta ASC")
         if limit is not None:
             sql += " LIMIT %s OFFSET %s"
             params.extend([limit, offset])
@@ -240,7 +251,8 @@ def contar_ventas_cliente(id_cliente, id_negocio=None, fecha_inicio=None, fecha_
         return cursor.fetchone()["total"]
 
 
-def obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limit, offset):
+def obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limit, offset,
+                           orden=None, direccion=None):
     with get_db() as (_, cursor):
         sql = """
             SELECT v.id_venta, v.fecha_recibo, v.fecha_estimada,
@@ -262,7 +274,9 @@ def obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limi
         if fecha_fin:
             sql += " AND v.fecha_recibo <= %s"
             params.append(fecha_fin)
-        sql += " ORDER BY v.fecha_recibo DESC LIMIT %s OFFSET %s"
+        sql += construir_order_by(orden, direccion, "v.fecha_recibo DESC",
+                                  COLUMNAS_ORDEN_PEDIDOS_CLIENTE)
+        sql += " LIMIT %s OFFSET %s"
         params.extend([limit, offset])
         cursor.execute(sql, params)
         return cursor.fetchall()

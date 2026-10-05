@@ -1,5 +1,5 @@
 from db import get_db
-from utils import build_where, registrar_historial as _registrar_historial
+from utils import build_where, construir_order_by, registrar_historial as _registrar_historial
 
 
 def existe_servicio_activo(id_negocio, nombre, excluir_id=None):
@@ -82,7 +82,16 @@ def contar_servicios(id_negocio=None, q=None, incluir_eliminados=False):
         return cursor.fetchone()["total"]
 
 
-def obtener_servicios(id_negocio=None, q=None, incluir_eliminados=False, limit=10, offset=0):
+COLUMNAS_ORDEN_SERVICIOS = {
+    "negocio": "n.nombre",
+    "nombre":  "s.nombre",
+    "precio":  "s.precio",
+    "activo":  "s.activo",
+}
+
+
+def obtener_servicios(id_negocio=None, q=None, incluir_eliminados=False, limit=10, offset=0,
+                      orden=None, direccion=None):
     where, params = build_where([
         ("s.id_negocio = %s", id_negocio),
         ("s.nombre LIKE %s", f"%{q}%" if q else None),
@@ -94,8 +103,10 @@ def obtener_servicios(id_negocio=None, q=None, incluir_eliminados=False, limit=1
             "SELECT s.id_servicio, s.nombre, s.precio, s.id_negocio, s.activo, n.nombre AS negocio"
             " FROM servicio s"
             " JOIN negocio n ON n.id_negocio = s.id_negocio "
-            + where +
-            " ORDER BY s.nombre ASC LIMIT %s OFFSET %s"
+            + where
+            + construir_order_by(orden, direccion, "s.nombre ASC",
+                                 COLUMNAS_ORDEN_SERVICIOS, "s.id_servicio")
+            + " LIMIT %s OFFSET %s"
         )
 
         cursor.execute(sql, params)

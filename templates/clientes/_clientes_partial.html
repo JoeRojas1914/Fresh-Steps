@@ -3,13 +3,14 @@
 {% from "components/empty_state.html" import fila_vacia %}
 
 {% call table([
-    "Nombre",
-    "Teléfono",
-    "Cód. Postal",
-    "Pedidos",
-    "Estado",
+    {"label": "Nombre", "sort": "nombre"},
+    {"label": "Teléfono", "sort": "telefono"},
+    {"label": "Cód. Postal", "sort": "direccion"},
+    {"label": "Pedidos", "sort": "pedidos"},
+    {"label": "Fecha de registro", "sort": "fecha_registro"},
+    {"label": "Estado", "sort": "activo"},
     "Acciones"
-]) %}
+], request.args.get('orden'), request.args.get('dir')) %}
 
     {% for c in clientes %}
     <tr
@@ -30,6 +31,8 @@
         </td>
 
         <td>{{ c.total_pedidos }}</td>
+
+        <td>{{ c.fecha_registro.strftime('%d/%m/%Y') if c.fecha_registro else '—' }}</td>
 
         <td>
             {% if c.activo %}
@@ -82,7 +85,7 @@
         </td>
     </tr>
     {% else %}
-    {% call fila_vacia(6) %}No se encontraron clientes con esos filtros.{% endcall %}
+    {% call fila_vacia(7) %}No se encontraron clientes con esos filtros.{% endcall %}
     {% endfor %}
 
 {% endcall %}
@@ -92,6 +95,9 @@
     total_paginas,
     'clientes.clientes',
     {
-      "eliminados": request.args.get('eliminados')
+      "eliminados": request.args.get('eliminados'),
+      "q":          request.args.get('q'),
+      "orden":        request.args.get('orden'),
+      "dir":          request.args.get('dir')
     }
 ) }}

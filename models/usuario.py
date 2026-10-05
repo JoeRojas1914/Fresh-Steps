@@ -1,8 +1,20 @@
 import json
 from db import get_db
+from utils import construir_order_by
+
+COLUMNAS_ORDEN_USUARIOS = {
+    "usuario":   "usuario",
+    "nombre":    "CONCAT(COALESCE(nombre, ''), ' ', COALESCE(apellido, ''))",
+    "telefono":  "telefono",
+    "correo":    "correo",
+    "rol":       "rol",
+    "activo":    "activo",
+    "creado_en": "creado_en",
+}
 
 
-def obtener_usuarios(q=None, rol=None, activo=None, pagina=1, por_pagina=20):
+def obtener_usuarios(q=None, rol=None, activo=None, pagina=1, por_pagina=20,
+                     orden=None, direccion=None):
     with get_db() as (_, cursor):
         where = "FROM usuario WHERE 1=1"
         params = []
@@ -29,7 +41,9 @@ def obtener_usuarios(q=None, rol=None, activo=None, pagina=1, por_pagina=20):
             f"""SELECT id_usuario, usuario, nombre, apellido,
                        telefono, correo, cp, rol, activo, creado_en
                 {where}
-                ORDER BY CASE WHEN rol = 'admin' THEN 0 ELSE 1 END, creado_en DESC
+                {construir_order_by(orden, direccion,
+                                    "CASE WHEN rol = 'admin' THEN 0 ELSE 1 END, creado_en DESC",
+                                    COLUMNAS_ORDEN_USUARIOS, "id_usuario")}
                 LIMIT %s OFFSET %s""",
             params + [por_pagina, offset],
         )

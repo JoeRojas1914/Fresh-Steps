@@ -136,7 +136,11 @@ def ventas_listas():
     pagina        = request.args.get("pagina", 1, type=int)
     q             = request.args.get("q", "").strip() or None
 
-    data = listar_ventas_listas_service(id_negocio, pagina, id_venta, q=q)
+    orden         = request.args.get("orden") or None
+    direccion     = request.args.get("dir") or None
+
+    data = listar_ventas_listas_service(id_negocio, pagina, id_venta, q=q,
+                                        orden=orden, direccion=direccion)
 
     if request.args.get('partial') == '1':
         return render_template("ventas/_listas_partial.html", **data)
@@ -152,7 +156,11 @@ def ventas_pendientes():
         pagina        = request.args.get("pagina", 1, type=int)
         q             = request.args.get("q", "").strip() or None
 
-        data = listar_entregas_pendientes_service(id_negocio, pagina, id_venta, q=q)
+        orden         = request.args.get("orden") or None
+        direccion     = request.args.get("dir") or None
+
+        data = listar_entregas_pendientes_service(id_negocio, pagina, id_venta, q=q,
+                                                  orden=orden, direccion=direccion)
 
         if request.args.get('partial') == '1':
             return render_template("ventas/_pendientes_partial.html", **data)
@@ -247,10 +255,14 @@ def historial_ventas():
     if tipo_fecha not in _TIPOS_FECHA_HISTORIAL:
         tipo_fecha = "fecha_recibo"
 
+    orden        = request.args.get("orden")        or None
+    direccion    = request.args.get("dir")          or None
+
     mostrar_eliminadas = request.args.get('eliminadas') == '1'
     data = historial_ventas_service(
         id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas,
         q=q, id_venta=id_venta, estado=estado, tipo_fecha=tipo_fecha,
+        orden=orden, direccion=direccion,
     )
 
     if request.args.get('partial') == '1':

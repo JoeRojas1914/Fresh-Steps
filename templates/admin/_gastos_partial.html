@@ -4,17 +4,17 @@
 {% from "components/empty_state.html" import fila_vacia %}
 
 {% call table([
-    "Negocio",
-    "Descripción",
-    "Categoría",
-    "Proveedor",
-    "Total",
-    "Comprobante",
-    "Pago",
-    "Fecha de registro",
-    "Estado",
+    {"label": "Negocio", "sort": "negocio"},
+    {"label": "Descripción", "sort": "descripcion"},
+    {"label": "Categoría", "sort": "categoria"},
+    {"label": "Proveedor", "sort": "proveedor"},
+    {"label": "Total", "sort": "total"},
+    {"label": "Comprobante", "sort": "tipo_comprobante"},
+    {"label": "Pago", "sort": "tipo_pago"},
+    {"label": "Fecha de registro", "sort": "fecha_registro"},
+    {"label": "Estado", "sort": "activo"},
     "Acciones"
-]) %}
+], request.args.get('orden'), request.args.get('dir')) %}
 
     {% for g in gastos %}
     <tr>
@@ -108,6 +108,8 @@
       "id_categoria": request.args.get('id_categoria'),
       "fecha_inicio": request.args.get('fecha_inicio'),
       "fecha_fin":    request.args.get('fecha_fin'),
-      "eliminados":   request.args.get('eliminados')
+      "eliminados":   request.args.get('eliminados'),
+      "orden":        request.args.get('orden'),
+      "dir":          request.args.get('dir')
     }
 ) }}

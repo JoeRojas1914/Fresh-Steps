@@ -44,7 +44,9 @@ def gastos():
     data = listar_gastos(
         id_negocio=id_negocio, id_categoria=id_categoria,
         fecha_inicio=fecha_inicio, fecha_fin=fecha_fin,
-        pagina=pagina, incluir_eliminados=incluir_eliminados
+        pagina=pagina, incluir_eliminados=incluir_eliminados,
+        orden=request.args.get("orden") or None,
+        direccion=request.args.get("dir") or None,
     )
     ctx = dict(
         gastos=data["gastos"], negocios=obtener_negocios(),

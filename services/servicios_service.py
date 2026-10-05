@@ -22,6 +22,8 @@ def listar_servicios(
     pagina: int = 1,
     por_pagina: int = 10,
     incluir_eliminados: bool = False,
+    orden: str | None = None,
+    direccion: str | None = None,
 ) -> dict:
     offset = (pagina - 1) * por_pagina
 
@@ -38,7 +40,9 @@ def listar_servicios(
         q=q,
         incluir_eliminados=incluir_eliminados,
         limit=por_pagina,
-        offset=offset
+        offset=offset,
+        orden=orden,
+        direccion=direccion,
     )
 
     return {

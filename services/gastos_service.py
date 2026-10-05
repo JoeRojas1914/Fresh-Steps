@@ -23,6 +23,8 @@ def listar_gastos(
     pagina: int = 1,
     por_pagina: int = 10,
     incluir_eliminados: bool = False,
+    orden: str | None = None,
+    direccion: str | None = None,
 ) -> dict:
     total = contar_gastos(
         id_negocio=id_negocio,
@@ -40,7 +42,9 @@ def listar_gastos(
         fecha_fin=fecha_fin,
         limit=por_pagina,
         offset=offset,
-        incluir_eliminados=incluir_eliminados
+        incluir_eliminados=incluir_eliminados,
+        orden=orden,
+        direccion=direccion,
     )
 
     return {
