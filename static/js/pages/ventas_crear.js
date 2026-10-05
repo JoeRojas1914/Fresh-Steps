@@ -5,6 +5,7 @@ import { buscarClientes, crearCliente } from './ventas_clientes.js';
 import { seleccionarNegocio, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado } from './ventas_servicios.js';
 import { agregarArticulo, cerrarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
 import { validarFormulario, togglePrepago, toggleDescuento, actualizarTotal, bloquearFechaMinima, actualizarFechaEstimadaCompleta } from './ventas_validacion.js';
+import { initSelectorHora, ajustarHorasPorFecha } from '../components/selector_hora.js';
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -111,7 +112,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.getElementById("toggle-descuento").addEventListener("change", toggleDescuento);
     document.getElementById("id_negocio").addEventListener("change", seleccionarNegocio);
-    document.getElementById("fecha_estimada_fecha").addEventListener("change", () => {
+    const selHora = document.getElementById("fecha_estimada_hora");
+    initSelectorHora(selHora);
+    document.getElementById("fecha_estimada_fecha").addEventListener("change", e => {
+        ajustarHorasPorFecha(selHora, e.target.value);
         actualizarFechaEstimadaCompleta();
         validarFormulario();
     });

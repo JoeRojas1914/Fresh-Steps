@@ -141,7 +141,8 @@
                 </div>
                 <div class="form-group mt-10">
                     <label class="form-label" for="fecha_estimada_hora">Hora</label>
-                    <input type="time" id="fecha_estimada_hora" aria-describedby="error-fecha">
+                    {# Opciones generadas por components/selector_hora.js #}
+                    <select id="fecha_estimada_hora" class="select--full" aria-describedby="error-fecha"></select>
                 </div>
                 <input type="hidden" name="fecha_estimada" id="fecha_estimada">
                 <div id="error-fecha" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">

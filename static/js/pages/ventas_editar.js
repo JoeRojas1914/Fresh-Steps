@@ -4,6 +4,7 @@ import { abrirModal, cerrarModal } from '../components/modal.js';
 import { initNavigationGuard } from '../base/navigation_guard.js';
 import { cargarServicios, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado } from './ventas_servicios.js';
 import { agregarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
+import { initSelectorHora, ajustarHorasPorFecha } from '../components/selector_hora.js';
 
 
 function calcularDeltaNuevos() {
@@ -585,6 +586,11 @@ function _motivosBloqueoGuardar(totalActual, totalPagado) {
         motivos.push("Sin cambios que guardar");
         return motivos;
     }
+    // Al cambiar a sábado la hora puede limpiarse si pasa del cierre
+    if (!document.getElementById("fecha_estimada_fecha_vis").value
+        || !document.getElementById("fecha_estimada_hora_vis").value) {
+        motivos.push("Definir fecha y hora de entrega");
+    }
     const fmt = v => "$" + v.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const nuevoTotal = totalActual + calcularDeltaExistentes() + calcularDeltaNuevos();
     if (nuevoTotal < totalPagado) {
@@ -602,6 +608,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const idVenta     = form.dataset.ventaId;
     const totalActual = parseFloat(form.dataset.totalActual || 0);
     const totalPagado = parseFloat(form.dataset.totalPagado || 0);
+
+    // Llenar el select de hora antes de cualquier hayCambios(), que lee su valor
+    const selHora = document.getElementById("fecha_estimada_hora_vis");
+    initSelectorHora(selHora, selHora.dataset.valor);
 
     ventaState.negocioSeleccionado = document.getElementById("id_negocio").value;
     await cargarServicios();
@@ -647,8 +657,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.getElementById("fecha_estimada_hora_vis").value;
         actualizarUI();
     };
-    document.getElementById("fecha_estimada_fecha_vis").addEventListener("change", sincFecha);
-    document.getElementById("fecha_estimada_hora_vis").addEventListener("change", sincFecha);
+    document.getElementById("fecha_estimada_fecha_vis").addEventListener("change", e => {
+        ajustarHorasPorFecha(selHora, e.target.value);
+        sincFecha();
+    });
+    selHora.addEventListener("change", sincFecha);
 
     // ── Cliente ──
     const inpCliente = document.getElementById("id_cliente_nuevo");

@@ -291,8 +291,9 @@
                 </div>
                 <div class="form-group mt-10">
                     <label class="form-label" for="fecha_estimada_hora_vis">Hora</label>
-                    <input type="time" id="fecha_estimada_hora_vis"
-                           value="{{ venta.fecha_estimada.strftime('%H:%M') if venta.fecha_estimada else '' }}">
+                    {# Opciones generadas por components/selector_hora.js #}
+                    <select id="fecha_estimada_hora_vis" class="select--full"
+                            data-valor="{{ venta.fecha_estimada.strftime('%H:%M') if venta.fecha_estimada else '' }}"></select>
                 </div>
                 <input type="hidden" name="fecha_estimada_fecha" id="fecha_estimada_fecha_hidden"
                        value="{{ venta.fecha_estimada.strftime('%Y-%m-%d') if venta.fecha_estimada else '' }}">
