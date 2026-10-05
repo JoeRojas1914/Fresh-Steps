@@ -51,7 +51,7 @@ from routes.ventas_routes import ventas_bp
 from routes.pagos_routes import pagos_bp
 from middleware.auth_middleware import init_auth_middleware
 from models.ventas import contar_entregas_resumen
-from models.estadisticas_ventas import contar_ventas_por_dia_rango, obtener_total_ingresos, contar_unidades_hoy
+from models.estadisticas_ventas import contar_ventas_por_dia_rango, obtener_total_ingresos, contar_unidades_hoy, contar_ventas_entregadas_hoy
 from models.estadisticas_gastos import obtener_total_gastos
 
 
@@ -139,6 +139,7 @@ def _kpis_index(negocio: str, es_admin: bool) -> dict:
 
     unidades_recibidas_hoy  = contar_unidades_hoy("fecha_recibo",  negocio)
     unidades_entregadas_hoy = contar_unidades_hoy("fecha_entrega", negocio)
+    ventas_entregadas_hoy   = contar_ventas_entregadas_hoy(negocio)
 
     ingresos_hoy = None
     kpis_mes     = None
@@ -157,6 +158,7 @@ def _kpis_index(negocio: str, es_admin: bool) -> dict:
         "chart_data":              [x["total"]  for x in ventas_semana],
         "unidades_recibidas_hoy":  unidades_recibidas_hoy,
         "unidades_entregadas_hoy": unidades_entregadas_hoy,
+        "ventas_entregadas_hoy":   ventas_entregadas_hoy,
         "ingresos_hoy":            ingresos_hoy,
         "kpis_mes":                kpis_mes,
     }

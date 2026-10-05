@@ -654,3 +654,19 @@ def contar_unidades_hoy(col: str = "fecha_recibo", id_negocio: str = "all") -> i
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
         return int(cursor.fetchone()["total"] or 0)
+
+
+def contar_ventas_entregadas_hoy(id_negocio: str = "all") -> int:
+    sql = """
+        SELECT COUNT(*) AS total
+        FROM venta v
+        WHERE DATE(v.fecha_entrega) = CURDATE()
+          AND v.eliminado = 0
+    """
+    params = []
+    if id_negocio != "all":
+        sql += " AND v.id_negocio = %s"
+        params.append(id_negocio)
+    with get_db() as (_, cursor):
+        cursor.execute(sql, params)
+        return int(cursor.fetchone()["total"] or 0)
