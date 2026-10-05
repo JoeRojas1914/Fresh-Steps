@@ -214,6 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
     togglePrepago();
     toggleDescuento();
     validarFormulario();
+    seleccionarNegocio();   // Fresh Steps viene seleccionado por default
 
     initNavigationGuard(() => {
         if (ventaState.enProceso) return false;
