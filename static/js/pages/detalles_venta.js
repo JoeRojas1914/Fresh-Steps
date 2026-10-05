@@ -1,6 +1,14 @@
 import { escapeHtml } from '../base/helpers.js';
 
-const detallesCargados = {};
+function _caracteristicasHTML(datos) {
+    const partes = [];
+    const colores = [datos.color_base, datos.color_secundario].filter(Boolean).map(escapeHtml).join(" / ");
+    if (colores)              partes.push(`Color: <b>${colores}</b>`);
+    if (datos.color_agujetas) partes.push(`Agujetas: <b>${escapeHtml(datos.color_agujetas)}</b>`);
+    if (datos.material)       partes.push(`Material: <b>${escapeHtml(datos.material)}</b>`);
+    if (!partes.length) return "";
+    return `<div class="detalle-caracteristicas">${partes.join(" · ")}</div>`;
+}
 
 document.addEventListener("click", function (e) {
     const btn = e.target.closest(".btn-detalles[data-id]");
@@ -37,7 +45,8 @@ export function toggleDetalles(idVenta, btn) {
     fila.style.display = "table-row";
     if (chevron) chevron.style.transform = "rotate(180deg)";
 
-    if (detallesCargados[idVenta]) return;
+    // El flag vive en el elemento: si la tabla se recarga por AJAX, se vuelve a pedir
+    if (lista.dataset.cargado) return;
 
     lista.innerHTML = `<li class="dim-soft">Cargando...</li>`;
 
@@ -45,7 +54,7 @@ export function toggleDetalles(idVenta, btn) {
         .then(r => r.json())
         .then(detalles => {
 
-            detallesCargados[idVenta] = true;
+            lista.dataset.cargado = "1";
 
             if (!detalles.length) {
                 lista.innerHTML = `<li>Sin detalles</li>`;
@@ -62,6 +71,7 @@ export function toggleDetalles(idVenta, btn) {
                             <i data-lucide="footprints" width="14" height="14"></i>
                             ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
                         </div>
+                        ${_caracteristicasHTML(item.datos)}
                     `;
 
                     html += item.servicios.map(s => `
@@ -80,6 +90,7 @@ export function toggleDetalles(idVenta, btn) {
                             <i data-lucide="scissors" width="14" height="14"></i>
                             ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
                         </div>
+                        ${_caracteristicasHTML(item.datos)}
                         <div>
                             Cantidad: <b>${escapeHtml(item.datos.cantidad)}</b>
                         </div>

@@ -161,6 +161,7 @@
 .detalle-zapato  { font-weight: 600; color: var(--color-navy); }
 .detalle-servicio { font-size: 14px; font-weight: 600; color: #374151; }
 .detalle-precio  { margin-left: 10px; font-weight: 700; color: #22c55e; }
+.detalle-caracteristicas { font-size: 13px; color: #64748b; margin: 2px 0 6px; }
 
 .detalle-color {
   display: inline-block;
