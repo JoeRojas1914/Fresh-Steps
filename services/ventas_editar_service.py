@@ -155,6 +155,11 @@ def editar_venta_service(id_venta: int, form, id_usuario: int) -> dict:
     fecha_hora  = (form.get("fecha_estimada_hora") or "").strip()
     fecha_estimada = f"{fecha_fecha} {fecha_hora}:00" if (fecha_fecha and fecha_hora) else None
 
+    id_cliente_raw   = (form.get("id_cliente_nuevo") or "").strip()
+    id_cliente_nuevo = int(id_cliente_raw) if id_cliente_raw.isdigit() else None
+    if id_cliente_nuevo == venta["id_cliente"]:
+        id_cliente_nuevo = None
+
     nuevos_articulos = _parsear_articulos_form(form, tipo_negocio)
     if nuevos_articulos:
         _validar_reglas_negocio(tipo_negocio, nuevos_articulos)
@@ -171,6 +176,7 @@ def editar_venta_service(id_venta: int, form, id_usuario: int) -> dict:
         and not eliminaciones_servicio
         and not ediciones_articulo
         and not fecha_estimada
+        and not id_cliente_nuevo
     )
     if sin_cambios:
         raise ValueError("No hay cambios para guardar.")
@@ -187,4 +193,5 @@ def editar_venta_service(id_venta: int, form, id_usuario: int) -> dict:
         eliminaciones_servicio=eliminaciones_servicio,
         ediciones_articulo=ediciones_articulo,
         id_usuario=id_usuario,
+        id_cliente_nuevo=id_cliente_nuevo,
     )

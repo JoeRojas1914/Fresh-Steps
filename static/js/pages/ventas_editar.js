@@ -116,9 +116,98 @@ function calcularDeltaExistentes() {
 }
 
 
+/* ─── Cliente ─────────────────────────────────────────────────────────────── */
+
+function _clienteCambiado() {
+    const inp = document.getElementById("id_cliente_nuevo");
+    return !!inp && inp.value !== inp.dataset.original;
+}
+
+function _iniciales(nombre, apellido) {
+    return ((nombre || "")[0] || "").toUpperCase() + ((apellido || "")[0] || "").toUpperCase();
+}
+
+function _mostrarBusquedaCliente(visible) {
+    document.getElementById("cliente-box").style.display = visible ? "none" : "flex";
+    document.getElementById("busqueda-cliente").classList.toggle("d-none", !visible);
+    document.getElementById("lista-clientes").innerHTML = "";
+    if (visible) {
+        const input = document.getElementById("buscar-cliente");
+        input.value = "";
+        input.focus();
+    }
+}
+
+function _seleccionarClienteEdicion(cliente) {
+    const inp = document.getElementById("id_cliente_nuevo");
+    const nombreCompleto = `${cliente.nombre || ""} ${cliente.apellido || ""}`.trim();
+    inp.value          = cliente.id_cliente;
+    inp.dataset.nombre = nombreCompleto;
+
+    document.getElementById("cliente-box-avatar").textContent = _iniciales(cliente.nombre, cliente.apellido);
+    document.getElementById("cliente-seleccionado").innerHTML =
+        `<span class="cliente-nombre-txt">${escapeHtml(nombreCompleto)}</span>`;
+    document.getElementById("cliente-seleccionado-tel").textContent = cliente.telefono || "";
+
+    _mostrarBusquedaCliente(false);
+    document.getElementById("btn-restaurar-cliente").classList.toggle("d-none", !_clienteCambiado());
+    _onClienteCambiado();
+}
+
+// Se asigna en DOMContentLoaded para refrescar total y botón de guardar
+let _onClienteCambiado = () => {};
+let _abortBusquedaCliente = null;
+
+async function _buscarClientesEdicion() {
+    const q     = document.getElementById("buscar-cliente").value.trim();
+    const lista = document.getElementById("lista-clientes");
+    lista.innerHTML = "";
+    if (q.length < 2) return;
+
+    if (_abortBusquedaCliente) _abortBusquedaCliente.abort();
+    _abortBusquedaCliente = new AbortController();
+
+    let clientes;
+    try {
+        const res = await fetch(`/api/clientes?q=${encodeURIComponent(q)}`, { signal: _abortBusquedaCliente.signal });
+        if (!res.ok) throw new Error("Error de red");
+        clientes = await res.json();
+    } catch (err) {
+        if (err.name === "AbortError") return;
+        lista.innerHTML = "<div class='result-item'>Error al buscar clientes.</div>";
+        return;
+    }
+
+    if (clientes.length === 0) {
+        lista.innerHTML = `
+            <div class="no-clientes-found">
+                <i data-lucide="user-x" width="28" height="28"></i>
+                <p>No se encontraron clientes con "<strong>${escapeHtml(q)}</strong>"</p>
+            </div>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+    }
+
+    clientes.forEach(c => {
+        const item     = document.createElement("div");
+        item.className = "result-item";
+        item.innerHTML = `
+            <div class="result-avatar">${escapeHtml(_iniciales(c.nombre, c.apellido))}</div>
+            <div class="result-info">
+                <div class="result-name">${escapeHtml(c.nombre)} ${escapeHtml(c.apellido)}</div>
+                <div class="result-tel">${escapeHtml(c.telefono || "")}</div>
+            </div>`;
+        item.addEventListener("click", () => _seleccionarClienteEdicion(c));
+        lista.appendChild(item);
+    });
+}
+
+
 function hayCambios() {
     const form = document.getElementById("formEditarVenta");
     if (!form) return false;
+
+    if (_clienteCambiado()) return true;
 
     const fechaOriginal  = form.dataset.fechaOriginal || "";
     const [origDate, origHora] = fechaOriginal.split(" ");
@@ -309,7 +398,9 @@ function construirResumen(form, totalActual, totalPagado) {
         if (changed) artsConDetallesEditados.push(idx + 1);
     });
 
-    const sinCambios = !fechaCambiada && numNuevosArts === 0 && numNuevosSrv === 0
+    const clienteCambiado = _clienteCambiado();
+
+    const sinCambios = !clienteCambiado && !fechaCambiada && numNuevosArts === 0 && numNuevosSrv === 0
                      && allEditItems.length === 0 && allDelItems.length === 0
                      && artsConDetallesEditados.length === 0;
     if (sinCambios) return null;
@@ -322,6 +413,12 @@ function construirResumen(form, totalActual, totalPagado) {
         </tr>`;
 
     let filas = "";
+
+    if (clienteCambiado) {
+        const inp = document.getElementById("id_cliente_nuevo");
+        filas += tr("resumen-tr--cliente", "user", "Cliente",
+            `${escapeHtml(inp.dataset.originalNombre || "—")} → ${escapeHtml(inp.dataset.nombre || "—")}`);
+    }
 
     if (fechaCambiada) {
         filas += tr("resumen-tr--fecha", "calendar", "Fecha",
@@ -552,6 +649,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     document.getElementById("fecha_estimada_fecha_vis").addEventListener("change", sincFecha);
     document.getElementById("fecha_estimada_hora_vis").addEventListener("change", sincFecha);
+
+    // ── Cliente ──
+    const inpCliente = document.getElementById("id_cliente_nuevo");
+    const clienteOriginal = {
+        id_cliente: inpCliente.dataset.original,
+        nombre:     inpCliente.dataset.originalFirst,
+        apellido:   inpCliente.dataset.originalLast,
+        telefono:   inpCliente.dataset.originalTel,
+    };
+    document.getElementById("cliente-box-avatar").textContent =
+        _iniciales(clienteOriginal.nombre, clienteOriginal.apellido);
+    _onClienteCambiado = actualizarUI;
+
+    let _timerBusqueda = null;
+    document.getElementById("buscar-cliente").addEventListener("input", () => {
+        clearTimeout(_timerBusqueda);
+        _timerBusqueda = setTimeout(_buscarClientesEdicion, 300);
+    });
+    document.getElementById("btn-cambiar-cliente").addEventListener("click", () => _mostrarBusquedaCliente(true));
+    document.getElementById("btn-cancelar-cliente").addEventListener("click", () => _mostrarBusquedaCliente(false));
+    document.getElementById("btn-restaurar-cliente").addEventListener("click", () => {
+        _seleccionarClienteEdicion(clienteOriginal);
+    });
 
     document.getElementById("btn-agregar-articulo").addEventListener("click", () => {
         agregarArticulo();

@@ -61,6 +61,9 @@ async function verHistorialVenta(idVenta) {
                     };
                     const partes = [];
 
+                    if (d.cliente) {
+                        partes.push(`Cliente: ${escapeHtml(d.cliente.antes)} → ${escapeHtml(d.cliente.despues)}`);
+                    }
                     if (d.fecha_estimada && a.fecha_estimada !== d.fecha_estimada) {
                         partes.push(`Fecha: ${fmtF(a.fecha_estimada)} → ${fmtF(d.fecha_estimada)}`);
                     }

@@ -42,7 +42,11 @@ def obtener_venta_para_editar(id_venta):
                 v.aplica_descuento,
                 v.cantidad_descuento,
                 v.total,
+                v.id_cliente,
                 CONCAT(c.nombre, ' ', c.apellido) AS nombre_cliente,
+                c.nombre   AS cliente_nombre,
+                c.apellido AS cliente_apellido,
+                c.telefono AS telefono_cliente,
                 n.nombre AS negocio_nombre,
                 COALESCE(SUM(p.monto), 0) AS total_pagado
             FROM venta v
@@ -111,15 +115,18 @@ def obtener_articulos_con_servicios(id_venta):
 
 
 def editar_venta(id_venta, fecha_estimada, nuevos_articulos, nuevos_servicios_por_articulo,
-                 ediciones_servicio, eliminaciones_servicio, id_usuario, ediciones_articulo=None):
+                 ediciones_servicio, eliminaciones_servicio, id_usuario, ediciones_articulo=None,
+                 id_cliente_nuevo=None):
     with get_db() as (_, cursor):
         cursor.execute("""
-            SELECT id_negocio, fecha_estimada, total
-            FROM venta
-            WHERE id_venta = %s
-              AND eliminado = 0
-              AND fecha_lista IS NULL
-              AND fecha_entrega IS NULL
+            SELECT v.id_negocio, v.fecha_estimada, v.total, v.id_cliente,
+                   CONCAT(c.nombre, ' ', c.apellido) AS nombre_cliente
+            FROM venta v
+            JOIN cliente c ON c.id_cliente = v.id_cliente
+            WHERE v.id_venta = %s
+              AND v.eliminado = 0
+              AND v.fecha_lista IS NULL
+              AND v.fecha_entrega IS NULL
             FOR UPDATE
         """, (id_venta,))
         venta = cursor.fetchone()
@@ -130,6 +137,27 @@ def editar_venta(id_venta, fecha_estimada, nuevos_articulos, nuevos_servicios_po
             "fecha_estimada": str(venta["fecha_estimada"]),
             "total":          float(venta["total"]),
         }
+
+        cliente_log = None
+        if id_cliente_nuevo and id_cliente_nuevo != venta["id_cliente"]:
+            cursor.execute(
+                "SELECT CONCAT(nombre, ' ', apellido) AS nombre_cliente"
+                " FROM cliente WHERE id_cliente = %s AND activo = 1",
+                (id_cliente_nuevo,),
+            )
+            nuevo = cursor.fetchone()
+            if not nuevo:
+                raise ValueError("El cliente seleccionado no existe o está inactivo.")
+            cursor.execute(
+                "UPDATE venta SET id_cliente = %s WHERE id_venta = %s",
+                (id_cliente_nuevo, id_venta),
+            )
+            datos_antes["id_cliente"] = venta["id_cliente"]
+            cliente_log = {
+                "id_cliente": id_cliente_nuevo,
+                "antes":      venta["nombre_cliente"],
+                "despues":    nuevo["nombre_cliente"],
+            }
 
         cursor.execute(
             "SELECT COALESCE(SUM(monto), 0) AS total_pagado FROM pago_venta WHERE id_venta = %s",
@@ -383,6 +411,8 @@ def editar_venta(id_venta, fecha_estimada, nuevos_articulos, nuevos_servicios_po
             "arts_editados":          arts_editados_count,
             "detalles_arts_editados": detalles_arts_editados,
         }
+        if cliente_log:
+            datos_despues["cliente"] = cliente_log
         registrar_historial_venta(cursor, id_venta, "EDITADO", id_usuario, datos_antes, datos_despues)
 
         return {"total_nuevo": float(total_nuevo)}

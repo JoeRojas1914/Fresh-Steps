@@ -193,6 +193,85 @@ def test_editar_venta_service_edita_articulo(venta_pendiente, usuario_admin):
     assert float(result["total_nuevo"]) == 180.00
 
 
+@pytest.fixture
+def otro_cliente(db_conn, usuario_admin):
+    cursor = db_conn.cursor()
+    cursor.execute(
+        """INSERT INTO cliente (nombre, apellido, telefono, activo, id_usuario)
+           VALUES ('OtroNombre', 'OtroApellido', '5587654321', 1, %s)""",
+        (usuario_admin["id_usuario"],),
+    )
+    db_conn.commit()
+    cid = cursor.lastrowid
+    cursor.close()
+
+    yield {"id_cliente": cid}
+
+    cursor = db_conn.cursor()
+    cursor.execute("DELETE FROM clientes_historial WHERE id_cliente = %s", (cid,))
+    cursor.execute("DELETE FROM cliente           WHERE id_cliente = %s", (cid,))
+    db_conn.commit()
+    cursor.close()
+
+
+def _id_cliente_venta(db_conn, id_venta):
+    db_conn.commit()  # refresca el snapshot de la conexión
+    cursor = db_conn.cursor(dictionary=True)
+    cursor.execute("SELECT id_cliente FROM venta WHERE id_venta = %s", (id_venta,))
+    row = cursor.fetchone()
+    cursor.close()
+    return row["id_cliente"]
+
+
+def test_editar_venta_service_cambia_cliente(venta_pendiente, otro_cliente, cliente_test,
+                                             usuario_admin, db_conn):
+    id_venta = venta_pendiente["id_venta"]
+    try:
+        editar_venta_service(
+            id_venta,
+            {"id_cliente_nuevo": str(otro_cliente["id_cliente"])},
+            id_usuario=usuario_admin["id_usuario"],
+        )
+        assert _id_cliente_venta(db_conn, id_venta) == otro_cliente["id_cliente"]
+
+        cursor = db_conn.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT datos_despues FROM venta_historial"
+            " WHERE id_venta = %s AND accion = 'EDITADO' ORDER BY id_historial DESC LIMIT 1",
+            (id_venta,),
+        )
+        historial = cursor.fetchone()["datos_despues"]
+        cursor.close()
+        assert "OtroNombre OtroApellido" in historial
+    finally:
+        # Regresar la venta al cliente del fixture para que el teardown funcione
+        cursor = db_conn.cursor()
+        cursor.execute("UPDATE venta SET id_cliente = %s WHERE id_venta = %s",
+                       (cliente_test["id_cliente"], id_venta))
+        db_conn.commit()
+        cursor.close()
+
+
+def test_editar_venta_service_mismo_cliente_sin_cambios(venta_pendiente, cliente_test, usuario_admin):
+    with pytest.raises(ValueError, match="No hay cambios"):
+        editar_venta_service(
+            venta_pendiente["id_venta"],
+            {"id_cliente_nuevo": str(cliente_test["id_cliente"])},
+            id_usuario=usuario_admin["id_usuario"],
+        )
+
+
+def test_editar_venta_service_cliente_inexistente_lanza(venta_pendiente, cliente_test,
+                                                        usuario_admin, db_conn):
+    with pytest.raises(ValueError, match="cliente seleccionado"):
+        editar_venta_service(
+            venta_pendiente["id_venta"],
+            {"id_cliente_nuevo": "999999"},
+            id_usuario=usuario_admin["id_usuario"],
+        )
+    assert _id_cliente_venta(db_conn, venta_pendiente["id_venta"]) == cliente_test["id_cliente"]
+
+
 # ===========================================================================
 # models/ventas_editar.py — cobertura directa de la capa de modelo
 # ===========================================================================

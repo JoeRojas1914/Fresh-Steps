@@ -236,6 +236,51 @@
         <div class="venta-seccion">
             <div class="venta-seccion-header">
                 <div class="venta-step-num">3</div>
+                <h2>Cliente</h2>
+            </div>
+            <div class="venta-seccion-body">
+                <input type="hidden" name="id_cliente_nuevo" id="id_cliente_nuevo"
+                       value="{{ venta.id_cliente }}"
+                       data-original="{{ venta.id_cliente }}"
+                       data-original-nombre="{{ venta.nombre_cliente }}"
+                       data-original-first="{{ venta.cliente_nombre }}"
+                       data-original-last="{{ venta.cliente_apellido }}"
+                       data-original-tel="{{ venta.telefono_cliente or '' }}">
+
+                <div id="cliente-box">
+                    <div class="cliente-box-avatar" id="cliente-box-avatar"></div>
+                    <div class="cliente-box-info">
+                        <strong id="cliente-seleccionado">
+                            <span class="cliente-nombre-txt">{{ venta.nombre_cliente }}</span>
+                        </strong>
+                        <div class="result-tel" id="cliente-seleccionado-tel">{{ venta.telefono_cliente or "" }}</div>
+                    </div>
+                    <button type="button" class="btn btn--secondary btn--sm" id="btn-cambiar-cliente">
+                        <i data-lucide="refresh-cw" width="13" height="13"></i> Cambiar
+                    </button>
+                </div>
+
+                <div id="busqueda-cliente" class="d-none">
+                    <div class="search-form-inline">
+                        <input type="text" id="buscar-cliente"
+                               placeholder="Buscar por nombre o teléfono..."
+                               autocomplete="off" aria-label="Buscar cliente">
+                        <button type="button" class="btn btn--secondary btn--sm" id="btn-cancelar-cliente">
+                            Cancelar
+                        </button>
+                    </div>
+                    <div class="results-list results-list--single" id="lista-clientes"></div>
+                </div>
+
+                <button type="button" class="btn btn--secondary btn--sm mt-10 d-none" id="btn-restaurar-cliente">
+                    <i data-lucide="undo-2" width="13" height="13"></i> Volver al cliente original
+                </button>
+            </div>
+        </div>
+
+        <div class="venta-seccion">
+            <div class="venta-seccion-header">
+                <div class="venta-step-num">4</div>
                 <h2>Fecha estimada</h2>
             </div>
             <div class="venta-seccion-body">
