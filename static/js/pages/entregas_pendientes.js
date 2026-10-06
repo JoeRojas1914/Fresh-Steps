@@ -1,6 +1,8 @@
 import { abrirModal, cerrarModal } from '../components/modal.js';
 import { mostrarFeedback, redirigirConFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
-import { abrirWhatsApp } from '../base/whatsapp.js';
+import { abrirWhatsApp, preabrirVentanaWhatsApp, cerrarVentanaPrevia } from '../base/whatsapp.js';
+
+const NEGOCIO_FRESH_STEPS = 1;
 
 let ventaSeleccionada = null;
 let ventaTelefono     = '';
@@ -19,9 +21,14 @@ document.addEventListener("click", function (e) {
     ventaNegocioId    = parseInt(btn.dataset.negocioId) || 0;
     ventaNegocio      = btn.dataset.negocio    || '';
 
+    // WhatsApp solo para ventas de Fresh Steps
+    const esFreshSteps = ventaNegocioId === NEGOCIO_FRESH_STEPS;
+    const waRow = waCheckbox ? waCheckbox.closest(".wa-check-row") : null;
+    if (waRow) waRow.style.display = esFreshSteps ? "" : "none";
+
     if (waCheckbox) {
-        waCheckbox.checked  = !!ventaTelefono;
-        waCheckbox.disabled = !ventaTelefono;
+        waCheckbox.checked  = esFreshSteps && !!ventaTelefono;
+        waCheckbox.disabled = !esFreshSteps || !ventaTelefono;
     }
 
     abrirModal("modalProcesado");
@@ -40,27 +47,37 @@ document.addEventListener("DOMContentLoaded", () => {
             btnConfirmar.disabled    = true;
             btnConfirmar.textContent = "Procesando...";
 
+            const waCheckbox = document.getElementById("waCheckbox");
+            const enviarWa   = ventaNegocioId === NEGOCIO_FRESH_STEPS
+                && waCheckbox && waCheckbox.checked && !!ventaTelefono;
+
+            // Se abre aquí (síncrono al click) para que el navegador remoto no lo bloquee
+            const ventanaWa = enviarWa ? preabrirVentanaWhatsApp() : null;
+
             csrfFetch(`/ventas/marcar-lista/${ventaSeleccionada}`, { method: "POST" })
                 .then(r => r.json())
-                .then(res => {
+                .then(async res => {
                     if (res.ok) {
                         cerrarModal("modalProcesado");
 
-                        const waCheckbox = document.getElementById("waCheckbox");
-                        if (waCheckbox && waCheckbox.checked && ventaTelefono) {
-                            const articulo = ventaNegocioId === 1 ? 'calzado' : 'prendas';
-                            const msg = `Buen día ${ventaNombre},\nTu orden ha sido procesada, puedes pasar a recoger tu ${articulo} a partir de este momento.\nSaludos`;
-                            abrirWhatsApp(ventaTelefono, msg, ventaNegocioId)
-                                .then(r => { if (!r.ok) mostrarFeedback("No se pudo abrir WhatsApp", "error"); });
+                        if (enviarWa) {
+                            const msg = `Buen día ${ventaNombre},\nTu orden ha sido procesada, puedes pasar a recoger tu calzado a partir de este momento.\nSaludos`;
+                            const wa  = await abrirWhatsApp(ventaTelefono, msg, ventaNegocioId, ventanaWa);
+                            if (!wa.ok) {
+                                redirigirConFeedback(location.pathname, "Venta marcada como lista, pero no se pudo abrir WhatsApp", "error");
+                                return;
+                            }
                         }
                         redirigirConFeedback(location.pathname, res.message, "success");
                     } else {
+                        cerrarVentanaPrevia(ventanaWa);
                         btnConfirmar.disabled    = false;
                         btnConfirmar.textContent = textoOriginal;
                         mostrarFeedback(res.error || "Error al marcar como lista", "error");
                     }
                 })
                 .catch(() => {
+                    cerrarVentanaPrevia(ventanaWa);
                     btnConfirmar.disabled    = false;
                     btnConfirmar.textContent = textoOriginal;
                     mostrarFeedback("Error de conexión al marcar la venta.", "error");
