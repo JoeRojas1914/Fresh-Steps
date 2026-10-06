@@ -22,6 +22,12 @@
                        placeholder="Nombre o apellido...">
             </div>
             <div class="filtro-item filtro-item--max220 ml-12">
+                <label>Buscar artículo</label>
+                <input type="text" id="buscador-articulo" name="articulo"
+                       value="{{ articulo or '' }}"
+                       placeholder="Marca, modelo, color...">
+            </div>
+            <div class="filtro-item filtro-item--max220 ml-12">
                 <label>Negocio</label>
                 <select id="filtro-negocio" name="id_negocio">
                     <option value="">Todos los negocios</option>

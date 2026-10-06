@@ -135,12 +135,14 @@ def ventas_listas():
     id_venta      = id_venta_raw if id_venta_raw.isdigit() else None
     pagina        = request.args.get("pagina", 1, type=int)
     q             = request.args.get("q", "").strip() or None
+    articulo      = request.args.get("articulo", "").strip() or None
 
     orden         = request.args.get("orden") or None
     direccion     = request.args.get("dir") or None
 
     data = listar_ventas_listas_service(id_negocio, pagina, id_venta, q=q,
-                                        orden=orden, direccion=direccion)
+                                        orden=orden, direccion=direccion,
+                                        articulo=articulo)
 
     if request.args.get('partial') == '1':
         return render_template("ventas/_listas_partial.html", **data)
@@ -155,12 +157,14 @@ def ventas_pendientes():
         id_venta      = id_venta_raw if id_venta_raw.isdigit() else None
         pagina        = request.args.get("pagina", 1, type=int)
         q             = request.args.get("q", "").strip() or None
+        articulo      = request.args.get("articulo", "").strip() or None
 
         orden         = request.args.get("orden") or None
         direccion     = request.args.get("dir") or None
 
         data = listar_entregas_pendientes_service(id_negocio, pagina, id_venta, q=q,
-                                                  orden=orden, direccion=direccion)
+                                                  orden=orden, direccion=direccion,
+                                                  articulo=articulo)
 
         if request.args.get('partial') == '1':
             return render_template("ventas/_pendientes_partial.html", **data)
@@ -249,6 +253,7 @@ def historial_ventas():
     fecha_fin    = request.args.get("fecha_fin")    or None
     pagina       = request.args.get("pagina", 1,    type=int)
     q            = request.args.get("q", "").strip() or None
+    articulo     = request.args.get("articulo", "").strip() or None
     id_venta     = request.args.get("id_venta",     type=int)
     estado       = request.args.get("estado")       or None
     tipo_fecha   = request.args.get("tipo_fecha", "fecha_recibo")
@@ -262,7 +267,7 @@ def historial_ventas():
     data = historial_ventas_service(
         id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas,
         q=q, id_venta=id_venta, estado=estado, tipo_fecha=tipo_fecha,
-        orden=orden, direccion=direccion,
+        orden=orden, direccion=direccion, articulo=articulo,
     )
 
     if request.args.get('partial') == '1':

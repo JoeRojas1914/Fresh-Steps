@@ -254,3 +254,53 @@ def test_venta_maquila_multiples_articulos(app, db_conn, cliente_test, usuario_a
     finally:
         if id_venta:
             cleanup_venta(db_conn, id_venta)
+
+
+# ---------------------------------------------------------------------------
+# Filtro por artículo (pendientes / listas / historial)
+# ---------------------------------------------------------------------------
+
+def _ids(data):
+    return [v["id_venta"] for v in data["ventas"]]
+
+
+def test_filtro_articulo_pendientes_encuentra_venta(app, venta_pendiente):
+    from services.ventas_service import listar_entregas_pendientes_service
+    id_venta = venta_pendiente["id_venta"]
+    data = listar_entregas_pendientes_service(id_venta=str(id_venta), articulo="nike blanco")
+    assert id_venta in _ids(data)
+    assert data["total_registros"] == len(data["ventas"])
+    assert data["articulo"] == "nike blanco"
+
+
+def test_filtro_articulo_pendientes_sin_coincidencia(app, venta_pendiente):
+    from services.ventas_service import listar_entregas_pendientes_service
+    id_venta = venta_pendiente["id_venta"]
+    data = listar_entregas_pendientes_service(id_venta=str(id_venta), articulo="nike rojo")
+    assert id_venta not in _ids(data)
+
+
+def test_filtro_articulo_listas_no_incluye_pendiente(app, venta_pendiente):
+    from services.ventas_service import listar_ventas_listas_service
+    id_venta = venta_pendiente["id_venta"]
+    data = listar_ventas_listas_service(id_venta=str(id_venta), articulo="nike")
+    assert id_venta not in _ids(data)
+
+
+def test_filtro_articulo_historial(app, venta_pendiente):
+    from services.ventas_service import historial_ventas_service
+    id_venta = venta_pendiente["id_venta"]
+    data = historial_ventas_service(id_venta=id_venta, articulo="tenis piel")
+    assert _ids(data) == [id_venta]
+    assert data["total_registros"] == 1
+    data = historial_ventas_service(id_venta=id_venta, articulo="adidas")
+    assert _ids(data) == []
+    assert data["total_registros"] == 0
+
+
+def test_rutas_aceptan_filtro_articulo(logged_client, venta_pendiente):
+    for url in ("/ventas/pendientes", "/ventas/listas", "/ventas/historial"):
+        res = logged_client.get(f"{url}?articulo=nike&partial=1", base_url="https://localhost")
+        assert res.status_code == 200, url
+        if url != "/ventas/listas":
+            assert str(venta_pendiente["id_venta"]).encode() in res.data, url

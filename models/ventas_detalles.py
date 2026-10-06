@@ -9,6 +9,31 @@ COLUMNAS_ORDEN_PEDIDOS_CLIENTE = {
 }
 
 
+_TEXTO_ARTICULO = (
+    "CONCAT_WS(' ', ac.marca, ac.tipo, ac.material, ac.color_base,"
+    " ac.color_secundario, ac.color_agujetas,"
+    " acf.marca, acf.tipo, acf.material, acf.color_base, acf.color_secundario,"
+    " am.tipo, a.comentario)"
+)
+
+
+def filtro_articulo(texto):
+    """Devuelve (sql, params) para filtrar ventas con un artículo que contenga
+    todas las palabras de `texto` (en cualquier campo del artículo)."""
+    palabras = (texto or "").split()
+    if not palabras:
+        return "", []
+    condiciones = " AND ".join([f"{_TEXTO_ARTICULO} LIKE %s"] * len(palabras))
+    sql = (
+        " AND EXISTS (SELECT 1 FROM articulo a"
+        " LEFT JOIN articulo_calzado    ac  ON ac.id_articulo  = a.id_articulo"
+        " LEFT JOIN articulo_confeccion acf ON acf.id_articulo = a.id_articulo"
+        " LEFT JOIN articulo_maquila    am  ON am.id_articulo  = a.id_articulo"
+        f" WHERE a.id_venta = v.id_venta AND {condiciones})"
+    )
+    return sql, [f"%{p}%" for p in palabras]
+
+
 def obtener_venta(id_venta):
     with get_db() as (_, cursor):
         cursor.execute("""
@@ -112,7 +137,7 @@ def obtener_detalles_venta(ids_venta):
 
 
 def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, offset=0,
-                          orden=None, direccion=None):
+                          orden=None, direccion=None, articulo=None):
     with get_db() as (_, cursor):
         sql = """
             SELECT
@@ -144,6 +169,10 @@ def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, of
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
             sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
             params.extend([like, like, like])
+        if articulo:
+            sql_art, params_art = filtro_articulo(articulo)
+            sql += sql_art
+            params.extend(params_art)
         sql += construir_order_by(orden, direccion, "v.id_negocio ASC, v.id_venta ASC")
         if limit is not None:
             sql += " LIMIT %s OFFSET %s"
@@ -153,7 +182,7 @@ def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, of
 
 
 def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=None, offset=0,
-                                orden=None, direccion=None):
+                                orden=None, direccion=None, articulo=None):
     with get_db() as (_, cursor):
         sql = """
             SELECT
@@ -188,6 +217,10 @@ def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=No
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
             sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
             params.extend([like, like, like])
+        if articulo:
+            sql_art, params_art = filtro_articulo(articulo)
+            sql += sql_art
+            params.extend(params_art)
         sql += " GROUP BY v.id_venta"
         sql += construir_order_by(orden, direccion, "v.fecha_estimada ASC, v.id_negocio ASC, v.id_venta ASC")
         if limit is not None:
@@ -197,7 +230,7 @@ def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=No
         return cursor.fetchall()
 
 
-def contar_entregas_resumen(id_negocio=None, id_venta=None, q=None):
+def contar_entregas_resumen(id_negocio=None, id_venta=None, q=None, articulo=None):
     sql = """
         SELECT
             SUM(CASE WHEN v.fecha_lista IS NOT NULL AND v.fecha_entrega IS NULL THEN 1 ELSE 0 END) AS listas,
@@ -218,19 +251,23 @@ def contar_entregas_resumen(id_negocio=None, id_venta=None, q=None):
         sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
         sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
         params.extend([like, like, like])
+    if articulo:
+        sql_art, params_art = filtro_articulo(articulo)
+        sql += sql_art
+        params.extend(params_art)
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
         row = cursor.fetchone()
     return int(row["listas"] or 0), int(row["pendientes"] or 0)
 
 
-def contar_entregas_listas(id_negocio=None, id_venta=None, q=None):
-    listas, _ = contar_entregas_resumen(id_negocio, id_venta, q)
+def contar_entregas_listas(id_negocio=None, id_venta=None, q=None, articulo=None):
+    listas, _ = contar_entregas_resumen(id_negocio, id_venta, q, articulo)
     return listas
 
 
-def contar_entregas_pendientes(id_negocio=None, id_venta=None, q=None):
-    _, pendientes = contar_entregas_resumen(id_negocio, id_venta, q)
+def contar_entregas_pendientes(id_negocio=None, id_venta=None, q=None, articulo=None):
+    _, pendientes = contar_entregas_resumen(id_negocio, id_venta, q, articulo)
     return pendientes
 
 

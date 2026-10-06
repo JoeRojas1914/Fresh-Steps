@@ -1,4 +1,5 @@
 from db import get_db
+from models.ventas_detalles import filtro_articulo
 from utils import (
     registrar_historial as _registrar_historial,
     construir_order_by,
@@ -57,6 +58,7 @@ def contar_historial_ventas(
     id_venta=None,
     estado=None,
     tipo_fecha="fecha_recibo",
+    articulo=None,
 ):
     col = tipo_fecha if tipo_fecha in _COLS_FECHA_HISTORIAL else "fecha_recibo"
     with get_db() as (_, cursor):
@@ -82,6 +84,10 @@ def contar_historial_ventas(
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"
             like = f"%{q}%"
             params.extend([like, like, like])
+        if articulo:
+            sql_art, params_art = filtro_articulo(articulo)
+            sql += sql_art
+            params.extend(params_art)
         if id_venta:
             sql += " AND v.id_venta = %s"
             params.append(id_venta)
@@ -103,6 +109,7 @@ def obtener_historial_ventas(
     tipo_fecha="fecha_recibo",
     orden=None,
     direccion=None,
+    articulo=None,
 ):
     col = tipo_fecha if tipo_fecha in _COLS_FECHA_HISTORIAL else "fecha_recibo"
     with get_db() as (_, cursor):
@@ -149,6 +156,10 @@ def obtener_historial_ventas(
             sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"
             like = f"%{q}%"
             params.extend([like, like, like])
+        if articulo:
+            sql_art, params_art = filtro_articulo(articulo)
+            sql += sql_art
+            params.extend(params_art)
         if id_venta:
             sql += " AND v.id_venta = %s"
             params.append(id_venta)
