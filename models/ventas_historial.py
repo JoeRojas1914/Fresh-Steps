@@ -1,13 +1,11 @@
 from db import get_db
-from models.ventas_detalles import filtro_articulo
+from models.ventas_detalles import filtro_articulo, filtro_cliente
 from utils import (
     registrar_historial as _registrar_historial,
     construir_order_by,
     COLUMNAS_ORDEN_VENTAS,
 )
 
-# Estado en orden de flujo: pendiente → lista → entregada → eliminada
-# (misma precedencia que _enriquecer_ventas en services/ventas_service.py)
 COLUMNAS_ORDEN_HISTORIAL = {
     **COLUMNAS_ORDEN_VENTAS,
     "estado": "CASE WHEN v.eliminado = 1 THEN 3"
@@ -81,9 +79,9 @@ def contar_historial_ventas(
             sql += f" AND DATE(v.{col}) <= %s"
             params.append(fecha_fin)
         if q:
-            sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"
-            like = f"%{q}%"
-            params.extend([like, like, like])
+            sql_cli, params_cli = filtro_cliente(q)
+            sql += sql_cli
+            params.extend(params_cli)
         if articulo:
             sql_art, params_art = filtro_articulo(articulo)
             sql += sql_art
@@ -153,9 +151,9 @@ def obtener_historial_ventas(
             sql += f" AND DATE(v.{col}) <= %s"
             params.append(fecha_fin)
         if q:
-            sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s OR CONCAT(c.nombre,' ',c.apellido) LIKE %s)"
-            like = f"%{q}%"
-            params.extend([like, like, like])
+            sql_cli, params_cli = filtro_cliente(q)
+            sql += sql_cli
+            params.extend(params_cli)
         if articulo:
             sql_art, params_art = filtro_articulo(articulo)
             sql += sql_art

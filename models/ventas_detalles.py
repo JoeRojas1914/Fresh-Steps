@@ -1,7 +1,8 @@
+import re
+
 from db import get_db
 from utils import construir_order_by, COLUMNAS_ORDEN_VENTAS
 
-# Sin "cliente": la consulta de pedidos de un cliente no hace JOIN con cliente
 COLUMNAS_ORDEN_PEDIDOS_CLIENTE = {
     **{k: v for k, v in COLUMNAS_ORDEN_VENTAS.items() if k != "cliente"},
     "estado": "CASE WHEN v.fecha_entrega IS NOT NULL THEN 2"
@@ -18,8 +19,6 @@ _TEXTO_ARTICULO = (
 
 
 def filtro_articulo(texto):
-    """Devuelve (sql, params) para filtrar ventas con un artículo que contenga
-    todas las palabras de `texto` (en cualquier campo del artículo)."""
     palabras = (texto or "").split()
     if not palabras:
         return "", []
@@ -32,6 +31,21 @@ def filtro_articulo(texto):
         f" WHERE a.id_venta = v.id_venta AND {condiciones})"
     )
     return sql, [f"%{p}%" for p in palabras]
+
+
+def filtro_cliente(q):
+    q = (q or "").strip()
+    if not q:
+        return "", []
+    like = f"%{q}%"
+    sql = (" AND (c.nombre LIKE %s OR c.apellido LIKE %s"
+           " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s")
+    params = [like, like, like]
+    digitos = re.sub(r"[\s\-\(\)\+]", "", q)
+    if digitos.isdigit():
+        sql += " OR c.telefono LIKE %s"
+        params.append(f"%{digitos}%")
+    return sql + ")", params
 
 
 def obtener_venta(id_venta):
@@ -165,10 +179,9 @@ def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, of
             sql += " AND CAST(v.id_venta AS CHAR) LIKE %s"
             params.append(f"{id_venta}%")
         if q:
-            like = f"%{q}%"
-            sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
-            sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
-            params.extend([like, like, like])
+            sql_cli, params_cli = filtro_cliente(q)
+            sql += sql_cli
+            params.extend(params_cli)
         if articulo:
             sql_art, params_art = filtro_articulo(articulo)
             sql += sql_art
@@ -213,10 +226,9 @@ def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=No
             sql += " AND CAST(v.id_venta AS CHAR) LIKE %s"
             params.append(f"{id_venta}%")
         if q:
-            like = f"%{q}%"
-            sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
-            sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
-            params.extend([like, like, like])
+            sql_cli, params_cli = filtro_cliente(q)
+            sql += sql_cli
+            params.extend(params_cli)
         if articulo:
             sql_art, params_art = filtro_articulo(articulo)
             sql += sql_art
@@ -247,10 +259,9 @@ def contar_entregas_resumen(id_negocio=None, id_venta=None, q=None, articulo=Non
         sql += " AND CAST(v.id_venta AS CHAR) LIKE %s"
         params.append(f"{id_venta}%")
     if q:
-        like = f"%{q}%"
-        sql += " AND (c.nombre LIKE %s OR c.apellido LIKE %s"
-        sql += " OR CONCAT(c.nombre, ' ', c.apellido) LIKE %s)"
-        params.extend([like, like, like])
+        sql_cli, params_cli = filtro_cliente(q)
+        sql += sql_cli
+        params.extend(params_cli)
     if articulo:
         sql_art, params_art = filtro_articulo(articulo)
         sql += sql_art
