@@ -283,3 +283,12 @@ def test_abrir_whatsapp_url_valida_200(logged_client):
     assert data["ok"] is True
     assert data.get("opened") is False
     assert "url" in data
+
+
+def test_abrir_whatsapp_rol_caja_permitido(logged_client_caja):
+    res = logged_client_caja.post("/ventas/abrir-whatsapp", json={
+        "url": "https://web.whatsapp.com/send?phone=521234567890&text=hola",
+        "negocio_id": 1,
+    }, headers={"X-Forwarded-For": "1.2.3.4"})
+    assert res.status_code == 200
+    assert res.get_json()["ok"] is True

@@ -39,6 +39,7 @@ RUTAS_CAJA = {
     "ventas.entregar_venta",
     "ventas.ventas_pendientes",
     "ventas.marcar_lista",
+    "ventas.abrir_whatsapp",
     "ventas.venta_ticket",
     "ventas.registrar_pago_final",
     "ventas.detalles_venta", 
