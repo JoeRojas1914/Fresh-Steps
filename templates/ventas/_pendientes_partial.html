@@ -1,4 +1,5 @@
 {% from "macros/badges.html" import badge_negocio %}
+{% from "macros/telefono.html" import telefono_wa %}
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
 {% from "components/empty_state.html" import fila_vacia %}
@@ -34,13 +35,7 @@
         <td>{{ badge_negocio(v.negocio) }}</td>
         <td>{{ v.nombre }} {{ v.apellido }}</td>
 
-        <td>
-            {% if v.telefono %}
-                {{ v.telefono }}
-            {% else %}
-                <span class="dim">Sin teléfono</span>
-            {% endif %}
-        </td>
+        <td>{{ telefono_wa(v.telefono, 'Sin teléfono') }}</td>
 
         <td>
             {{ v.fecha_recibo.day }} {{ meses[v.fecha_recibo.month] }}

@@ -130,6 +130,16 @@
   cursor: pointer;
 }
 
+.tel-wa {
+  color: #128c7e;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tel-wa:hover {
+  text-decoration: underline;
+}
+
 
 .entrega-hoy {
     background-color: #fff3cd;  

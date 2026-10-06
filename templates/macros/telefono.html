@@ -1,0 +1,11 @@
+{# Teléfono como link a WhatsApp Web. Los teléfonos se guardan como 10 dígitos. #}
+{% macro telefono_wa(telefono, vacio='—') %}
+    {%- if telefono -%}
+        {%- set digitos = telefono | string | trim -%}
+        <a href="https://web.whatsapp.com/send?phone=521{{ digitos[-10:] }}"
+           target="_blank" rel="noopener noreferrer"
+           class="tel-wa" title="Abrir chat en WhatsApp Web">{{ telefono }}</a>
+    {%- else -%}
+        <span class="dim">{{ vacio }}</span>
+    {%- endif -%}
+{% endmacro %}

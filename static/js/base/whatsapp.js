@@ -11,9 +11,6 @@ function esAccesoLocal() {
     return ['localhost', '127.0.0.1', '::1', '[::1]'].includes(location.hostname);
 }
 
-// Debe llamarse de forma síncrona dentro del click: si se abre después de un
-// fetch, el navegador lo bloquea como popup. En acceso local no hace falta,
-// el servidor abre el navegador directamente.
 export function preabrirVentanaWhatsApp() {
     if (esAccesoLocal()) return null;
     const win = window.open('', '_blank');

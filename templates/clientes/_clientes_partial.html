@@ -1,4 +1,5 @@
 {% from "components/table.html" import table %}
+{% from "macros/telefono.html" import telefono_wa %}
 {% from "components/pagination.html" import pagination %}
 {% from "components/empty_state.html" import fila_vacia %}
 
@@ -20,7 +21,7 @@
 
         <td>{{ c.nombre }} {{ c.apellido }}</td>
 
-        <td>{{ c.telefono }}</td>
+        <td>{{ telefono_wa(c.telefono) }}</td>
 
         <td>
             {% if c.direccion %}
