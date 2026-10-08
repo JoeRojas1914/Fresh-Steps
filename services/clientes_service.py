@@ -145,9 +145,16 @@ def obtener_cliente_detalle_service(
     }
 
 
-def exportar_clientes_service(incluir_eliminados: bool) -> tuple[list, dict]:
+def exportar_clientes_service(
+    incluir_eliminados: bool,
+    q: str | None = None,
+    orden: str | None = None,
+    direccion: str | None = None,
+) -> tuple[list, dict]:
     from config import MAX_FILAS_EXPORTAR
-    clientes    = obtener_clientes(limit=MAX_FILAS_EXPORTAR, offset=0, incluir_eliminados=incluir_eliminados)
+    clientes    = obtener_clientes(q, limit=MAX_FILAS_EXPORTAR, offset=0,
+                                   incluir_eliminados=incluir_eliminados,
+                                   orden=orden, direccion=direccion)
     ids         = [cl["id_cliente"] for cl in clientes]
     pedidos_map = contar_pedidos_por_cliente(ids)
     return clientes, pedidos_map

@@ -134,10 +134,17 @@ def restaurar_servicio(id_servicio):
 def exportar_servicios_excel():
     id_negocio         = request.args.get("id_negocio") or None
     incluir_eliminados = request.args.get("eliminados") == "1"
+    q                  = request.args.get("q", "").strip() or None
 
-    servicios = exportar_servicios_service(id_negocio, incluir_eliminados)
+    servicios = exportar_servicios_service(
+        id_negocio, incluir_eliminados, q=q,
+        orden=request.args.get("orden") or None,
+        direccion=request.args.get("dir") or None,
+    )
 
     subtexto = f"Negocio ID: {id_negocio}" if id_negocio else "Todos los negocios"
+    if q:
+        subtexto += f"  |  Búsqueda: {q}"
     if incluir_eliminados:
         subtexto += "  |  Incluye eliminados"
 

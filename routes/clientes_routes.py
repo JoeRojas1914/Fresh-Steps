@@ -134,15 +134,23 @@ def api_crear_cliente():
 @admin_required
 def exportar_clientes_excel():
     incluir_eliminados = request.args.get("eliminados") == "1"
-    clientes, pedidos_map = exportar_clientes_service(incluir_eliminados)
+    q                  = request.args.get("q", "").strip() or None
+    clientes, pedidos_map = exportar_clientes_service(
+        incluir_eliminados, q=q,
+        orden=request.args.get("orden") or None,
+        direccion=request.args.get("dir") or None,
+    )
+
+    subtexto = "Incluye eliminados" if incluir_eliminados else "Solo clientes activos"
+    if q:
+        subtexto += f"  |  Búsqueda: {q}"
 
     wb = Workbook()
     ws = wb.active
     ws.title = "Clientes"
     ws.freeze_panes = "A4"
 
-    xl_titulo_hoja(ws, "Clientes — Fresh Steps", 7,
-                   "Incluye eliminados" if incluir_eliminados else "Solo clientes activos")
+    xl_titulo_hoja(ws, "Clientes — Fresh Steps", 7, subtexto)
     xl_fila_headers(ws, ["Nombre", "Apellido", "Teléfono", "Correo", "Dirección", "Estado", "Total pedidos"])
 
     for i, cl in enumerate(clientes):

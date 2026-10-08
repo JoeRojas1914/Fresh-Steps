@@ -181,6 +181,16 @@ def test_exportar_servicios_retorna_xlsx(logged_client):
     assert XLSX_CONTENT_TYPE in res.content_type
 
 
+def test_exportar_servicios_respeta_busqueda(logged_client):
+    from io import BytesIO
+    from openpyxl import load_workbook
+    res = logged_client.get("/servicios/exportar?q=NoExiste_pytest_xyz")
+    assert res.status_code == 200
+    ws = load_workbook(BytesIO(res.data)).active
+    assert ws.cell(row=4, column=1).value is None
+    assert "Búsqueda: NoExiste_pytest_xyz" in ws.cell(row=2, column=1).value
+
+
 # ===========================================================================
 # CLIENTES
 # ===========================================================================
@@ -224,6 +234,16 @@ def test_exportar_clientes_retorna_xlsx(logged_client):
     res = logged_client.get("/clientes/exportar")
     assert res.status_code == 200
     assert XLSX_CONTENT_TYPE in res.content_type
+
+
+def test_exportar_clientes_respeta_busqueda(logged_client):
+    from io import BytesIO
+    from openpyxl import load_workbook
+    res = logged_client.get("/clientes/exportar?q=NoExiste_pytest_xyz")
+    assert res.status_code == 200
+    ws = load_workbook(BytesIO(res.data)).active
+    assert ws.cell(row=4, column=1).value is None
+    assert "Búsqueda: NoExiste_pytest_xyz" in ws.cell(row=2, column=1).value
 
 
 def test_exportar_cliente_individual_retorna_xlsx(logged_client, cliente_test):

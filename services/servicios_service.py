@@ -98,11 +98,14 @@ def restaurar_servicio_service(id_servicio: int, id_usuario: int) -> None:
     _invalidar_cache_servicios()
 
 
-def exportar_servicios_service(id_negocio, incluir_eliminados):
+def exportar_servicios_service(id_negocio, incluir_eliminados, q=None, orden=None, direccion=None):
     from config import MAX_FILAS_EXPORTAR
     return obtener_servicios(
         id_negocio=id_negocio,
+        q=q,
         incluir_eliminados=incluir_eliminados,
         limit=MAX_FILAS_EXPORTAR,
         offset=0,
+        orden=orden,
+        direccion=direccion,
     )
