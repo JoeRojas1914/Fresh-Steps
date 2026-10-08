@@ -376,14 +376,14 @@ from config import POR_PAGINA_HISTORIAL_VENTAS as POR_PAGINA_HISTORIAL
 
 
 def historial_ventas_service(
-    id_negocio: int | None = None,
+    id_negocio: int | list[int] | None = None,
     fecha_inicio: str | None = None,
     fecha_fin: str | None = None,
     pagina: int = 1,
     mostrar_eliminadas: bool = False,
     q: str | None = None,
     id_venta: int | None = None,
-    estado: str | None = None,
+    estado: str | list[str] | None = None,
     tipo_fecha: str = "fecha_recibo",
     orden: str | None = None,
     direccion: str | None = None,

@@ -97,10 +97,6 @@
         cargarTablaAjax(link.href, container);
     });
 
-    // ── Ordenar al hacer clic en encabezados (th.th-sort) ──
-    // 1er clic: ascendente; clic de nuevo sobre la misma columna: descendente.
-    // El orden vive en inputs ocultos del formulario de filtros, así filtros
-    // y paginación lo conservan.
     function ordenarPorColumna(th) {
         const inputOrden = document.querySelector('form input[type=hidden][name=orden]');
         const form       = inputOrden?.form;
@@ -125,6 +121,24 @@
         if (!th) return;
         e.preventDefault();
         ordenarPorColumna(th);
+    });
+
+    // ── Exportar a Excel con los filtros actuales (a.js-exportar) ──
+    // Los filtros se aplican por AJAX y no recargan la página, así que el href
+    // generado por el servidor queda viejo. Se reconstruye al hacer clic.
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a.js-exportar');
+        if (!link) return;
+        const form = link.closest('form');
+        if (!form) return;
+
+        const params = new URLSearchParams();
+        for (const [k, v] of new FormData(form).entries()) {
+            if (v && k !== 'pagina' && k !== 'partial') params.append(k, v);
+        }
+        const url = new URL(link.href, window.location.href);
+        url.search = params.toString();
+        link.href = url.toString();
     });
 
     window.cargarTablaAjax = cargarTablaAjax;

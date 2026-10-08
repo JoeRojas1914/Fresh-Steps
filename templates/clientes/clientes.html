@@ -36,7 +36,7 @@
             </div>
             <a href="{{ url_for('clientes.exportar_clientes_excel',
                         eliminados='1' if incluir_eliminados else '') }}"
-               class="btn btn--success btn--sm no-underline">
+               class="btn btn--success btn--sm no-underline js-exportar">
                 <i data-lucide="download" width="14" height="14"></i> Exportar Excel
             </a>
             <button type="button" data-modal-open="modalCliente" class="btn btn--primary btn--sm">

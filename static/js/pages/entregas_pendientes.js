@@ -21,7 +21,6 @@ document.addEventListener("click", function (e) {
     ventaNegocioId    = parseInt(btn.dataset.negocioId) || 0;
     ventaNegocio      = btn.dataset.negocio    || '';
 
-    // WhatsApp solo para ventas de Fresh Steps
     const esFreshSteps = ventaNegocioId === NEGOCIO_FRESH_STEPS;
     const waRow = waCheckbox ? waCheckbox.closest(".wa-check-row") : null;
     if (waRow) waRow.style.display = esFreshSteps ? "" : "none";
@@ -51,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const enviarWa   = ventaNegocioId === NEGOCIO_FRESH_STEPS
                 && waCheckbox && waCheckbox.checked && !!ventaTelefono;
 
-            // Se abre aquí (síncrono al click) para que el navegador remoto no lo bloquee
             const ventanaWa = enviarWa ? preabrirVentanaWhatsApp() : null;
 
             csrfFetch(`/ventas/marcar-lista/${ventaSeleccionada}`, { method: "POST" })

@@ -169,11 +169,25 @@ def _ws_pagos(ws, ventas, pagos_map, filtro_txt):
     xl_col_widths(ws, [10, 16, 26, 16, 16, 14, 14, 18, 18])
 
 
-def exportar_historial_service(id_negocio, fecha_inicio, fecha_fin, tipo_fecha="fecha_recibo"):
-    """Construye y retorna el Workbook de Excel del historial de ventas."""
+def _texto_lista(valor):
+    if isinstance(valor, (list, tuple, set)):
+        return ", ".join(str(v) for v in valor)
+    return str(valor)
+
+
+def exportar_historial_service(
+    id_negocio, fecha_inicio, fecha_fin, tipo_fecha="fecha_recibo",
+    mostrar_eliminadas=False, q=None, articulo=None, id_venta=None, estado=None,
+    orden=None, direccion=None,
+):
+    """Construye y retorna el Workbook de Excel del historial de ventas
+    aplicando los mismos filtros que la tabla del historial."""
     ventas    = obtener_historial_ventas(id_negocio, fecha_inicio, fecha_fin,
                                         limit=MAX_FILAS_EXPORTAR, offset=0,
-                                        tipo_fecha=tipo_fecha)
+                                        mostrar_eliminadas=mostrar_eliminadas,
+                                        q=q, id_venta=id_venta, estado=estado,
+                                        tipo_fecha=tipo_fecha, orden=orden,
+                                        direccion=direccion, articulo=articulo)
     ids_venta    = [v["id_venta"] for v in ventas]
     detalles_map = obtener_detalles_venta(ids_venta)
     pagos_map    = obtener_pagos_venta(ids_venta)
@@ -184,11 +198,21 @@ def exportar_historial_service(id_negocio, fecha_inicio, fecha_fin, tipo_fecha="
         "fecha_entrega": "Fecha de entrega",
     }
     etiqueta_fecha = _ETIQUETAS_FECHA.get(tipo_fecha, "Fecha de recibo")
+    negocios_txt = ""
+    if id_negocio:
+        nombres = {v["id_negocio"]: v["negocio"] for v in ventas}
+        ids     = id_negocio if isinstance(id_negocio, (list, tuple, set)) else [id_negocio]
+        negocios_txt = _texto_lista([nombres.get(i, f"ID {i}") for i in ids])
     filtro_txt = "  ".join(filter(None, [
-        f"Negocio ID: {id_negocio}"         if id_negocio  else "",
+        f"Negocio: {negocios_txt}"           if negocios_txt else "",
+        f"Estado: {_texto_lista(estado)}"    if estado       else "",
+        f"Cliente: {q}"                      if q            else "",
+        f"Artículo: {articulo}"              if articulo     else "",
+        f"Ticket: #{id_venta}"               if id_venta     else "",
+        "Incluye eliminadas"                 if mostrar_eliminadas else "",
         f"Filtro por: {etiqueta_fecha}",
-        f"Desde: {fecha_inicio}"            if fecha_inicio else "",
-        f"Hasta: {fecha_fin}"               if fecha_fin    else "",
+        f"Desde: {fecha_inicio}"             if fecha_inicio else "",
+        f"Hasta: {fecha_fin}"                if fecha_fin    else "",
     ])) or "Sin filtros — todos los registros"
 
     wb    = Workbook()

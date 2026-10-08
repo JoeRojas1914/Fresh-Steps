@@ -37,15 +37,18 @@
 
             <div class="filtro-item">
                 <label>Negocio</label>
-                <select name="id_negocio">
-                    <option value="">Todos los negocios</option>
-                    {% for n in negocios %}
-                        <option value="{{ n.id_negocio }}"
-                            {% if id_negocio == n.id_negocio %}selected{% endif %}>
-                            {{ n.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <details class="multi-select" data-placeholder="Todos los negocios">
+                    <summary class="multi-select__btn"><span class="multi-select__txt">Todos los negocios</span></summary>
+                    <div class="multi-select__panel">
+                        {% for n in negocios %}
+                        <label class="multi-select__opt">
+                            <input type="checkbox" name="id_negocio" value="{{ n.id_negocio }}"
+                                   {% if id_negocio and n.id_negocio in id_negocio %}checked{% endif %}>
+                            <span>{{ n.nombre }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </details>
             </div>
  
             <div class="filtro-item filtro-item--max160">
@@ -69,13 +72,18 @@
  
             <div class="filtro-item filtro-item--max160">
                 <label>Estado</label>
-                <select name="estado">
-                    <option value="">Todos</option>
-                    <option value="pendiente"  {% if estado == 'pendiente'  %}selected{% endif %}>Pendiente</option>
-                    <option value="lista"      {% if estado == 'lista'      %}selected{% endif %}>Lista</option>
-                    <option value="entregada"  {% if estado == 'entregada'  %}selected{% endif %}>Entregada</option>
-                    <option value="eliminada"  {% if estado == 'eliminada'  %}selected{% endif %}>Eliminada</option>
-                </select>
+                <details class="multi-select" data-placeholder="Todos">
+                    <summary class="multi-select__btn"><span class="multi-select__txt">Todos</span></summary>
+                    <div class="multi-select__panel">
+                        {% for valor, etiqueta in [('pendiente', 'Pendiente'), ('lista', 'Lista'), ('entregada', 'Entregada'), ('eliminada', 'Eliminada')] %}
+                        <label class="multi-select__opt">
+                            <input type="checkbox" name="estado" value="{{ valor }}"
+                                   {% if estado and valor in estado %}checked{% endif %}>
+                            <span>{{ etiqueta }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </details>
             </div>
 
             <div class="filtro-item filtro-item--auto">
@@ -98,14 +106,8 @@
                 {% if id_negocio or fecha_inicio or fecha_fin or q or articulo or id_venta or estado or (tipo_fecha and tipo_fecha != 'fecha_recibo') %}
                 <a href="/ventas/historial" id="btn-limpiar-filtro-historial" class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
                 {% endif %}
-                <a href="{{ url_for('ventas.exportar_historial_excel',
-                            id_negocio=id_negocio or '',
-                            fecha_inicio=fecha_inicio or '',
-                            fecha_fin=fecha_fin or '',
-                            tipo_fecha=tipo_fecha or '',
-                            q=q or '',
-                            id_venta=id_venta or '') }}"
-                   class="btn btn--success btn--sm no-underline">
+                <a href="{{ url_for('ventas.exportar_historial_excel') }}"
+                   class="btn btn--success btn--sm no-underline js-exportar">
                     <i data-lucide="download" width="14" height="14"></i> Exportar Excel
                 </a>
             </div>

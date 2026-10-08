@@ -165,6 +165,27 @@ def test_contar_historial_ventas_estado_eliminada():
     assert isinstance(count, int) and count >= 0
 
 
+def test_contar_historial_ventas_varios_estados_suma_individuales():
+    from models.ventas_historial import contar_historial_ventas
+    pendientes = contar_historial_ventas(estado="pendiente")
+    listas     = contar_historial_ventas(estado="lista")
+    assert contar_historial_ventas(estado=["pendiente", "lista"]) == pendientes + listas
+
+
+def test_contar_historial_ventas_varios_negocios_suma_individuales():
+    from models.ventas_historial import contar_historial_ventas
+    calzado    = contar_historial_ventas(id_negocio=1)
+    confeccion = contar_historial_ventas(id_negocio=2)
+    assert contar_historial_ventas(id_negocio=[1, 2]) == calzado + confeccion
+
+
+def test_obtener_historial_ventas_varios_estados_solo_devuelve_esos():
+    from models.ventas_historial import obtener_historial_ventas
+    rows = obtener_historial_ventas(estado=["pendiente", "lista"], limit=200)
+    for v in rows:
+        assert not v["eliminado"] and v["fecha_entrega"] is None
+
+
 # ============================================================
 # models/ventas_historial.py:69-71,73-74  (q e id_venta en contar)
 # ============================================================

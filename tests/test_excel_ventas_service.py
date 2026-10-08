@@ -41,6 +41,24 @@ def test_exportar_con_tipo_fecha_entrega():
     assert isinstance(wb, Workbook)
 
 
+def test_exportar_respeta_filtro_de_estados():
+    from models.ventas_historial import contar_historial_ventas
+    estados = ["pendiente", "lista"]
+    esperadas = contar_historial_ventas(estado=estados)
+    wb = exportar_historial_service(None, None, None, estado=estados)
+    ws = wb["Resumen ventas"]
+    filas = [r for r in range(4, ws.max_row + 1)
+             if str(ws.cell(row=r, column=1).value or "").startswith("#")]
+    assert len(filas) == esperadas
+    assert "Estado: pendiente, lista" in ws.cell(row=2, column=1).value
+
+
+def test_exportar_con_busqueda_sin_resultados_no_trae_todo():
+    wb = exportar_historial_service(None, None, None, q="NoExiste_pytest_xyz")
+    ws = wb["Resumen ventas"]
+    assert ws.cell(row=4, column=1).value is None
+
+
 def test_exportar_resumen_tiene_headers():
     wb = exportar_historial_service(None, None, None)
     ws = wb["Resumen ventas"]

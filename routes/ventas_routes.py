@@ -243,31 +243,36 @@ def eliminar_venta_route(id_venta):
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
 
 _TIPOS_FECHA_HISTORIAL = {"fecha_recibo", "fecha_lista", "fecha_entrega"}
+_ESTADOS_HISTORIAL     = ("pendiente", "lista", "entregada", "eliminada")
+
+
+def _filtros_historial():
+    """Lee los filtros del historial desde la query string (compartido por la tabla y el Excel)."""
+    tipo_fecha = request.args.get("tipo_fecha", "fecha_recibo")
+    if tipo_fecha not in _TIPOS_FECHA_HISTORIAL:
+        tipo_fecha = "fecha_recibo"
+    estados = request.args.getlist("estado")
+    return {
+        "id_negocio":         [int(n) for n in request.args.getlist("id_negocio") if n.isdigit()],
+        "fecha_inicio":       request.args.get("fecha_inicio") or None,
+        "fecha_fin":          request.args.get("fecha_fin")    or None,
+        "mostrar_eliminadas": request.args.get("eliminadas") == "1",
+        "q":                  request.args.get("q", "").strip() or None,
+        "articulo":           request.args.get("articulo", "").strip() or None,
+        "id_venta":           request.args.get("id_venta", type=int),
+        "estado":             [e for e in _ESTADOS_HISTORIAL if e in estados],
+        "tipo_fecha":         tipo_fecha,
+    }
+
 
 @ventas_bp.route("/ventas/historial")
 @admin_required
 def historial_ventas():
-
-    id_negocio   = request.args.get("id_negocio",  type=int)
-    fecha_inicio = request.args.get("fecha_inicio") or None
-    fecha_fin    = request.args.get("fecha_fin")    or None
-    pagina       = request.args.get("pagina", 1,    type=int)
-    q            = request.args.get("q", "").strip() or None
-    articulo     = request.args.get("articulo", "").strip() or None
-    id_venta     = request.args.get("id_venta",     type=int)
-    estado       = request.args.get("estado")       or None
-    tipo_fecha   = request.args.get("tipo_fecha", "fecha_recibo")
-    if tipo_fecha not in _TIPOS_FECHA_HISTORIAL:
-        tipo_fecha = "fecha_recibo"
-
-    orden        = request.args.get("orden")        or None
-    direccion    = request.args.get("dir")          or None
-
-    mostrar_eliminadas = request.args.get('eliminadas') == '1'
     data = historial_ventas_service(
-        id_negocio, fecha_inicio, fecha_fin, pagina, mostrar_eliminadas,
-        q=q, id_venta=id_venta, estado=estado, tipo_fecha=tipo_fecha,
-        orden=orden, direccion=direccion, articulo=articulo,
+        **_filtros_historial(),
+        pagina=request.args.get("pagina", 1, type=int),
+        orden=request.args.get("orden") or None,
+        direccion=request.args.get("dir") or None,
     )
 
     if request.args.get('partial') == '1':
@@ -279,13 +284,11 @@ def historial_ventas():
 @ventas_bp.route("/ventas/historial/exportar")
 @admin_required
 def exportar_historial_excel():
-    id_negocio   = request.args.get("id_negocio",  type=int)
-    fecha_inicio = request.args.get("fecha_inicio") or None
-    fecha_fin    = request.args.get("fecha_fin")    or None
-    tipo_fecha   = request.args.get("tipo_fecha", "fecha_recibo")
-    if tipo_fecha not in _TIPOS_FECHA_HISTORIAL:
-        tipo_fecha = "fecha_recibo"
-    wb = exportar_historial_service(id_negocio, fecha_inicio, fecha_fin, tipo_fecha=tipo_fecha)
+    wb = exportar_historial_service(
+        **_filtros_historial(),
+        orden=request.args.get("orden") or None,
+        direccion=request.args.get("dir") or None,
+    )
     return send_excel(wb, "historial_ventas")
 
 @ventas_bp.route("/ventas/<int:id_venta>/historial")

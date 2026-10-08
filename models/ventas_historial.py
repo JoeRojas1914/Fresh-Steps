@@ -33,17 +33,37 @@ def obtener_historial_venta(id_venta):
         return cursor.fetchall()
 
 
+_CONDICIONES_ESTADO = {
+    "pendiente": "(v.eliminado = 0 AND v.fecha_lista IS NULL AND v.fecha_entrega IS NULL)",
+    "lista":     "(v.eliminado = 0 AND v.fecha_lista IS NOT NULL AND v.fecha_entrega IS NULL)",
+    "entregada": "(v.eliminado = 0 AND v.fecha_entrega IS NOT NULL)",
+    "eliminada": "(v.eliminado = 1)",
+}
+
+
+def _como_lista(valor):
+    """Acepta None, un valor suelto o una lista y regresa una lista sin vacíos."""
+    if valor is None:
+        return []
+    if not isinstance(valor, (list, tuple, set)):
+        valor = [valor]
+    return [v for v in valor if v not in (None, "")]
+
+
 def _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas):
-    if estado == "pendiente":
-        sql += " AND v.eliminado = 0 AND v.fecha_lista IS NULL AND v.fecha_entrega IS NULL"
-    elif estado == "lista":
-        sql += " AND v.eliminado = 0 AND v.fecha_lista IS NOT NULL AND v.fecha_entrega IS NULL"
-    elif estado == "entregada":
-        sql += " AND v.eliminado = 0 AND v.fecha_entrega IS NOT NULL"
-    elif estado == "eliminada":
-        sql += " AND v.eliminado = 1"
+    condiciones = [_CONDICIONES_ESTADO[e] for e in _como_lista(estado) if e in _CONDICIONES_ESTADO]
+    if condiciones:
+        sql += " AND (" + " OR ".join(condiciones) + ")"
     elif not mostrar_eliminadas:
         sql += " AND v.eliminado = 0"
+    return sql, params
+
+
+def _aplicar_filtro_negocio(sql, params, id_negocio):
+    ids = _como_lista(id_negocio)
+    if ids:
+        sql += f" AND v.id_negocio IN ({', '.join(['%s'] * len(ids))})"
+        params.extend(ids)
     return sql, params
 
 
@@ -68,10 +88,8 @@ def contar_historial_ventas(
         """
         params = []
         sql, params = _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas)
+        sql, params = _aplicar_filtro_negocio(sql, params, id_negocio)
 
-        if id_negocio:
-            sql += " AND v.id_negocio = %s"
-            params.append(id_negocio)
         if fecha_inicio:
             sql += f" AND DATE(v.{col}) >= %s"
             params.append(fecha_inicio)
@@ -140,10 +158,8 @@ def obtener_historial_ventas(
         """
         params = []
         sql, params = _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas)
+        sql, params = _aplicar_filtro_negocio(sql, params, id_negocio)
 
-        if id_negocio:
-            sql += " AND v.id_negocio = %s"
-            params.append(id_negocio)
         if fecha_inicio:
             sql += f" AND DATE(v.{col}) >= %s"
             params.append(fecha_inicio)
