@@ -15,19 +15,8 @@
     <input type="hidden" name="dir" value="{{ direccion or '' }}">
     <div class="filtro-box">
         <div class="filtro-row">
-            <div class="filtro-item filtro-item--max280">
-                <label>Buscar cliente</label>
-                <input type="text" id="buscador-cliente" name="q"
-                       value="{{ q or '' }}"
-                       placeholder="Nombre o teléfono...">
-            </div>
-            <div class="filtro-item filtro-item--max220 ml-12">
-                <label>Buscar artículo</label>
-                <input type="text" id="buscador-articulo" name="articulo"
-                       value="{{ articulo or '' }}"
-                       placeholder="Marca, modelo, color...">
-            </div>
-            <div class="filtro-item filtro-item--max220 ml-12">
+            {% if session.rol == 'admin' %}
+            <div class="filtro-item filtro-item--max220">
                 <label>Negocio</label>
                 <select id="filtro-negocio" name="id_negocio">
                     <option value="">Todos los negocios</option>
@@ -38,6 +27,19 @@
                         </option>
                     {% endfor %}
                 </select>
+            </div>
+            {% endif %}
+            <div class="filtro-item filtro-item--max280{% if session.rol == 'admin' %} ml-12{% endif %}">
+                <label>Buscar cliente</label>
+                <input type="text" id="buscador-cliente" name="q"
+                       value="{{ q or '' }}"
+                       placeholder="Nombre o teléfono...">
+            </div>
+            <div class="filtro-item filtro-item--max220 ml-12">
+                <label>Buscar artículo</label>
+                <input type="text" id="buscador-articulo" name="articulo"
+                       value="{{ articulo or '' }}"
+                       placeholder="Marca, modelo, color...">
             </div>
             <div class="filtro-item filtro-item--max110 ml-12">
                 <label>N° Ticket</label>

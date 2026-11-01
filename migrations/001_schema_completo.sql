@@ -44,6 +44,17 @@ CREATE TABLE IF NOT EXISTS usuario (
     creado_en     DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Negocios que puede ver cada usuario de caja (los admin ven todos)
+CREATE TABLE IF NOT EXISTS usuario_negocio (
+    id_usuario INT NOT NULL,
+    id_negocio INT NOT NULL,
+    PRIMARY KEY (id_usuario, id_negocio),
+    CONSTRAINT fk_usuario_negocio_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario (id_usuario) ON DELETE CASCADE,
+    CONSTRAINT fk_usuario_negocio_negocio
+        FOREIGN KEY (id_negocio) REFERENCES negocio (id_negocio) ON DELETE CASCADE
+);
+
 -- -------------------------------------------------------------
 -- Clientes
 -- -------------------------------------------------------------

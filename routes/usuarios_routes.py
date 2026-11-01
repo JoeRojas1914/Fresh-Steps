@@ -38,6 +38,7 @@ def listar_usuarios():
         pagina=pagina,
         q=q,
         mostrar_inactivos=mostrar_inactivos,
+        negocios=data["negocios"],
     )
     if request.args.get("partial") == "1":
         return render_template("admin/_usuarios_partial.html", **ctx)
@@ -65,6 +66,7 @@ def guardar_usuario():
             telefono = data.get("telefono") or None,
             correo   = data.get("correo")   or None,
             cp       = (data.get("cp")       or "").strip() or None,
+            negocios = data.get("negocios"),
         )
         msg = "Usuario editado correctamente." if id_usuario else "Usuario creado correctamente."
         return jsonify({"ok": True, "message": msg})

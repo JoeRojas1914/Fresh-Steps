@@ -22,12 +22,20 @@ from services.ventas_service import (
 )
 
 from services.ventas_editar_service import obtener_venta_editar_service, editar_venta_service
+from services.permisos_service import (
+    restringir_negocios,
+    puede_usar_negocio,
+    puede_ver_venta,
+    negocios_visibles,
+)
 from middleware.auth_middleware import admin_required
 from extensions import limiter
 
 logger = logging.getLogger(__name__)
 
 ventas_bp = Blueprint("ventas", __name__)
+
+_SIN_PERMISO = "No tienes permiso para ver ventas de este negocio."
 
 _EDGE_PATHS = [
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
@@ -77,6 +85,8 @@ def guardar_venta():
     id_usuario = session.get("id_usuario")
     if not id_usuario:  # pragma: no cover
         return jsonify({"ok": False, "error": "Sesión expirada. Vuelve a iniciar sesión."}), 401
+    if not puede_usar_negocio(request.form.get("id_negocio")):
+        return jsonify({"ok": False, "error": "No tienes permiso para registrar ventas de este negocio."}), 403
     id_venta, error = guardar_venta_service(request.form, id_usuario)
     if error:
         status = 500 if "interno" in error.lower() else 400
@@ -86,13 +96,15 @@ def guardar_venta():
 
 @ventas_bp.route("/ventas")
 def ventas():
-    return render_template("ventas/ventas_crear.html")
+    return render_template("ventas/ventas_crear.html", negocios=negocios_visibles())
 
 
 @ventas_bp.route("/ventas/entregar/<int:id_venta>", methods=["POST"])
 @limiter.limit("30 per minute")
 def entregar_venta(id_venta):
     id_usuario = session.get("id_usuario")
+    if not puede_ver_venta(id_venta):
+        return jsonify({"ok": False, "error": _SIN_PERMISO}), 403
 
     try:
         if marcar_entregada(id_venta, id_usuario):
@@ -116,6 +128,8 @@ def venta_ticket(id_venta):
     venta = obtener_venta(id_venta)
     if not venta:
         return render_template("errors/404.html"), 404
+    if not puede_ver_venta(id_venta):
+        return render_template("errors/403.html"), 403
 
     detalles_dict = obtener_detalles_venta([id_venta])
     detalles = detalles_dict.get(id_venta, [])
@@ -140,7 +154,7 @@ def ventas_listas():
     orden         = request.args.get("orden") or None
     direccion     = request.args.get("dir") or None
 
-    data = listar_ventas_listas_service(id_negocio, pagina, id_venta, q=q,
+    data = listar_ventas_listas_service(restringir_negocios(id_negocio), pagina, id_venta, q=q,
                                         orden=orden, direccion=direccion,
                                         articulo=articulo)
 
@@ -162,7 +176,7 @@ def ventas_pendientes():
         orden         = request.args.get("orden") or None
         direccion     = request.args.get("dir") or None
 
-        data = listar_entregas_pendientes_service(id_negocio, pagina, id_venta, q=q,
+        data = listar_entregas_pendientes_service(restringir_negocios(id_negocio), pagina, id_venta, q=q,
                                                   orden=orden, direccion=direccion,
                                                   articulo=articulo)
 
@@ -178,6 +192,8 @@ def ventas_pendientes():
 @ventas_bp.route("/ventas/marcar-lista/<int:id_venta>", methods=["POST"])
 @limiter.limit("30 per minute")
 def marcar_lista(id_venta):
+    if not puede_ver_venta(id_venta):
+        return jsonify({"ok": False, "error": _SIN_PERMISO}), 403
     try:
         id_usuario = session.get('id_usuario')
         if marcar_lista_service(id_venta, id_usuario):
@@ -197,7 +213,9 @@ def marcar_lista(id_venta):
 
 @ventas_bp.route("/ventas/detalles/<int:id_venta>")
 def detalles_venta(id_venta):
-    detalles = obtener_detalles_venta([id_venta])  
+    if not puede_ver_venta(id_venta):
+        return jsonify({"ok": False, "error": _SIN_PERMISO}), 403
+    detalles = obtener_detalles_venta([id_venta])
     return jsonify(detalles.get(id_venta, []))
 
 @ventas_bp.route("/ventas/pago-final", methods=["POST"])
@@ -205,6 +223,10 @@ def detalles_venta(id_venta):
 def registrar_pago_final():
     data = request.get_json(silent=True) or {}
     id_usuario = session.get("id_usuario")
+
+    id_venta_pago = data.get("id_venta")
+    if str(id_venta_pago).isdigit() and not puede_ver_venta(int(id_venta_pago)):
+        return jsonify({"ok": False, "error": _SIN_PERMISO}), 403
 
     ok, mensaje = registrar_pago_final_service(data, id_usuario)
     if not ok:

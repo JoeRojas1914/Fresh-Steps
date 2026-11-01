@@ -12,6 +12,14 @@ def _col_v(col: str) -> str:
     return _COLS_FECHA.get(col, "fecha_recibo")
 
 
+def _filtro_negocios(id_negocio, columna: str = "id_negocio") -> tuple[str, list]:
+    """'all' = sin filtro; un id o una lista de ids = `AND columna IN (...)`."""
+    if id_negocio == "all" or id_negocio is None:
+        return "", []
+    ids = list(id_negocio) if isinstance(id_negocio, (list, tuple, set)) else [id_negocio]
+    return f" AND {columna} IN ({', '.join(['%s'] * len(ids))})", ids
+
+
 def generar_semanas_rango(inicio: date, fin: date):
     meses = [
         "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -261,10 +269,9 @@ def contar_ventas_por_dia_rango(inicio: date, fin: date, id_negocio: str, col: s
         WHERE DATE({col}) BETWEEN %s AND %s
           AND eliminado = 0
     """
-    params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+    sql_neg, params_neg = _filtro_negocios(id_negocio)
+    sql += sql_neg
+    params = [inicio, fin] + params_neg
     sql += " GROUP BY dia"
 
     with get_db() as (_, cursor):
@@ -647,10 +654,8 @@ def contar_unidades_hoy(col: str = "fecha_recibo", id_negocio: str = "all") -> i
         WHERE DATE(v.{col}) = CURDATE()
           AND v.eliminado = 0
     """
-    params = []
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql_neg, params = _filtro_negocios(id_negocio, "v.id_negocio")
+    sql += sql_neg
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
         return int(cursor.fetchone()["total"] or 0)
@@ -663,10 +668,8 @@ def contar_ventas_entregadas_hoy(id_negocio: str = "all") -> int:
         WHERE DATE(v.fecha_entrega) = CURDATE()
           AND v.eliminado = 0
     """
-    params = []
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql_neg, params = _filtro_negocios(id_negocio, "v.id_negocio")
+    sql += sql_neg
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
         return int(cursor.fetchone()["total"] or 0)

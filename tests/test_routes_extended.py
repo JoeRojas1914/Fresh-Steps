@@ -363,6 +363,7 @@ def test_guardar_usuario_nuevo_retorna_json(logged_client, db_conn):
         "pin":      "4321",
         "nombre":   "Ruta",
         "apellido": "Test",
+        "negocios": [1, 3],
     })
     assert res.status_code == 200
     assert res.get_json()["ok"] is True
@@ -374,6 +375,9 @@ def test_guardar_usuario_nuevo_retorna_json(logged_client, db_conn):
     if row:
         uid = row[0]
         cursor = db_conn.cursor()
+        cursor.execute("SELECT id_negocio FROM usuario_negocio WHERE id_usuario=%s ORDER BY id_negocio", (uid,))
+        assert [r[0] for r in cursor.fetchall()] == [1, 3]
+        cursor.execute("DELETE FROM usuario_negocio WHERE id_usuario=%s", (uid,))
         cursor.execute("DELETE FROM historial_usuario WHERE id_usuario=%s", (uid,))
         cursor.execute("DELETE FROM login_log WHERE id_usuario=%s", (uid,))
         cursor.execute("DELETE FROM usuario WHERE id_usuario=%s", (uid,))

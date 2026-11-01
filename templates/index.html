@@ -15,7 +15,8 @@
     <span class="home-fecha">{{ fecha_bonita }}</span>
 </div>
 
-{# ── Selector de negocio ── #}
+{# ── Selector de negocio — solo admin (caja ve sus negocios asignados) ── #}
+{% if session.rol == "admin" %}
 <div class="negocio-pills">
     <span class="negocio-pills-label">Negocio</span>
     <a href="/" data-negocio="all" class="negocio-pill{% if negocio_sel == 'all' %} active{% endif %}">Todos</a>
@@ -29,6 +30,7 @@
         <span class="pill-dot pill-dot--maquila"></span> Maquila
     </a>
 </div>
+{% endif %}
 
 {# ── Resumen del mes — solo admin ── #}
 {% if session.rol == "admin" and kpis_mes %}

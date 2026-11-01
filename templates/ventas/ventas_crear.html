@@ -84,11 +84,16 @@
                     </div>
                     <div class="cliente-negocio-col">
                         <label class="form-label" for="id_negocio">Negocio</label>
+                        {# Solo los negocios que el usuario puede usar (caja: los asignados por el admin) #}
+                        {% set ids_permitidos = negocios | map(attribute='id_negocio') | list %}
+                        {% set etiquetas = [(1, 'Fresh Steps'), (2, 'Confección'), (3, 'Maquila')] %}
+                        {% set ns = namespace(default=None) %}
+                        {% for id_neg, _ in etiquetas %}{% if id_neg in ids_permitidos and ns.default is none %}{% set ns.default = id_neg %}{% endif %}{% endfor %}
                         <select name="id_negocio" id="id_negocio" class="select--full" aria-describedby="error-negocio">
                             <option value="">-- Selecciona --</option>
-                            <option value="1" selected>Fresh Steps</option>
-                            <option value="2">Confección</option>
-                            <option value="3">Maquila</option>
+                            {% for id_neg, etiqueta in etiquetas if id_neg in ids_permitidos %}
+                            <option value="{{ id_neg }}" {% if id_neg == ns.default %}selected{% endif %}>{{ etiqueta }}</option>
+                            {% endfor %}
                         </select>
                         <div id="error-negocio" class="error-msg d-none" role="alert" aria-live="assertive" aria-atomic="true">
                             <i data-lucide="alert-triangle" width="12" height="12"></i> Borra los artículos para cambiar el negocio.

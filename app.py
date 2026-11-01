@@ -53,6 +53,7 @@ from middleware.auth_middleware import init_auth_middleware
 from models.ventas import contar_entregas_resumen
 from models.estadisticas_ventas import contar_ventas_por_dia_rango, obtener_total_ingresos, contar_unidades_hoy, contar_ventas_entregadas_hoy
 from models.estadisticas_gastos import obtener_total_gastos
+from services.permisos_service import negocios_permitidos, restringir_negocios
 
 
 
@@ -126,7 +127,16 @@ def server_error(e):  # pragma: no cover
 _NEGOCIOS_VALIDOS = {"all", "1", "2", "3"}
 
 
-def _kpis_index(negocio: str, es_admin: bool) -> dict:
+def _negocio_index():
+    """Negocio de los KPIs: admin elige con las pastillas ('all' o un id);
+    caja siempre ve la suma de sus negocios asignados (lista de ids)."""
+    if negocios_permitidos() is not None:
+        return restringir_negocios()
+    negocio = request.args.get("negocio", "all")
+    return negocio if negocio in _NEGOCIOS_VALIDOS else "all"
+
+
+def _kpis_index(negocio, es_admin: bool) -> dict:
     hoy_dt         = date.today()
     negocio_filtro = negocio if negocio != "all" else None
 
@@ -183,11 +193,8 @@ def index():
     hoy_dt = date.today()
     fecha_bonita = f"{dias[hoy_dt.weekday()]} {hoy_dt.day} de {meses[hoy_dt.month-1]}, {hoy_dt.year}"
 
-    negocio = request.args.get("negocio", "all")
-    if negocio not in _NEGOCIOS_VALIDOS:
-        negocio = "all"
-
-    kpis = _kpis_index(negocio, session.get("rol") == "admin")
+    negocio = _negocio_index()
+    kpis    = _kpis_index(negocio, session.get("rol") == "admin")
 
     return render_template(
         "index.html",
@@ -204,11 +211,7 @@ def api_index_kpis():
     if not session.get("id_usuario"):  # pragma: no cover
         return jsonify({"error": "No autorizado"}), 401
 
-    negocio = request.args.get("negocio", "all")
-    if negocio not in _NEGOCIOS_VALIDOS:
-        negocio = "all"
-
-    kpis = _kpis_index(negocio, session.get("rol") == "admin")
+    kpis = _kpis_index(_negocio_index(), session.get("rol") == "admin")
     resp = jsonify(kpis)
     resp.cache_control.private = True
     resp.cache_control.max_age = 30

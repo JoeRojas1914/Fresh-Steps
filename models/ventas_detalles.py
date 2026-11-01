@@ -33,6 +33,23 @@ def filtro_articulo(texto):
     return sql, [f"%{p}%" for p in palabras]
 
 
+def como_lista(valor):
+    """Acepta None, un valor suelto o una lista y regresa una lista sin vacíos."""
+    if valor is None:
+        return []
+    if not isinstance(valor, (list, tuple, set)):
+        valor = [valor]
+    return [v for v in valor if v not in (None, "")]
+
+
+def filtro_negocio(id_negocio):
+    """Filtro por uno o varios negocios: `AND v.id_negocio IN (...)`."""
+    ids = como_lista(id_negocio)
+    if not ids:
+        return "", []
+    return f" AND v.id_negocio IN ({', '.join(['%s'] * len(ids))})", list(ids)
+
+
 def filtro_cliente(q):
     q = (q or "").strip()
     if not q:
@@ -171,10 +188,8 @@ def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, of
               AND v.fecha_entrega IS NULL
               AND v.eliminado = 0
         """
-        params = []
-        if id_negocio:
-            sql += " AND v.id_negocio = %s"
-            params.append(id_negocio)
+        sql_neg, params = filtro_negocio(id_negocio)
+        sql += sql_neg
         if id_venta:
             sql += " AND CAST(v.id_venta AS CHAR) LIKE %s"
             params.append(f"{id_venta}%")
@@ -218,10 +233,8 @@ def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=No
               AND v.fecha_entrega IS NULL
               AND v.eliminado = 0
         """
-        params = []
-        if id_negocio:
-            sql += " AND v.id_negocio = %s"
-            params.append(id_negocio)
+        sql_neg, params = filtro_negocio(id_negocio)
+        sql += sql_neg
         if id_venta:
             sql += " AND CAST(v.id_venta AS CHAR) LIKE %s"
             params.append(f"{id_venta}%")
@@ -251,10 +264,8 @@ def contar_entregas_resumen(id_negocio=None, id_venta=None, q=None, articulo=Non
         JOIN cliente c ON c.id_cliente = v.id_cliente
         WHERE v.eliminado = 0
     """
-    params = []
-    if id_negocio is not None:
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql_neg, params = filtro_negocio(id_negocio)
+    sql += sql_neg
     if id_venta:
         sql += " AND CAST(v.id_venta AS CHAR) LIKE %s"
         params.append(f"{id_venta}%")

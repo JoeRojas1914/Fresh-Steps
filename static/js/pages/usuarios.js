@@ -13,6 +13,18 @@ import { abrirHistorial } from '../base/historial_helpers.js';
 
 let _pendingToggleUrl = null;
 
+// ── Negocios que puede ver el usuario de caja ──
+function marcarNegocios(ids) {
+    const marcados = new Set(ids.map(String));
+    document.querySelectorAll(".js-negocio-usuario").forEach(cb => {
+        cb.checked = marcados.has(cb.value);
+    });
+}
+
+function negociosSeleccionados() {
+    return [...document.querySelectorAll(".js-negocio-usuario:checked")].map(cb => parseInt(cb.value, 10));
+}
+
 function confirmarToggleUsuario(id, accion) {
     _pendingToggleUrl = `/usuarios/toggle/${id}`;
     document.getElementById("modalToggleTitulo").innerText  = `${accion} usuario`;
@@ -46,6 +58,7 @@ function abrirModalUsuario() {
     document.getElementById("u_correo").value            = "";
     document.getElementById("u_cp").value                = "";
     document.getElementById("u_rol").value               = "caja";
+    marcarNegocios([]);
 
     document.getElementById("password").required                      = true;
     document.getElementById("password_confirmar").required             = true;
@@ -72,6 +85,7 @@ function editarUsuario(e, btn) {
     document.getElementById("u_correo").value        = d.correo    || "";
     document.getElementById("u_cp").value            = d.cp        || "";
     document.getElementById("u_rol").value           = d.rol       || "caja";
+    marcarNegocios((d.negocios || "").split(",").filter(Boolean));
     document.getElementById("password").value        = "";
     document.getElementById("password_confirmar").value = "";
     document.getElementById("pin").value             = "";
@@ -135,6 +149,11 @@ document.addEventListener("DOMContentLoaded", () => {
             mostrarFeedback("El teléfono debe tener exactamente 10 dígitos.", "error");
             return;
         }
+        const negocios = negociosSeleccionados();
+        if (!negocios.length) {
+            mostrarFeedback("Selecciona al menos un negocio que el usuario pueda ver.", "error");
+            return;
+        }
 
         const btn = form.querySelector('[type="submit"]');
         const textoOriginal = btn ? btn.textContent : "";
@@ -154,6 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     correo:     document.getElementById("u_correo").value.trim(),
                     cp:         document.getElementById("u_cp").value.trim(),
                     rol:        document.getElementById("u_rol").value,
+                    negocios:   negocios,
                 })
             });
             const res = await r.json();
@@ -215,6 +235,11 @@ function _detalleHistorialUsuario(h) {
             const cambios = campos
                 .filter(c => (a[c] || "") !== (d[c] || ""))
                 .map(c => `${escapeHtml(c)}: <em>${escapeHtml(a[c] || "—")}</em> → <strong>${escapeHtml(d[c] || "—")}</strong>`);
+            const negAntes   = (a.negocios || []).join(", ");
+            const negDespues = (d.negocios || []).join(", ");
+            if (d.negocios && negAntes !== negDespues) {
+                cambios.push(`negocios: <em>${escapeHtml(negAntes || "—")}</em> → <strong>${escapeHtml(negDespues || "—")}</strong>`);
+            }
             return cambios.length ? cambios.join(" | ") : "Sin cambios visibles";
         } catch { return "Editado"; }
     }

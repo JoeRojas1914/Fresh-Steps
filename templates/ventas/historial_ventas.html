@@ -17,23 +17,6 @@
     <input type="hidden" name="dir" value="{{ direccion or '' }}">
     <div class="filtro-box">
         <div class="filtro-row">
- 
-            <div class="filtro-item">
-                <label>Buscar cliente</label>
-                <input type="text" name="q" value="{{ q or '' }}" placeholder="Nombre o teléfono...">
-            </div>
-
-            <div class="filtro-item">
-                <label>Buscar artículo</label>
-                <input type="text" name="articulo" value="{{ articulo or '' }}" placeholder="Marca, modelo, color...">
-            </div>
-
-            <div class="filtro-item filtro-item--max160">
-                <label>N° Ticket</label>
-                <input type="number" name="id_venta" min="1"
-                       value="{{ id_venta or '' }}"
-                       placeholder="# Recibo...">
-            </div>
 
             <div class="filtro-item">
                 <label>Negocio</label>
@@ -49,6 +32,23 @@
                         {% endfor %}
                     </div>
                 </details>
+            </div>
+
+            <div class="filtro-item">
+                <label>Buscar cliente</label>
+                <input type="text" name="q" value="{{ q or '' }}" placeholder="Nombre o teléfono...">
+            </div>
+
+            <div class="filtro-item">
+                <label>Buscar artículo</label>
+                <input type="text" name="articulo" value="{{ articulo or '' }}" placeholder="Marca, modelo, color...">
+            </div>
+
+            <div class="filtro-item filtro-item--max160">
+                <label>N° Ticket</label>
+                <input type="number" name="id_venta" min="1"
+                       value="{{ id_venta or '' }}"
+                       placeholder="# Recibo...">
             </div>
  
             <div class="filtro-item filtro-item--max160">

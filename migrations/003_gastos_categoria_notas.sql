@@ -1,6 +1,3 @@
--- Migración 003: Categoría y notas en gastos
--- Aplicar con: mysql -u user -p freshsteps < migrations/003_gastos_categoria_notas.sql
-
 CREATE TABLE IF NOT EXISTS categoria_gasto (
     id_categoria  INT          NOT NULL AUTO_INCREMENT,
     nombre        VARCHAR(100) NOT NULL,

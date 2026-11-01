@@ -1,5 +1,5 @@
 from db import get_db
-from models.ventas_detalles import filtro_articulo, filtro_cliente
+from models.ventas_detalles import filtro_articulo, filtro_cliente, filtro_negocio, como_lista
 from utils import (
     registrar_historial as _registrar_historial,
     construir_order_by,
@@ -41,17 +41,8 @@ _CONDICIONES_ESTADO = {
 }
 
 
-def _como_lista(valor):
-    """Acepta None, un valor suelto o una lista y regresa una lista sin vacíos."""
-    if valor is None:
-        return []
-    if not isinstance(valor, (list, tuple, set)):
-        valor = [valor]
-    return [v for v in valor if v not in (None, "")]
-
-
 def _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas):
-    condiciones = [_CONDICIONES_ESTADO[e] for e in _como_lista(estado) if e in _CONDICIONES_ESTADO]
+    condiciones = [_CONDICIONES_ESTADO[e] for e in como_lista(estado) if e in _CONDICIONES_ESTADO]
     if condiciones:
         sql += " AND (" + " OR ".join(condiciones) + ")"
     elif not mostrar_eliminadas:
@@ -60,11 +51,8 @@ def _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas):
 
 
 def _aplicar_filtro_negocio(sql, params, id_negocio):
-    ids = _como_lista(id_negocio)
-    if ids:
-        sql += f" AND v.id_negocio IN ({', '.join(['%s'] * len(ids))})"
-        params.extend(ids)
-    return sql, params
+    sql_neg, params_neg = filtro_negocio(id_negocio)
+    return sql + sql_neg, params + params_neg
 
 
 def contar_historial_ventas(

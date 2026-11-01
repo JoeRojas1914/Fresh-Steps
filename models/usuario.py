@@ -155,6 +155,44 @@ def obtener_session_token(id_usuario):
         return row["session_token"] if row else None
 
 
+def obtener_negocios_usuario(id_usuario):
+    """IDs de los negocios asignados a un usuario (tabla usuario_negocio)."""
+    with get_db() as (_, cursor):
+        cursor.execute("""
+            SELECT id_negocio FROM usuario_negocio
+            WHERE id_usuario=%s
+            ORDER BY id_negocio
+        """, (id_usuario,))
+        return [r["id_negocio"] for r in cursor.fetchall()]
+
+
+def obtener_negocios_usuarios(ids_usuario):
+    """{id_usuario: [id_negocio, ...]} para varios usuarios en una sola consulta."""
+    if not ids_usuario:
+        return {}
+    with get_db() as (_, cursor):
+        ph = ",".join(["%s"] * len(ids_usuario))
+        cursor.execute(f"""
+            SELECT id_usuario, id_negocio FROM usuario_negocio
+            WHERE id_usuario IN ({ph})
+            ORDER BY id_negocio
+        """, tuple(ids_usuario))
+        resultado = {}
+        for r in cursor.fetchall():
+            resultado.setdefault(r["id_usuario"], []).append(r["id_negocio"])
+        return resultado
+
+
+def guardar_negocios_usuario(id_usuario, ids_negocio):
+    """Reemplaza los negocios asignados al usuario."""
+    with get_db() as (_, cursor):
+        cursor.execute("DELETE FROM usuario_negocio WHERE id_usuario=%s", (id_usuario,))
+        for id_negocio in ids_negocio:
+            cursor.execute("""
+                INSERT INTO usuario_negocio (id_usuario, id_negocio) VALUES (%s, %s)
+            """, (id_usuario, id_negocio))
+
+
 def obtener_historial_usuario(id_usuario):
     with get_db() as (_, cursor):
         cursor.execute("""

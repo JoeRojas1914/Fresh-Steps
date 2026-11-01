@@ -159,6 +159,20 @@ select:focus {
 .custom-checkbox:hover .checkmark { border-color: #0056b3; }
 
 .checkbox-item { justify-content: flex-start; }
+
+/* Lista de casillas en línea (p. ej. negocios de un usuario de caja) */
+.negocios-check {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  padding: 6px 0;
+}
+
+.negocios-check .custom-checkbox {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
 .checkbox-item .custom-checkbox { height: 42px; display: flex; align-items: center; }
 
 .filtro-toggle {

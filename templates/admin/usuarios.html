@@ -114,6 +114,19 @@
             </div>
 
             <div class="modal-field modal-field--full">
+                <label>Negocios que puede ver <span class="text-danger">*</span></label>
+                <div class="negocios-check" id="u_negocios">
+                    {% for n in negocios %}
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="negocios" value="{{ n.id_negocio }}" class="js-negocio-usuario">
+                        <span class="checkmark"></span> {{ n.nombre }}
+                    </label>
+                    {% endfor %}
+                </div>
+                <span class="dim text-2xs">Solo verá y podrá registrar ventas de los negocios marcados.</span>
+            </div>
+
+            <div class="modal-field modal-field--full">
                 <label for="password">
                     Contraseña
                     <span id="pass-requerido" class="text-danger">*</span>

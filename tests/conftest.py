@@ -88,13 +88,19 @@ def usuario_caja(db_conn):
            VALUES (%s, %s, %s, 'caja', 'Caja Test', 1)""",
         (username, generate_password_hash("TestPass123!"), generate_password_hash(pin)),
     )
-    db_conn.commit()
     uid = cursor.lastrowid
+    # Por defecto la caja de prueba puede ver todos los negocios
+    cursor.execute(
+        "INSERT INTO usuario_negocio (id_usuario, id_negocio) SELECT %s, id_negocio FROM negocio",
+        (uid,),
+    )
+    db_conn.commit()
     cursor.close()
 
     yield {"id_usuario": uid, "usuario": username, "pin": pin, "rol": "caja"}
 
     cursor = db_conn.cursor()
+    cursor.execute("DELETE FROM usuario_negocio   WHERE id_usuario = %s", (uid,))
     cursor.execute("DELETE FROM historial_usuario WHERE id_usuario = %s", (uid,))
     cursor.execute("DELETE FROM login_log         WHERE id_usuario = %s", (uid,))
     cursor.execute("DELETE FROM login_intentos WHERE usuario     = %s", (username,))

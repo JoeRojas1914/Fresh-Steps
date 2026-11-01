@@ -46,6 +46,7 @@ def test_crear_usuario_caja(app, db_conn):
             rol="caja",
             pin="4321",
             nombre="Nuevo",
+            negocios=[1],
         )
 
     cursor = db_conn.cursor(dictionary=True)
@@ -100,6 +101,7 @@ def test_crear_usuario_sin_correo_ni_cp(app, db_conn):
             rol="caja",
             pin="4322",
             nombre="Nuevo",
+            negocios=[1],
         )
 
     cursor = db_conn.cursor(dictionary=True)
