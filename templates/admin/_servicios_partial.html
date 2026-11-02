@@ -68,7 +68,7 @@
     total_paginas,
     'servicios.servicios',
     {
-      "id_negocio": request.args.get('id_negocio'),
+      "id_negocio": request.args.getlist('id_negocio'),
       "fecha_inicio": request.args.get('fecha_inicio'),
       "fecha_fin": request.args.get('fecha_fin'),
       "eliminados": request.args.get('eliminados'),

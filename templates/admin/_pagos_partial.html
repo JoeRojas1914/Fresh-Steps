@@ -77,7 +77,7 @@
     total_paginas,
     'pagos.historial_pagos',
     {
-      "id_negocio":      request.args.get('id_negocio'),
+      "id_negocio":      request.args.getlist('id_negocio'),
       "tipo_pago":       request.args.get('tipo_pago'),
       "tipo_pago_venta": request.args.get('tipo_pago_venta'),
       "fecha_inicio":    request.args.get('fecha_inicio'),

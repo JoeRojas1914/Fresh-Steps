@@ -8,7 +8,7 @@
 {% from "macros/badges.html" import badge_negocio %}
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
-{% from "components/filtros.html" import filtro_ticket %}
+{% from "components/filtros.html" import filtro_ticket, filtro_negocios %}
 
 <h1><i data-lucide="clipboard-list" width="24" height="24"></i> Historial de ventas</h1>
 {% set es_admin = session.rol == 'admin' %}
@@ -24,21 +24,7 @@
 
             {# La caja solo ve sus negocios; con uno solo no hay nada que elegir #}
             {% if es_admin or negocios | length > 1 %}
-            <div class="filtro-item">
-                <label>Negocio</label>
-                <details class="multi-select" data-placeholder="Todos los negocios">
-                    <summary class="multi-select__btn"><span class="multi-select__txt">Todos los negocios</span></summary>
-                    <div class="multi-select__panel">
-                        {% for n in negocios %}
-                        <label class="multi-select__opt">
-                            <input type="checkbox" name="id_negocio" value="{{ n.id_negocio }}"
-                                   {% if id_negocio and n.id_negocio in id_negocio %}checked{% endif %}>
-                            <span>{{ n.nombre }}</span>
-                        </label>
-                        {% endfor %}
-                    </div>
-                </details>
-            </div>
+            {{ filtro_negocios(negocios, id_negocio) }}
             {% endif %}
 
             <div class="filtro-item">

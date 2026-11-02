@@ -1,5 +1,5 @@
 from db import get_db
-from utils import build_where, construir_order_by, registrar_historial as _registrar_historial
+from utils import build_where, cond_in, construir_order_by, registrar_historial as _registrar_historial
 
 
 def existe_servicio_activo(id_negocio, nombre, excluir_id=None):
@@ -73,7 +73,7 @@ def obtener_servicio_por_id(id_servicio):
 
 def contar_servicios(id_negocio=None, q=None, incluir_eliminados=False):
     where, params = build_where([
-        ("id_negocio = %s", id_negocio),
+        cond_in("id_negocio", id_negocio),
         ("nombre LIKE %s", f"%{q}%" if q else None),
         ("activo = %s", None if incluir_eliminados else 1),
     ])
@@ -93,7 +93,7 @@ COLUMNAS_ORDEN_SERVICIOS = {
 def obtener_servicios(id_negocio=None, q=None, incluir_eliminados=False, limit=10, offset=0,
                       orden=None, direccion=None):
     where, params = build_where([
-        ("s.id_negocio = %s", id_negocio),
+        cond_in("s.id_negocio", id_negocio),
         ("s.nombre LIKE %s", f"%{q}%" if q else None),
         ("s.activo = %s", None if incluir_eliminados else 1),
     ])

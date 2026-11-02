@@ -6,6 +6,7 @@
 {% from "components/pagination.html" import pagination %}
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal %}
+{% from "components/filtros.html" import filtro_negocios %}
 
 
 <h1><i data-lucide="banknote" width="24" height="24"></i> Gastos</h1>
@@ -19,18 +20,7 @@
       class="filtro-box">
 
   <div class="filtro-row">
-    <div class="filtro-item">
-      <label for="filtro-negocio-gasto">Negocio</label>
-      <select name="id_negocio" id="filtro-negocio-gasto">
-        <option value="">Todos</option>
-        {% for n in negocios %}
-          <option value="{{ n.id_negocio }}"
-            {% if request.args.get('id_negocio') == n.id_negocio|string %}selected{% endif %}>
-            {{ n.nombre }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
+    {{ filtro_negocios(negocios, request.args.getlist('id_negocio'), placeholder="Todos", input_id="filtro-negocio-gasto") }}
 
     <div class="filtro-item">
       <label for="filtro-fecha-inicio-gasto">Desde</label>
@@ -80,7 +70,7 @@
            class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
       {% endif %}
       <a href="{{ url_for('gastos.exportar_gastos_excel',
-                  id_negocio=request.args.get('id_negocio') or '',
+                  id_negocio=request.args.getlist('id_negocio'),
                   id_categoria=request.args.get('id_categoria') or '',
                   fecha_inicio=request.args.get('fecha_inicio') or '',
                   fecha_fin=request.args.get('fecha_fin') or '',

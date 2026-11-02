@@ -4,6 +4,7 @@
 {% from "components/pagination.html" import pagination %}
 {% from "components/modal.html" import modal %}
 {% from "components/alerts.html" import alerts %}
+{% from "components/filtros.html" import filtro_negocios %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/cliente_perfil.css') }}">
@@ -89,18 +90,7 @@
     <div class="filtro-row">
       {# La caja solo ve sus negocios; con uno solo no hay nada que elegir #}
       {% if session.rol == 'admin' or negocios | length > 1 %}
-      <div class="filtro-item">
-        <label>Negocio</label>
-        <select name="id_negocio">
-          <option value="">Todos</option>
-          {% for n in negocios %}
-            <option value="{{ n.id_negocio }}"
-              {% if request.args.get('id_negocio') == n.id_negocio|string %}selected{% endif %}>
-              {{ n.nombre }}
-            </option>
-          {% endfor %}
-        </select>
-      </div>
+      {{ filtro_negocios(negocios, id_negocio, placeholder="Todos") }}
       {% endif %}
       <div class="filtro-item">
         <label>Desde</label>
@@ -121,7 +111,7 @@
         {% endif %}
         {% if session.rol == 'admin' %}
         <a href="{{ url_for('clientes.exportar_cliente_excel', id_cliente=cliente.id_cliente,
-                    id_negocio=request.args.get('id_negocio') or '',
+                    id_negocio=request.args.getlist('id_negocio'),
                     fecha_inicio=request.args.get('fecha_inicio') or '',
                     fecha_fin=request.args.get('fecha_fin') or '') }}"
            class="btn btn--success btn--sm no-underline js-exportar">

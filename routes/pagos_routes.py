@@ -10,6 +10,7 @@ from services.excel_helpers import (
     xl_fila_totales, xl_col_widths, xl_row_bg, fmt_dt, C,
 )
 from config import METODOS_PAGO_VALIDOS
+from utils import ids_de_args
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ TIPOS_PAGO_VENTA = ["prepago", "final"]
 
 def _filtros_request():
     return {
-        "id_negocio":     request.args.get("id_negocio")     or None,
+        "id_negocio":     ids_de_args(request.args),
         "tipo_pago":      request.args.get("tipo_pago")       or None,
         "tipo_pago_venta": request.args.get("tipo_pago_venta") or None,
         "fecha_inicio":   request.args.get("fecha_inicio")    or None,

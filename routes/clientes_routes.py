@@ -16,6 +16,7 @@ from services.excel_helpers import (
 
 from middleware.auth_middleware import admin_required
 from extensions import limiter
+from utils import ids_de_args
 from services.permisos_service import (
     negocios_permitidos,
     restringir_negocios,
@@ -134,14 +135,18 @@ def api_clientes():
 def ver_cliente(id_cliente):
     if not puede_ver_cliente(id_cliente):
         return render_template("errors/403.html"), 403
-    filtros = request.args
+    # Uno o varios negocios (?id_negocio=1&id_negocio=3)
+    filtros = request.args.to_dict()
+    filtros["id_negocio"] = ids_de_args(request.args)
     negocios_kpis = None
     if not _es_admin():
-        filtros = request.args.to_dict()
-        filtros["id_negocio"] = restringir_negocios(request.args.get("id_negocio") or None)
+        # Pedidos y KPIs solo de los negocios de la caja
+        filtros["id_negocio"] = restringir_negocios(filtros["id_negocio"])
         negocios_kpis = restringir_negocios()
     data = obtener_cliente_detalle_service(id_cliente, filtros, negocios_kpis=negocios_kpis)
     data["negocios"] = negocios_visibles()
+    # En pantalla solo se marcan los negocios que se pidieron explícitamente
+    data["id_negocio"] = ids_de_args(request.args)
     if request.args.get('partial') == '1':
         return render_template("clientes/_cliente_pedidos_partial.html", **data)
     data["volver_url"] = _url_volver_clientes()
@@ -237,7 +242,7 @@ def exportar_clientes_excel():
 @clientes_bp.route("/clientes/<int:id_cliente>/exportar")
 @admin_required
 def exportar_cliente_excel(id_cliente):
-    id_negocio   = request.args.get("id_negocio")  or None
+    id_negocio   = ids_de_args(request.args)
     fecha_inicio = request.args.get("fecha_inicio") or None
     fecha_fin    = request.args.get("fecha_fin")    or None
 

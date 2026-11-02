@@ -4,6 +4,7 @@
 {% from "components/alerts.html" import alerts %}
 {% from "components/pagination.html" import pagination %}
 {% from "components/table.html" import table %}
+{% from "components/filtros.html" import filtro_negocios %}
 
 <h1><i data-lucide="credit-card" width="24" height="24"></i> Historial de Pagos</h1>
 <p class="page-sub">Registro de todos los pagos recibidos</p>
@@ -16,18 +17,7 @@
       class="filtro-box">
 
   <div class="filtro-row">
-    <div class="filtro-item">
-      <label for="filtro-negocio-pago">Negocio</label>
-      <select name="id_negocio" id="filtro-negocio-pago">
-        <option value="">Todos</option>
-        {% for n in negocios %}
-          <option value="{{ n.id_negocio }}"
-            {% if request.args.get('id_negocio') == n.id_negocio|string %}selected{% endif %}>
-            {{ n.nombre }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
+    {{ filtro_negocios(negocios, request.args.getlist('id_negocio'), placeholder="Todos", input_id="filtro-negocio-pago") }}
 
     <div class="filtro-item">
       <label for="filtro-tipo-pago">Método de pago</label>
@@ -75,7 +65,7 @@
          id="btn-limpiar-filtro"
          class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
       <a href="{{ url_for('pagos.exportar_pagos_excel',
-                  id_negocio=request.args.get('id_negocio') or '',
+                  id_negocio=request.args.getlist('id_negocio'),
                   tipo_pago=request.args.get('tipo_pago') or '',
                   tipo_pago_venta=request.args.get('tipo_pago_venta') or '',
                   fecha_inicio=request.args.get('fecha_inicio') or '',

@@ -81,6 +81,7 @@
                 form.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
                 form.querySelectorAll('input[type=checkbox], input[type=radio]').forEach(el => { el.checked = false; });
                 form.querySelectorAll('input[type=hidden][name=orden], input[type=hidden][name=dir]').forEach(el => { el.value = ''; });
+                if (window.actualizarMultiSelects) window.actualizarMultiSelects();
                 cargarTablaAjax(clearEl.href || form.action, container);
             });
         }

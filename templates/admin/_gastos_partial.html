@@ -104,7 +104,7 @@
     total_paginas,
     'gastos.gastos',
     {
-      "id_negocio":  request.args.get('id_negocio'),
+      "id_negocio":  request.args.getlist('id_negocio'),
       "id_categoria": request.args.get('id_categoria'),
       "fecha_inicio": request.args.get('fecha_inicio'),
       "fecha_fin":    request.args.get('fecha_fin'),

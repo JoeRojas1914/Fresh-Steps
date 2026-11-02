@@ -15,6 +15,7 @@ from services.excel_helpers import (
 
 from middleware.auth_middleware import admin_required
 from extensions import limiter
+from utils import ids_de_args, nombres_negocios
 from services.servicios_service import (
     listar_servicios,
     listar_servicios_api,
@@ -31,7 +32,7 @@ servicios_bp = Blueprint("servicios", __name__)
 @servicios_bp.route("/servicios")
 def servicios():
     q = request.args.get("q", "")
-    id_negocio = request.args.get("id_negocio", type=int)
+    id_negocio = ids_de_args(request.args)
     pagina = request.args.get("pagina", 1, type=int)
 
     incluir_eliminados = bool(request.args.get("eliminados"))
@@ -132,7 +133,7 @@ def restaurar_servicio(id_servicio):
 @servicios_bp.route("/servicios/exportar")
 @admin_required
 def exportar_servicios_excel():
-    id_negocio         = request.args.get("id_negocio") or None
+    id_negocio         = ids_de_args(request.args)
     incluir_eliminados = request.args.get("eliminados") == "1"
     q                  = request.args.get("q", "").strip() or None
 
@@ -142,7 +143,7 @@ def exportar_servicios_excel():
         direccion=request.args.get("dir") or None,
     )
 
-    subtexto = f"Negocio ID: {id_negocio}" if id_negocio else "Todos los negocios"
+    subtexto = nombres_negocios(id_negocio, obtener_negocios()) or "Todos los negocios"
     if q:
         subtexto += f"  |  Búsqueda: {q}"
     if incluir_eliminados:

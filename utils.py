@@ -30,6 +30,30 @@ def build_where(filters):
     return where, params
 
 
+def cond_in(columna, valores):
+    """Filtro para build_where: `columna IN (...)` con uno o varios valores.
+
+    None, "" o una lista vacía = sin filtro."""
+    if valores is None:
+        return ("", None)
+    if not isinstance(valores, (list, tuple, set)):
+        valores = [valores]
+    valores = [v for v in valores if v not in (None, "")]
+    if not valores:
+        return ("", None)
+    return (f"{columna} IN ({', '.join(['%s'] * len(valores))})", *valores)
+
+
+def ids_de_args(args, clave="id_negocio"):
+    """Lista de IDs enteros de un parámetro repetible (?id_negocio=1&id_negocio=3)."""
+    return [int(v) for v in args.getlist(clave) if str(v).strip().isdigit()]
+
+
+def nombres_negocios(ids, negocios):
+    """'Calzado, Maquila' para los IDs dados (para subtítulos de Excel)."""
+    return ", ".join(n["nombre"] for n in negocios if n["id_negocio"] in (ids or []))
+
+
 COLUMNAS_ORDEN_VENTAS = {
     "id":             "v.id_venta",
     "cliente":        "CONCAT(c.nombre, ' ', c.apellido)",

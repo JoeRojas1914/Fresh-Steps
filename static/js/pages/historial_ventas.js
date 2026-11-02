@@ -13,38 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("tabla-paginada");
     const clearEl   = document.getElementById("btn-limpiar-filtro-historial");
     if (form && container) window.initFiltroAjax(form, container, { clearEl });
-
-    initMultiSelects(form);
 });
-
-function initMultiSelects(form) {
-    if (!form) return;
-    const selects = form.querySelectorAll("details.multi-select");
-
-    const actualizarTexto = (det) => {
-        const marcados = [...det.querySelectorAll("input[type=checkbox]:checked")]
-            .map(cb => cb.nextElementSibling?.textContent.trim() || cb.value);
-        det.querySelector(".multi-select__txt").textContent =
-            marcados.length ? marcados.join(", ") : det.dataset.placeholder;
-    };
-
-    selects.forEach(det => {
-        actualizarTexto(det);
-        det.addEventListener("change", () => actualizarTexto(det));
-    });
-
-    form.addEventListener("click", (e) => {
-        if (e.target.closest("#btn-limpiar-filtro-historial")) {
-            setTimeout(() => selects.forEach(actualizarTexto), 0);
-        }
-    });
-
-    document.addEventListener("click", (e) => {
-        selects.forEach(det => {
-            if (det.open && !det.contains(e.target)) det.open = false;
-        });
-    });
-}
 
 async function verHistorialVenta(idVenta) {
     abrirModal("modalHistorialVenta");

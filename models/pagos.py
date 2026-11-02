@@ -1,6 +1,6 @@
 from db import get_db
 from config import TIPO_PAGO_FINAL
-from utils import build_where, construir_order_by
+from utils import build_where, cond_in, construir_order_by
 
 
 def registrar_pago(id_venta, monto, tipo_pago, id_usuario_cobro):
@@ -66,7 +66,7 @@ def registrar_pago_final_db(id_venta, monto, metodo_pago, id_usuario):
 def _filtros_historial(id_negocio, tipo_pago, tipo_pago_venta, fecha_inicio, fecha_fin):
     return build_where([
         ("v.eliminado = %s",          0),
-        ("v.id_negocio = %s",         id_negocio),
+        cond_in("v.id_negocio", id_negocio),
         ("pv.tipo_pago = %s",         tipo_pago),
         ("pv.tipo_pago_venta = %s",   tipo_pago_venta),
         ("DATE(pv.fecha_pago) >= %s", fecha_inicio),

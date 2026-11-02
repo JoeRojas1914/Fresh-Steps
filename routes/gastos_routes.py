@@ -27,6 +27,7 @@ from services.gastos_service import (
 )
 from middleware.auth_middleware import admin_required
 from extensions import limiter
+from utils import ids_de_args, nombres_negocios
 
 gastos_bp = Blueprint("gastos", __name__)
 
@@ -34,7 +35,7 @@ gastos_bp = Blueprint("gastos", __name__)
 @gastos_bp.route("/gastos")
 @admin_required
 def gastos():
-    id_negocio         = request.args.get("id_negocio")   or None
+    id_negocio         = ids_de_args(request.args)
     id_categoria       = request.args.get("id_categoria") or None
     fecha_inicio       = request.args.get("fecha_inicio") or None
     fecha_fin          = request.args.get("fecha_fin")    or None
@@ -160,7 +161,7 @@ def eliminar_categoria_route(id_categoria):
 @gastos_bp.route("/gastos/exportar")
 @admin_required
 def exportar_gastos_excel():
-    id_negocio         = request.args.get("id_negocio")   or None
+    id_negocio         = ids_de_args(request.args)
     id_categoria       = request.args.get("id_categoria") or None
     fecha_inicio       = request.args.get("fecha_inicio") or None
     fecha_fin          = request.args.get("fecha_fin")    or None
@@ -169,7 +170,7 @@ def exportar_gastos_excel():
     gastos = exportar_gastos_service(id_negocio, id_categoria, fecha_inicio, fecha_fin, incluir_eliminados)
 
     subtexto = "  ".join(filter(None, [
-        f"Negocio ID: {id_negocio}"   if id_negocio   else "",
+        f"Negocio: {nombres_negocios(id_negocio, obtener_negocios())}" if id_negocio else "",
         f"Categor\u00eda: {id_categoria}"  if id_categoria  else "",
         f"Desde: {fecha_inicio}"      if fecha_inicio  else "",
         f"Hasta: {fecha_fin}"         if fecha_fin     else "",

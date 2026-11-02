@@ -6,6 +6,7 @@
 {% from "components/pagination.html" import pagination %}
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal %}
+{% from "components/filtros.html" import filtro_negocios %}
 
 
 <h1><i data-lucide="store" width="24" height="24"></i> Servicios <span class="page-count">{{ total_servicios }} servicios</span></h1>
@@ -16,18 +17,7 @@
 <form method="GET" action="/servicios" id="form-filtro-servicios">
     <div class="filtro-box">
         <div class="filtro-row">
-            <div class="filtro-item">
-                <label for="select-negocio-servicios">Negocio</label>
-                <select name="id_negocio" id="select-negocio-servicios">
-                    <option value="">Todos los negocios</option>
-                    {% for n in negocios %}
-                        <option value="{{ n.id_negocio }}"
-                            {% if id_negocio and id_negocio|int == n.id_negocio %}selected{% endif %}>
-                            {{ n.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+            {{ filtro_negocios(negocios, id_negocio, input_id="select-negocio-servicios") }}
             <div class="filtro-item filtro-item--auto">
                 <label>&nbsp;</label>
                 <div class="filtro-toggle filtro-toggle--compact">
@@ -44,7 +34,7 @@
             </div>
             <div class="filtro-actions">
                 <a href="{{ url_for('servicios.exportar_servicios_excel',
-                            id_negocio=request.args.get('id_negocio') or '',
+                            id_negocio=request.args.getlist('id_negocio'),
                             eliminados='1' if incluir_eliminados else '') }}"
                    class="btn btn--success btn--sm no-underline js-exportar">
                     <i data-lucide="download" width="14" height="14"></i> Exportar Excel

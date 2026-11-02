@@ -31,6 +31,7 @@ from services.permisos_service import (
 )
 from middleware.auth_middleware import admin_required
 from extensions import limiter
+from utils import ids_de_args
 
 logger = logging.getLogger(__name__)
 
@@ -145,7 +146,7 @@ def venta_ticket(id_venta):
 
 @ventas_bp.route("/ventas/listas")
 def ventas_listas():
-    id_negocio    = request.args.get("id_negocio", type=int)
+    id_negocio    = ids_de_args(request.args)
     id_venta_raw  = request.args.get("id_venta", "").strip()
     id_venta      = id_venta_raw if id_venta_raw.isdigit() else None
     pagina        = request.args.get("pagina", 1, type=int)
@@ -167,7 +168,7 @@ def ventas_listas():
 @ventas_bp.route("/ventas/pendientes")
 def ventas_pendientes():
     try:
-        id_negocio    = request.args.get("id_negocio", type=int)
+        id_negocio    = ids_de_args(request.args)
         id_venta_raw  = request.args.get("id_venta", "").strip()
         id_venta      = id_venta_raw if id_venta_raw.isdigit() else None
         pagina        = request.args.get("pagina", 1, type=int)
@@ -280,7 +281,7 @@ def _filtros_historial():
     estados  = request.args.getlist("estado")
     if not es_admin:
         estados = [e for e in estados if e != "eliminada"]
-    id_negocio = [int(n) for n in request.args.getlist("id_negocio") if n.isdigit()]
+    id_negocio = ids_de_args(request.args)
     return {
         "id_negocio":         id_negocio if es_admin else restringir_negocios(id_negocio),
         "fecha_inicio":       request.args.get("fecha_inicio") or None,

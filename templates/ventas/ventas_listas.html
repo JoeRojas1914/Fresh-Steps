@@ -5,7 +5,7 @@
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal, modal_eliminar_venta %}
 {% from "components/pagination.html" import pagination %}
-{% from "components/filtros.html" import filtro_ticket %}
+{% from "components/filtros.html" import filtro_ticket, filtro_negocios %}
     <h1><i data-lucide="check-circle" width="24" height="24"></i> Entregas procesadas</h1>
     <p class="page-sub">Ventas listas para recoger por el cliente</p>
 
@@ -18,18 +18,7 @@
         <div class="filtro-row">
             {{ filtro_ticket(id_venta, "buscador-ticket") }}
             {% if session.rol == 'admin' %}
-            <div class="filtro-item filtro-item--max220">
-                <label>Negocio</label>
-                <select id="filtro-negocio" name="id_negocio">
-                    <option value="">Todos los negocios</option>
-                    {% for n in negocios %}
-                        <option value="{{ n.id_negocio }}"
-                            {% if id_negocio == n.id_negocio %}selected{% endif %}>
-                            {{ n.nombre }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+            {{ filtro_negocios(negocios, id_negocio, clase="filtro-item--max220") }}
             {% endif %}
             <div class="filtro-item filtro-item--max280">
                 <label>Buscar cliente</label>

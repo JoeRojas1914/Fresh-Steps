@@ -17,6 +17,28 @@
 </div>
 {% endmacro %}
 
+{# Selector de uno o varios negocios (casillas). Manda ?id_negocio=1&id_negocio=3.
+   `seleccionados`: lista de IDs marcados (o un solo ID). El JS está en components/multi_select.js #}
+{% macro filtro_negocios(negocios, seleccionados=None, placeholder="Todos los negocios", clase="", input_id="filtro-negocio") %}
+{% set marcados = (seleccionados if seleccionados is iterable and seleccionados is not string else [seleccionados])
+                  | reject("none") | map("int") | list %}
+<div class="filtro-item {{ clase }}">
+    <label>Negocio</label>
+    <details class="multi-select" data-placeholder="{{ placeholder }}" id="{{ input_id }}">
+        <summary class="multi-select__btn"><span class="multi-select__txt">{{ placeholder }}</span></summary>
+        <div class="multi-select__panel">
+            {% for n in negocios %}
+            <label class="multi-select__opt">
+                <input type="checkbox" name="id_negocio" value="{{ n.id_negocio }}"
+                       {% if n.id_negocio in marcados %}checked{% endif %}>
+                <span>{{ n.nombre }}</span>
+            </label>
+            {% endfor %}
+        </div>
+    </details>
+</div>
+{% endmacro %}
+
 {% macro cerrar_filtro(limpiar_url=None, mostrar_limpiar=False) %}
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm">
