@@ -29,7 +29,7 @@ export async function abrirHistorial(url, modalId, tbodySelector, getCambios) {
     const tbody = document.querySelector(tbodySelector);
     if (!tbody) return;
 
-    tbody.innerHTML = "<tr><td colspan='4'>Cargando...</td></tr>";
+    tbody.innerHTML = window.Skeleton ? window.Skeleton.filas(4, 3) : "<tr><td colspan='4'>Cargando...</td></tr>";
     abrirModal(modalId);
 
     try {

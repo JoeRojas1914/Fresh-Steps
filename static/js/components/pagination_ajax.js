@@ -9,8 +9,11 @@
         const fetchUrl = new URL(url, window.location.href);
         fetchUrl.searchParams.set('partial', '1');
 
-        container.style.opacity = '0.5';
         container.style.pointerEvents = 'none';
+        const skeletonTimer = setTimeout(() => {
+            if (reqCounters.get(container) !== myId) return;
+            if (!(window.Skeleton && window.Skeleton.tabla(container))) container.style.opacity = '0.5';
+        }, 150);
 
         try {
             const resp = await fetch(fetchUrl.toString());
@@ -25,9 +28,11 @@
         } catch {
             if (reqCounters.get(container) === myId) window.location.href = url;
         } finally {
+            clearTimeout(skeletonTimer);
             if (reqCounters.get(container) === myId) {
                 container.style.opacity = '';
                 container.style.pointerEvents = '';
+                container.removeAttribute('aria-busy');
                 const loader = document.getElementById('page-loader');
                 if (loader) {
                     loader.className = 'is-done';

@@ -133,11 +133,19 @@ function _setKpi(key, value, monetary) {
     if (!el) return;
     countUp(el, value, monetary, 500);
 }
+var _loadingTimer = null;
 
 function _setLoading(on) {
-    document.querySelectorAll("[data-kpi]").forEach(function(el) {
-        el.classList.toggle("kpi-loading", on);
-    });
+    clearTimeout(_loadingTimer);
+    var aplicar = function(estado) {
+        document.querySelectorAll("[data-kpi]").forEach(function(el) {
+            el.classList.toggle("is-skeleton", estado);
+        });
+        var chart = document.querySelector(".hoy-chart");
+        if (chart) chart.classList.toggle("is-cargando", estado);
+    };
+    if (on) _loadingTimer = setTimeout(function() { aplicar(true); }, 150);
+    else aplicar(false);
 }
 
 document.addEventListener("click", function(e) {

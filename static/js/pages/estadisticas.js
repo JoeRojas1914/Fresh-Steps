@@ -462,6 +462,8 @@ async function cargarDashboard() {
     ocultarError();
     actualizarTitulos();
 
+    const skeletonTimer = setTimeout(() => document.body.classList.add("stats-cargando"), 150);
+
     try {
         const url = `/api/estadisticas/dashboard?inicio=${p.inicio}&fin=${p.fin}&id_negocio=${p.id_negocio}&granularidad=${p.granularidad||"semana"}&tipo_fecha=${p.tipo_fecha||"fecha_recibo"}&agrupacion_gastos=${agrupacionGastos}`;
         const res = await fetch(url);
@@ -558,6 +560,10 @@ async function cargarDashboard() {
         renderTopClientes(data.top_clientes||[]);
 
     } catch(err) { mostrarError("Error inesperado al cargar el dashboard."); }
+    finally {
+        clearTimeout(skeletonTimer);
+        document.body.classList.remove("stats-cargando");
+    }
 }
 
 function renderTopClientes(clientes) {

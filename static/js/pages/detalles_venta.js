@@ -45,10 +45,9 @@ export function toggleDetalles(idVenta, btn) {
     fila.style.display = "table-row";
     if (chevron) chevron.style.transform = "rotate(180deg)";
 
-    // El flag vive en el elemento: si la tabla se recarga por AJAX, se vuelve a pedir
     if (lista.dataset.cargado) return;
 
-    lista.innerHTML = `<li class="dim-soft">Cargando...</li>`;
+    lista.innerHTML = window.Skeleton ? window.Skeleton.lineas(2) : `<li class="dim-soft">Cargando...</li>`;
 
     fetch(`/ventas/detalles/${idVenta}`)
         .then(r => r.json())

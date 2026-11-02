@@ -19,7 +19,9 @@ async function verHistorialVenta(idVenta) {
     abrirModal("modalHistorialVenta");
 
     const tbody = document.querySelector("#tablaHistorialVenta tbody");
-    tbody.innerHTML = "<tr><td colspan='4' class='text-center dim'>Cargando...</td></tr>";
+    tbody.innerHTML = window.Skeleton
+        ? window.Skeleton.filas(4, 3)
+        : "<tr><td colspan='4' class='text-center dim'>Cargando...</td></tr>";
 
     try {
         const res  = await fetch(`/ventas/${idVenta}/historial`);

@@ -1,5 +1,18 @@
-[data-kpi] { transition: opacity 0.12s; }
-[data-kpi].kpi-loading { opacity: 0.35; }
+.hoy-chart-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #e6f0fa 25%, #d6e4f2 50%, #e6f0fa 75%);
+    background-size: 200% 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+}
+.hoy-chart.is-cargando .hoy-chart-wrap::after {
+    opacity: 1;
+    animation: skeleton-slide 1.4s ease infinite;
+}
 
 .pill-dot--calzado    { background: #3b82f6; }
 .pill-dot--confeccion { background: #22c55e; }

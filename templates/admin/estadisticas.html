@@ -213,9 +213,8 @@
     <div class="stats-page">
         <div class="card stats-card full-width">
             <h2 class="stats-title"><i data-lucide="trophy" width="18" height="18"></i> Top 5 clientes del período</h2>
-            <div id="topClientesContainer">
-                <p class="dim td-empty">Cargando...</p>
-            </div>
+            {# Se llena por JS; mientras carga lo tapa el skeleton de .stats-card #}
+            <div id="topClientesContainer" class="top-clientes-container"></div>
         </div>
     </div>
 </div>
