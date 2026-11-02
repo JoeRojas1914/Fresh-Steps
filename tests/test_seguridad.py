@@ -5,6 +5,8 @@ Tests de seguridad: CSRF, timeout de sesión y rate limiting.
 import pytest
 from datetime import datetime, timedelta
 
+from config import TIMEOUT_ADMIN, TIMEOUT_CAJA
+
 
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -58,8 +60,8 @@ def test_csrf_rechaza_post_token_invalido(csrf_client, usuario_admin):
 # ─── Timeout de sesión ────────────────────────────────────────────────────────
 
 def test_sesion_admin_expirada_redirige(client, usuario_admin):
-    """Admin inactivo >15 min debe ser redirigido al login."""
-    vencida = datetime.now() - timedelta(minutes=20)
+    """Admin inactivo más de TIMEOUT_ADMIN minutos debe ser redirigido al login."""
+    vencida = datetime.now() - timedelta(minutes=TIMEOUT_ADMIN + 5)
     _sesion_admin(client, usuario_admin, ultima_actividad=vencida)
 
     res = client.get("/clientes")
@@ -69,8 +71,8 @@ def test_sesion_admin_expirada_redirige(client, usuario_admin):
 
 
 def test_sesion_caja_expirada_redirige(client, usuario_caja):
-    """Caja inactiva >20 min debe ser redirigida."""
-    vencida = datetime.now() - timedelta(minutes=25)
+    """Caja inactiva más de TIMEOUT_CAJA minutos debe ser redirigida."""
+    vencida = datetime.now() - timedelta(minutes=TIMEOUT_CAJA + 5)
     _sesion_caja(client, usuario_caja, ultima_actividad=vencida)
 
     res = client.get("/ventas")

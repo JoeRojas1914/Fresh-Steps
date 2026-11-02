@@ -122,8 +122,8 @@
 
     {% else %}
     {% call fila_vacia(11) %}
-        {% if q or id_negocio or id_venta %}
-            No se encontraron ventas con esos filtros.
+        {% if q or articulo or id_venta or (id_negocio and session.rol == 'admin') %}
+            No se encontraron resultados con estos filtros.
         {% else %}
             ¡Todo al día! No hay entregas pendientes por el momento.
         {% endif %}
