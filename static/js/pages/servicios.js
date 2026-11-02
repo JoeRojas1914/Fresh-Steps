@@ -43,8 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (formFiltro && container) window.initFiltroAjax(formFiltro, container);
 });
 
-// ── Servicio predeterminado por negocio (estrella) ──
-// Si el negocio ya tiene otro predeterminado, primero se pide confirmación.
+
 let _defaultPendiente = null;
 
 document.addEventListener("click", (e) => {
@@ -69,7 +68,6 @@ document.addEventListener("click", (e) => {
     alternarDefault(btn);
 });
 
-// Recarga solo la tabla (con los filtros actuales) para mover la estrella.
 async function alternarDefault(btn) {
     btn.disabled = true;
     try {

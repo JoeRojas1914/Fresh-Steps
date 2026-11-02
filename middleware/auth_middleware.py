@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if session.get("rol") != "admin":  # pragma: no cover
+        if session.get("rol") != "admin":  
             wants_json = (
                 request.accept_mimetypes.best_match(
                     ["application/json", "text/html"]
@@ -43,14 +43,14 @@ RUTAS_CAJA = {
     "ventas.venta_ticket",
     "ventas.registrar_pago_final",
     "ventas.detalles_venta",
-    "ventas.historial_ventas",          # sin exportar ni eliminadas (ver ventas_routes)
+    "ventas.historial_ventas",         
     "ventas.historial_venta_por_id",
 
     "clientes.api_clientes",
     "clientes.api_crear_cliente",
     "clientes.api_obtener_cliente",
     "clientes.api_editar_cliente",
-    "clientes.clientes",                # solo clientes de sus negocios (ver clientes_routes)
+    "clientes.clientes",               
     "clientes.ver_cliente",
     "clientes.guardar_cliente",
     "clientes.historial_cliente",
@@ -104,7 +104,7 @@ def init_auth_middleware(app):
 
         try:
             token_bd = obtener_session_token(session["id_usuario"])
-        except Exception:  # pragma: no cover
+        except Exception:  
             logger.exception("Error al verificar session token id_usuario=%s", session.get("id_usuario"))
             session.clear()
             flash("Error de sesión. Por favor vuelve a ingresar.", "error")
