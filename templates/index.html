@@ -95,7 +95,13 @@
         </div>
     </div>
     <div class="hoy-chart">
-        <span class="hoy-chart-title">Ventas — esta semana</span>
+        <div class="hoy-chart-head">
+            <span class="hoy-chart-title">Esta semana</span>
+            <span class="hoy-chart-leyenda">
+                <span class="leyenda-item"><span class="leyenda-dot leyenda-dot--ventas"></span> Ventas</span>
+                <span class="leyenda-item"><span class="leyenda-dot leyenda-dot--unidades"></span> Unidades recibidas</span>
+            </span>
+        </div>
         <div class="hoy-chart-wrap">
             <canvas id="miniVentasChart"></canvas>
         </div>
@@ -144,7 +150,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script type="application/json" id="indexChartData">{"labels": {{ chart_labels|tojson }}, "data": {{ chart_data|tojson }}}</script>
+<script type="application/json" id="indexChartData">{"labels": {{ chart_labels|tojson }}, "data": {{ chart_data|tojson }}, "unidades": {{ chart_unidades|tojson }}}</script>
 <script defer src="{{ url_for('static', filename='vendor/chart.min.js') }}"></script>
 <script defer src="{{ url_for('static', filename='js/pages/index.js') }}"></script>
 {% endblock %}

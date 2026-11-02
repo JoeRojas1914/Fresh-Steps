@@ -310,6 +310,40 @@
     height: 110px;
 }
 
+.hoy-chart-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin-bottom: 10px;
+}
+
+.hoy-chart-head .hoy-chart-title { margin-bottom: 0; }
+
+.hoy-chart-leyenda {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.leyenda-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.leyenda-dot {
+    width: 10px;
+    height: 3px;
+    border-radius: 2px;
+}
+
+.leyenda-dot--ventas   { background: #2fa4ff; }
+.leyenda-dot--unidades { background: #8b5cf6; }
+
 /* ── Resumen del mes ── */
 .mes-section-header {
     display: flex;

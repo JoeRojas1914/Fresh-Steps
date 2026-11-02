@@ -286,6 +286,30 @@ def contar_ventas_por_dia_rango(inicio: date, fin: date, id_negocio: str, col: s
     return resultado
 
 
+def contar_unidades_por_dia_rango(inicio: date, fin: date, id_negocio="all"):
+    """Artículos recibidos por día (por fecha de recibo), con los días vacíos en 0."""
+    sql = """
+        SELECT DATE(v.fecha_recibo) AS dia, COUNT(a.id_articulo) AS total
+        FROM venta v
+        JOIN articulo a ON a.id_venta = v.id_venta
+        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+          AND v.eliminado = 0
+    """
+    sql_neg, params_neg = _filtro_negocios(id_negocio, "v.id_negocio")
+    sql += sql_neg + " GROUP BY dia"
+
+    with get_db() as (_, cursor):
+        cursor.execute(sql, [inicio, fin] + params_neg)
+        rows = {r["dia"]: int(r["total"]) for r in cursor.fetchall()}
+
+    resultado = []
+    d = inicio
+    while d <= fin:
+        resultado.append({"label": _label_dia(d), "total": rows.get(d, 0)})
+        d += timedelta(days=1)
+    return resultado
+
+
 def obtener_ingresos_por_dia_rango(inicio: date, fin: date, id_negocio: str):
     sql = """
         SELECT DATE(pv.fecha_pago) AS dia, COALESCE(SUM(pv.monto), 0) AS total

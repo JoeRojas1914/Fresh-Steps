@@ -62,6 +62,19 @@ if (_canvas && _rawChart) {
                 pointHoverBackgroundColor: "#2fa4ff",
                 pointHoverBorderColor: "#ffffff",
                 pointHoverBorderWidth: 2
+            }, {
+                label: "unidades",
+                data: _rawChart.unidades || [],
+                borderColor: "#8b5cf6",
+                borderWidth: 2,
+                borderDash: [5, 4],
+                fill: false,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: "#8b5cf6",
+                pointHoverBorderColor: "#ffffff",
+                pointHoverBorderWidth: 2
             }]
         },
         options: {
@@ -73,7 +86,12 @@ if (_canvas && _rawChart) {
                     mode: "index",
                     intersect: false,
                     callbacks: {
-                        label: function(c) { return " " + c.raw + " venta" + (c.raw !== 1 ? "s" : ""); }
+                        label: function(c) {
+                            if (c.datasetIndex === 1) {
+                                return " " + c.raw + " unidad" + (c.raw !== 1 ? "es" : "") + " recibida" + (c.raw !== 1 ? "s" : "");
+                            }
+                            return " " + c.raw + " venta" + (c.raw !== 1 ? "s" : "");
+                        }
                     }
                 }
             },
@@ -163,6 +181,7 @@ document.addEventListener("click", function(e) {
         if (_chart && data.chart_labels && data.chart_data) {
             _chart.data.labels            = data.chart_labels;
             _chart.data.datasets[0].data  = data.chart_data;
+            _chart.data.datasets[1].data  = data.chart_unidades || [];
             _chart.update("none");
         }
     })
