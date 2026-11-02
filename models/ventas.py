@@ -17,6 +17,7 @@ from .ventas_detalles import (
     contar_entregas_resumen,
     contar_entregas_listas,
     contar_entregas_pendientes,
+    contar_articulos_entregas,
     contar_ventas_cliente,
     obtener_ventas_cliente,
 )

@@ -190,3 +190,30 @@ def test_editar_usuario_con_negocio_invalido_falla(logged_client, usuario_caja):
         "negocios":   [999],
     })
     assert res.get_json()["ok"] is False
+
+
+# ---------------------------------------------------------------------------
+# Mensaje de tabla vacía
+# ---------------------------------------------------------------------------
+
+_SIN_RESULTADOS = "No se encontraron resultados con estos filtros."
+
+
+def test_filtro_por_articulo_sin_resultados_muestra_mensaje(logged_client):
+    for url in ("/ventas/pendientes", "/ventas/listas"):
+        html = logged_client.get(f"{url}?partial=1&articulo=zzzinexistentezzz").data.decode()
+        assert _SIN_RESULTADOS in html
+
+
+def test_filtro_por_cliente_sin_resultados_muestra_mensaje(logged_client_caja):
+    for url in ("/ventas/pendientes", "/ventas/listas"):
+        html = logged_client_caja.get(f"{url}?partial=1&q=zzzinexistentezzz").data.decode()
+        assert _SIN_RESULTADOS in html
+
+
+def test_caja_sin_filtros_no_muestra_mensaje_de_filtros(logged_client_caja, usuario_caja, db_conn):
+    # Sin negocios asignados la tabla sale vacía, pero no se filtró nada
+    _asignar_negocios(db_conn, usuario_caja["id_usuario"], [])
+    for url in ("/ventas/pendientes", "/ventas/listas"):
+        html = logged_client_caja.get(f"{url}?partial=1").data.decode()
+        assert _SIN_RESULTADOS not in html

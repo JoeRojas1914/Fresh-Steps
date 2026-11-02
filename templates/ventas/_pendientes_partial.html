@@ -3,8 +3,11 @@
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
 {% from "components/empty_state.html" import fila_vacia %}
+{% from "components/contador_ventas.html" import contador_ventas %}
 
 <div id="toast-container"></div>
+
+{{ contador_ventas(total_registros, total_articulos, filtrado=(q or articulo or id_venta or (id_negocio and session.rol == 'admin'))) }}
 
 <div id="tabla-ventas">
     {% call table([

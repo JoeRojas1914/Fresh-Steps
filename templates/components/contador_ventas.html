@@ -1,0 +1,12 @@
+{# Totales de ventas y artículos según los filtros aplicados.
+   Va dentro del parcial para que se actualice con cada recarga AJAX. #}
+{% macro contador_ventas(total_ventas, total_articulos, filtrado=false) %}
+<p class="contador-ventas" aria-live="polite">
+    <strong data-contador="ventas">{{ total_ventas }}</strong> {{ "venta" if total_ventas == 1 else "ventas" }}
+    <span class="contador-ventas__sep" aria-hidden="true">·</span>
+    <strong data-contador="articulos">{{ total_articulos }}</strong> {{ "artículo" if total_articulos == 1 else "artículos" }}
+    {% if filtrado %}
+    <span class="contador-ventas__nota">— con los filtros aplicados</span>
+    {% endif %}
+</p>
+{% endmacro %}

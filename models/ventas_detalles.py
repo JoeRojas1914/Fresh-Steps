@@ -255,17 +255,9 @@ def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=No
         return cursor.fetchall()
 
 
-def contar_entregas_resumen(id_negocio=None, id_venta=None, q=None, articulo=None):
-    sql = """
-        SELECT
-            SUM(CASE WHEN v.fecha_lista IS NOT NULL AND v.fecha_entrega IS NULL THEN 1 ELSE 0 END) AS listas,
-            SUM(CASE WHEN v.fecha_lista IS NULL     AND v.fecha_entrega IS NULL THEN 1 ELSE 0 END) AS pendientes
-        FROM venta v
-        JOIN cliente c ON c.id_cliente = v.id_cliente
-        WHERE v.eliminado = 0
-    """
-    sql_neg, params = filtro_negocio(id_negocio)
-    sql += sql_neg
+def _filtros_entregas(id_negocio=None, id_venta=None, q=None, articulo=None):
+    """Filtros comunes de los listados de ventas activas (negocio, ticket, cliente, artículo)."""
+    sql, params = filtro_negocio(id_negocio)
     if id_venta:
         sql += " AND CAST(v.id_venta AS CHAR) LIKE %s"
         params.append(f"{id_venta}%")
@@ -277,10 +269,44 @@ def contar_entregas_resumen(id_negocio=None, id_venta=None, q=None, articulo=Non
         sql_art, params_art = filtro_articulo(articulo)
         sql += sql_art
         params.extend(params_art)
+    return sql, params
+
+
+def contar_entregas_resumen(id_negocio=None, id_venta=None, q=None, articulo=None):
+    sql = """
+        SELECT
+            SUM(CASE WHEN v.fecha_lista IS NOT NULL AND v.fecha_entrega IS NULL THEN 1 ELSE 0 END) AS listas,
+            SUM(CASE WHEN v.fecha_lista IS NULL     AND v.fecha_entrega IS NULL THEN 1 ELSE 0 END) AS pendientes
+        FROM venta v
+        JOIN cliente c ON c.id_cliente = v.id_cliente
+        WHERE v.eliminado = 0
+    """
+    sql_filtros, params = _filtros_entregas(id_negocio, id_venta, q, articulo)
+    sql += sql_filtros
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
         row = cursor.fetchone()
     return int(row["listas"] or 0), int(row["pendientes"] or 0)
+
+
+def contar_articulos_entregas(listas, id_negocio=None, id_venta=None, q=None, articulo=None):
+    """Artículos de las ventas no entregadas que cumplen los filtros.
+
+    `listas=True` cuenta las ventas listas para entrega; False, las que siguen en proceso."""
+    sql = f"""
+        SELECT COUNT(a.id_articulo) AS total
+        FROM venta v
+        JOIN cliente c  ON c.id_cliente = v.id_cliente
+        JOIN articulo a ON a.id_venta   = v.id_venta
+        WHERE v.eliminado = 0
+          AND v.fecha_entrega IS NULL
+          AND v.fecha_lista IS {"NOT NULL" if listas else "NULL"}
+    """
+    sql_filtros, params = _filtros_entregas(id_negocio, id_venta, q, articulo)
+    sql += sql_filtros
+    with get_db() as (_, cursor):
+        cursor.execute(sql, params)
+        return int(cursor.fetchone()["total"] or 0)
 
 
 def contar_entregas_listas(id_negocio=None, id_venta=None, q=None, articulo=None):

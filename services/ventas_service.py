@@ -17,6 +17,7 @@ from models.ventas import (
     contar_historial_ventas,
     contar_entregas_listas,
     contar_entregas_pendientes,
+    contar_articulos_entregas,
     crear_venta,
 )
 
@@ -123,6 +124,7 @@ def listar_ventas_listas_service(
         "pagina":          pagina,
         "total_paginas":   total_paginas,
         "total_registros": total_registros,
+        "total_articulos": contar_articulos_entregas(True, id_negocio, id_venta, q, articulo),
         "orden":           orden,
         "direccion":       direccion,
     }
@@ -154,6 +156,7 @@ def listar_entregas_pendientes_service(
         "pagina":          pagina,
         "total_paginas":   total_paginas,
         "total_registros": total_registros,
+        "total_articulos": contar_articulos_entregas(False, id_negocio, id_venta, q, articulo),
         "orden":           orden,
         "direccion":       direccion,
     }
