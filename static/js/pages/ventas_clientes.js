@@ -1,6 +1,6 @@
 import { escapeHtml, mostrarFeedback } from '../base/helpers.js';
 import { validarRequerido, validarTelefono } from '../base/form_validators.js';
-import { cerrarModal } from '../components/modal.js';
+import { abrirModal, cerrarModal } from '../components/modal.js';
 import { validarFormulario } from './ventas_validacion.js';
 
 /* ─── Búsqueda de cliente ────────────────────────────────────────────────── */
@@ -60,7 +60,11 @@ export async function buscarClientes() {
 
 /* ─── Selección de cliente ───────────────────────────────────────────────── */
 
+// Cliente mostrado en la tarjeta (para conservar total_ventas al editarlo)
+let _clienteActual = null;
+
 export function seleccionarCliente(cliente) {
+    _clienteActual = cliente;
     document.getElementById("id_cliente").value = cliente.id_cliente;
 
     const ventas     = cliente.total_ventas || 0;
@@ -80,6 +84,91 @@ export function seleccionarCliente(cliente) {
     document.getElementById("busqueda-cliente").style.display = "none";
 
     validarFormulario();
+}
+
+export function limpiarClienteActual() {
+    _clienteActual = null;
+}
+
+/* ─── Editar cliente seleccionado ────────────────────────────────────────── */
+
+const _CAMPOS_EDITAR = ["nombre", "apellido", "telefono", "correo", "direccion"];
+
+function _errorEditar(mensaje) {
+    const errorBox = document.getElementById("error-cliente-editar");
+    errorBox.innerText     = mensaje || "";
+    errorBox.style.display = mensaje ? "block" : "none";
+}
+
+export async function abrirEditarCliente() {
+    const id = document.getElementById("id_cliente").value;
+    if (!id) return;
+
+    const btn = document.getElementById("btn-editar-cliente");
+    if (btn) btn.disabled = true;
+    try {
+        const res = await fetch(`/api/clientes/${encodeURIComponent(id)}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            mostrarFeedback(data.error || "No se pudo cargar el cliente.", "error");
+            return;
+        }
+        _CAMPOS_EDITAR.forEach(campo => {
+            document.getElementById(`editar_cliente_${campo}`).value = data[campo] || "";
+        });
+        _errorEditar("");
+        abrirModal("modalEditarCliente");
+    } catch {
+        mostrarFeedback("Error de conexión.", "error");
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+export async function guardarEdicionCliente(e) {
+    e.preventDefault();
+
+    const id       = document.getElementById("id_cliente").value;
+    const nombre   = document.getElementById("editar_cliente_nombre").value.trim();
+    const apellido = document.getElementById("editar_cliente_apellido").value.trim();
+    const telefono = document.getElementById("editar_cliente_telefono").value.trim();
+
+    if (!validarRequerido(nombre) || !validarRequerido(apellido) || !validarRequerido(telefono)) {
+        _errorEditar("Nombre, apellido y teléfono son obligatorios.");
+        return;
+    }
+    if (!validarTelefono(telefono)) {
+        _errorEditar("El teléfono debe contener exactamente 10 dígitos.");
+        return;
+    }
+    _errorEditar("");
+
+    const btn = document.querySelector('[form="formEditarCliente"][type="submit"]');
+    if (btn?.disabled) return;
+    const textoOriginal = btn?.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = "Guardando..."; }
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    try {
+        const res = await fetch(`/api/clientes/${encodeURIComponent(id)}/editar`, {
+            method:  "POST",
+            headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
+            body:    new FormData(e.target),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+            _errorEditar(data.error || "Error al guardar el cliente.");
+            return;
+        }
+        cerrarModal("modalEditarCliente");
+        seleccionarCliente({ ...(_clienteActual || {}), ...data.cliente });
+        mostrarFeedback("Cliente actualizado correctamente.", "success");
+    } catch {
+        _errorEditar("Error de conexión.");
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+    }
 }
 
 /* ─── Crear cliente rápido ───────────────────────────────────────────────── */

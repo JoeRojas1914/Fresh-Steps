@@ -43,6 +43,38 @@
 {% endif %}
 {% endcall %}
 
+{% call(section) modal("modalEditarCliente", "Editar cliente", "md") %}
+{% if section == 'body' %}
+<form id="formEditarCliente" class="modal-form modal-form--grid">
+    <div id="error-cliente-editar" class="error-msg d-none modal-field--full"></div>
+    <div class="modal-field">
+        <label for="editar_cliente_nombre">Nombre</label>
+        <input id="editar_cliente_nombre" type="text" name="nombre" required>
+    </div>
+    <div class="modal-field">
+        <label for="editar_cliente_apellido">Apellido</label>
+        <input id="editar_cliente_apellido" type="text" name="apellido" required>
+    </div>
+    <div class="modal-field">
+        <label for="editar_cliente_telefono">Teléfono</label>
+        <input id="editar_cliente_telefono" type="text" name="telefono" required pattern="[0-9]{10}">
+    </div>
+    <div class="modal-field">
+        <label for="editar_cliente_correo">Correo (opcional)</label>
+        <input id="editar_cliente_correo" type="email" name="correo">
+    </div>
+    <div class="modal-field modal-field--full">
+        <label for="editar_cliente_direccion">Código postal (opcional)</label>
+        <input id="editar_cliente_direccion" type="text" name="direccion">
+    </div>
+</form>
+{% endif %}
+{% if section == 'footer' %}
+<button type="button" class="btn btn--danger btn--sm" data-modal-close="modalEditarCliente">Cancelar</button>
+<button type="submit" form="formEditarCliente" class="btn btn--primary btn--lg">Guardar cambios</button>
+{% endif %}
+{% endcall %}
+
 
 <form id="formVenta" class="venta-layout">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -77,6 +109,9 @@
                             <div class="cliente-box-info">
                                 <strong id="cliente-seleccionado"></strong>
                             </div>
+                            <button type="button" class="btn btn--info btn--sm" id="btn-editar-cliente">
+                                <i data-lucide="pencil" width="13" height="13"></i> Editar
+                            </button>
                             <button type="button" class="btn btn--secondary btn--sm" id="btn-cambiar-cliente">
                                 <i data-lucide="refresh-cw" width="13" height="13"></i> Cambiar
                             </button>

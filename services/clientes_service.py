@@ -29,14 +29,16 @@ def listar_clientes_service(
     incluir_eliminados: bool = False,
     orden: str | None = None,
     direccion: str | None = None,
+    id_negocio: list[int] | None = None,
 ) -> dict:
-    total = contar_clientes(q, incluir_eliminados)
+    """`id_negocio`: solo clientes con compras en esos negocios (y pedidos contados ahí)."""
+    total = contar_clientes(q, incluir_eliminados, id_negocio=id_negocio)
     offset, total_paginas = calcular_paginacion(total, pagina, por_pagina)
     clientes = obtener_clientes(q, por_pagina, offset, incluir_eliminados,
-                                orden=orden, direccion=direccion)
+                                orden=orden, direccion=direccion, id_negocio=id_negocio)
 
     ids = [c["id_cliente"] for c in clientes]
-    pedidos_map = contar_pedidos_por_cliente(ids)
+    pedidos_map = contar_pedidos_por_cliente(ids, id_negocio=id_negocio)
     for c in clientes:
         c["total_pedidos"] = pedidos_map.get(c["id_cliente"], 0)
 
@@ -92,6 +94,21 @@ def obtener_historial_cliente_service(id_cliente: int) -> list[dict]:
     return obtener_historial_cliente(id_cliente)
 
 
+def obtener_cliente_service(id_cliente: int) -> dict | None:
+    """Datos editables de un cliente activo (None si no existe o está eliminado)."""
+    cliente = obtener_cliente_por_id(id_cliente)
+    if not cliente or not cliente.get("activo"):
+        return None
+    return {
+        "id_cliente": cliente["id_cliente"],
+        "nombre":     cliente["nombre"],
+        "apellido":   cliente["apellido"],
+        "telefono":   cliente.get("telefono") or "",
+        "correo":     cliente.get("correo") or "",
+        "direccion":  cliente.get("direccion") or "",
+    }
+
+
 def buscar_clientes_service(q: str) -> list[dict]:
     if not q:
         return []
@@ -102,7 +119,10 @@ def obtener_cliente_detalle_service(
     id_cliente: int,
     filtros: dict,
     pedidos_por_pagina: int = 5,
+    negocios_kpis: list[int] | None = None,
 ) -> dict:
+    """`filtros["id_negocio"]` puede ser uno o varios negocios.
+    `negocios_kpis`: negocios que cuentan en los KPIs (None = todos)."""
     id_negocio   = filtros.get("id_negocio")
     fecha_inicio = filtros.get("fecha_inicio")
     fecha_fin    = filtros.get("fecha_fin")
@@ -132,7 +152,7 @@ def obtener_cliente_detalle_service(
         p["saldo_pendiente"] = Decimal(str(p["total"])) - total_pagado
 
     negocios = obtener_negocios()
-    kpis     = obtener_kpis_cliente(id_cliente)
+    kpis     = obtener_kpis_cliente(id_cliente, negocios_kpis)
 
     return {
         "cliente":       cliente,

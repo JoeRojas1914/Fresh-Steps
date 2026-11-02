@@ -68,13 +68,15 @@
                 Cambios
             </button>
 
+            {% if session.rol == 'admin' %}
             <button type="button"
                     class="btn btn--danger btn--sm no-row-click js-confirmar-eliminar-cliente"
                     data-id="{{ c.id_cliente }}">
                 Eliminar
             </button>
+            {% endif %}
 
-        {% else %}
+        {% elif session.rol == 'admin' %}
 
             <button type="button"
                     class="btn btn--primary btn--sm no-row-click js-restaurar-cliente"

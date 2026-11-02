@@ -1,7 +1,7 @@
 import { ventaState } from './ventas_state.js';
 import { mostrarFeedback, initModalForm, scrollToFirstError } from '../base/helpers.js';
 import { initNavigationGuard } from '../base/navigation_guard.js';
-import { buscarClientes, crearCliente } from './ventas_clientes.js';
+import { buscarClientes, crearCliente, abrirEditarCliente, guardarEdicionCliente, limpiarClienteActual } from './ventas_clientes.js';
 import { seleccionarNegocio, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado } from './ventas_servicios.js';
 import { agregarArticulo, cerrarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
 import { validarFormulario, togglePrepago, toggleDescuento, actualizarTotal, bloquearFechaMinima, actualizarFechaEstimadaCompleta } from './ventas_validacion.js';
@@ -33,8 +33,13 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("busqueda-cliente").style.display = "block";
         document.getElementById("buscar-cliente").value           = "";
         document.getElementById("lista-clientes").innerHTML       = "";
+        limpiarClienteActual();
         validarFormulario();
     });
+
+    /* ── Editar cliente seleccionado ── */
+    document.getElementById("btn-editar-cliente").addEventListener("click", abrirEditarCliente);
+    document.getElementById("formEditarCliente").addEventListener("submit", guardarEdicionCliente);
 
     /* ── Cerrar artículo al hacer clic fuera ── */
     document.addEventListener("click", e => {

@@ -1,5 +1,21 @@
 from db import get_db
 from utils import build_where, construir_order_by, registrar_historial as _registrar_historial
+from models.ventas_detalles import como_lista
+
+
+def _cond_negocios(id_negocio):
+    """Filtro para build_where: clientes con al menos una venta activa en esos negocios.
+
+    None / lista vacía = sin filtro (admin)."""
+    ids = como_lista(id_negocio)
+    if not ids:
+        return ("", None)
+    ph = ", ".join(["%s"] * len(ids))
+    return (
+        "EXISTS (SELECT 1 FROM venta vn WHERE vn.id_cliente = cliente.id_cliente"
+        f" AND vn.eliminado = 0 AND vn.id_negocio IN ({ph}))",
+        *ids,
+    )
 
 
 def crear_cliente(nombre, apellido, correo, telefono, direccion, id_usuario):
@@ -75,11 +91,12 @@ def actualizar_cliente(id_cliente, nombre, apellido, correo, telefono, direccion
         registrar_historial(cursor, id_cliente, "EDITADO", id_usuario, antes, despues)
 
 
-def contar_clientes(q=None, incluir_eliminados=False):
+def contar_clientes(q=None, incluir_eliminados=False, id_negocio=None):
     q_like = f"%{q}%" if q else None
     where, params = build_where([
         ("activo = %s", None if incluir_eliminados else 1),
         ("(nombre LIKE %s OR apellido LIKE %s OR CONCAT(nombre, ' ', apellido) LIKE %s)", q_like, q_like, q_like),
+        _cond_negocios(id_negocio),
     ])
     with get_db() as (_, cursor):
         cursor.execute("SELECT COUNT(*) AS total FROM cliente " + where, params)
@@ -154,6 +171,18 @@ def obtener_cliente_por_id(id_cliente):
         return cursor.fetchone()
 
 
+def cliente_visible(id_cliente, id_negocio):
+    """True si el cliente está activo y tiene alguna venta activa en esos negocios."""
+    where, params = build_where([
+        ("id_cliente = %s", id_cliente),
+        ("activo = %s", 1),
+        _cond_negocios(id_negocio),
+    ])
+    with get_db() as (_, cursor):
+        cursor.execute("SELECT 1 AS ok FROM cliente " + where, params)
+        return cursor.fetchone() is not None
+
+
 def registrar_historial(cursor, id_cliente, accion, id_usuario, antes=None, despues=None):
     _registrar_historial(cursor, "clientes_historial", "id_cliente", id_cliente, accion, id_usuario, antes, despues)
 
@@ -184,11 +213,12 @@ COLUMNAS_ORDEN_CLIENTES = {
 
 
 def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False,
-                     orden=None, direccion=None):
+                     orden=None, direccion=None, id_negocio=None):
     q_like = f"%{q}%" if q else None
     where, params = build_where([
         ("activo = %s", None if incluir_eliminados else 1),
         ("(nombre LIKE %s OR apellido LIKE %s OR CONCAT(nombre, ' ', apellido) LIKE %s)", q_like, q_like, q_like),
+        _cond_negocios(id_negocio),
     ])
     params.extend([limit, offset])
     with get_db() as (_, cursor):
@@ -204,18 +234,21 @@ def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False,
         return cursor.fetchall()
 
 
-def contar_pedidos_por_cliente(ids_cliente: list) -> dict:
+def contar_pedidos_por_cliente(ids_cliente: list, id_negocio=None) -> dict:
     if not ids_cliente:
         return {}
     placeholders = ",".join(["%s"] * len(ids_cliente))
+    negocios = como_lista(id_negocio)
+    sql_neg  = f" AND id_negocio IN ({', '.join(['%s'] * len(negocios))})" if negocios else ""
     with get_db() as (_, cursor):
         cursor.execute(f"""
             SELECT id_cliente, COUNT(*) AS total
             FROM venta
             WHERE id_cliente IN ({placeholders})
               AND eliminado = 0
+              {sql_neg}
             GROUP BY id_cliente
-        """, ids_cliente)
+        """, list(ids_cliente) + list(negocios))
         return {r["id_cliente"]: int(r["total"]) for r in cursor.fetchall()}
 
 

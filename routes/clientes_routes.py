@@ -15,6 +15,12 @@ from services.excel_helpers import (
 
 from middleware.auth_middleware import admin_required
 from extensions import limiter
+from services.permisos_service import (
+    negocios_permitidos,
+    restringir_negocios,
+    puede_ver_cliente,
+    negocios_visibles,
+)
 from services.clientes_service import (
     listar_clientes_service,
     guardar_cliente_service,
@@ -23,22 +29,30 @@ from services.clientes_service import (
     buscar_clientes_service,
     obtener_cliente_detalle_service,
     obtener_historial_cliente_service,
+    obtener_cliente_service,
     exportar_clientes_service,
     exportar_cliente_service,
 )
 
 clientes_bp = Blueprint("clientes", __name__)
 
+_SIN_PERMISO_CLIENTE = "No tienes permiso para ver este cliente."
+
+
+def _es_admin() -> bool:
+    return negocios_permitidos() is None
+
 
 @clientes_bp.route("/clientes")
 def clientes():
     q = request.args.get("q", "")
     pagina = request.args.get("pagina", 1, type=int)
-    incluir_eliminados = request.args.get("eliminados") == "1"
+    incluir_eliminados = _es_admin() and request.args.get("eliminados") == "1"
     data = listar_clientes_service(
         q=q, pagina=pagina, incluir_eliminados=incluir_eliminados,
         orden=request.args.get("orden") or None,
         direccion=request.args.get("dir") or None,
+        id_negocio=None if _es_admin() else restringir_negocios(),
     )
     ctx = dict(
         clientes=data["clientes"], q=q, pagina=pagina,
@@ -55,6 +69,10 @@ def clientes():
 @limiter.limit("30 per minute")
 def guardar_cliente():
     id_usuario = session.get("id_usuario")
+    id_cliente = request.form.get("id_cliente")
+    if id_cliente and (not id_cliente.isdigit() or not puede_ver_cliente(int(id_cliente))):
+        flash(_SIN_PERMISO_CLIENTE, "error")
+        return redirect(url_for("clientes.clientes"))
     try:
         resultado = guardar_cliente_service(request.form, id_usuario)
         flash(
@@ -99,8 +117,9 @@ def restaurar_cliente(id_cliente):
 
 
 @clientes_bp.route("/clientes/<int:id_cliente>/historial")
-@admin_required
 def historial_cliente(id_cliente):
+    if not puede_ver_cliente(id_cliente):
+        return jsonify({"ok": False, "error": _SIN_PERMISO_CLIENTE}), 403
     return jsonify(obtener_historial_cliente_service(id_cliente))
 
 
@@ -112,8 +131,16 @@ def api_clientes():
 
 @clientes_bp.route("/clientes/<int:id_cliente>")
 def ver_cliente(id_cliente):
+    if not puede_ver_cliente(id_cliente):
+        return render_template("errors/403.html"), 403
     filtros = request.args
-    data = obtener_cliente_detalle_service(id_cliente, filtros)
+    negocios_kpis = None
+    if not _es_admin():
+        filtros = request.args.to_dict()
+        filtros["id_negocio"] = restringir_negocios(request.args.get("id_negocio") or None)
+        negocios_kpis = restringir_negocios()
+    data = obtener_cliente_detalle_service(id_cliente, filtros, negocios_kpis=negocios_kpis)
+    data["negocios"] = negocios_visibles()
     if request.args.get('partial') == '1':
         return render_template("clientes/_cliente_pedidos_partial.html", **data)
     return render_template("clientes/cliente_perfil.html", **data)
@@ -128,6 +155,31 @@ def api_crear_cliente():
     except ValueError as e:
         return jsonify({"ok": False, "error": str(e)}), 400
     return jsonify(cliente)
+
+
+@clientes_bp.route("/api/clientes/<int:id_cliente>")
+def api_obtener_cliente(id_cliente):
+    cliente = obtener_cliente_service(id_cliente)
+    if not cliente:
+        return jsonify({"ok": False, "error": "Cliente no encontrado."}), 404
+    return jsonify(cliente)
+
+
+@clientes_bp.route("/api/clientes/<int:id_cliente>/editar", methods=["POST"])
+@limiter.limit("30 per minute")
+def api_editar_cliente(id_cliente):
+    if not obtener_cliente_service(id_cliente):
+        return jsonify({"ok": False, "error": "Cliente no encontrado."}), 404
+    form = request.form.to_dict()
+    form["id_cliente"] = id_cliente
+    try:
+        guardar_cliente_service(form, session.get("id_usuario"))
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
+    except Exception:  # pragma: no cover
+        logger.exception("Error al editar cliente id_cliente=%s", id_cliente)
+        return jsonify({"ok": False, "error": "Error al guardar el cliente."}), 500
+    return jsonify({"ok": True, "cliente": obtener_cliente_service(id_cliente)})
 
 
 @clientes_bp.route("/clientes/exportar")

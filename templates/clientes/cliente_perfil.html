@@ -81,6 +81,8 @@
         action="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}"
         class="filtro-box">
     <div class="filtro-row">
+      {# La caja solo ve sus negocios; con uno solo no hay nada que elegir #}
+      {% if session.rol == 'admin' or negocios | length > 1 %}
       <div class="filtro-item">
         <label>Negocio</label>
         <select name="id_negocio">
@@ -93,6 +95,7 @@
           {% endfor %}
         </select>
       </div>
+      {% endif %}
       <div class="filtro-item">
         <label>Desde</label>
         <input type="date" name="fecha_inicio"
@@ -110,6 +113,7 @@
              href="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}"
              class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
         {% endif %}
+        {% if session.rol == 'admin' %}
         <a href="{{ url_for('clientes.exportar_cliente_excel', id_cliente=cliente.id_cliente,
                     id_negocio=request.args.get('id_negocio') or '',
                     fecha_inicio=request.args.get('fecha_inicio') or '',
@@ -117,6 +121,7 @@
            class="btn btn--success btn--sm no-underline js-exportar">
             <i data-lucide="download" width="14" height="14"></i> Exportar Excel
         </a>
+        {% endif %}
       </div>
     </div>
     <input type="hidden" name="orden" value="{{ request.args.get('orden', '') }}">

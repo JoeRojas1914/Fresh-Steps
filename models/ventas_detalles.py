@@ -321,16 +321,15 @@ def contar_entregas_pendientes(id_negocio=None, id_venta=None, q=None, articulo=
 
 def contar_ventas_cliente(id_cliente, id_negocio=None, fecha_inicio=None, fecha_fin=None):
     with get_db() as (_, cursor):
-        sql = "SELECT COUNT(*) AS total FROM venta WHERE id_cliente=%s AND eliminado=0"
-        params = [id_cliente]
-        if id_negocio:
-            sql += " AND id_negocio=%s"
-            params.append(id_negocio)
+        sql = "SELECT COUNT(*) AS total FROM venta v WHERE v.id_cliente=%s AND v.eliminado=0"
+        sql_neg, params_neg = filtro_negocio(id_negocio)
+        sql += sql_neg
+        params = [id_cliente] + params_neg
         if fecha_inicio:
-            sql += " AND fecha_recibo >= %s"
+            sql += " AND v.fecha_recibo >= %s"
             params.append(fecha_inicio)
         if fecha_fin:
-            sql += " AND fecha_recibo <= %s"
+            sql += " AND v.fecha_recibo <= %s"
             params.append(fecha_fin)
         cursor.execute(sql, params)
         return cursor.fetchone()["total"]
@@ -349,10 +348,9 @@ def obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limi
             WHERE v.id_cliente = %s
               AND v.eliminado = 0
         """
-        params = [id_cliente]
-        if id_negocio:
-            sql += " AND v.id_negocio=%s"
-            params.append(id_negocio)
+        sql_neg, params_neg = filtro_negocio(id_negocio)
+        sql += sql_neg
+        params = [id_cliente] + params_neg
         if fecha_inicio:
             sql += " AND v.fecha_recibo >= %s"
             params.append(fecha_inicio)
@@ -367,20 +365,23 @@ def obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limi
         return cursor.fetchall()
 
 
-def obtener_kpis_cliente(id_cliente: int) -> dict:
+def obtener_kpis_cliente(id_cliente: int, id_negocio=None) -> dict:
+    """Total gastado y saldo pendiente del cliente (opcionalmente solo en esos negocios)."""
+    sql_neg, params_neg = filtro_negocio(id_negocio)
+    sql_neg_v3 = sql_neg.replace("v.id_negocio", "v3.id_negocio")
     with get_db() as (_, cursor):
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT
                 COALESCE(SUM(v.total), 0) AS total_gastado,
                 COALESCE((
                     SELECT SUM(pv.monto)
                     FROM pago_venta pv
                     JOIN venta v3 ON pv.id_venta = v3.id_venta
-                    WHERE v3.id_cliente = %s AND v3.eliminado = 0
+                    WHERE v3.id_cliente = %s AND v3.eliminado = 0{sql_neg_v3}
                 ), 0) AS total_pagado
             FROM venta v
-            WHERE v.id_cliente = %s AND v.eliminado = 0
-        """, (id_cliente, id_cliente))
+            WHERE v.id_cliente = %s AND v.eliminado = 0{sql_neg}
+        """, [id_cliente] + params_neg + [id_cliente] + params_neg)
         row = cursor.fetchone()
 
     total_gastado = float(row["total_gastado"] or 0)

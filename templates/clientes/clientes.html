@@ -9,7 +9,7 @@
 
 
 <h1><i data-lucide="users" width="24" height="24"></i> Clientes <span class="page-count">{{ total_clientes }} clientes</span></h1>
-<p class="page-sub">Búsqueda y gestión de clientes registrados</p>
+<p class="page-sub">{% if session.rol == 'admin' %}Búsqueda y gestión de clientes registrados{% else %}Clientes con compras en tus negocios{% endif %}</p>
 
 {{ alerts(get_flashed_messages(with_categories=true)) }}
 
@@ -23,6 +23,8 @@
                    autocomplete="off">
         </div>
         <div class="filtro-actions--right">
+            {# Eliminados y Excel: solo admin #}
+            {% if session.rol == 'admin' %}
             <div class="filtro-toggle filtro-toggle--compact">
                 <label class="switch">
                     <input type="checkbox"
@@ -39,6 +41,7 @@
                class="btn btn--success btn--sm no-underline js-exportar">
                 <i data-lucide="download" width="14" height="14"></i> Exportar Excel
             </a>
+            {% endif %}
             <button type="button" data-modal-open="modalCliente" class="btn btn--primary btn--sm">
                 <i data-lucide="plus" width="14" height="14"></i> Agregar cliente
             </button>

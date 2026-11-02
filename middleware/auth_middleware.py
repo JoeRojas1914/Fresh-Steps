@@ -48,6 +48,12 @@ RUTAS_CAJA = {
 
     "clientes.api_clientes",
     "clientes.api_crear_cliente",
+    "clientes.api_obtener_cliente",
+    "clientes.api_editar_cliente",
+    "clientes.clientes",                # solo clientes de sus negocios (ver clientes_routes)
+    "clientes.ver_cliente",
+    "clientes.guardar_cliente",
+    "clientes.historial_cliente",
     "servicios.api_servicios",
 
     "ventas.guardar_venta",

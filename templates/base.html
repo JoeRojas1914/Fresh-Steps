@@ -42,6 +42,7 @@
             <a href="/ventas/pendientes" {% if request.path == "/ventas/pendientes"  %}aria-current="page"{% endif %}>Pendientes</a>
             <a href="/ventas/listas"     {% if request.path == "/ventas/listas"      %}aria-current="page"{% endif %}>Procesadas</a>
             {% if session.rol != "admin" %}
+            <a href="/clientes"          {% if request.path.startswith("/clientes")  %}aria-current="page"{% endif %}>Clientes</a>
             <a href="/ventas/historial"  {% if request.path == "/ventas/historial"   %}aria-current="page"{% endif %}>Historial</a>
             {% endif %}
         </div>
