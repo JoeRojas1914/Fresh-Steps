@@ -1,6 +1,7 @@
 import io
 import logging
 from datetime import datetime
+from urllib.parse import urlparse
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, send_file
 
 logger = logging.getLogger(__name__)
@@ -143,7 +144,19 @@ def ver_cliente(id_cliente):
     data["negocios"] = negocios_visibles()
     if request.args.get('partial') == '1':
         return render_template("clientes/_cliente_pedidos_partial.html", **data)
+    data["volver_url"] = _url_volver_clientes()
+    if not _es_admin():
+        data["kpis"] = None   
     return render_template("clientes/cliente_perfil.html", **data)
+
+
+def _url_volver_clientes() -> str:
+    """Regresa a la lista de clientes conservando búsqueda/página si se llegó desde ahí."""
+    lista = url_for("clientes.clientes")
+    ref = urlparse(request.referrer or "")
+    if ref.netloc == request.host and ref.path == lista:
+        return f"{lista}?{ref.query}" if ref.query else lista
+    return lista
 
 
 @clientes_bp.route("/api/clientes/crear", methods=["POST"])

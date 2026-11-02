@@ -165,6 +165,19 @@ def test_caja_kpis_solo_de_sus_negocios(
     assert round(calzado + confeccion, 2) == round(todos, 2)
 
 
+def test_caja_perfil_no_muestra_montos(logged_client_caja, cliente_test, venta_pendiente):
+    html = logged_client_caja.get(f"/clientes/{cliente_test['id_cliente']}").data.decode()
+    assert "Total pedidos" in html
+    assert "Total gastado" not in html
+    assert "Saldo pendiente</div>" not in html
+
+
+def test_admin_perfil_si_muestra_montos(logged_client, cliente_test, venta_pendiente):
+    html = logged_client.get(f"/clientes/{cliente_test['id_cliente']}").data.decode()
+    assert "Total gastado" in html
+    assert "Saldo pendiente</div>" in html
+
+
 def test_admin_perfil_muestra_todos_los_pedidos(
     logged_client, cliente_test, venta_pendiente, venta_confeccion
 ):

@@ -14,6 +14,10 @@
 
   {{ alerts(get_flashed_messages(with_categories=true)) }}
 
+  <a href="{{ volver_url or url_for('clientes.clientes') }}" class="btn btn--secondary btn--sm no-underline mb-20">
+    <i data-lucide="arrow-left" width="14" height="14"></i> Regresar a clientes
+  </a>
+
   {# ── Perfil del cliente ────────────────────────────────── #}
   <div class="cliente-card">
     <div class="cliente-avatar-wrap">
@@ -57,12 +61,13 @@
     </div>
   </div>
 
-  {# ── KPIs ──────────────────────────────────────────────── #}
-  <div class="cliente-kpis">
+  {# ── KPIs — montos solo para admin ─────────────────────── #}
+  <div class="cliente-kpis{% if not kpis %} cliente-kpis--solo{% endif %}">
     <div class="kpi-card">
       <div class="kpi-card__label"><i data-lucide="shopping-bag" width="13" height="13"></i> Total pedidos</div>
       <div class="kpi-card__value">{{ total_pedidos }}</div>
     </div>
+    {% if kpis %}
     <div class="kpi-card">
       <div class="kpi-card__label"><i data-lucide="dollar-sign" width="13" height="13"></i> Total gastado</div>
       <div class="kpi-card__value">${{ "%.2f"|format(kpis.total_gastado) }}</div>
@@ -71,6 +76,7 @@
       <div class="kpi-card__label"><i data-lucide="clock" width="13" height="13"></i> Saldo pendiente</div>
       <div class="kpi-card__value">${{ "%.2f"|format(kpis.saldo_pendiente_total) }}</div>
     </div>
+    {% endif %}
   </div>
 
   <h2 class="mb-20"><i data-lucide="package" width="22" height="22"></i> Historial de pedidos</h2>

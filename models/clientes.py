@@ -1,6 +1,25 @@
+import re
+
 from db import get_db
 from utils import build_where, construir_order_by, registrar_historial as _registrar_historial
 from models.ventas_detalles import como_lista
+
+
+def _cond_busqueda(q):
+    """Filtro para build_where: nombre, apellido o teléfono.
+
+    El teléfono se compara sin espacios, guiones, paréntesis ni '+'."""
+    q = (q or "").strip()
+    if not q:
+        return ("", None)
+    like = f"%{q}%"
+    sql = "nombre LIKE %s OR apellido LIKE %s OR CONCAT(nombre, ' ', apellido) LIKE %s"
+    valores = [like, like, like]
+    digitos = re.sub(r"[\s\-\(\)\+]", "", q)
+    if digitos.isdigit():
+        sql += " OR telefono LIKE %s"
+        valores.append(f"%{digitos}%")
+    return (f"({sql})", *valores)
 
 
 def _cond_negocios(id_negocio):
@@ -92,10 +111,9 @@ def actualizar_cliente(id_cliente, nombre, apellido, correo, telefono, direccion
 
 
 def contar_clientes(q=None, incluir_eliminados=False, id_negocio=None):
-    q_like = f"%{q}%" if q else None
     where, params = build_where([
         ("activo = %s", None if incluir_eliminados else 1),
-        ("(nombre LIKE %s OR apellido LIKE %s OR CONCAT(nombre, ' ', apellido) LIKE %s)", q_like, q_like, q_like),
+        _cond_busqueda(q),
         _cond_negocios(id_negocio),
     ])
     with get_db() as (_, cursor):
@@ -214,10 +232,9 @@ COLUMNAS_ORDEN_CLIENTES = {
 
 def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False,
                      orden=None, direccion=None, id_negocio=None):
-    q_like = f"%{q}%" if q else None
     where, params = build_where([
         ("activo = %s", None if incluir_eliminados else 1),
-        ("(nombre LIKE %s OR apellido LIKE %s OR CONCAT(nombre, ' ', apellido) LIKE %s)", q_like, q_like, q_like),
+        _cond_busqueda(q),
         _cond_negocios(id_negocio),
     ])
     params.extend([limit, offset])
