@@ -257,6 +257,18 @@
     border-color: #1e7fd6;
 }
 
+/* KPIs que llevan al historial filtrado */
+a.kpi-hoy-card--link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+a.kpi-hoy-card--link:focus-visible {
+    outline: 2px solid #1e7fd6;
+    outline-offset: 2px;
+}
+
 .hoy-kpis .kpi-hoy-card:last-child:nth-child(odd) {
     grid-column: span 2;
 }

@@ -151,6 +151,13 @@ document.addEventListener("click", function(e) {
         p.classList.toggle("active", p.dataset.negocio === negocio);
     });
 
+    document.querySelectorAll("a.kpi-hoy-card--link").forEach(function(a) {
+        var url = new URL(a.href, window.location.href);
+        if (negocio === "all") url.searchParams.delete("id_negocio");
+        else url.searchParams.set("id_negocio", negocio);
+        a.href = url.pathname + url.search;
+    });
+
     _setLoading(true);
 
     fetch("/api/index/kpis?negocio=" + encodeURIComponent(negocio), {

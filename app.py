@@ -203,6 +203,7 @@ def index():
         nombre_usuario          = " ".join(filter(None, [session.get("nombre"), session.get("apellido")])) or session.get("usuario", "").capitalize(),
         fecha_bonita            = fecha_bonita,
         negocio_sel             = negocio,
+        hoy_iso                 = hoy_dt.isoformat(),
         **kpis,
     )
 

@@ -68,31 +68,39 @@
 </div>
 {% endif %}
 
-{# ── KPIs del día ── #}
+
+{% macro url_historial_hoy(tipo_fecha) -%}
+{{ url_for('ventas.historial_ventas', tipo_fecha=tipo_fecha, fecha_inicio=hoy_iso, fecha_fin=hoy_iso,
+           id_negocio=negocio_sel if (session.rol == 'admin' and negocio_sel != 'all') else None) }}
+{%- endmacro %}
 <div class="hoy-grid">
     <div class="hoy-kpis{% if session.rol != 'admin' %} hoy-kpis--solo{% endif %}">
-        <div class="kpi-hoy-card azul">
+        <a class="kpi-hoy-card kpi-hoy-card--link azul" href="{{ url_historial_hoy('fecha_recibo') }}"
+           title="Ver en el historial">
             <span class="kpi-hoy-label">Ventas hoy</span>
             <span class="kpi-hoy-num" data-kpi="ventas_hoy">{{ ventas_hoy }}</span>
-        </div>
+        </a>
         {% if session.rol == "admin" %}
         <div class="kpi-hoy-card verde">
             <span class="kpi-hoy-label">Ingresos hoy</span>
             <span class="kpi-hoy-num dato-sensible" data-kpi="ingresos_hoy">${{ "%.2f"|format(ingresos_hoy) }}</span>
         </div>
         {% endif %}
-        <div class="kpi-hoy-card naranja">
+        <a class="kpi-hoy-card kpi-hoy-card--link naranja" href="{{ url_historial_hoy('fecha_recibo') }}"
+           title="Ver en el historial">
             <span class="kpi-hoy-label">Unidades recibidas</span>
             <span class="kpi-hoy-num" data-kpi="unidades_recibidas">{{ unidades_recibidas_hoy }}</span>
-        </div>
-        <div class="kpi-hoy-card morado">
+        </a>
+        <a class="kpi-hoy-card kpi-hoy-card--link morado" href="{{ url_historial_hoy('fecha_entrega') }}"
+           title="Ver en el historial">
             <span class="kpi-hoy-label">Unidades entregadas</span>
             <span class="kpi-hoy-num" data-kpi="unidades_entregadas">{{ unidades_entregadas_hoy }}</span>
-        </div>
-        <div class="kpi-hoy-card teal">
+        </a>
+        <a class="kpi-hoy-card kpi-hoy-card--link teal" href="{{ url_historial_hoy('fecha_entrega') }}"
+           title="Ver en el historial">
             <span class="kpi-hoy-label">Ventas cerradas hoy</span>
             <span class="kpi-hoy-num" data-kpi="ventas_entregadas_hoy">{{ ventas_entregadas_hoy }}</span>
-        </div>
+        </a>
     </div>
     <div class="hoy-chart">
         <div class="hoy-chart-head">
