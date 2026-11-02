@@ -147,6 +147,8 @@ def test_orden_invalido_no_rompe(logged_client):
 
 # Pendientes y Listas no muestran fecha lista / fecha entrega como columna
 _SIN_FECHAS_CIERRE = {k for k in COLUMNAS_ORDEN_VENTAS if k not in ("fecha_lista", "fecha_entrega")}
+# Procesadas muestra "Fecha lista" en lugar de "Fecha estimada"
+_COLUMNAS_LISTAS = (_SIN_FECHAS_CIERRE - {"fecha_estimada"}) | {"fecha_lista"}
 
 # (url, columnas permitidas en SQL, columnas con encabezado visible)
 _TABLAS = [
@@ -156,7 +158,7 @@ _TABLAS = [
     ("/pagos",             COLUMNAS_ORDEN_PAGOS,     COLUMNAS_ORDEN_PAGOS),
     ("/clientes",          COLUMNAS_ORDEN_CLIENTES,  COLUMNAS_ORDEN_CLIENTES),
     ("/ventas/pendientes", COLUMNAS_ORDEN_VENTAS,    _SIN_FECHAS_CIERRE),
-    ("/ventas/listas",     COLUMNAS_ORDEN_VENTAS,    _SIN_FECHAS_CIERRE),
+    ("/ventas/listas",     COLUMNAS_ORDEN_VENTAS,    _COLUMNAS_LISTAS),
     ("/ventas/historial",  COLUMNAS_ORDEN_HISTORIAL, COLUMNAS_ORDEN_HISTORIAL),
 ]
 

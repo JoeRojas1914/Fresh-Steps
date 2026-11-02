@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 from config import METODOS_PAGO_VALIDOS, POR_PAGINA_VENTAS_ACTIVAS
@@ -28,6 +28,15 @@ from models.pagos import (
 )
 
 from models.negocio import obtener_negocios, cargar_tipos_por_negocio
+
+
+def semanas_desde(fecha, hoy: date | None = None) -> int:
+    """Semanas completas transcurridas desde `fecha` (0 si no hay fecha o es futura)."""
+    if not fecha:
+        return 0
+    if isinstance(fecha, datetime):
+        fecha = fecha.date()
+    return max((hoy or date.today()) - fecha, timedelta(0)).days // 7
 
 
 def _paginar_ventas(
@@ -113,10 +122,13 @@ def listar_ventas_listas_service(
         orden=orden, direccion=direccion, articulo=articulo,
     )
     _enriquecer_ventas(ventas, con_pagos=True)
+    hoy = date.today()
+    for v in ventas:
+        v["semanas_lista"] = semanas_desde(v.get("fecha_lista"), hoy)
     return {
         "ventas":          ventas,
         "negocios":        obtener_negocios(),
-        "hoy":             date.today(),
+        "hoy":             hoy,
         "id_negocio":      id_negocio,
         "id_venta":        id_venta,
         "q":               q,

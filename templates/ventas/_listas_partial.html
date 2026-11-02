@@ -16,7 +16,7 @@
 {"label": "Cliente", "sort": "cliente"},
 "Teléfono",
 {"label": "Fecha Recibo", "sort": "fecha_recibo"},
-{"label": "Fecha estimada", "sort": "fecha_estimada"},
+{"label": "Fecha lista", "sort": "fecha_lista"},
 {"label": "Total", "sort": "total"},
 "Monto prepago",
 "Pago a deber",
@@ -47,9 +47,18 @@
         {{ "%02d:%02d"|format(v.fecha_recibo.hour, v.fecha_recibo.minute) }}
     </td>
 
+    {# A partir de la primera semana desde que se marcó lista, badge con las semanas #}
     <td>
-        {{ v.fecha_estimada.day }} {{ meses[v.fecha_estimada.month] }}
-        {{ "%02d:%02d"|format(v.fecha_estimada.hour, v.fecha_estimada.minute) }}
+        <span class="fecha-estimada-cell">
+            <span>{{ v.fecha_lista.day }} {{ meses[v.fecha_lista.month] }}
+            {{ "%02d:%02d"|format(v.fecha_lista.hour, v.fecha_lista.minute) }}</span>
+            {% if v.semanas_lista >= 1 %}
+                <span class="badge-semanas{% if v.semanas_lista >= 4 %} badge-semanas--alta{% endif %}"
+                      title="Lleva {{ v.semanas_lista }} semana{{ 's' if v.semanas_lista != 1 }} lista para entrega">
+                    {{ v.semanas_lista }} {{ "semana" if v.semanas_lista == 1 else "semanas" }}
+                </span>
+            {% endif %}
+        </span>
     </td>
 
     <td>${{ total | round(2) }}</td>
