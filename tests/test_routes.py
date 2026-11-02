@@ -38,8 +38,8 @@ def test_exportar_gastos_con_rol_caja_retorna_403(logged_client_caja):
     assert res.status_code == 403
 
 
-def test_historial_ventas_con_rol_caja_retorna_403(logged_client_caja):
-    res = logged_client_caja.get("/ventas/historial")
+def test_exportar_historial_ventas_con_rol_caja_retorna_403(logged_client_caja):
+    res = logged_client_caja.get("/ventas/historial/exportar")
     assert res.status_code == 403
 
 

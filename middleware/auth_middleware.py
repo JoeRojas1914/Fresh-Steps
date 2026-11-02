@@ -42,7 +42,9 @@ RUTAS_CAJA = {
     "ventas.abrir_whatsapp",
     "ventas.venta_ticket",
     "ventas.registrar_pago_final",
-    "ventas.detalles_venta", 
+    "ventas.detalles_venta",
+    "ventas.historial_ventas",          # sin exportar ni eliminadas (ver ventas_routes)
+    "ventas.historial_venta_por_id",
 
     "clientes.api_clientes",
     "clientes.api_crear_cliente",

@@ -23,6 +23,7 @@ from services.ventas_service import (
 
 from services.ventas_editar_service import obtener_venta_editar_service, editar_venta_service
 from services.permisos_service import (
+    negocios_permitidos,
     restringir_negocios,
     puede_usar_negocio,
     puede_ver_venta,
@@ -269,16 +270,22 @@ _ESTADOS_HISTORIAL     = ("pendiente", "lista", "entregada", "eliminada")
 
 
 def _filtros_historial():
-    """Lee los filtros del historial desde la query string (compartido por la tabla y el Excel)."""
+    """Lee los filtros del historial desde la query string (compartido por la tabla y el Excel).
+
+    La caja solo ve sus negocios asignados y nunca las ventas eliminadas."""
     tipo_fecha = request.args.get("tipo_fecha", "fecha_recibo")
     if tipo_fecha not in _TIPOS_FECHA_HISTORIAL:
         tipo_fecha = "fecha_recibo"
-    estados = request.args.getlist("estado")
+    es_admin = negocios_permitidos() is None
+    estados  = request.args.getlist("estado")
+    if not es_admin:
+        estados = [e for e in estados if e != "eliminada"]
+    id_negocio = [int(n) for n in request.args.getlist("id_negocio") if n.isdigit()]
     return {
-        "id_negocio":         [int(n) for n in request.args.getlist("id_negocio") if n.isdigit()],
+        "id_negocio":         id_negocio if es_admin else restringir_negocios(id_negocio),
         "fecha_inicio":       request.args.get("fecha_inicio") or None,
         "fecha_fin":          request.args.get("fecha_fin")    or None,
-        "mostrar_eliminadas": request.args.get("eliminadas") == "1",
+        "mostrar_eliminadas": es_admin and request.args.get("eliminadas") == "1",
         "q":                  request.args.get("q", "").strip() or None,
         "articulo":           request.args.get("articulo", "").strip() or None,
         "id_venta":           request.args.get("id_venta", type=int),
@@ -288,14 +295,20 @@ def _filtros_historial():
 
 
 @ventas_bp.route("/ventas/historial")
-@admin_required
 def historial_ventas():
+    filtros = _filtros_historial()
     data = historial_ventas_service(
-        **_filtros_historial(),
+        **filtros,
         pagina=request.args.get("pagina", 1, type=int),
         orden=request.args.get("orden") or None,
         direccion=request.args.get("dir") or None,
     )
+    data["negocios"] = negocios_visibles()
+    # El filtro de la caja se calcula con todos sus negocios; en pantalla solo
+    # se marcan los que pidió explícitamente.
+    if negocios_permitidos() is not None:
+        data["id_negocio"] = [n for n in filtros["id_negocio"]
+                              if str(n) in request.args.getlist("id_negocio")]
 
     if request.args.get('partial') == '1':
         return render_template("ventas/_historial_partial.html", **data)
@@ -315,6 +328,8 @@ def exportar_historial_excel():
 
 @ventas_bp.route("/ventas/<int:id_venta>/historial")
 def historial_venta_por_id(id_venta):
+    if not puede_ver_venta(id_venta, estricto=True):
+        return jsonify({"ok": False, "error": _SIN_PERMISO}), 403
     data   = obtener_historial_venta(id_venta)
     result = []
     for row in data:

@@ -59,17 +59,18 @@ def puede_usar_negocio(id_negocio) -> bool:
         return False
 
 
-def puede_ver_venta(id_venta: int) -> bool:
+def puede_ver_venta(id_venta: int, estricto: bool = False) -> bool:
     """False si la venta existe y pertenece a un negocio no permitido.
 
-    Si la venta no existe regresa True para que la ruta responda como siempre
-    (404 / "no existe")."""
+    Si la venta no existe (o está eliminada) regresa True para que la ruta
+    responda como siempre (404 / "no existe"). Con `estricto=True` regresa False:
+    la caja no puede consultar ventas eliminadas."""
     permitidos = negocios_permitidos()
     if permitidos is None:
         return True
     venta = obtener_venta(id_venta)
     if not venta:
-        return True
+        return not estricto
     return venta["id_negocio"] in permitidos
 
 
