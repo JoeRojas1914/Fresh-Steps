@@ -44,7 +44,6 @@ CREATE TABLE IF NOT EXISTS usuario (
     creado_en     DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Negocios que puede ver cada usuario de caja (los admin ven todos)
 CREATE TABLE IF NOT EXISTS usuario_negocio (
     id_usuario INT NOT NULL,
     id_negocio INT NOT NULL,
@@ -94,6 +93,12 @@ CREATE TABLE IF NOT EXISTS servicio (
     activo      TINYINT(1) NOT NULL DEFAULT 1,
     FOREIGN KEY (id_negocio) REFERENCES negocio(id_negocio)
 );
+
+-- Servicio predeterminado por negocio (va aquí porque `servicio` se crea después de `negocio`)
+ALTER TABLE negocio
+    ADD COLUMN id_servicio_default INT NULL AFTER tipo,
+    ADD CONSTRAINT fk_negocio_servicio_default
+        FOREIGN KEY (id_servicio_default) REFERENCES servicio (id_servicio) ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS servicios_historial (
     id_historial  INT AUTO_INCREMENT PRIMARY KEY,

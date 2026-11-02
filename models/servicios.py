@@ -36,6 +36,9 @@ def actualizar_servicio(id_servicio, id_negocio, nombre, precio, id_usuario):
             WHERE id_servicio=%s
         """, (id_negocio, nombre, precio, id_servicio))
 
+        if antes and int(antes["id_negocio"]) != int(id_negocio):
+            _quitar_default(cursor, id_servicio)
+
         despues = {"nombre": nombre, "precio": precio}
         registrar_historial(cursor, id_servicio, "EDITADO", id_usuario, antes, despues)
 
@@ -50,9 +53,51 @@ def eliminar_servicio(id_servicio, id_usuario):
             SET activo = 0
             WHERE id_servicio=%s
         """, (id_servicio,))
+        _quitar_default(cursor, id_servicio)
 
         registrar_historial(cursor, id_servicio, "ELIMINADO", id_usuario, antes, None)
         return True
+
+
+# ── Servicio predeterminado por negocio (negocio.id_servicio_default) ──
+
+def _quitar_default(cursor, id_servicio):
+    cursor.execute(
+        "UPDATE negocio SET id_servicio_default = NULL WHERE id_servicio_default = %s",
+        (id_servicio,),
+    )
+
+
+def alternar_servicio_default(id_servicio, id_usuario):
+    """Marca el servicio como predeterminado de su negocio, o lo quita si ya lo era.
+
+    Regresa True si quedó como predeterminado, False si se quitó y None si el
+    servicio no existe o está eliminado."""
+    with get_db() as (_, cursor):
+        cursor.execute("""
+            SELECT s.id_negocio, n.id_servicio_default
+            FROM servicio s
+            JOIN negocio n ON n.id_negocio = s.id_negocio
+            WHERE s.id_servicio = %s AND s.activo = 1
+        """, (id_servicio,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+
+        era_default = row["id_servicio_default"] == id_servicio
+        cursor.execute(
+            "UPDATE negocio SET id_servicio_default = %s WHERE id_negocio = %s",
+            (None if era_default else id_servicio, row["id_negocio"]),
+        )
+        # El que era predeterminado antes en ese negocio también queda en el historial
+        anterior = row["id_servicio_default"]
+        if anterior and not era_default:
+            registrar_historial(cursor, anterior, "EDITADO", id_usuario,
+                                {"predeterminado": "Sí"}, {"predeterminado": "No"})
+        registrar_historial(cursor, id_servicio, "EDITADO", id_usuario,
+                            {"predeterminado": "Sí" if era_default else "No"},
+                            {"predeterminado": "No" if era_default else "Sí"})
+        return not era_default
 
 
 def obtener_servicio_por_id(id_servicio):
@@ -100,9 +145,12 @@ def obtener_servicios(id_negocio=None, q=None, incluir_eliminados=False, limit=1
     params.extend([limit, offset])
     with get_db() as (_, cursor):
         sql = (
-            "SELECT s.id_servicio, s.nombre, s.precio, s.id_negocio, s.activo, n.nombre AS negocio"
+            "SELECT s.id_servicio, s.nombre, s.precio, s.id_negocio, s.activo, n.nombre AS negocio,"
+            " (n.id_servicio_default <=> s.id_servicio) AS es_default,"
+            " sd.nombre AS default_actual"   # predeterminado actual del negocio (para confirmar el cambio)
             " FROM servicio s"
-            " JOIN negocio n ON n.id_negocio = s.id_negocio "
+            " JOIN negocio n ON n.id_negocio = s.id_negocio"
+            " LEFT JOIN servicio sd ON sd.id_servicio = n.id_servicio_default "
             + where
             + construir_order_by(orden, direccion, "s.nombre ASC",
                                  COLUMNAS_ORDEN_SERVICIOS, "s.id_servicio")

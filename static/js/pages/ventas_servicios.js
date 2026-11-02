@@ -95,6 +95,17 @@ function crearFilaServicio(indexArticulo, indexServicio, opcionesHTML) {
     `;
 }
 
+
+export function aplicarServicioDefault(indexArticulo) {
+    const porDefecto = ventaState.serviciosGlobales.find(s => Number(s.es_default) === 1);
+    if (!porDefecto) return;
+    const select = document.querySelector(`#serviciosLista_${indexArticulo} .select-servicio`);
+    if (!select || select.value) return;
+    select.value = String(porDefecto.id_servicio);
+    if (!select.value) return;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 /* ─── CRUD de filas de servicio ──────────────────────────────────────────── */
 
 export function marcarPrecioEditado(input) {

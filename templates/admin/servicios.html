@@ -17,6 +17,13 @@
 <form method="GET" action="/servicios" id="form-filtro-servicios">
     <div class="filtro-box">
         <div class="filtro-row">
+            <div class="filtro-item filtro-item--max280">
+                <label for="buscar-servicio">Buscar servicio</label>
+                <input type="text" id="buscar-servicio" name="q"
+                       value="{{ q or '' }}"
+                       placeholder="Nombre del servicio..."
+                       autocomplete="off">
+            </div>
             {{ filtro_negocios(negocios, id_negocio, input_id="select-negocio-servicios") }}
             <div class="filtro-item filtro-item--auto">
                 <label>&nbsp;</label>
@@ -34,6 +41,7 @@
             </div>
             <div class="filtro-actions">
                 <a href="{{ url_for('servicios.exportar_servicios_excel',
+                            q=q or None,
                             id_negocio=request.args.getlist('id_negocio'),
                             eliminados='1' if incluir_eliminados else '') }}"
                    class="btn btn--success btn--sm no-underline js-exportar">
@@ -115,6 +123,30 @@
   {% endcall %}
 {% endif %}
 
+{% endcall %}
+
+
+{# ── Modal confirmar cambio de servicio predeterminado (cuando el negocio ya tenía uno) ── #}
+{% call(section) modal("modalConfirmarDefaultServicio", "Cambiar servicio predeterminado", "sm") %}
+{% if section == 'body' %}
+<div class="modal-confirm">
+  <div class="modal-confirm__hero modal-confirm__hero--warning">
+    <div class="modal-confirm__icon">
+      <i data-lucide="star" width="32" height="32"></i>
+    </div>
+  </div>
+  <p class="modal-confirm__title">¿Cambiar el servicio predeterminado?</p>
+  <p class="modal-confirm__sub">
+    El predeterminado de <strong id="defaultNegocio"></strong> es
+    <strong id="defaultAnterior"></strong>.<br>
+    ¿Quieres reemplazarlo por <strong id="defaultNuevo"></strong>?
+  </p>
+</div>
+{% endif %}
+{% if section == 'footer' %}
+<button class="btn btn--danger btn--sm" data-modal-close="modalConfirmarDefaultServicio">Cancelar</button>
+<button class="btn btn--primary btn--sm js-confirmar-default-servicio">Sí, actualizar</button>
+{% endif %}
 {% endcall %}
 
 

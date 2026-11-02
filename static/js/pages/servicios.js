@@ -1,5 +1,5 @@
-import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, escapeHtml } from '../base/helpers.js';
+import { abrirModal, cerrarModal } from '../components/modal.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, escapeHtml, csrfFetch } from '../base/helpers.js';
 import { validarRequerido, validarPrecio } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
@@ -42,6 +42,56 @@ document.addEventListener("DOMContentLoaded", () => {
     const container  = document.getElementById("tabla-paginada");
     if (formFiltro && container) window.initFiltroAjax(formFiltro, container);
 });
+
+// ── Servicio predeterminado por negocio (estrella) ──
+// Si el negocio ya tiene otro predeterminado, primero se pide confirmación.
+let _defaultPendiente = null;
+
+document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".js-default-servicio");
+    if (!btn || btn.disabled) return;
+
+    const anterior = btn.dataset.defaultActual;
+    if (!anterior) { alternarDefault(btn); return; }
+
+    _defaultPendiente = btn;
+    document.getElementById("defaultNegocio").textContent  = btn.dataset.negocio;
+    document.getElementById("defaultAnterior").textContent = anterior;
+    document.getElementById("defaultNuevo").textContent    = btn.dataset.nombre;
+    abrirModal("modalConfirmarDefaultServicio");
+});
+
+document.addEventListener("click", (e) => {
+    if (!e.target.closest(".js-confirmar-default-servicio") || !_defaultPendiente) return;
+    const btn = _defaultPendiente;
+    _defaultPendiente = null;
+    cerrarModal("modalConfirmarDefaultServicio");
+    alternarDefault(btn);
+});
+
+// Recarga solo la tabla (con los filtros actuales) para mover la estrella.
+async function alternarDefault(btn) {
+    btn.disabled = true;
+    try {
+        const res  = await csrfFetch(`/servicios/${btn.dataset.id}/default`, { method: "POST" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+            mostrarFeedback(data.error || "No se pudo cambiar el servicio predeterminado.", "error");
+            btn.disabled = false;
+            return;
+        }
+        mostrarFeedback(data.message, "success");
+        const container = document.getElementById("tabla-paginada");
+        if (container && window.cargarTablaAjax) {
+            window.cargarTablaAjax(window.location.href, container, { push: false });
+        } else {
+            window.location.reload();
+        }
+    } catch {
+        mostrarFeedback("Error de conexión.", "error");
+        btn.disabled = false;
+    }
+}
 
 
 const _eliminarServicio = crearEliminarHandler("modalConfirmarEliminarServicio");

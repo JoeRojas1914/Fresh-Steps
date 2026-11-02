@@ -14,7 +14,24 @@
     {% for s in servicios %}
     <tr>
         <td>{{ badge_negocio(s.negocio) }}</td>
-        <td>{{ s.nombre }}</td>
+        <td>
+            <span class="servicio-nombre">
+                {% if s.activo %}
+                {# Estrella: servicio predeterminado de su negocio (se agrega solo a cada artículo nuevo) #}
+                <button type="button"
+                        class="btn-default-servicio js-default-servicio{% if s.es_default %} is-default{% endif %}"
+                        data-id="{{ s.id_servicio }}"
+                        data-nombre="{{ s.nombre }}"
+                        data-negocio="{{ s.negocio }}"
+                        data-default-actual="{{ '' if s.es_default else (s.default_actual or '') }}"
+                        aria-pressed="{{ 'true' if s.es_default else 'false' }}"
+                        title="{% if s.es_default %}Predeterminado de {{ s.negocio }} — clic para quitarlo{% else %}Marcar como predeterminado de {{ s.negocio }}{% endif %}">
+                    <i data-lucide="star" width="16" height="16"></i>
+                </button>
+                {% endif %}
+                {{ s.nombre }}
+            </span>
+        </td>
         <td>${{ s.precio }}</td>
         <td>
             {% if s.activo %}

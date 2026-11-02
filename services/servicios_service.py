@@ -9,7 +9,8 @@ from models.servicios import (
     eliminar_servicio,
     obtener_historial_servicio,
     restaurar_servicio,
-    existe_servicio_activo
+    existe_servicio_activo,
+    alternar_servicio_default,
 )
 
 _servicios_cache: dict = {}
@@ -87,6 +88,15 @@ def eliminar_servicio_service(id_servicio: int, id_usuario: int) -> bool:
     result = eliminar_servicio(id_servicio, id_usuario)
     _invalidar_cache_servicios()
     return result
+
+
+def alternar_servicio_default_service(id_servicio: int, id_usuario: int) -> bool:
+    """Marca/quita el servicio como predeterminado de su negocio. True = quedó marcado."""
+    resultado = alternar_servicio_default(id_servicio, id_usuario)
+    if resultado is None:
+        raise ValueError("El servicio no existe o está eliminado.")
+    _invalidar_cache_servicios()
+    return resultado
 
 
 def obtener_historial_servicio_service(id_servicio: int) -> list[dict]:

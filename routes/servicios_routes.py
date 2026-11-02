@@ -23,6 +23,7 @@ from services.servicios_service import (
     eliminar_servicio_service,
     obtener_historial_servicio_service,
     restaurar_servicio_service,
+    alternar_servicio_default_service,
     obtener_negocios,
     exportar_servicios_service,
 )
@@ -101,6 +102,22 @@ def eliminar_servicio(id_servicio):
         return jsonify({"ok": False, "error": "Error al eliminar el servicio."}), 500
 
 
+
+
+@servicios_bp.route("/servicios/<int:id_servicio>/default", methods=["POST"])
+@admin_required
+@limiter.limit("30 per minute")
+def alternar_default_servicio(id_servicio):
+    try:
+        marcado = alternar_servicio_default_service(id_servicio, session.get("id_usuario"))
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 404
+    except Exception:  # pragma: no cover
+        logger.exception("Error al cambiar servicio predeterminado id_servicio=%s", id_servicio)
+        return jsonify({"ok": False, "error": "Error al cambiar el servicio predeterminado."}), 500
+    msg = ("Servicio marcado como predeterminado de su negocio." if marcado
+           else "El servicio ya no es el predeterminado.")
+    return jsonify({"ok": True, "es_default": marcado, "message": msg})
 
 
 @servicios_bp.route("/api/servicios")

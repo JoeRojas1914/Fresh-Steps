@@ -1,7 +1,7 @@
 import { ventaState } from './ventas_state.js';
 import { mostrarFeedback, escapeHtml } from '../base/helpers.js';
 import { validarFormulario, actualizarTotal, calcularTotal } from './ventas_validacion.js';
-import { crearServiciosSelect, actualizarOpcionesServiciosDelArticulo } from './ventas_servicios.js';
+import { crearServiciosSelect, actualizarOpcionesServiciosDelArticulo, aplicarServicioDefault } from './ventas_servicios.js';
 
 /* ─── Tipo de artículo por negocio ───────────────────────────────────────── */
 
@@ -103,6 +103,7 @@ export function agregarArticulo() {
 
     document.getElementById("articulos-container").appendChild(div);
     actualizarEmptyState();
+    aplicarServicioDefault(index);
     if (window.lucide) lucide.createIcons();
 
     const resumenDiv = div.querySelector(".articulo-resumen");

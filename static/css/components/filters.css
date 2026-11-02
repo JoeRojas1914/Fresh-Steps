@@ -205,6 +205,13 @@
   margin-bottom: 24px;
 }
 
+/* ── Negocio (selector múltiple): ancho fijo, no se estira a toda la fila ── */
+.filtro-item--negocio {
+  flex: 0 0 190px;
+  min-width: 190px;
+  max-width: 190px;
+}
+
 /* ── N° Ticket: primer filtro, destacado ── */
 .filtro-item--ticket {
   flex: 0 0 150px;
@@ -270,6 +277,7 @@
 
   .filtro-item,
   .filtro-item--ticket,
+  .filtro-item--negocio,
   .filtro-item--max220,
   .filtro-item--max260,
   .filtro-item--max280 {

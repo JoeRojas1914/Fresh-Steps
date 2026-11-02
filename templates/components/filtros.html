@@ -22,7 +22,7 @@
 {% macro filtro_negocios(negocios, seleccionados=None, placeholder="Todos los negocios", clase="", input_id="filtro-negocio") %}
 {% set marcados = (seleccionados if seleccionados is iterable and seleccionados is not string else [seleccionados])
                   | reject("none") | map("int") | list %}
-<div class="filtro-item {{ clase }}">
+<div class="filtro-item filtro-item--negocio {{ clase }}">
     <label>Negocio</label>
     <details class="multi-select" data-placeholder="{{ placeholder }}" id="{{ input_id }}">
         <summary class="multi-select__btn"><span class="multi-select__txt">{{ placeholder }}</span></summary>
