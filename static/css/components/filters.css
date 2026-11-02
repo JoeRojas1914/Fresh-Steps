@@ -205,6 +205,50 @@
   margin-bottom: 24px;
 }
 
+/* ── N° Ticket: primer filtro, destacado ── */
+.filtro-item--ticket {
+  flex: 0 0 150px;
+  min-width: 150px;
+}
+
+.filtro-item--ticket label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.filtro-ticket {
+  position: relative;
+}
+
+.filtro-ticket__hash {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+/* Borde, fondo y foco: los mismos que el resto de los campos */
+.filtro-item--ticket input {
+  width: 100%;
+  height: 42px;
+  padding: 8px 10px 8px 28px;
+  box-sizing: border-box;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.filtro-item--ticket input::placeholder { font-weight: 500; }
+
+/* Sin flechas de número: el ticket se escribe, no se incrementa */
+.filtro-item--ticket input::-webkit-outer-spin-button,
+.filtro-item--ticket input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.filtro-item--ticket input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
 .filtro-item--auto   { flex: 0 0 auto; min-width: auto; }
 .filtro-item--ml-auto { margin-left: auto; }
 .filtro-item--max110 { max-width: 110px; }
@@ -225,6 +269,7 @@
   .filtro-row { flex-direction: column; gap: 12px; }
 
   .filtro-item,
+  .filtro-item--ticket,
   .filtro-item--max220,
   .filtro-item--max260,
   .filtro-item--max280 {

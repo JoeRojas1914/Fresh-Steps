@@ -4,6 +4,19 @@
         <div class="filtro-row">
 {% endmacro %}
 
+{% macro filtro_ticket(id_venta, input_id=None) %}
+<div class="filtro-item filtro-item--ticket">
+    <label{% if input_id %} for="{{ input_id }}"{% endif %}>
+        <i data-lucide="receipt" width="13" height="13"></i> N° Ticket
+    </label>
+    <div class="filtro-ticket">
+        <span class="filtro-ticket__hash" aria-hidden="true">#</span>
+        <input type="number" {% if input_id %}id="{{ input_id }}" {% endif %}name="id_venta" min="1"
+               inputmode="numeric" value="{{ id_venta or '' }}" placeholder="Recibo">
+    </div>
+</div>
+{% endmacro %}
+
 {% macro cerrar_filtro(limpiar_url=None, mostrar_limpiar=False) %}
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm">

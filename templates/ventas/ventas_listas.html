@@ -5,6 +5,7 @@
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal, modal_eliminar_venta %}
 {% from "components/pagination.html" import pagination %}
+{% from "components/filtros.html" import filtro_ticket %}
     <h1><i data-lucide="check-circle" width="24" height="24"></i> Entregas procesadas</h1>
     <p class="page-sub">Ventas listas para recoger por el cliente</p>
 
@@ -15,6 +16,7 @@
     <input type="hidden" name="dir" value="{{ direccion or '' }}">
     <div class="filtro-box">
         <div class="filtro-row">
+            {{ filtro_ticket(id_venta, "buscador-ticket") }}
             {% if session.rol == 'admin' %}
             <div class="filtro-item filtro-item--max220">
                 <label>Negocio</label>
@@ -29,23 +31,17 @@
                 </select>
             </div>
             {% endif %}
-            <div class="filtro-item filtro-item--max280{% if session.rol == 'admin' %} ml-12{% endif %}">
+            <div class="filtro-item filtro-item--max280">
                 <label>Buscar cliente</label>
                 <input type="text" id="buscador-cliente" name="q"
                        value="{{ q or '' }}"
                        placeholder="Nombre o teléfono...">
             </div>
-            <div class="filtro-item filtro-item--max220 ml-12">
+            <div class="filtro-item filtro-item--max220">
                 <label>Buscar artículo</label>
                 <input type="text" id="buscador-articulo" name="articulo"
                        value="{{ articulo or '' }}"
                        placeholder="Marca, modelo, color...">
-            </div>
-            <div class="filtro-item filtro-item--max110 ml-12">
-                <label>N° Ticket</label>
-                <input type="number" id="buscador-ticket" name="id_venta" min="1"
-                       value="{{ id_venta or '' }}"
-                       placeholder="# Recibo...">
             </div>
         </div>
     </div>

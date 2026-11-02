@@ -8,7 +8,8 @@
 {% from "macros/badges.html" import badge_negocio %}
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
- 
+{% from "components/filtros.html" import filtro_ticket %}
+
 <h1><i data-lucide="clipboard-list" width="24" height="24"></i> Historial de ventas</h1>
 {% set es_admin = session.rol == 'admin' %}
 <p class="page-sub">{% if es_admin %}Consulta y exportación del registro completo de ventas{% else %}Consulta del registro de ventas de tus negocios{% endif %}</p>
@@ -18,6 +19,8 @@
     <input type="hidden" name="dir" value="{{ direccion or '' }}">
     <div class="filtro-box">
         <div class="filtro-row">
+
+            {{ filtro_ticket(id_venta, "buscador-ticket-historial") }}
 
             {# La caja solo ve sus negocios; con uno solo no hay nada que elegir #}
             {% if es_admin or negocios | length > 1 %}
@@ -48,13 +51,6 @@
                 <input type="text" name="articulo" value="{{ articulo or '' }}" placeholder="Marca, modelo, color...">
             </div>
 
-            <div class="filtro-item filtro-item--max160">
-                <label>N° Ticket</label>
-                <input type="number" name="id_venta" min="1"
-                       value="{{ id_venta or '' }}"
-                       placeholder="# Recibo...">
-            </div>
- 
             <div class="filtro-item filtro-item--max160">
                 <label>Tipo de fecha</label>
                 <select name="tipo_fecha">
