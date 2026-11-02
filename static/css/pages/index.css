@@ -364,6 +364,8 @@ a.kpi-hoy-card--link:focus-visible {
     margin-bottom: 10px;
 }
 
+.mes-section-header .home-section-label { margin: 0; }
+
 .mes-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

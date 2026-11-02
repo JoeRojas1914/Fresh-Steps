@@ -580,7 +580,7 @@ function renderTopClientes(clientes) {
             <div class="tc-body">
                 <div class="tc-name">${escapeHtml(cl.nombre)}</div>
                 <div class="tc-bar-wrap">
-                    <div class="tc-bar tc-bar--${rank}" style="width:${barPct}%"></div>
+                    <div class="tc-bar tc-bar--${rank}" data-pct="${barPct}"></div>
                 </div>
             </div>
             <div class="tc-meta">
@@ -589,6 +589,8 @@ function renderTopClientes(clientes) {
             </div>
         </div>`;
     }).join('')}</div>`;
+
+    c.querySelectorAll(".tc-bar[data-pct]").forEach(bar => { bar.style.width = `${bar.dataset.pct}%`; });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

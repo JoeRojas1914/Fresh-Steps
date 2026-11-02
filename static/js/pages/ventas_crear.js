@@ -17,9 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const lista = document.getElementById("lista-clientes");
         if (q.length < 2) { lista.innerHTML = ""; return; }
         lista.innerHTML = `
-            <div class="skeleton-result"><div class="skeleton" style="width:65%;height:13px;border-radius:6px"></div><div class="skeleton" style="width:40%;height:11px;border-radius:6px"></div></div>
-            <div class="skeleton-result"><div class="skeleton" style="width:75%;height:13px;border-radius:6px"></div><div class="skeleton" style="width:50%;height:11px;border-radius:6px"></div></div>
-            <div class="skeleton-result"><div class="skeleton" style="width:55%;height:13px;border-radius:6px"></div><div class="skeleton" style="width:45%;height:11px;border-radius:6px"></div></div>
+            <div class="skeleton-result"><div class="skeleton skeleton--nombre skeleton--w65"></div><div class="skeleton skeleton--tel skeleton--w40"></div></div>
+            <div class="skeleton-result"><div class="skeleton skeleton--nombre skeleton--w75"></div><div class="skeleton skeleton--tel skeleton--w50"></div></div>
+            <div class="skeleton-result"><div class="skeleton skeleton--nombre skeleton--w55"></div><div class="skeleton skeleton--tel skeleton--w45"></div></div>
         `;
         _buscarTimer = setTimeout(buscarClientes, 350);
     });

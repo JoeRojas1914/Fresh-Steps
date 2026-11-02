@@ -336,6 +336,16 @@
   gap: 6px;
 }
 
+/* Líneas del esqueleto de búsqueda de clientes (clases, no style="": lo bloquea la CSP) */
+.skeleton--nombre { height: 13px; }
+.skeleton--tel    { height: 11px; }
+.skeleton--w40 { width: 40%; }
+.skeleton--w45 { width: 45%; }
+.skeleton--w50 { width: 50%; }
+.skeleton--w55 { width: 55%; }
+.skeleton--w65 { width: 65%; }
+.skeleton--w75 { width: 75%; }
+
 #btn-crear:disabled,
 #btn-guardar:disabled {
   pointer-events: auto;
