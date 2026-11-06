@@ -14,8 +14,11 @@ lucide.createIcons();
         if (!link) return;
         const href = link.getAttribute("href");
         if (!href || href.startsWith("#") || href.startsWith("javascript") ||
-            link.target === "_blank" || e.ctrlKey || e.metaKey || e.shiftKey) return;
-        loader.className = "is-loading";
+            link.target === "_blank" || link.hasAttribute("download") ||
+            e.ctrlKey || e.metaKey || e.shiftKey) return;
+        setTimeout(() => {
+            if (!e.defaultPrevented) loader.className = "is-loading";
+        }, 0);
     });
 }());
 

@@ -298,14 +298,6 @@ a.kpi-hoy-card--link:focus-visible { outline: 2px solid #1e7fd6; outline-offset:
     white-space: nowrap;
 }
 
-.mes-link {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1e7fd6;
-    text-decoration: none;
-}
-.mes-link:hover { text-decoration: underline; }
-
 .mes-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
