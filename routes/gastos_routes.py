@@ -1,13 +1,11 @@
-import io
 import logging
-from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, flash, url_for, session, jsonify, send_file
+from flask import Blueprint, render_template, request, redirect, flash, url_for, session, jsonify
 
 logger = logging.getLogger(__name__)
-from config import MAX_FILAS_EXPORTAR, PAGO_LABEL, COMPROBANTE_LABEL
+from config import PAGO_LABEL, COMPROBANTE_LABEL
 from openpyxl import Workbook
 from services.excel_helpers import (
-    C, xl_cell, xl_row_bg,
+    xl_cell, xl_row_bg,
     xl_titulo_hoja, xl_fila_headers, xl_fila_totales,
     xl_col_widths, xl_badge_activo, send_excel
 )

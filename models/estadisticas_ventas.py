@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import date, timedelta
 from db import get_db
+from utils import filtro_negocios, sql_negocios
 
 _COLS_FECHA: dict[str, str] = {
     "fecha_recibo":  "fecha_recibo",
@@ -10,14 +11,6 @@ _COLS_FECHA: dict[str, str] = {
 
 def _col_v(col: str) -> str:
     return _COLS_FECHA.get(col, "fecha_recibo")
-
-
-def _filtro_negocios(id_negocio, columna: str = "id_negocio") -> tuple[str, list]:
-    """'all' = sin filtro; un id o una lista de ids = `AND columna IN (...)`."""
-    if id_negocio == "all" or id_negocio is None:
-        return "", []
-    ids = list(id_negocio) if isinstance(id_negocio, (list, tuple, set)) else [id_negocio]
-    return f" AND {columna} IN ({', '.join(['%s'] * len(ids))})", ids
 
 
 def generar_semanas_rango(inicio: date, fin: date):
@@ -71,9 +64,7 @@ def contar_ventas_por_semana(inicio: date, fin: date, id_negocio: str, col: str 
           AND eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "id_negocio")
     sql += " GROUP BY yw"
 
     with get_db() as (_, cursor):
@@ -159,9 +150,7 @@ def obtener_total_ingresos(inicio, fin, id_negocio):
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
 
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
@@ -180,9 +169,7 @@ def obtener_ingresos_por_semana(inicio, fin, id_negocio):
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
     sql += " GROUP BY yw"
 
     with get_db() as (_, cursor):
@@ -209,9 +196,7 @@ def contar_ventas_por_hora(inicio: date, fin: date, id_negocio: str, col: str = 
           AND eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "id_negocio")
     sql += " GROUP BY hora"
 
     with get_db() as (_, cursor):
@@ -229,9 +214,7 @@ def obtener_ingresos_por_hora(inicio: date, fin: date, id_negocio: str):
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
     sql += " GROUP BY hora"
 
     with get_db() as (_, cursor):
@@ -250,9 +233,7 @@ def obtener_unidades_por_hora(inicio: date, fin: date, id_negocio: str, col: str
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
     sql += " GROUP BY hora"
 
     with get_db() as (_, cursor):
@@ -269,7 +250,7 @@ def contar_ventas_por_dia_rango(inicio: date, fin: date, id_negocio: str, col: s
         WHERE DATE({col}) BETWEEN %s AND %s
           AND eliminado = 0
     """
-    sql_neg, params_neg = _filtro_negocios(id_negocio)
+    sql_neg, params_neg = filtro_negocios(id_negocio)
     sql += sql_neg
     params = [inicio, fin] + params_neg
     sql += " GROUP BY dia"
@@ -295,7 +276,7 @@ def contar_unidades_por_dia_rango(inicio: date, fin: date, id_negocio="all"):
         WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
           AND v.eliminado = 0
     """
-    sql_neg, params_neg = _filtro_negocios(id_negocio, "v.id_negocio")
+    sql_neg, params_neg = filtro_negocios(id_negocio, "v.id_negocio")
     sql += sql_neg + " GROUP BY dia"
 
     with get_db() as (_, cursor):
@@ -319,9 +300,7 @@ def obtener_ingresos_por_dia_rango(inicio: date, fin: date, id_negocio: str):
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
     sql += " GROUP BY dia"
 
     with get_db() as (_, cursor):
@@ -346,9 +325,7 @@ def obtener_unidades_por_dia_rango(inicio: date, fin: date, id_negocio: str, col
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
     sql += " GROUP BY dia"
 
     with get_db() as (_, cursor):
@@ -375,9 +352,7 @@ def obtener_uso_servicios(inicio, fin, id_negocio, col: str = "fecha_recibo"):
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
     sql += " GROUP BY s.id_servicio ORDER BY total DESC"
 
     with get_db() as (_, cursor):
@@ -401,9 +376,7 @@ def obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio, col: str = "fecha_
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
     sql += " GROUP BY tipo"
 
     with get_db() as (_, cursor):
@@ -423,9 +396,7 @@ def obtener_ventas_por_dia(inicio, fin, id_negocio, col: str = "fecha_recibo"):
           AND eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "id_negocio")
     sql += " GROUP BY dia"
 
     with get_db() as (_, cursor):
@@ -448,9 +419,7 @@ def obtener_ticket_promedio(inicio, fin, id_negocio, col: str = "fecha_recibo"):
           AND eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "id_negocio")
 
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
@@ -475,9 +444,7 @@ def obtener_saldo_por_cobrar(inicio, fin, id_negocio, col: str = "fecha_recibo")
           AND (v.total - COALESCE(p.pagado, 0)) > 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
 
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
@@ -494,9 +461,7 @@ def obtener_tiempo_promedio_entrega(inicio, fin, id_negocio):
           AND eliminado   = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "id_negocio")
 
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
@@ -525,90 +490,6 @@ def obtener_ingresos_por_negocio(inicio, fin, col: str = "fecha_recibo"):
         ]
 
 
-def obtener_ventas_por_mes(anio, id_negocio):
-    sql = """
-        SELECT MONTH(fecha_recibo) AS mes, COUNT(*) AS total
-        FROM venta
-        WHERE YEAR(fecha_recibo) = %s AND eliminado = 0
-    """
-    params = [anio]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
-    sql += " GROUP BY mes ORDER BY mes"
-
-    with get_db() as (_, cursor):
-        cursor.execute(sql, params)
-        rows = {r["mes"]: r["total"] for r in cursor.fetchall()}
-    meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-    return [{"label": meses[i], "total": rows.get(i + 1, 0)} for i in range(12)]
-
-
-def obtener_ingresos_por_mes(anio, id_negocio):
-    sql = """
-        SELECT MONTH(pv.fecha_pago) AS mes, COALESCE(SUM(pv.monto), 0) AS total
-        FROM pago_venta pv
-        JOIN venta v ON v.id_venta = pv.id_venta
-        WHERE YEAR(pv.fecha_pago) = %s AND v.eliminado = 0
-    """
-    params = [anio]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
-    sql += " GROUP BY mes ORDER BY mes"
-
-    with get_db() as (_, cursor):
-        cursor.execute(sql, params)
-        rows = {r["mes"]: float(r["total"]) for r in cursor.fetchall()}
-    meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-    return [{"label": meses[i], "total": rows.get(i + 1, 0.0)} for i in range(12)]
-
-
-def obtener_unidades_por_mes(anio, id_negocio):
-    meses_labels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun",
-                    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-    totals: defaultdict = defaultdict(int)
-
-    with get_db() as (_, cursor):
-        if id_negocio in ("1", "all"):
-            cursor.execute("""
-                SELECT MONTH(v.fecha_recibo) AS mes, COUNT(a.id_articulo) AS u
-                FROM venta v
-                JOIN articulo a          ON a.id_venta     = v.id_venta
-                JOIN articulo_calzado ac ON ac.id_articulo = a.id_articulo
-                WHERE YEAR(v.fecha_recibo) = %s AND v.eliminado = 0 AND v.id_negocio = 1
-                GROUP BY mes
-            """, [anio])
-            for r in cursor.fetchall():
-                totals[r["mes"]] += int(r["u"] or 0)
-
-        if id_negocio in ("2", "all"):
-            cursor.execute("""
-                SELECT MONTH(v.fecha_recibo) AS mes, COALESCE(SUM(ac2.cantidad), 0) AS u
-                FROM venta v
-                JOIN articulo a              ON a.id_venta      = v.id_venta
-                JOIN articulo_confeccion ac2 ON ac2.id_articulo = a.id_articulo
-                WHERE YEAR(v.fecha_recibo) = %s AND v.eliminado = 0 AND v.id_negocio = 2
-                GROUP BY mes
-            """, [anio])
-            for r in cursor.fetchall():
-                totals[r["mes"]] += int(r["u"] or 0)
-
-        if id_negocio in ("3", "all"):
-            cursor.execute("""
-                SELECT MONTH(v.fecha_recibo) AS mes, COALESCE(SUM(am.cantidad), 0) AS u
-                FROM venta v
-                JOIN articulo a          ON a.id_venta     = v.id_venta
-                JOIN articulo_maquila am ON am.id_articulo = a.id_articulo
-                WHERE YEAR(v.fecha_recibo) = %s AND v.eliminado = 0 AND v.id_negocio = 3
-                GROUP BY mes
-            """, [anio])
-            for r in cursor.fetchall():
-                totals[r["mes"]] += int(r["u"] or 0)
-
-    return [{"label": meses_labels[i], "total": totals[i + 1]} for i in range(12)]
-
-
 def obtener_metodos_pago(inicio, fin, id_negocio):
     sql = """
         SELECT pv.tipo_pago AS metodo, COUNT(*) AS total, COALESCE(SUM(pv.monto),0) AS monto
@@ -618,9 +499,7 @@ def obtener_metodos_pago(inicio, fin, id_negocio):
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
     sql += " GROUP BY pv.tipo_pago ORDER BY total DESC"
 
     with get_db() as (_, cursor):
@@ -640,9 +519,7 @@ def obtener_hora_pico_recepcion(inicio, fin, id_negocio):
           AND HOUR(fecha_recibo) BETWEEN 7 AND 21
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "id_negocio")
     sql += " GROUP BY hora ORDER BY hora"
 
     with get_db() as (_, cursor):
@@ -661,9 +538,7 @@ def obtener_hora_pico_entrega(inicio, fin, id_negocio):
           AND HOUR(fecha_entrega) BETWEEN 7 AND 21
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "id_negocio")
     sql += " GROUP BY hora ORDER BY hora"
 
     with get_db() as (_, cursor):
@@ -681,7 +556,7 @@ def contar_unidades_hoy(col: str = "fecha_recibo", id_negocio: str = "all") -> i
         WHERE DATE(v.{col}) = CURDATE()
           AND v.eliminado = 0
     """
-    sql_neg, params = _filtro_negocios(id_negocio, "v.id_negocio")
+    sql_neg, params = filtro_negocios(id_negocio, "v.id_negocio")
     sql += sql_neg
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
@@ -695,7 +570,7 @@ def contar_ventas_entregadas_hoy(id_negocio: str = "all") -> int:
         WHERE DATE(v.fecha_entrega) = CURDATE()
           AND v.eliminado = 0
     """
-    sql_neg, params = _filtro_negocios(id_negocio, "v.id_negocio")
+    sql_neg, params = filtro_negocios(id_negocio, "v.id_negocio")
     sql += sql_neg
     with get_db() as (_, cursor):
         cursor.execute(sql, params)

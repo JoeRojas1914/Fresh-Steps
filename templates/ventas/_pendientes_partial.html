@@ -1,3 +1,4 @@
+{% from "components/detalles_venta.html" import detalles_encabezado %}
 {% from "macros/badges.html" import badge_negocio %}
 {% from "macros/telefono.html" import telefono_wa %}
 {% from "components/table.html" import table %}
@@ -84,13 +85,7 @@
     <tr id="detalles-{{ v.id_venta }}" class="table--details d-none">
         <td colspan="11">
             <div class="detalles-box">
-                <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta
-                {% if (v.cantidad_descuento or 0) > 0 %}<span class="status status--warn detalles-aviso-descuento">Con descuento de {{ v.cantidad_descuento|dinero }}</span>{% endif %}
-            </div>
-
-                <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}" data-total="{{ v.total }}" data-descuento="{{ v.cantidad_descuento or 0 }}">
-                    <li class="dim-soft">Cargando detalles...</li>
-                </ul>
+                {{ detalles_encabezado(v) }}
 
                 <div class="btn-row">
                     <button type="button"

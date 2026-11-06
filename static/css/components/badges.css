@@ -35,10 +35,9 @@
 }
 
 /* Variantes por significado */
-.status--ok,     .status-completado { --bc: #15803d; --bb: #e8f7ee; }
-.status--warn,   .status-pendiente  { --bc: #b45309; --bb: #fdf3e2; }
+.status--ok { --bc: #15803d; --bb: #e8f7ee; }
+.status--warn { --bc: #b45309; --bb: #fdf3e2; }
 .status--info                       { --bc: #1e6fc2; --bb: #e8f2fc; }
-.status--bad                        { --bc: #c62828; --bb: #fdecec; }
 .status--neutral                    { --bc: #64748b; --bb: #f1f5f9; }
 
 /* ── Negocio: cada uno con su color ── */

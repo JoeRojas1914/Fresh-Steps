@@ -5,36 +5,13 @@
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal, modal_eliminar_venta %}
 {% from "components/pagination.html" import pagination %}
-{% from "components/filtros.html" import filtro_ticket, filtro_negocios %}
+{% from "components/filtros.html" import filtros_entregas %}
     <h1><i data-lucide="package" width="24" height="24"></i> Entregas pendientes</h1>
 <p class="page-sub">Ventas en proceso pendientes de entrega</p>
 
     {{ alerts(get_flashed_messages(with_categories=true)) }}
 
-    <form method="GET" action="{{ url_for('ventas.ventas_pendientes') }}">
-    <input type="hidden" name="orden" value="{{ orden or '' }}">
-    <input type="hidden" name="dir" value="{{ direccion or '' }}">
-    <div class="filtro-box">
-        <div class="filtro-row">
-            {% if session.rol == 'admin' %}
-            {{ filtro_negocios(negocios, id_negocio, clase="filtro-item--max220") }}
-            {% endif %}
-            {{ filtro_ticket(id_venta, "buscador-ticket") }}
-            <div class="filtro-item filtro-item--max280">
-                <label>Buscar cliente</label>
-                <input type="text" id="buscador-cliente" name="q"
-                       value="{{ q or '' }}"
-                       placeholder="Nombre o teléfono...">
-            </div>
-            <div class="filtro-item filtro-item--max220">
-                <label>Buscar artículo</label>
-                <input type="text" id="buscador-articulo" name="articulo"
-                       value="{{ articulo or '' }}"
-                       placeholder="Marca, modelo, color...">
-            </div>
-        </div>
-    </div>
-    </form>
+    {{ filtros_entregas("ventas.ventas_pendientes", session.rol == 'admin', negocios, id_negocio, id_venta, q, articulo, orden, direccion) }}
 
     <div id="tabla-paginada">
     {% include "ventas/_pendientes_partial.html" %}

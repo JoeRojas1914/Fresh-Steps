@@ -1,7 +1,6 @@
 """
 Tests para services/gastos_service.py — CRUD de gastos.
 """
-import pytest
 from services.gastos_service import (
     guardar_gasto_service,
     eliminar_gasto_service,

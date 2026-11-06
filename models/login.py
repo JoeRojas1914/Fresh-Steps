@@ -13,17 +13,6 @@ def obtener_usuario_por_username(username):
         return cursor.fetchone()
 
 
-def obtener_usuario_caja_activo():
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            SELECT *
-            FROM usuario
-            WHERE rol = 'caja' AND activo = 1
-            LIMIT 1
-        """)
-        return cursor.fetchone()
-
-
 def obtener_usuarios_caja_activos():
     with get_db() as (_, cursor):
         cursor.execute("""

@@ -185,19 +185,6 @@ def obtener_gastos(
         return cursor.fetchall()
 
 
-def obtener_gastos_por_proveedor(id_negocio, fecha_inicio, fecha_fin):
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            SELECT proveedor, SUM(total) AS total
-            FROM gastos
-            WHERE id_negocio = %s
-              AND fecha_registro BETWEEN %s AND %s
-            GROUP BY proveedor
-            ORDER BY total DESC
-        """, (id_negocio, fecha_inicio, fecha_fin))
-        return cursor.fetchall()
-
-
 def contar_gastos(
     id_negocio=None,
     id_categoria=None,

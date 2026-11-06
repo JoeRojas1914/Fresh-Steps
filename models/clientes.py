@@ -121,18 +121,6 @@ def contar_clientes(q=None, incluir_eliminados=False, id_negocio=None):
         return cursor.fetchone()["total"]
 
 
-def buscar_clientes_por_nombre(texto):
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            SELECT *
-            FROM cliente
-            WHERE activo = 1
-              AND (nombre LIKE %s OR apellido LIKE %s)
-            LIMIT 50
-        """, (f"%{texto}%", f"%{texto}%"))
-        return cursor.fetchall()
-
-
 def buscar_clientes(q):
     q_like = f"%{q}%"
     with get_db() as (_, cursor):

@@ -1,17 +1,4 @@
-function countUp(el, target, monetary, duration) {
-    duration = duration || 900;
-    const start = performance.now();
-    const fmt = monetary
-        ? function(v) { return "$" + v.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-        : function(v) { return Math.floor(v).toLocaleString("es-MX"); };
-    function tick(now) {
-        var ease = 1 - Math.pow(1 - Math.min((now - start) / duration, 1), 3);
-        el.textContent = fmt(target * ease);
-        if (ease < 1) requestAnimationFrame(tick);
-        else el.textContent = fmt(target);
-    }
-    requestAnimationFrame(tick);
-}
+import { countUp } from '../base/helpers.js';
 
 var _countObserver = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {

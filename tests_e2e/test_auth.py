@@ -1,5 +1,4 @@
 """Tests E2E: flujos de autenticación."""
-import pytest
 from playwright.sync_api import expect
 
 

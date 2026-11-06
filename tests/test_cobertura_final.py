@@ -68,7 +68,7 @@ def test_login_pin_incorrecto_retorna_none(app, usuario_caja, db_conn):
 def test_login_pin_bloqueado_retorna_locked(app, usuario_caja):
     """Cubre auth_service.py:110-111 — retorna 'LOCKED' cuando todos los usuarios están bloqueados."""
     from services.auth_service import login_pin_service
-    from config import MAX_INTENTOS_PIN, BLOQUEO_MIN_PIN
+    from config import MAX_INTENTOS_PIN
     with app.test_request_context("/", headers={"User-Agent": "pytest"}):
         # Consumir todos los intentos para bloquear el usuario caja
         for _ in range(MAX_INTENTOS_PIN + 1):
@@ -81,12 +81,6 @@ def test_login_pin_bloqueado_retorna_locked(app, usuario_caja):
 # ===========================================================================
 # gastos_service
 # ===========================================================================
-
-def test_obtener_historial_gasto_service(gasto_test):
-    """Cubre gastos_service.py:67."""
-    from services.gastos_service import obtener_historial_gasto_service
-    historial = obtener_historial_gasto_service(gasto_test["id_gasto"])
-    assert isinstance(historial, list)
 
 
 def test_actualizar_categoria_service(db_conn):

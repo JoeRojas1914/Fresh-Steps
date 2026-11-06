@@ -100,22 +100,6 @@ def alternar_servicio_default(id_servicio, id_usuario):
         return not era_default
 
 
-def obtener_servicio_por_id(id_servicio):
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            SELECT s.id_servicio,
-                   s.id_negocio,
-                   n.nombre AS negocio,
-                   s.nombre,
-                   s.precio
-            FROM servicio s
-            JOIN Negocio n ON s.id_negocio = n.id_negocio
-            WHERE s.id_servicio = %s
-              AND s.activo = 1
-        """, (id_servicio,))
-        return cursor.fetchone()
-
-
 def contar_servicios(id_negocio=None, q=None, incluir_eliminados=False):
     where, params = build_where([
         cond_in("id_negocio", id_negocio),
@@ -159,18 +143,6 @@ def obtener_servicios(id_negocio=None, q=None, incluir_eliminados=False, limit=1
 
         cursor.execute(sql, params)
         return cursor.fetchall()
-
-
-def servicio_tiene_ventas(cursor, id_servicio):
-    cursor.execute("""
-        SELECT COUNT(*) AS total
-        FROM articulo_servicio
-        WHERE id_servicio = %s
-    """, (id_servicio,))
-    row = cursor.fetchone()
-    if isinstance(row, dict):
-        return row["total"] > 0
-    return row[0] > 0  # pragma: no cover
 
 
 def registrar_historial(cursor, id_servicio, accion, id_usuario, antes=None, despues=None):

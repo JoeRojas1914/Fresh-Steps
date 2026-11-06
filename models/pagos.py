@@ -37,17 +37,6 @@ def obtener_pagos_venta(ids_venta):
         return pagos_por_venta
 
 
-def obtener_pagos_por_venta(id_venta):
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            SELECT tipo_pago_venta, tipo_pago, monto, fecha_pago
-            FROM pago_venta
-            WHERE id_venta=%s
-            ORDER BY fecha_pago
-        """, (id_venta,))
-        return cursor.fetchall()
-
-
 def registrar_pago_final_db(id_venta, monto, metodo_pago, id_usuario):
     with get_db() as (_, cursor):
         cursor.execute("""

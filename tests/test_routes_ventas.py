@@ -4,7 +4,6 @@ Cubre: lista, pendientes, historial, ticket, detalles, guardar,
        marcar-lista, revertir, entregar, pago-final, eliminar,
        editar GET/POST, exportar Excel, abrir-whatsapp.
 """
-import pytest
 from tests.conftest import cleanup_venta
 
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

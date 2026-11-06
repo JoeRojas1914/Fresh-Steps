@@ -1,8 +1,3 @@
-.card-number {
-  font-size: 28px;
-  font-weight: bold;
-  color: var(--color-primary-dark);
-}
 
 .stats-page {
   display: grid;
@@ -46,122 +41,11 @@
   box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
 }
 
-.kpi-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  background: var(--color-bg-blue);
-  color: var(--color-primary-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 14px;
-}
-
 .kpi-card h3 {
   font-size: 15px;
   font-weight: 600;
   color: var(--color-navy);
   margin-bottom: 8px;
-}
-
-.kpi-card .card-number { font-size: 32px; font-weight: 800; }
-
-.kpi-sub {
-  display: block;
-  margin-top: 6px;
-  font-size: 11px;
-  opacity: 0.6;
-  color: var(--color-muted);
-}
-
-.monthly-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-  margin: 20px 0;
-}
-
-.monthly-card {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 20px;
-  text-align: left;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  border: 1px solid #e8eef5;
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
-}
-
-.monthly-card h4 {
-  font-size: 11px;
-  font-weight: 600;
-  color: #94a3b8;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.monthly-card p {
-  font-size: 28px;
-  font-weight: 800;
-  color: #0b3c5d;
-  letter-spacing: -0.5px;
-  line-height: 1.1;
-}
-
-.monthly-card.ventas      { background: #f0fdf4; }
-.monthly-card.ventas p    { color: #15803d; }
-
-.monthly-card.gastos      { background: #fff1f2; }
-.monthly-card.gastos p    { color: #dc2626; }
-
-.monthly-card.ganancia    { background: #f0f7ff; }
-.monthly-card.ganancia p  { color: #1e7fd6; }
-
-.monthly-card.total-ventas    { background: #f0f7ff; }
-.monthly-card.total-ventas p  { color: #0b3c5d; }
-
-.monthly-card.ticket      { background: #f0f7ff; }
-.monthly-card.ticket p    { color: #1e7fd6; }
-
-.monthly-card.cobrar      { background: #fffbf0; }
-.monthly-card.cobrar p    { color: #b45309; }
-
-.monthly-card.small p { font-size: 20px; }
-
-.monthly-card.azul   { background: #f0f7ff; }
-.monthly-card.azul p { color: #1e7fd6; }
-
-.monthly-card.indigo   { background: #f0f7ff; }
-.monthly-card.indigo p { color: #1e7fd6; }
-
-.monthly-card.ambar   { background: #fffbf0; }
-.monthly-card.ambar p { color: #b45309; }
-
-.monthly-card.teal   { background: #f0f7ff; }
-.monthly-card.teal p { color: #0b3c5d; }
-
-.summary-cards {
-  display: flex;
-  gap: 20px;
-  margin-top: 20px;
-  flex-wrap: wrap;
-}
-
-.summary-card {
-  flex: 1 1 200px;
-  text-align: center;
-  padding: 20px;
-  background: var(--color-bg-blue);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
-
-.summary-card h3 {
-  font-size: 16px;
-  color: var(--color-navy);
-  margin-bottom: 10px;
 }
 
 /* Contador de ventas / artículos arriba de las tablas de ventas activas */
@@ -226,7 +110,6 @@
   color: #64748b;
 }
 
-
 .tab-bar {
   display: flex;
   gap: 4px;
@@ -258,68 +141,6 @@
 }
 
 .tab-panel { padding-top: 8px; }
-
-
-.periodo-btn {
-  background: var(--color-bg-light);
-  color: var(--color-muted);
-  border: 1px solid var(--color-border);
-  font-weight: 500;
-}
-
-.periodo-btn:hover,
-.periodo-btn.active {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
-  transform: none;
-}
-
-
-.top-clientes-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.top-clientes-table th {
-  text-align: left;
-  padding: 10px 14px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-muted);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.top-clientes-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--color-bg-light);
-  color: var(--color-text);
-}
-
-.top-clientes-table tr:last-child td { border-bottom: none; }
-
-.top-clientes-table tr:hover td { background: var(--color-bg-blue); }
-
-.rank-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  font-weight: 700;
-  font-size: 13px;
-  color: #fff;
-}
-
-
-.modo-selector {
-  display: flex;
-  gap: 6px;
-  margin: 20px 0 0;
-  flex-wrap: wrap;
-}
 
 .modo-btn {
   padding: 10px 20px;

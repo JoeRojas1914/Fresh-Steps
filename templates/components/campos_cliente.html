@@ -1,0 +1,26 @@
+{# Campos del formulario de cliente (Clientes, Perfil, Nueva venta y su modal de edición).
+   prefijo: prefijo de los ids (p. ej. "cliente" → #cliente_nombre); los JS los usan.
+   cp_id / cp_name: id (sin prefijo) y name del último campo, que cambia por pantalla.
+   datos: cliente para precargar los valores (Perfil). #}
+{% macro campos_cliente(prefijo, cp_id="direccion", cp_name="direccion", cp_label="Código postal (opcional)", datos=None) %}
+<div class="modal-field">
+    <label for="{{ prefijo }}_nombre">Nombre</label>
+    <input id="{{ prefijo }}_nombre" type="text" name="nombre"{% if datos %} value="{{ datos.nombre }}"{% endif %} required>
+</div>
+<div class="modal-field">
+    <label for="{{ prefijo }}_apellido">Apellido</label>
+    <input id="{{ prefijo }}_apellido" type="text" name="apellido"{% if datos %} value="{{ datos.apellido }}"{% endif %} required>
+</div>
+<div class="modal-field">
+    <label for="{{ prefijo }}_telefono">Teléfono</label>
+    <input id="{{ prefijo }}_telefono" type="text" name="telefono"{% if datos %} value="{{ datos.telefono or '' }}"{% endif %} required pattern="[0-9]{10}">
+</div>
+<div class="modal-field">
+    <label for="{{ prefijo }}_correo">Correo (opcional)</label>
+    <input id="{{ prefijo }}_correo" type="email" name="correo"{% if datos %} value="{{ datos.correo or '' }}"{% endif %}>
+</div>
+<div class="modal-field modal-field--full">
+    <label for="{{ prefijo }}_{{ cp_id }}">{{ cp_label }}</label>
+    <input id="{{ prefijo }}_{{ cp_id }}" type="text" name="{{ cp_name }}"{% if datos %} value="{{ datos.direccion or '' }}"{% endif %}>
+</div>
+{% endmacro %}

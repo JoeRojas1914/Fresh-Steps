@@ -2,7 +2,7 @@ import logging
 import os
 import subprocess
 from datetime import date, datetime
-from flask import Blueprint, render_template, jsonify, session, request, send_file
+from flask import Blueprint, render_template, jsonify, session, request
 from services.excel_helpers import send_excel
 from services.excel_ventas_service import exportar_historial_service
 

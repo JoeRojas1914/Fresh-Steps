@@ -1,3 +1,4 @@
+{% from "components/detalles_venta.html" import detalles_encabezado, pagos_registrados %}
 {% from "macros/badges.html" import badge_negocio %}
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
@@ -5,7 +6,6 @@
 {% if pedidos %}
 
 
-<div id="toast-container"></div>
 
 {% call table([
     {"label": "Recibo", "sort": "id"},
@@ -65,28 +65,8 @@
   <tr id="detalles-{{ p.id_venta }}" class="table--details d-none">
     <td colspan="9">
       <div class="detalles-box">
-        <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles del pedido
-          {% if (p.cantidad_descuento or 0) > 0 %}<span class="status status--warn detalles-aviso-descuento">Con descuento de {{ p.cantidad_descuento|dinero }}</span>{% endif %}
-        </div>
-        <ul class="detalles-list" id="lista-detalles-{{ p.id_venta }}" data-total="{{ p.total }}" data-descuento="{{ p.cantidad_descuento or 0 }}">
-          <li class="dim-soft">Cargando detalles...</li>
-        </ul>
-        <div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
-        {% if p.pagos %}
-          {% for pg in p.pagos %}
-          <div class="pago-fila">
-            <span class="pago-tipo">
-              {{ (pg.tipo_pago or '—')|capitalize }}
-              {% if pg.tipo_pago_venta %}
-                <span class="pago-tag">{{ pg.tipo_pago_venta }}</span>
-              {% endif %}
-            </span>
-            <span class="pago-monto">{{ pg.monto|dinero }}</span>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="dim-soft text-sm nota-italic">Sin pagos registrados</div>
-        {% endif %}
+        {{ detalles_encabezado(p, "Detalles del pedido") }}
+        {{ pagos_registrados(p.pagos) }}
 
         <div class="pedido-saldo">
         {% if p.saldo_pendiente > 0 %}

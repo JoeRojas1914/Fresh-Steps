@@ -3,6 +3,7 @@
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
 {% from "components/modal.html" import modal %}
+{% from "components/campos_cliente.html" import campos_cliente %}
 {% from "components/alerts.html" import alerts %}
 {% from "components/filtros.html" import filtro_negocios %}
 
@@ -140,35 +141,7 @@
   <input type="hidden" name="id_cliente"  value="{{ cliente.id_cliente }}">
   <input type="hidden" name="next"        value="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}">
 
-  <div class="modal-field">
-    <label for="edit_nombre">Nombre</label>
-    <input id="edit_nombre" type="text" name="nombre"
-           value="{{ cliente.nombre }}" required>
-  </div>
-
-  <div class="modal-field">
-    <label for="edit_apellido">Apellido</label>
-    <input id="edit_apellido" type="text" name="apellido"
-           value="{{ cliente.apellido }}" required>
-  </div>
-
-  <div class="modal-field">
-    <label for="edit_telefono">Teléfono</label>
-    <input id="edit_telefono" type="text" name="telefono"
-           value="{{ cliente.telefono or '' }}" required pattern="[0-9]{10}">
-  </div>
-
-  <div class="modal-field">
-    <label for="edit_correo">Correo (opcional)</label>
-    <input id="edit_correo" type="email" name="correo"
-           value="{{ cliente.correo or '' }}">
-  </div>
-
-  <div class="modal-field modal-field--full">
-    <label for="edit_direccion">Dirección (opcional)</label>
-    <input id="edit_direccion" type="text" name="direccion"
-           value="{{ cliente.direccion or '' }}">
-  </div>
+  {{ campos_cliente("edit", cp_label="Dirección (opcional)", datos=cliente) }}
 </form>
 {% endif %}
 

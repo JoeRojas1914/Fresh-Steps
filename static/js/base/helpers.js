@@ -1,6 +1,5 @@
 import { abrirModal, cerrarModal } from '../components/modal.js';
-
-const _TOAST_KEY = "_pendingToast";
+import { appendToast, TOAST_KEY } from './toast.js';
 
 export function fmtDinero(n) {
     const v = Number(n || 0);
@@ -38,52 +37,21 @@ export function csrfFetch(url, options = {}) {
 }
 
 
-function _getToastContainer() {
-    let container = document.getElementById("toast-container");
-    if (!container) {
-        container = document.createElement("div");
-        container.id = "toast-container";
-        document.body.appendChild(container);
-    }
-    return container;
-}
-
-function _scheduleAlertDismiss(el) {
-    if (el.dataset.dismissScheduled) return;
-    el.dataset.dismissScheduled = "1";
-
-    el.addEventListener("click", () => el.remove(), { once: true });
-    setTimeout(() => {
-        el.style.transition = "opacity 0.5s ease, transform 0.5s ease";
-        el.style.opacity    = "0";
-        el.style.transform  = "translateY(-10px)";
-    }, 4500);
-    setTimeout(() => el.remove(), 5000);
-}
-
-function _appendToast(texto, tipo) {
-    const div = document.createElement("div");
-    div.className = `alert ${tipo}`;
-    div.textContent = texto;
-    _getToastContainer().appendChild(div);
-    _scheduleAlertDismiss(div);
-}
-
 export function mostrarFeedback(texto, tipo = "success") {
-    _appendToast(texto, tipo);
+    appendToast(texto, tipo);
 }
 
 
 export function recargarConFeedback(texto, tipo = "success", delay = 300) {
     try {
-        sessionStorage.setItem(_TOAST_KEY, JSON.stringify({ texto, tipo }));
+        sessionStorage.setItem(TOAST_KEY, JSON.stringify({ texto, tipo }));
     } catch {}
     setTimeout(() => location.reload(), delay);
 }
 
 export function redirigirConFeedback(url, texto, tipo = "success", delay = 300) {
     try {
-        sessionStorage.setItem(_TOAST_KEY, JSON.stringify({ texto, tipo }));
+        sessionStorage.setItem(TOAST_KEY, JSON.stringify({ texto, tipo }));
     } catch {}
     setTimeout(() => { location.href = url; }, delay);
 }

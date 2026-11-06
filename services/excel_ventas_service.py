@@ -10,7 +10,6 @@ from services.excel_helpers import (
     xl_titulo_hoja, xl_fila_headers, xl_fila_totales,
     xl_col_widths, xl_badge_estado,
     fmt_dt, estado_venta,
-    send_excel,
 )
 
 

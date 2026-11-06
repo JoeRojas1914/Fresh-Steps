@@ -2,10 +2,9 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from datetime import date, timedelta
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from db import get_db
 from dotenv import load_dotenv
-from werkzeug.security import check_password_hash
 from flask_wtf import CSRFProtect
 from flask_talisman import Talisman
 from flask_compress import Compress

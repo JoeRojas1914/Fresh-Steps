@@ -189,19 +189,8 @@ def obtener_ventas_listas(id_negocio=None, id_venta=None, q=None, limit=None, of
               AND v.fecha_entrega IS NULL
               AND v.eliminado = 0
         """
-        sql_neg, params = filtro_negocio(id_negocio)
-        sql += sql_neg
-        if id_venta:
-            sql += " AND CAST(v.id_venta AS CHAR) LIKE %s"
-            params.append(f"{id_venta}%")
-        if q:
-            sql_cli, params_cli = filtro_cliente(q)
-            sql += sql_cli
-            params.extend(params_cli)
-        if articulo:
-            sql_art, params_art = filtro_articulo(articulo)
-            sql += sql_art
-            params.extend(params_art)
+        sql_filtros, params = _filtros_entregas(id_negocio, id_venta, q, articulo)
+        sql += sql_filtros
         sql += construir_order_by(orden, direccion, "v.id_negocio ASC, v.id_venta ASC")
         if limit is not None:
             sql += " LIMIT %s OFFSET %s"
@@ -235,19 +224,8 @@ def obtener_entregas_pendientes(id_negocio=None, id_venta=None, q=None, limit=No
               AND v.fecha_entrega IS NULL
               AND v.eliminado = 0
         """
-        sql_neg, params = filtro_negocio(id_negocio)
-        sql += sql_neg
-        if id_venta:
-            sql += " AND CAST(v.id_venta AS CHAR) LIKE %s"
-            params.append(f"{id_venta}%")
-        if q:
-            sql_cli, params_cli = filtro_cliente(q)
-            sql += sql_cli
-            params.extend(params_cli)
-        if articulo:
-            sql_art, params_art = filtro_articulo(articulo)
-            sql += sql_art
-            params.extend(params_art)
+        sql_filtros, params = _filtros_entregas(id_negocio, id_venta, q, articulo)
+        sql += sql_filtros
         sql += " GROUP BY v.id_venta"
         sql += construir_order_by(orden, direccion, "v.fecha_estimada ASC, v.id_negocio ASC, v.id_venta ASC")
         if limit is not None:

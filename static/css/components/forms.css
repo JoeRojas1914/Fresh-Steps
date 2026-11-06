@@ -65,16 +65,6 @@ select:focus {
   color: var(--color-navy-mid);
 }
 
-.form-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 180px;
-}
-
-.form-item select,
-.form-item input { height: 42px; }
-
 .form-row {
   display: flex;
   gap: 24px;
@@ -91,20 +81,6 @@ select:focus {
   transition: color var(--transition-base);
 }
 .close:hover { color: #111827; }
-
-.search-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.search-bar input {
-  display: inline-block;
-  width: 260px;
-  padding: 8px;
-  margin: 0;
-}
 
 .custom-checkbox {
   display: flex;
@@ -150,8 +126,6 @@ select:focus {
 .custom-checkbox input:checked ~ .checkmark::after { display: block; }
 .custom-checkbox:hover .checkmark { border-color: #0056b3; }
 
-.checkbox-item { justify-content: flex-start; }
-
 .negocios-check {
   display: flex;
   flex-wrap: wrap;
@@ -164,7 +138,6 @@ select:focus {
   font-weight: 500;
   color: var(--color-text);
 }
-.checkbox-item .custom-checkbox { height: 42px; display: flex; align-items: center; }
 
 .filtro-toggle {
   display: flex;

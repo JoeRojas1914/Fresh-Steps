@@ -6,6 +6,7 @@
 {% from "components/pagination.html" import pagination %}
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal %}
+{% from "components/campos_cliente.html" import campos_cliente %}
 
 
 <h1><i data-lucide="users" width="24" height="24"></i> Clientes <span class="page-count">{{ total_clientes }} clientes</span></h1>
@@ -58,30 +59,7 @@
 <form id="modalClienteForm" method="POST" action="/clientes/guardar" class="modal-form modal-form--grid">
   <input type="hidden" name="id_cliente" id="id_cliente">
 
-  <div class="modal-field">
-    <label for="cliente_nombre">Nombre</label>
-    <input id="cliente_nombre" type="text" name="nombre" required>
-  </div>
-
-  <div class="modal-field">
-    <label for="cliente_apellido">Apellido</label>
-    <input id="cliente_apellido" type="text" name="apellido" required>
-  </div>
-
-  <div class="modal-field">
-    <label for="cliente_telefono">Teléfono</label>
-    <input id="cliente_telefono" type="text" name="telefono" required pattern="[0-9]{10}">
-  </div>
-
-  <div class="modal-field">
-    <label for="cliente_correo">Correo (opcional)</label>
-    <input id="cliente_correo" type="email" name="correo">
-  </div>
-
-  <div class="modal-field modal-field--full">
-    <label for="cliente_direccion">Código Postal (opcional)</label>
-    <input id="cliente_direccion" type="text" name="direccion">
-  </div>
+  {{ campos_cliente("cliente") }}
 
 </form>
 {% endif %}

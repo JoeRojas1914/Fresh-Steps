@@ -111,7 +111,7 @@ export function actualizarTotal() {
 
 /* ─── Validación ─────────────────────────────────────────────────────────── */
 
-export function articulosCompletos() {
+function articulosCompletos() {
     const articulos = document.querySelectorAll(".articulo-item");
     if (articulos.length === 0) return false;
 
@@ -129,7 +129,7 @@ export function articulosCompletos() {
     return true;
 }
 
-export function obtenerMotivosBloqueo() {
+function obtenerMotivosBloqueo() {
     const motivos = [];
 
     if (!document.getElementById("id_cliente").value)     motivos.push("Seleccionar un cliente");

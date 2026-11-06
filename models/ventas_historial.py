@@ -41,18 +41,39 @@ _CONDICIONES_ESTADO = {
 }
 
 
-def _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas):
+def _filtros_historial(id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas,
+                       q, id_venta, estado, tipo_fecha, articulo):
+    """Filtros comunes del historial (conteo y listado): regresa (sql, params)."""
     condiciones = [_CONDICIONES_ESTADO[e] for e in como_lista(estado) if e in _CONDICIONES_ESTADO]
     if condiciones:
-        sql += " AND (" + " OR ".join(condiciones) + ")"
+        sql = " AND (" + " OR ".join(condiciones) + ")"
     elif not mostrar_eliminadas:
-        sql += " AND v.eliminado = 0"
+        sql = " AND v.eliminado = 0"
+    else:
+        sql = ""
+
+    sql_neg, params = filtro_negocio(id_negocio)
+    sql += sql_neg
+
+    col = tipo_fecha if tipo_fecha in _COLS_FECHA_HISTORIAL else "fecha_recibo"
+    if fecha_inicio:
+        sql += f" AND DATE(v.{col}) >= %s"
+        params.append(fecha_inicio)
+    if fecha_fin:
+        sql += f" AND DATE(v.{col}) <= %s"
+        params.append(fecha_fin)
+    if q:
+        sql_cli, params_cli = filtro_cliente(q)
+        sql += sql_cli
+        params.extend(params_cli)
+    if articulo:
+        sql_art, params_art = filtro_articulo(articulo)
+        sql += sql_art
+        params.extend(params_art)
+    if id_venta:
+        sql += " AND v.id_venta = %s"
+        params.append(id_venta)
     return sql, params
-
-
-def _aplicar_filtro_negocio(sql, params, id_negocio):
-    sql_neg, params_neg = filtro_negocio(id_negocio)
-    return sql + sql_neg, params + params_neg
 
 
 def contar_historial_ventas(
@@ -66,7 +87,6 @@ def contar_historial_ventas(
     tipo_fecha="fecha_recibo",
     articulo=None,
 ):
-    col = tipo_fecha if tipo_fecha in _COLS_FECHA_HISTORIAL else "fecha_recibo"
     with get_db() as (_, cursor):
         sql = """
             SELECT COUNT(DISTINCT v.id_venta) AS total
@@ -74,27 +94,11 @@ def contar_historial_ventas(
             JOIN cliente c ON c.id_cliente = v.id_cliente
             WHERE 1=1
         """
-        params = []
-        sql, params = _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas)
-        sql, params = _aplicar_filtro_negocio(sql, params, id_negocio)
-
-        if fecha_inicio:
-            sql += f" AND DATE(v.{col}) >= %s"
-            params.append(fecha_inicio)
-        if fecha_fin:
-            sql += f" AND DATE(v.{col}) <= %s"
-            params.append(fecha_fin)
-        if q:
-            sql_cli, params_cli = filtro_cliente(q)
-            sql += sql_cli
-            params.extend(params_cli)
-        if articulo:
-            sql_art, params_art = filtro_articulo(articulo)
-            sql += sql_art
-            params.extend(params_art)
-        if id_venta:
-            sql += " AND v.id_venta = %s"
-            params.append(id_venta)
+        sql_filtros, params = _filtros_historial(
+            id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas,
+            q, id_venta, estado, tipo_fecha, articulo,
+        )
+        sql += sql_filtros
 
         cursor.execute(sql, params)
         return cursor.fetchone()["total"]
@@ -115,7 +119,6 @@ def obtener_historial_ventas(
     direccion=None,
     articulo=None,
 ):
-    col = tipo_fecha if tipo_fecha in _COLS_FECHA_HISTORIAL else "fecha_recibo"
     with get_db() as (_, cursor):
         sql = """
             SELECT
@@ -144,27 +147,11 @@ def obtener_historial_ventas(
             LEFT JOIN pago_venta p ON p.id_venta = v.id_venta
             WHERE 1=1
         """
-        params = []
-        sql, params = _aplicar_filtro_estado(sql, params, estado, mostrar_eliminadas)
-        sql, params = _aplicar_filtro_negocio(sql, params, id_negocio)
-
-        if fecha_inicio:
-            sql += f" AND DATE(v.{col}) >= %s"
-            params.append(fecha_inicio)
-        if fecha_fin:
-            sql += f" AND DATE(v.{col}) <= %s"
-            params.append(fecha_fin)
-        if q:
-            sql_cli, params_cli = filtro_cliente(q)
-            sql += sql_cli
-            params.extend(params_cli)
-        if articulo:
-            sql_art, params_art = filtro_articulo(articulo)
-            sql += sql_art
-            params.extend(params_art)
-        if id_venta:
-            sql += " AND v.id_venta = %s"
-            params.append(id_venta)
+        sql_filtros, params = _filtros_historial(
+            id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas,
+            q, id_venta, estado, tipo_fecha, articulo,
+        )
+        sql += sql_filtros
 
         sql += " GROUP BY v.id_venta"
         sql += construir_order_by(orden, direccion, "v.id_venta DESC", COLUMNAS_ORDEN_HISTORIAL)

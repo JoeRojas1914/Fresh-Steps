@@ -1,0 +1,33 @@
+{# Piezas comunes del panel de detalles de una venta (Pendientes, Procesadas,
+   Historial y pedidos del cliente). Los artículos se cargan por JS en
+   #lista-detalles-{id} (static/js/pages/detalles_venta.js). #}
+
+{% macro detalles_encabezado(v, titulo="Detalles de la venta") %}
+<div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> {{ titulo }}
+    {% if (v.cantidad_descuento or 0) > 0 %}<span class="status status--warn detalles-aviso-descuento">Con descuento de {{ v.cantidad_descuento|dinero }}</span>{% endif %}
+</div>
+
+<ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}" data-total="{{ v.total }}" data-descuento="{{ v.cantidad_descuento or 0 }}">
+    <li class="dim-soft">Cargando detalles...</li>
+</ul>
+{% endmacro %}
+
+
+{% macro pagos_registrados(pagos) %}
+<div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
+{% if pagos %}
+    {% for p in pagos %}
+    <div class="pago-fila">
+        <span class="pago-tipo">
+            {{ (p.tipo_pago or '—')|capitalize }}
+            {% if p.tipo_pago_venta %}
+                <span class="pago-tag">{{ p.tipo_pago_venta }}</span>
+            {% endif %}
+        </span>
+        <span class="pago-monto">{{ p.monto|dinero }}</span>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="dim-soft text-sm nota-italic">Sin pagos registrados</div>
+{% endif %}
+{% endmacro %}

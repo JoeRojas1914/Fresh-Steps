@@ -70,7 +70,6 @@ function verHistorialCliente(e, id) {
 
 
 const _eliminarCliente = crearEliminarHandler("modalConfirmarEliminarCliente");
-function confirmarEliminarCliente(id) { _eliminarCliente.confirmar(`/clientes/eliminar/${id}`); }
 function ejecutarEliminarCliente()    { _eliminarCliente.ejecutar(); }
 
 function restaurarCliente(idCliente) {

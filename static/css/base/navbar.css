@@ -71,7 +71,6 @@
 }
 
 /* Links individuales */
-.nav-links a,
 .nav-group a {
     padding: 7px 11px;
     box-shadow: inset 0 0 0 1px transparent;
@@ -84,14 +83,12 @@
     transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.nav-links a:hover,
 .nav-group a:hover {
     background: #f0f7ff;
     color: #1765b5;
 }
 
 /* Página activa: tonal azul con borde fino, como los botones */
-.nav-links a.active,
 .nav-group a[aria-current="page"] {
     background: #e8f2fc;
     color: #1765b5;
@@ -214,7 +211,6 @@
     background: #fff5f5;
     color: #b91c1c;
 }
-
 
 /* ── Hamburger icon animation ── */
 .nav-toggle svg {

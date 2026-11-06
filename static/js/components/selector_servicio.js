@@ -157,7 +157,7 @@ function _teclado(e) {
     }
 }
 
-export function mejorarSelectServicio(select) {
+function mejorarSelectServicio(select) {
     if (select._srvBoton) return;
 
     const boton = document.createElement("button");

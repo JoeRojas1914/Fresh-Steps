@@ -64,11 +64,6 @@ def xl_head(ws, r, col, value, size=9):
                    align="center", size=size)
 
 
-def xl_subhead(ws, r, col, value):
-    return xl_cell(ws, r, col, value,
-                   bold=True, fg=C["azul_cl"], color=C["azul"], align="left")
-
-
 def xl_row_bg(i):
     return C["gris"] if i % 2 == 0 else C["blanco"]
 

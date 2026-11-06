@@ -93,7 +93,6 @@ async function alternarDefault(btn) {
 
 
 const _eliminarServicio = crearEliminarHandler("modalConfirmarEliminarServicio");
-function confirmarEliminarServicio(id) { _eliminarServicio.confirmar(`/servicios/eliminar/${id}`); }
 function ejecutarEliminarServicio()    { _eliminarServicio.ejecutar(); }
 
 

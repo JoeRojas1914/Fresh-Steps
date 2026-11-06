@@ -1,7 +1,23 @@
-const _TOAST_KEY = "_pendingToast";
+// Toasts: mensajes flotantes que se cierran solos (o con un clic).
+// Fuente única: helpers.js importa appendToast y TOAST_KEY de aquí.
+
+export const TOAST_KEY = "_pendingToast";
 
 function _getContainer() {
-    return document.getElementById("toast-container");
+    let container = document.getElementById("toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "toast-container";
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+function _agregarBarra(el) {
+    if (el.querySelector(".toast-progress")) return;
+    const bar = document.createElement("div");
+    bar.className = "toast-progress";
+    el.appendChild(bar);
 }
 
 function _scheduleDismiss(el) {
@@ -16,39 +32,34 @@ function _scheduleDismiss(el) {
     setTimeout(() => el.remove(), 5000);
 }
 
-function _appendToast(texto, tipo) {
-    const container = _getContainer();
-    if (!container || !texto) return;
+export function appendToast(texto, tipo) {
+    if (!texto) return;
     const div = document.createElement("div");
     div.className = `alert ${tipo}`;
     div.textContent = texto;
-    const bar = document.createElement("div");
-    bar.className = "toast-progress";
-    div.appendChild(bar);
-    container.appendChild(div);
+    _agregarBarra(div);
+    _getContainer().appendChild(div);
     _scheduleDismiss(div);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    if (!document.getElementById("toast-container")) return;
     const container = _getContainer();
-    if (!container) return;
 
+    // Mensaje guardado antes de recargar o redirigir (recargarConFeedback)
     try {
-        const raw = sessionStorage.getItem(_TOAST_KEY);
+        const raw = sessionStorage.getItem(TOAST_KEY);
         if (raw) {
-            sessionStorage.removeItem(_TOAST_KEY);
+            sessionStorage.removeItem(TOAST_KEY);
             const { texto, tipo } = JSON.parse(raw);
-            _appendToast(texto, tipo);
+            appendToast(texto, tipo);
         }
     } catch {}
 
+    // Mensajes flash que vienen en el HTML
     document.querySelectorAll(".alert").forEach(alert => {
         if (!container.contains(alert)) {
-            if (!alert.querySelector(".toast-progress")) {
-                const bar = document.createElement("div");
-                bar.className = "toast-progress";
-                alert.appendChild(bar);
-            }
+            _agregarBarra(alert);
             container.appendChild(alert);
         }
         _scheduleDismiss(alert);

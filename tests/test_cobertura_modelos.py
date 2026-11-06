@@ -2,7 +2,6 @@
 Tests para alcanzar 100% de cobertura en models/*.
 Cubre funciones y ramas que no son ejercidas por los tests de rutas/servicios.
 """
-import pytest
 from datetime import date
 
 
@@ -10,20 +9,10 @@ from datetime import date
 # models/login.py:17-24  (obtener_usuario_caja_activo)
 # ============================================================
 
-def test_obtener_usuario_caja_activo():
-    from models.login import obtener_usuario_caja_activo
-    result = obtener_usuario_caja_activo()
-    assert result is None or isinstance(result, dict)
-
 
 # ============================================================
 # models/pagos.py:41-48  (obtener_pagos_por_venta)
 # ============================================================
-
-def test_obtener_pagos_por_venta(venta_pendiente):
-    from models.pagos import obtener_pagos_por_venta
-    pagos = obtener_pagos_por_venta(venta_pendiente["id_venta"])
-    assert isinstance(pagos, list)
 
 
 # ============================================================
@@ -40,11 +29,6 @@ def test_obtener_usuarios_con_q():
 # ============================================================
 # models/estadisticas.py:46-48  (ejecutar_query)
 # ============================================================
-
-def test_ejecutar_query():
-    from models.estadisticas import ejecutar_query
-    result = ejecutar_query("SELECT 1 AS val")
-    assert result[0]["val"] == 1
 
 
 # ============================================================
@@ -82,49 +66,15 @@ def test_eliminar_categoria_en_uso_retorna_false(db_conn, usuario_admin):
 # models/gastos.py:172-181  (obtener_gastos_por_proveedor)
 # ============================================================
 
-def test_obtener_gastos_por_proveedor():
-    from models.gastos import obtener_gastos_por_proveedor
-    result = obtener_gastos_por_proveedor(1, date(2020, 1, 1), date(2030, 12, 31))
-    assert isinstance(result, list)
-
 
 # ============================================================
 # models/servicios.py:59-71  (obtener_servicio_por_id)
 # ============================================================
 
-def test_obtener_servicio_por_id_existente(servicio_calzado):
-    from models.servicios import obtener_servicio_por_id
-    result = obtener_servicio_por_id(servicio_calzado["id_servicio"])
-    assert result is not None
-    assert result["id_servicio"] == servicio_calzado["id_servicio"]
-
-
-def test_obtener_servicio_por_id_inexistente():
-    from models.servicios import obtener_servicio_por_id
-    result = obtener_servicio_por_id(999999)
-    assert result is None
-
-
-def test_servicio_tiene_ventas(venta_pendiente, servicio_calzado):
-    """Lines 106-113: servicio_tiene_ventas con cursor real."""
-    from models.servicios import servicio_tiene_ventas
-    from db import get_db
-    sid = servicio_calzado["id_servicio"]
-    with get_db() as (_, cursor):
-        tiene = servicio_tiene_ventas(cursor, sid)
-    assert tiene is True
-
 
 # ============================================================
 # models/clientes.py:90-98  (buscar_clientes_por_nombre)
 # ============================================================
-
-def test_buscar_clientes_por_nombre(cliente_test):
-    from models.clientes import buscar_clientes_por_nombre
-    result = buscar_clientes_por_nombre("TestNombre")
-    assert isinstance(result, list)
-    ids = [r["id_cliente"] for r in result]
-    assert cliente_test["id_cliente"] in ids
 
 
 # ============================================================
@@ -138,7 +88,7 @@ def test_contar_pedidos_por_cliente_lista_vacia():
 
 
 # ============================================================
-# models/ventas_historial.py:26,28,30,32  (_aplicar_filtro_estado)
+# models/ventas_historial.py:26,28,30,32  (_filtros_historial)
 # ============================================================
 
 def test_contar_historial_ventas_estado_pendiente():
@@ -312,12 +262,6 @@ def test_estadisticas_gastos_categoria_semana_negocio_especifico(gasto_test):
 # models/estadisticas_gastos.py:100-115  (obtener_gastos_por_mes negocio)
 # ============================================================
 
-def test_obtener_gastos_por_mes_negocio_especifico():
-    from models.estadisticas_gastos import obtener_gastos_por_mes
-    result = obtener_gastos_por_mes(2024, "1")
-    assert len(result) == 12
-    assert result[0]["label"] == "Ene"
-
 
 # ============================================================
 # models/estadisticas_ventas.py:205-206,225-226,246-247,
@@ -360,55 +304,16 @@ def test_estadisticas_ventas_con_negocio_especifico():
 # models/estadisticas_ventas.py:495-510  (obtener_ventas_por_mes)
 # ============================================================
 
-def test_obtener_ventas_por_mes_negocio_especifico():
-    from models.estadisticas_ventas import obtener_ventas_por_mes
-    result = obtener_ventas_por_mes(2024, "1")
-    assert len(result) == 12
-    assert result[0]["label"] == "Ene"
-
 
 # ============================================================
 # models/estadisticas_ventas.py:514-530  (obtener_ingresos_por_mes)
 # ============================================================
-
-def test_obtener_ingresos_por_mes_negocio_especifico():
-    from models.estadisticas_ventas import obtener_ingresos_por_mes
-    result = obtener_ingresos_por_mes(2024, "1")
-    assert len(result) == 12
-    assert result[0]["label"] == "Ene"
 
 
 # ============================================================
 # models/estadisticas_ventas.py:534-575  (obtener_unidades_por_mes)
 # Cubre las tres ramas: id_negocio "all", "2", "3"
 # ============================================================
-
-def test_obtener_unidades_por_mes_all():
-    from models.estadisticas_ventas import obtener_unidades_por_mes
-    result = obtener_unidades_por_mes(2024, "all")
-    assert len(result) == 12
-
-
-def test_obtener_unidades_por_mes_negocio_2():
-    from models.estadisticas_ventas import obtener_unidades_por_mes
-    result = obtener_unidades_por_mes(2024, "2")
-    assert len(result) == 12
-
-
-def test_obtener_unidades_por_mes_negocio_3():
-    from models.estadisticas_ventas import obtener_unidades_por_mes
-    result = obtener_unidades_por_mes(2024, "3")
-    assert len(result) == 12
-
-
-def test_obtener_unidades_por_mes_cubre_loops_con_datos(venta_pendiente, venta_confeccion, venta_maquila):
-    """Lines 549,561,573: loops internos con ventas reales de los 3 negocios."""
-    from models.estadisticas_ventas import obtener_unidades_por_mes
-    import datetime
-    anio = datetime.date.today().year
-    result = obtener_unidades_por_mes(anio, "all")
-    assert len(result) == 12
-    assert sum(r["total"] for r in result) >= 3
 
 
 # ============================================================

@@ -44,6 +44,23 @@ def cond_in(columna, valores):
     return (f"{columna} IN ({', '.join(['%s'] * len(valores))})", *valores)
 
 
+def filtro_negocios(id_negocio, columna="id_negocio"):
+    """Filtro SQL por negocio: regresa (sql, params).
+
+    "all" o None = sin filtro; un id o una lista de ids = `AND columna IN (...)`."""
+    if id_negocio == "all" or id_negocio is None:
+        return "", []
+    ids = list(id_negocio) if isinstance(id_negocio, (list, tuple, set)) else [id_negocio]
+    return f" AND {columna} IN ({', '.join(['%s'] * len(ids))})", ids
+
+
+def sql_negocios(params, id_negocio, columna="id_negocio"):
+    """Igual que filtro_negocios, pero agrega los valores a `params` y regresa solo el SQL."""
+    sql, valores = filtro_negocios(id_negocio, columna)
+    params.extend(valores)
+    return sql
+
+
 def ids_de_args(args, clave="id_negocio"):
     """Lista de IDs enteros de un parámetro repetible (?id_negocio=1&id_negocio=3)."""
     return [int(v) for v in args.getlist(clave) if str(v).strip().isdigit()]

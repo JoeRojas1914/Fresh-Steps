@@ -1,4 +1,5 @@
 from db import get_db
+from utils import sql_negocios
 from .estadisticas_ventas import _col_v
 
 
@@ -18,9 +19,7 @@ def obtener_top_clientes(inicio, fin, id_negocio, limit=5, col: str = "fecha_rec
           AND v.eliminado = 0
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
     sql += " GROUP BY c.id_cliente ORDER BY total_gastado DESC, visitas DESC LIMIT %s"
     params.append(limit)
 
@@ -47,9 +46,7 @@ def obtener_clientes_unicos(inicio, fin, id_negocio, col: str = "fecha_recibo"):
           AND id_cliente IS NOT NULL
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "id_negocio")
 
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
@@ -73,9 +70,7 @@ def obtener_clientes_nuevos(inicio, fin, id_negocio, col: str = "fecha_recibo"):
           )
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
 
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
@@ -102,9 +97,7 @@ def obtener_tasa_retorno(inicio, fin, id_negocio, col: str = "fecha_recibo"):
           AND v.id_cliente IS NOT NULL
     """
     params = [inicio, inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
 
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
@@ -128,9 +121,7 @@ def obtener_gasto_promedio_cliente(inicio, fin, id_negocio, col: str = "fecha_re
           AND v.id_cliente IS NOT NULL
     """
     params = [inicio, fin]
-    if id_negocio != "all":
-        sql += " AND v.id_negocio = %s"
-        params.append(id_negocio)
+    sql += sql_negocios(params, id_negocio, "v.id_negocio")
 
     with get_db() as (_, cursor):
         cursor.execute(sql, params)

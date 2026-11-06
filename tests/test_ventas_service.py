@@ -3,7 +3,6 @@ Tests para services/ventas_service.py — reglas de negocio de creación de vent
 Los casos 1-7 validan lógica pura (sin tocar BD).
 Los casos 8-10 hacen INSERT real y limpian al terminar.
 """
-import pytest
 from services.ventas_service import guardar_venta_service, registrar_pago_final_service
 from tests.conftest import cleanup_venta
 

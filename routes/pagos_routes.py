@@ -7,7 +7,7 @@ from models.negocio import obtener_negocios
 from services.pagos_service import listar_pagos_service, exportar_pagos_service
 from services.excel_helpers import (
     send_excel, xl_titulo_hoja, xl_fila_headers, xl_cell,
-    xl_fila_totales, xl_col_widths, xl_row_bg, fmt_dt, C,
+    xl_fila_totales, xl_col_widths, xl_row_bg, fmt_dt,
 )
 from config import METODOS_PAGO_VALIDOS
 from utils import ids_de_args

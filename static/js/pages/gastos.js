@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 const _eliminarGasto = crearEliminarHandler("modalConfirmarEliminarGasto");
-function confirmarEliminarGasto(id) { _eliminarGasto.confirmar(`/gastos/eliminar/${id}`); }
 function ejecutarEliminarGasto()    { _eliminarGasto.ejecutar(); }
 
 

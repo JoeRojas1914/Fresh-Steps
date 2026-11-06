@@ -30,7 +30,6 @@
   50%       { opacity: .4; }
 }
 
-
 /* ── Spinner ── */
 .spinner {
   width: 18px;
@@ -44,30 +43,11 @@
   flex-shrink: 0;
 }
 
-.spinner--blue {
-  border-color: rgba(30, 127, 214, 0.2);
-  border-top-color: #1e7fd6;
-}
-
 .spinner--sm {
   width: 14px;
   height: 14px;
   border-width: 2px;
 }
-
-
-/* ── Loading inline (tablas, modales) ── */
-.loading-row td {
-  text-align: center;
-  padding: 24px;
-  color: var(--color-muted);
-  font-size: 13px;
-}
-
-.loading-row .spinner {
-  margin-right: 8px;
-}
-
 
 /* ── Skeleton ── */
 .skeleton {
@@ -126,7 +106,6 @@
   }
   .skeleton, .is-skeleton { animation: none !important; }
 }
-
 
 @keyframes pageEnter {
   from { opacity: 0; transform: translateY(12px); }
@@ -190,9 +169,6 @@
 .field--error-pulse { animation: errorPulse 0.5s ease forwards; }
 
 /* ── Clases utilitarias ── */
-.animate-slide-in { animation: slideIn 0.25s ease both; }
-.animate-slide-up { animation: slideUp 0.25s ease both; }
-.animate-fade-in  { animation: fadeIn  0.25s ease both; }
 
 .row--removing {
   animation: rowRemove 0.25s ease forwards;

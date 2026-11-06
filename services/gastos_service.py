@@ -67,10 +67,6 @@ def eliminar_gasto_service(id_gasto: int, id_usuario: int) -> None:
     eliminar_gasto(id_gasto, id_usuario)
 
 
-def obtener_historial_gasto_service(id_gasto: int) -> list[dict]:
-    return obtener_historial_gasto(id_gasto)
-
-
 def restaurar_gasto_service(id_gasto: int, id_usuario: int) -> None:
     restaurar_gasto(id_gasto, id_usuario)
 

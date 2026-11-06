@@ -232,8 +232,6 @@ def exportar_estadisticas_service(args):
         return None, f"El rango máximo permitido es {MAX_DIAS_RANGO} días"
 
     from openpyxl import Workbook
-    from openpyxl.styles import Font, PatternFill, Alignment
-    from openpyxl.utils import get_column_letter
     from services.excel_helpers import (
         C, xl_cell, xl_titulo_hoja, xl_fila_headers, xl_col_widths, send_excel
     )

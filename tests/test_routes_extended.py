@@ -3,7 +3,6 @@ Tests HTTP extendidos — GET/POST en rutas de gastos, servicios, clientes,
 pagos, estadísticas y usuarios. Cada test verifica status code y, donde
 corresponde, el Content-Type de la respuesta.
 """
-import pytest
 
 XLSX_CONTENT_TYPE = (
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -85,7 +84,7 @@ def test_guardar_categoria_nueva(logged_client):
     assert res.get_json()["ok"] is True
 
     # Cleanup
-    from models.gastos import obtener_categorias, eliminar_categoria
+    from models.gastos import obtener_categorias
     cats = obtener_categorias()
     for c in cats:
         if c["nombre"] == "CatRutaTest":

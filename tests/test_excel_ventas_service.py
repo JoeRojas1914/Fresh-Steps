@@ -3,7 +3,6 @@ Tests para services/excel_ventas_service.py
 Verifica que exportar_historial_service() devuelva un Workbook válido con las
 3 hojas esperadas, tanto con datos como sin ellos.
 """
-import pytest
 from openpyxl import Workbook
 from services.excel_ventas_service import exportar_historial_service
 

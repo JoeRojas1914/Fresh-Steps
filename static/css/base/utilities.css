@@ -16,28 +16,10 @@
 .text-primary { color: var(--color-primary-dark); }
 .text-danger  { color: var(--color-danger); }
 .text-success { color: var(--color-success); }
-.text-muted   { color: var(--color-muted); }
-.text-navy    { color: var(--color-navy); }
 
 .dim      { opacity: 0.5; }
 .dim-soft { opacity: 0.6; }
-.dim-mid  { opacity: 0.8; }
 .text-sm  { font-size: 13px; }
-.text-xs  { font-size: 11px; }
-
-.modal-question {
-    margin: 0 0 8px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #0b3c5d;
-}
-
-.modal-hint {
-    margin: 0;
-    font-size: 13px;
-    color: #64748b;
-    line-height: 1.6;
-}
 
 .lucide {
   display: inline-block;
@@ -48,12 +30,9 @@
 
 /* ── Display ───────────────────── */
 .d-none       { display: none; }
-.d-flex       { display: flex; }
 
 /* ── Spacing ───────────────────── */
-.mb-20        { margin-bottom: 20px; }
 .mt-10        { margin-top: 10px; }
-.ml-auto      { margin-left: auto; }
 
 /* ── Text ──────────────────────── */
 .no-underline { text-decoration: none; }
@@ -61,9 +40,6 @@
 /* ── Transitions ───────────────── */
 .transition-transform { transition: transform .2s; }
 .chevron-icon--abierto { transform: rotate(180deg); }
-
-/* ── Positioning ───────────────── */
-.relative     { position: relative; }
 
 /* ── Table empty state ─────────── */
 .td-empty     { text-align: center; padding: 2rem; }
@@ -74,7 +50,6 @@
 /* Extra spacing */
 .mt-6   { margin-top: 6px; }
 .mt-16  { margin-top: 16px; }
-.ml-12  { margin-left: 12px; }
 
 /* Font sizes */
 .text-2xs { font-size: 12px; }

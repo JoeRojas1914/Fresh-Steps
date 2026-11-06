@@ -1,10 +1,10 @@
+{% from "components/detalles_venta.html" import detalles_encabezado, pagos_registrados %}
 {% from "macros/badges.html" import badge_negocio %}
 {% from "macros/telefono.html" import telefono_wa %}
 {% from "components/table.html" import table %}
 {% from "components/pagination.html" import pagination %}
 {% from "components/empty_state.html" import fila_vacia %}
 
-<div id="toast-container"></div>
 <div id="tabla-ventas">
 
 
@@ -59,30 +59,9 @@
 <tr id="detalles-{{ v.id_venta }}" class="table--details d-none">
     <td colspan="11">
         <div class="detalles-box">
-            <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta
-                {% if (v.cantidad_descuento or 0) > 0 %}<span class="status status--warn detalles-aviso-descuento">Con descuento de {{ v.cantidad_descuento|dinero }}</span>{% endif %}
-            </div>
+            {{ detalles_encabezado(v) }}
 
-            <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}" data-total="{{ v.total }}" data-descuento="{{ v.cantidad_descuento or 0 }}">
-                <li class="dim-soft">Cargando detalles...</li>
-            </ul>
-
-            <div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
-            {% if v.pagos %}
-                {% for p in v.pagos %}
-                <div class="pago-fila">
-                    <span class="pago-tipo">
-                        {{ (p.tipo_pago or '—')|capitalize }}
-                        {% if p.tipo_pago_venta %}
-                            <span class="pago-tag">{{ p.tipo_pago_venta }}</span>
-                        {% endif %}
-                    </span>
-                    <span class="pago-monto">{{ p.monto|dinero }}</span>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="dim-soft text-sm nota-italic">Sin pagos registrados</div>
-            {% endif %}
+            {{ pagos_registrados(v.pagos) }}
 
             <div class="pagos-title"><i data-lucide="user" width="14" height="14"></i> Usuarios</div>
                 {% if v.usuario_creo %}

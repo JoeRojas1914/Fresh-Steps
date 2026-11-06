@@ -1,11 +1,10 @@
 import { escapeHtml, mostrarFeedback } from '../base/helpers.js';
 import { validarRequerido, validarTelefono } from '../base/form_validators.js';
 import { abrirModal, cerrarModal } from '../components/modal.js';
+import { fetchClientes } from '../components/buscar_clientes.js';
 import { validarFormulario } from './ventas_validacion.js';
 
 /* ─── Búsqueda de cliente ────────────────────────────────────────────────── */
-
-let _abortBusqueda = null;
 
 export async function buscarClientes() {
     const q     = document.getElementById("buscar-cliente").value.trim();
@@ -13,30 +12,8 @@ export async function buscarClientes() {
     lista.innerHTML = "";
     if (q.length < 2) return;
 
-    if (_abortBusqueda) _abortBusqueda.abort();
-    _abortBusqueda = new AbortController();
-
-    let clientes;
-    try {
-        const res = await fetch(`/api/clientes?q=${q}`, { signal: _abortBusqueda.signal });
-        if (!res.ok) throw new Error("Error de red");
-        clientes = await res.json();
-    } catch (err) {
-        if (err.name === "AbortError") return;
-        lista.innerHTML = "<div class='result-item'>Error al buscar clientes.</div>";
-        return;
-    }
-
-    if (clientes.length === 0) {
-        lista.innerHTML = `
-            <div class="no-clientes-found">
-                <i data-lucide="user-x" width="28" height="28"></i>
-                <p>No se encontraron clientes con "<strong>${escapeHtml(q)}</strong>"</p>
-            </div>
-        `;
-        if (window.lucide) lucide.createIcons();
-        return;
-    }
+    const clientes = await fetchClientes(q, lista);
+    if (!clientes) return;
 
     clientes.forEach(c => {
         const item     = document.createElement("div");
@@ -63,7 +40,7 @@ export async function buscarClientes() {
 // Cliente mostrado en la tarjeta (para conservar total_ventas al editarlo)
 let _clienteActual = null;
 
-export function seleccionarCliente(cliente) {
+function seleccionarCliente(cliente) {
     _clienteActual = cliente;
     document.getElementById("id_cliente").value = cliente.id_cliente;
 

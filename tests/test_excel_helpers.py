@@ -1,6 +1,6 @@
 """
 Tests directos sobre services/excel_helpers.py.
-Cubre: xl_subhead, fmt_dt (date/str), build_excel_cliente con datos completos,
+Cubre: fmt_dt (date/str), build_excel_cliente con datos completos,
        _build_ws_articulos (calzado, confeccion, maquila, sin detalles),
        _build_ws_pagos (con y sin pagos), _build_ws_resumen (con pedidos).
 """
@@ -8,7 +8,6 @@ from datetime import datetime
 from openpyxl import Workbook
 
 from services.excel_helpers import (
-    xl_subhead,
     fmt_dt,
     build_excel_cliente,
     _build_ws_resumen,
@@ -72,13 +71,6 @@ def _det_maquila(id_venta=3):
 
 
 # ---------------------------------------------------------------------------
-
-def test_xl_subhead_retorna_celda():
-    """Cubre excel_helpers.py:68 — cuerpo de xl_subhead."""
-    wb = Workbook()
-    ws = wb.active
-    celda = xl_subhead(ws, 1, 1, "Encabezado sub")
-    assert celda.value == "Encabezado sub"
 
 
 def test_fmt_dt_none():

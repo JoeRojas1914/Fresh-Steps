@@ -1,6 +1,7 @@
 import { ventaState } from './ventas_state.js';
 import { mostrarFeedback, redirigirConFeedback, escapeHtml } from '../base/helpers.js';
 import { abrirModal, cerrarModal } from '../components/modal.js';
+import { fetchClientes } from '../components/buscar_clientes.js';
 import { initNavigationGuard } from '../base/navigation_guard.js';
 import { cargarServicios, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado, opcionesServiciosHTML } from './ventas_servicios.js';
 import { agregarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
@@ -157,37 +158,14 @@ function _seleccionarClienteEdicion(cliente) {
 
 // Se asigna en DOMContentLoaded para refrescar total y botón de guardar
 let _onClienteCambiado = () => {};
-let _abortBusquedaCliente = null;
-
 async function _buscarClientesEdicion() {
     const q     = document.getElementById("buscar-cliente").value.trim();
     const lista = document.getElementById("lista-clientes");
     lista.innerHTML = "";
     if (q.length < 2) return;
 
-    if (_abortBusquedaCliente) _abortBusquedaCliente.abort();
-    _abortBusquedaCliente = new AbortController();
-
-    let clientes;
-    try {
-        const res = await fetch(`/api/clientes?q=${encodeURIComponent(q)}`, { signal: _abortBusquedaCliente.signal });
-        if (!res.ok) throw new Error("Error de red");
-        clientes = await res.json();
-    } catch (err) {
-        if (err.name === "AbortError") return;
-        lista.innerHTML = "<div class='result-item'>Error al buscar clientes.</div>";
-        return;
-    }
-
-    if (clientes.length === 0) {
-        lista.innerHTML = `
-            <div class="no-clientes-found">
-                <i data-lucide="user-x" width="28" height="28"></i>
-                <p>No se encontraron clientes con "<strong>${escapeHtml(q)}</strong>"</p>
-            </div>`;
-        if (window.lucide) lucide.createIcons();
-        return;
-    }
+    const clientes = await fetchClientes(q, lista);
+    if (!clientes) return;
 
     clientes.forEach(c => {
         const item     = document.createElement("div");

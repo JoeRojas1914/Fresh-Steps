@@ -18,7 +18,6 @@
   font-size: 14px;
 }
 
-
 .table thead {
   background: #0b3c5d;
   color: #ffffff;
@@ -87,8 +86,6 @@
   background-color: #f0f7ff;
 }
 
-
-
 .table--details td {
   padding: 0;
   background: #f8fbff;
@@ -105,17 +102,7 @@
   .table td { font-size: 13px; padding: 7px 8px; }
 }
 
-
-.table__row--danger {
-  background-color: #fdecea;
-}
-
 .td-acciones { white-space: nowrap; }
-.td-acciones .acciones {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
 .td-acciones form { display: inline-flex; margin: 0; }
 
 .clickable-row {
@@ -131,7 +118,6 @@
 .tel-wa:hover {
   text-decoration: underline;
 }
-
 
 .entrega-hoy {
     background-color: #fff3cd;  
