@@ -159,7 +159,7 @@ def obtener_gastos(
 ):
     where, params = build_where([
         cond_in("g.id_negocio", id_negocio),
-        ("g.id_categoria = %s", id_categoria),
+        cond_in("g.id_categoria", id_categoria),
         ("g.fecha_registro >= %s", fecha_inicio),
         ("g.fecha_registro <= %s", fecha_fin),
         ("g.activo = %s", None if incluir_eliminados else 1),
@@ -208,7 +208,7 @@ def contar_gastos(
     where, params = build_where([
         ("activo = %s",          None if incluir_eliminados else 1),
         cond_in("id_negocio", id_negocio),
-        ("id_categoria = %s",    id_categoria),
+        cond_in("id_categoria",   id_categoria),
         ("fecha_registro >= %s", fecha_inicio),
         ("fecha_registro <= %s", fecha_fin),
     ])

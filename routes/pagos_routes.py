@@ -22,8 +22,8 @@ TIPOS_PAGO_VENTA = ["prepago", "final"]
 def _filtros_request():
     return {
         "id_negocio":     ids_de_args(request.args),
-        "tipo_pago":      request.args.get("tipo_pago")       or None,
-        "tipo_pago_venta": request.args.get("tipo_pago_venta") or None,
+        "tipo_pago":       [m for m in request.args.getlist("tipo_pago") if m in METODOS_PAGO_VALIDOS] or None,
+        "tipo_pago_venta": [t for t in request.args.getlist("tipo_pago_venta") if t in TIPOS_PAGO_VENTA] or None,
         "fecha_inicio":   request.args.get("fecha_inicio")    or None,
         "fecha_fin":      request.args.get("fecha_fin")        or None,
     }

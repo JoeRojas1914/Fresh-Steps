@@ -36,7 +36,7 @@ gastos_bp = Blueprint("gastos", __name__)
 @admin_required
 def gastos():
     id_negocio         = ids_de_args(request.args)
-    id_categoria       = request.args.get("id_categoria") or None
+    id_categoria       = ids_de_args(request.args, "id_categoria") or None
     fecha_inicio       = request.args.get("fecha_inicio") or None
     fecha_fin          = request.args.get("fecha_fin")    or None
     pagina             = request.args.get("pagina", 1, type=int)
@@ -158,11 +158,17 @@ def eliminar_categoria_route(id_categoria):
         return jsonify({"ok": False, "error": "Error al eliminar la categoría."}), 500
 
 
+def _nombres_categorias(ids):
+    """Nombres de las categorías elegidas, para el subtítulo del Excel."""
+    nombres = {c["id_categoria"]: c["nombre"] for c in obtener_categorias()}
+    return ", ".join(nombres.get(i, str(i)) for i in ids)
+
+
 @gastos_bp.route("/gastos/exportar")
 @admin_required
 def exportar_gastos_excel():
     id_negocio         = ids_de_args(request.args)
-    id_categoria       = request.args.get("id_categoria") or None
+    id_categoria       = ids_de_args(request.args, "id_categoria") or None
     fecha_inicio       = request.args.get("fecha_inicio") or None
     fecha_fin          = request.args.get("fecha_fin")    or None
     incluir_eliminados = request.args.get("eliminados") == "1"
@@ -171,7 +177,7 @@ def exportar_gastos_excel():
 
     subtexto = "  ".join(filter(None, [
         f"Negocio: {nombres_negocios(id_negocio, obtener_negocios())}" if id_negocio else "",
-        f"Categor\u00eda: {id_categoria}"  if id_categoria  else "",
+        f"Categor\u00eda: {_nombres_categorias(id_categoria)}" if id_categoria else "",
         f"Desde: {fecha_inicio}"      if fecha_inicio  else "",
         f"Hasta: {fecha_fin}"         if fecha_fin     else "",
     ])) or "Sin filtros \u2014 todos los registros"

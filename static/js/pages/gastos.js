@@ -1,5 +1,5 @@
 import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, csrfFetch, escapeHtml, apiAction } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, csrfFetch, escapeHtml, apiAction, normalizar } from '../base/helpers.js';
 import { validarRequerido, validarPrecio } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
@@ -118,14 +118,38 @@ function verHistorial(id) {
 
 const btnGestionarCats = document.getElementById("btn-gestionar-categorias");
 if (btnGestionarCats) {
-    btnGestionarCats.addEventListener("click", () => abrirModal("modalCategorias"));
+    btnGestionarCats.addEventListener("click", () => {
+        const buscador = document.getElementById("buscar-categoria");
+        if (buscador) buscador.value = "";
+        filtrarCategorias();
+        abrirModal("modalCategorias");
+    });
 }
+
+// Buscador por nombre del modal de categorías (sin acentos ni mayúsculas)
+function filtrarCategorias() {
+    const buscador = document.getElementById("buscar-categoria");
+    const items    = document.querySelectorAll("#categorias-lista-wrap .cat-item");
+    const termino  = normalizar(buscador ? buscador.value : "");
+    let visibles = 0;
+    items.forEach(li => {
+        const nombre = normalizar(li.querySelector(".cat-nombre")?.textContent || "");
+        const ok = !termino || nombre.includes(termino);
+        li.hidden = !ok;
+        if (ok) visibles++;
+    });
+    const vacio = document.getElementById("cat-sin-resultados");
+    if (vacio) vacio.hidden = !(termino && items.length && visibles === 0);
+}
+
+document.getElementById("buscar-categoria")?.addEventListener("input", filtrarCategorias);
 
 async function recargarListaCategorias() {
     const wrap = document.getElementById("categorias-lista-wrap");
     if (!wrap) return;
     const res  = await fetch("/gastos/categorias/lista");
     wrap.innerHTML = await res.text();
+    filtrarCategorias();
 }
 
 function mostrarFeedbackCat(msg, tipo = "error") {

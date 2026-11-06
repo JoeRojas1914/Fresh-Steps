@@ -73,8 +73,8 @@
     'pagos.historial_pagos',
     {
       "id_negocio":      request.args.getlist('id_negocio'),
-      "tipo_pago":       request.args.get('tipo_pago'),
-      "tipo_pago_venta": request.args.get('tipo_pago_venta'),
+      "tipo_pago":       request.args.getlist('tipo_pago'),
+      "tipo_pago_venta": request.args.getlist('tipo_pago_venta'),
       "fecha_inicio":    request.args.get('fecha_inicio'),
       "fecha_fin":       request.args.get('fecha_fin'),
       "orden":        request.args.get('orden'),

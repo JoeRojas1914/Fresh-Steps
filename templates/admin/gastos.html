@@ -6,7 +6,7 @@
 {% from "components/pagination.html" import pagination %}
 {% from "components/table.html" import table %}
 {% from "components/modal.html" import modal %}
-{% from "components/filtros.html" import filtro_negocios %}
+{% from "components/filtros.html" import filtro_negocios, filtro_multi %}
 
 
 <h1><i data-lucide="banknote" width="24" height="24"></i> Gastos</h1>
@@ -34,18 +34,8 @@
              value="{{ request.args.get('fecha_fin', '') }}">
     </div>
 
-    <div class="filtro-item">
-      <label for="filtro-categoria-gasto">Categoría</label>
-      <select name="id_categoria" id="filtro-categoria-gasto">
-        <option value="">Todas</option>
-        {% for c in categorias %}
-          <option value="{{ c.id_categoria }}"
-            {% if request.args.get('id_categoria') == c.id_categoria|string %}selected{% endif %}>
-            {{ c.nombre }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
+    {% set ops_cat = [] %}{% for c in categorias %}{% set _ = ops_cat.append((c.id_categoria, c.nombre)) %}{% endfor %}
+    {{ filtro_multi("id_categoria", "Categoría", ops_cat, request.args.getlist('id_categoria'), placeholder="Todas", input_id="filtro-categoria-gasto") }}
 
 
     <div class="filtro-actions">
@@ -68,7 +58,7 @@
       {% endif %}
       <a href="{{ url_for('gastos.exportar_gastos_excel',
                   id_negocio=request.args.getlist('id_negocio'),
-                  id_categoria=request.args.get('id_categoria') or '',
+                  id_categoria=request.args.getlist('id_categoria'),
                   fecha_inicio=request.args.get('fecha_inicio') or '',
                   fecha_fin=request.args.get('fecha_fin') or '',
                   eliminados='1' if incluir_eliminados else '') }}"
@@ -230,6 +220,11 @@
 {% call(section) modal("modalCategorias", "Gestionar categorías", "sm") %}
 
 {% if section == 'body' %}
+<div class="cat-buscar">
+    <i data-lucide="search" width="16" height="16" class="cat-buscar__icono"></i>
+    <input type="search" id="buscar-categoria" class="cat-buscar__input" placeholder="Buscar categoría por nombre..." autocomplete="off" aria-label="Buscar categoría">
+</div>
+<p id="cat-sin-resultados" class="cat-sin-resultados dim" hidden>No hay categorías con ese nombre.</p>
 <div id="categorias-lista-wrap">
     {% include "admin/_categorias_lista.html" %}
 </div>

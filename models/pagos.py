@@ -67,8 +67,8 @@ def _filtros_historial(id_negocio, tipo_pago, tipo_pago_venta, fecha_inicio, fec
     return build_where([
         ("v.eliminado = %s",          0),
         cond_in("v.id_negocio", id_negocio),
-        ("pv.tipo_pago = %s",         tipo_pago),
-        ("pv.tipo_pago_venta = %s",   tipo_pago_venta),
+        cond_in("pv.tipo_pago",       tipo_pago),
+        cond_in("pv.tipo_pago_venta", tipo_pago_venta),
         ("DATE(pv.fecha_pago) >= %s", fecha_inicio),
         ("DATE(pv.fecha_pago) <= %s", fecha_fin),
     ])

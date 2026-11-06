@@ -4,7 +4,7 @@
 {% from "components/alerts.html" import alerts %}
 {% from "components/pagination.html" import pagination %}
 {% from "components/table.html" import table %}
-{% from "components/filtros.html" import filtro_negocios %}
+{% from "components/filtros.html" import filtro_negocios, filtro_multi %}
 
 <h1><i data-lucide="credit-card" width="24" height="24"></i> Historial de Pagos</h1>
 <p class="page-sub">Registro de todos los pagos recibidos</p>
@@ -19,31 +19,11 @@
   <div class="filtro-row">
     {{ filtro_negocios(negocios, request.args.getlist('id_negocio'), placeholder="Todos", input_id="filtro-negocio-pago") }}
 
-    <div class="filtro-item">
-      <label for="filtro-tipo-pago">Método de pago</label>
-      <select name="tipo_pago" id="filtro-tipo-pago">
-        <option value="">Todos</option>
-        {% for m in metodos_pago %}
-          <option value="{{ m }}"
-            {% if request.args.get('tipo_pago') == m %}selected{% endif %}>
-            {{ m.capitalize() }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
+    {% set ops_metodo = [] %}{% for m in metodos_pago %}{% set _ = ops_metodo.append((m, m|capitalize)) %}{% endfor %}
+    {{ filtro_multi("tipo_pago", "Método de pago", ops_metodo, request.args.getlist('tipo_pago'), input_id="filtro-tipo-pago") }}
 
-    <div class="filtro-item">
-      <label for="filtro-tipo-pago-venta">Tipo</label>
-      <select name="tipo_pago_venta" id="filtro-tipo-pago-venta">
-        <option value="">Todos</option>
-        {% for t in tipos_pago_venta %}
-          <option value="{{ t }}"
-            {% if request.args.get('tipo_pago_venta') == t %}selected{% endif %}>
-            {{ t.capitalize() }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
+    {% set ops_tipo = [] %}{% for t in tipos_pago_venta %}{% set _ = ops_tipo.append((t, t|capitalize)) %}{% endfor %}
+    {{ filtro_multi("tipo_pago_venta", "Tipo", ops_tipo, request.args.getlist('tipo_pago_venta'), input_id="filtro-tipo-pago-venta") }}
 
     <div class="filtro-item">
       <label for="filtro-fecha-inicio-pago">Desde</label>
@@ -68,8 +48,8 @@
       {% endif %}
       <a href="{{ url_for('pagos.exportar_pagos_excel',
                   id_negocio=request.args.getlist('id_negocio'),
-                  tipo_pago=request.args.get('tipo_pago') or '',
-                  tipo_pago_venta=request.args.get('tipo_pago_venta') or '',
+                  tipo_pago=request.args.getlist('tipo_pago'),
+                  tipo_pago_venta=request.args.getlist('tipo_pago_venta'),
                   fecha_inicio=request.args.get('fecha_inicio') or '',
                   fecha_fin=request.args.get('fecha_fin') or '') }}"
          class="btn btn--success btn--sm no-underline js-exportar">

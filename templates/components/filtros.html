@@ -39,6 +39,29 @@
 </div>
 {% endmacro %}
 
+{# Selector de una o varias opciones (casillas), igual que el de negocio.
+   `opciones`: lista de (valor, texto). `seleccionados`: lista de valores marcados.
+   Manda ?nombre=a&nombre=b. El JS está en components/multi_select.js #}
+{% macro filtro_multi(nombre, etiqueta, opciones, seleccionados=None, placeholder="Todos", clase="", input_id=None) %}
+{% set marcados = (seleccionados if seleccionados is iterable and seleccionados is not string else [seleccionados])
+                  | reject("none") | map("string") | list %}
+<div class="filtro-item {{ clase }}">
+    <label>{{ etiqueta }}</label>
+    <details class="multi-select" data-placeholder="{{ placeholder }}"{% if input_id %} id="{{ input_id }}"{% endif %}>
+        <summary class="multi-select__btn"><span class="multi-select__txt">{{ placeholder }}</span></summary>
+        <div class="multi-select__panel">
+            {% for valor, texto in opciones %}
+            <label class="multi-select__opt">
+                <input type="checkbox" name="{{ nombre }}" value="{{ valor }}"
+                       {% if valor|string in marcados %}checked{% endif %}>
+                <span>{{ texto }}</span>
+            </label>
+            {% endfor %}
+        </div>
+    </details>
+</div>
+{% endmacro %}
+
 {% macro cerrar_filtro(limpiar_url=None, mostrar_limpiar=False) %}
             <div class="filtro-actions">
                 <button type="submit" class="btn btn--primary btn--sm">

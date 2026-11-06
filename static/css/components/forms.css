@@ -152,7 +152,6 @@ select:focus {
 
 .checkbox-item { justify-content: flex-start; }
 
-/* Lista de casillas en línea (p. ej. negocios de un usuario de caja) */
 .negocios-check {
   display: flex;
   flex-wrap: wrap;
@@ -221,11 +220,47 @@ select:focus {
 /* ── Modal gestión de categorías ── */
 .cat-lista {
   list-style: none;
-  padding: 0;
+  padding: 0 4px 0 0;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.cat-lista::-webkit-scrollbar { width: 6px; }
+.cat-lista::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+
+.cat-item[hidden] { display: none; }
+
+.cat-buscar {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.cat-buscar__icono {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+
+.cat-buscar__input {
+  height: 40px;
+  padding: 8px 12px 8px 34px;
+  border-radius: 10px;
+}
+
+.cat-sin-resultados {
+  margin: 4px 0 8px;
+  font-size: 14px;
+  text-align: center;
 }
 
 .cat-item {
