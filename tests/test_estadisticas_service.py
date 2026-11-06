@@ -69,16 +69,6 @@ def test_api_rango_excede_maximo():
     assert str(MAX_DIAS_RANGO) in error
 
 
-def test_api_tipo_fecha_invalido_no_falla():
-    resultado, error = dashboard_api_service({
-        "inicio":     "2026-06-01",
-        "fin":        "2026-06-30",
-        "tipo_fecha": "columna_inexistente",
-    })
-    assert error is None
-    assert resultado is not None
-
-
 def test_api_rango_valido_devuelve_claves():
     resultado, error = dashboard_api_service({
         "inicio": "2026-06-01",

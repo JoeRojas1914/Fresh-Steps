@@ -247,18 +247,13 @@ function setModo(modo, btn) {
     cargarDashboard();
 }
 
-function getTipoFecha() {
-    return document.getElementById("tipo-fecha")?.value || "fecha_recibo";
-}
-
 function getParams() {
     const neg = id => document.getElementById(id)?.value || "all";
-    const tipo_fecha = getTipoFecha();
     const modo = modoActual;
     if (modo==="dia") {
         const f = document.getElementById("fecha-dia").value;
         if (!f) return null;
-        return {inicio:f, fin:f, id_negocio:neg("negocio-dia"), granularidad:"hora", tipo_fecha, modo};
+        return {inicio:f, fin:f, id_negocio:neg("negocio-stats"), granularidad:"hora", modo};
     }
     if (modo==="semana") {
         const val = document.getElementById("fecha-semana").value;
@@ -266,20 +261,20 @@ function getParams() {
         const [y,w] = val.split("-W");
         const lunes = lunesDeSemanaISO(parseInt(y), parseInt(w));
         const domingo = new Date(lunes); domingo.setDate(lunes.getDate()+6);
-        return {inicio:isoLocal(lunes), fin:isoLocal(domingo), id_negocio:neg("negocio-semana"), granularidad:"dia", tipo_fecha, modo};
+        return {inicio:isoLocal(lunes), fin:isoLocal(domingo), id_negocio:neg("negocio-stats"), granularidad:"dia", modo};
     }
     if (modo==="mes") {
         const val = document.getElementById("fecha-mes").value;
         if (!val) return null;
         const [y,m] = val.split("-");
         const ultimo = new Date(parseInt(y),parseInt(m),0).getDate();
-        return {inicio:`${y}-${m}-01`, fin:`${y}-${m}-${pad(ultimo)}`, id_negocio:neg("negocio-mes"), granularidad:"semana", tipo_fecha, modo};
+        return {inicio:`${y}-${m}-01`, fin:`${y}-${m}-${pad(ultimo)}`, id_negocio:neg("negocio-stats"), granularidad:"semana", modo};
     }
     if (modo==="personalizado") {
         const inicio = document.getElementById("fecha-inicio-custom").value;
         const fin    = document.getElementById("fecha-fin-custom").value;
         if (!inicio || !fin) return null;
-        return {inicio, fin, id_negocio:neg("negocio-custom"), granularidad:"semana", tipo_fecha, modo};
+        return {inicio, fin, id_negocio:neg("negocio-stats"), granularidad:"semana", modo};
     }
     return null;
 }
@@ -287,9 +282,8 @@ function getParams() {
 function actualizarTitulos() {
     const sufijos = {dia:"por hora", semana:"por día", mes:"por semana", personalizado:"por semana"};
     const s = sufijos[modoActual] || "por semana";
-    const esEntrega = getTipoFecha() === "fecha_entrega";
-    const baseVentas   = esEntrega ? "Ventas entregadas"  : "Número de ventas";
-    const baseUnidades = esEntrega ? "Unidades entregadas" : "Unidades recibidas";
+    const baseVentas   = "Número de ventas";
+    const baseUnidades = "Unidades recibidas";
     [
         ["titulo-ingresos", "Cobrado"],
         ["titulo-gastos",   "Gastos"],
@@ -345,7 +339,7 @@ async function cargarDashboard() {
     try {
         const qs = new URLSearchParams({
             inicio: p.inicio, fin: p.fin, id_negocio: p.id_negocio,
-            granularidad: p.granularidad || "semana", tipo_fecha: p.tipo_fecha || "fecha_recibo",
+            granularidad: p.granularidad || "semana",
             agrupacion_gastos: agrupacionGastos, modo: p.modo,
         });
         const res = await fetch(`/api/estadisticas/dashboard?${qs.toString()}`);
@@ -545,8 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {
     [
         "fecha-dia", "fecha-semana", "fecha-mes",
         "fecha-inicio-custom", "fecha-fin-custom",
-        "negocio-dia", "negocio-semana", "negocio-mes", "negocio-custom",
-        "tipo-fecha",
+        "negocio-stats",
     ].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener("change", _cargarDashboardDebounced);
@@ -583,7 +576,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 inicio:     p.inicio,
                 fin:        p.fin,
                 id_negocio: p.id_negocio || "all",
-                tipo_fecha: p.tipo_fecha  || "fecha_recibo",
             });
 
             btnExportar.dataset.exporting = "1";

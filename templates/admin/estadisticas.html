@@ -19,6 +19,9 @@
 <div class="filtro-box st-filtros">
     <div class="st-filtros-row">
 
+        {# Un solo selector de negocio para todos los periodos #}
+        {{ negocio_select("negocio-stats") }}
+
         <div class="filtro-item st-field st-field--auto">
             <span class="st-label" id="lbl-periodo">Periodo</span>
             <div class="modo-group" role="group" aria-labelledby="lbl-periodo">
@@ -31,31 +34,19 @@
 
         <div id="panel-dia" class="modo-panel st-panel d-none">
             <div class="filtro-item st-field"><label for="fecha-dia">Fecha</label><input type="date" id="fecha-dia"></div>
-            {{ negocio_select("negocio-dia") }}
         </div>
 
         <div id="panel-semana" class="modo-panel st-panel d-none">
             <div class="filtro-item st-field"><label for="fecha-semana">Semana</label><input type="week" id="fecha-semana"></div>
-            {{ negocio_select("negocio-semana") }}
         </div>
 
         <div id="panel-mes" class="modo-panel st-panel">
             <div class="filtro-item st-field"><label for="fecha-mes">Mes</label><input type="month" id="fecha-mes" value="{{ fecha_inicio[:7] }}"></div>
-            {{ negocio_select("negocio-mes") }}
         </div>
 
         <div id="panel-personalizado" class="modo-panel st-panel d-none">
             <div class="filtro-item st-field"><label for="fecha-inicio-custom">Desde</label><input type="date" id="fecha-inicio-custom" value="{{ fecha_inicio }}"></div>
             <div class="filtro-item st-field"><label for="fecha-fin-custom">Hasta</label><input type="date" id="fecha-fin-custom" value="{{ fecha_fin }}"></div>
-            {{ negocio_select("negocio-custom") }}
-        </div>
-
-        <div class="filtro-item st-field st-field--tipo">
-            <label for="tipo-fecha">Contar ventas por</label>
-            <select id="tipo-fecha">
-                <option value="fecha_recibo">Fecha de recibo</option>
-                <option value="fecha_entrega">Fecha de entrega</option>
-            </select>
         </div>
 
         <div class="st-acciones">

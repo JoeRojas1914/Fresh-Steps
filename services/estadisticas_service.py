@@ -36,7 +36,6 @@ from models.estadisticas import (
 )
 
 MAX_DIAS_RANGO = 186
-_COLS_FECHA_ESTADISTICAS = frozenset({"fecha_recibo", "fecha_entrega"})
 
 _log = logging.getLogger(__name__)
 
@@ -96,28 +95,26 @@ def _periodo_comparacion(inicio: date, fin: date, modo: str | None, hoy: date | 
     if modo == "mes":
         inicio_ant = _mes_anterior(inicio)
         if corte == fin and fin == _ultimo_dia_mes(fin):
-            fin_ant = _ultimo_dia_mes(inicio_ant)   # mes completo vs mes completo
+            fin_ant = _ultimo_dia_mes(inicio_ant)   
         else:
             fin_ant = _mes_anterior(corte)
         return (inicio, corte), (inicio_ant, fin_ant)
 
-    # semana y día: una semana atrás
     semana = timedelta(days=7)
     return (inicio, corte), (inicio - semana, corte - semana)
 
 
 def _pct_cambio(actual, anterior) -> float | None:
-    # Sin base positiva no hay comparación honesta (evita ÷0 y signos invertidos en ganancia)
     if anterior is None or anterior <= 0:
         return None
     return round((actual - anterior) / anterior * 100, 1)
 
 
-def _calcular_kpis(inicio: date, fin: date, id_negocio, col: str = "fecha_recibo") -> dict:
+def _calcular_kpis(inicio: date, fin: date, id_negocio) -> dict:
     total_ingresos              = obtener_total_ingresos(inicio, fin, id_negocio)
     total_gastos                = obtener_total_gastos(inicio,   fin, id_negocio)
-    ticket_promedio, num_ventas = obtener_ticket_promedio(inicio, fin, id_negocio, col)
-    saldo_por_cobrar            = obtener_saldo_por_cobrar(inicio, fin, id_negocio, col)
+    ticket_promedio, num_ventas = obtener_ticket_promedio(inicio, fin, id_negocio)
+    saldo_por_cobrar            = obtener_saldo_por_cobrar(inicio, fin, id_negocio)
     return {
         "ingresos":         total_ingresos,
         "gastos":           total_gastos,
@@ -129,14 +126,12 @@ def _calcular_kpis(inicio: date, fin: date, id_negocio, col: str = "fecha_recibo
     }
 
 
-def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio, col: str = "fecha_recibo",
+def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio,
                           modo: str | None = None) -> tuple[dict, dict, dict]:
-    # Los KPIs del período actual no necesitan recalcularse para el tramo transcurrido:
-    # los días que aún no llegan no tienen ventas, pagos ni gastos.
     (inicio_act, fin_act), (inicio_ant, fin_ant) = _periodo_comparacion(inicio, fin, modo)
     ingresos_ant           = obtener_total_ingresos(inicio_ant, fin_ant, id_negocio)
     gastos_ant             = obtener_total_gastos(inicio_ant,   fin_ant, id_negocio)
-    ticket_ant, ventas_ant = obtener_ticket_promedio(inicio_ant, fin_ant, id_negocio, col)
+    ticket_ant, ventas_ant = obtener_ticket_promedio(inicio_ant, fin_ant, id_negocio)
     ganancia_ant           = ingresos_ant - gastos_ant
 
     pcts = {
@@ -151,49 +146,49 @@ def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio, col: 
     return pcts, periodo_anterior_str, periodo_actual_str
 
 
-def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, col: str = "fecha_recibo", agrupacion_gastos: str = "proveedor") -> dict:
+def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrupacion_gastos: str = "proveedor") -> dict:
     if granularidad == "hora":
-        ventas_semanales   = contar_ventas_por_hora(inicio, fin, id_negocio, col)
+        ventas_semanales   = contar_ventas_por_hora(inicio, fin, id_negocio)
         ingresos_semanales = obtener_ingresos_por_hora(inicio, fin, id_negocio)
-        unidades_semanales = obtener_unidades_por_hora(inicio, fin, id_negocio, col)
+        unidades_semanales = obtener_unidades_por_hora(inicio, fin, id_negocio)
     elif granularidad == "dia":
-        ventas_semanales   = contar_ventas_por_dia_rango(inicio, fin, id_negocio, col)
+        ventas_semanales   = contar_ventas_por_dia_rango(inicio, fin, id_negocio)
         ingresos_semanales = obtener_ingresos_por_dia_rango(inicio, fin, id_negocio)
-        unidades_semanales = obtener_unidades_por_dia_rango(inicio, fin, id_negocio, col)
+        unidades_semanales = obtener_unidades_por_dia_rango(inicio, fin, id_negocio)
     else:
-        ventas_semanales   = contar_ventas_por_semana(inicio, fin, id_negocio, col)
+        ventas_semanales   = contar_ventas_por_semana(inicio, fin, id_negocio)
         ingresos_semanales = obtener_ingresos_por_semana(inicio, fin, id_negocio)
-        unidades_semanales = obtener_unidades_por_semana(inicio, fin, id_negocio, col)
+        unidades_semanales = obtener_unidades_por_semana(inicio, fin, id_negocio)
 
     if agrupacion_gastos == "categoria":
         gastos_semanales = obtener_gastos_por_semana_y_categoria(inicio, fin, id_negocio)
     else:
         gastos_semanales = obtener_gastos_por_semana_y_proveedor(inicio, fin, id_negocio)
-    ventas_prepago     = obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio, col)
-    uso_servicios      = obtener_uso_servicios(inicio, fin, id_negocio, col)
-    ventas_por_dia     = obtener_ventas_por_dia(inicio, fin, id_negocio, col)
-    top_clientes       = obtener_top_clientes(inicio, fin, id_negocio, col=col)
+    ventas_prepago     = obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio)
+    uso_servicios      = obtener_uso_servicios(inicio, fin, id_negocio)
+    ventas_por_dia     = obtener_ventas_por_dia(inicio, fin, id_negocio)
+    top_clientes       = obtener_top_clientes(inicio, fin, id_negocio)
     tiempo_entrega     = obtener_tiempo_promedio_entrega(inicio, fin, id_negocio)
-    ingresos_x_negocio = obtener_ingresos_por_negocio(inicio, fin, col) if id_negocio == "all" else []
+    ingresos_x_negocio = obtener_ingresos_por_negocio(inicio, fin) if id_negocio == "all" else []
     metodos_pago       = obtener_metodos_pago(inicio, fin, id_negocio)
     hora_recepcion     = obtener_hora_pico_recepcion(inicio, fin, id_negocio)
     hora_entrega       = obtener_hora_pico_entrega(inicio, fin, id_negocio)
-    clientes_unicos    = obtener_clientes_unicos(inicio, fin, id_negocio, col)
+    clientes_unicos    = obtener_clientes_unicos(inicio, fin, id_negocio)
 
     try:
-        clientes_nuevos = obtener_clientes_nuevos(inicio, fin, id_negocio, col)
+        clientes_nuevos = obtener_clientes_nuevos(inicio, fin, id_negocio)
     except Exception as e:  # pragma: no cover
         _log.error("clientes_nuevos: %s", e)
         clientes_nuevos = 0
 
     try:
-        tasa_retorno = obtener_tasa_retorno(inicio, fin, id_negocio, col)
+        tasa_retorno = obtener_tasa_retorno(inicio, fin, id_negocio)
     except Exception as e:  # pragma: no cover
         _log.error("tasa_retorno: %s", e)
         tasa_retorno = {"total": 0, "recurrentes": 0, "tasa": 0}
 
     try:
-        gasto_prom_cliente = obtener_gasto_promedio_cliente(inicio, fin, id_negocio, col)
+        gasto_prom_cliente = obtener_gasto_promedio_cliente(inicio, fin, id_negocio)
     except Exception as e:  # pragma: no cover
         _log.error("gasto_prom_cliente: %s", e)
         gasto_prom_cliente = 0.0
@@ -223,9 +218,6 @@ def exportar_estadisticas_service(args):
     inicio_str = args.get("inicio")
     fin_str    = args.get("fin")
     id_negocio = args.get("id_negocio", "all")
-    col        = args.get("tipo_fecha", "fecha_recibo")
-    if col not in _COLS_FECHA_ESTADISTICAS:
-        col = "fecha_recibo"
 
     if not inicio_str or not fin_str:
         return None, "Faltan fechas"
@@ -246,8 +238,8 @@ def exportar_estadisticas_service(args):
         C, xl_cell, xl_titulo_hoja, xl_fila_headers, xl_col_widths, send_excel
     )
 
-    kpis   = _calcular_kpis(inicio, fin, id_negocio, col)
-    series = _cargar_series(inicio, fin, id_negocio, "dia" if (fin - inicio).days <= 31 else "semana", col)
+    kpis   = _calcular_kpis(inicio, fin, id_negocio)
+    series = _cargar_series(inicio, fin, id_negocio, "dia" if (fin - inicio).days <= 31 else "semana")
 
     negocio_label = {"1": "Calzado", "2": "Confección", "3": "Maquila"}.get(str(id_negocio), "Todos los negocios")
     subtitulo = f"{inicio_str} al {fin_str} — {negocio_label}"
@@ -299,9 +291,6 @@ def dashboard_api_service(args):
     inicio_str = args.get("inicio")
     fin_str    = args.get("fin")
     id_negocio = args.get("id_negocio", "all")
-    col        = args.get("tipo_fecha", "fecha_recibo")
-    if col not in _COLS_FECHA_ESTADISTICAS:
-        col = "fecha_recibo"
 
     if not inicio_str or not fin_str:
         return None, "Faltan fechas"
@@ -326,9 +315,9 @@ def dashboard_api_service(args):
     if modo not in _MODOS:
         modo = None
 
-    kpis   = _calcular_kpis(inicio, fin, id_negocio, col)
-    pcts, periodo_anterior_str, periodo_actual_str = _calcular_comparativa(kpis, inicio, fin, id_negocio, col, modo)
-    series = _cargar_series(inicio, fin, id_negocio, args.get("granularidad", "semana"), col, agrupacion_gastos)
+    kpis   = _calcular_kpis(inicio, fin, id_negocio)
+    pcts, periodo_anterior_str, periodo_actual_str = _calcular_comparativa(kpis, inicio, fin, id_negocio, modo)
+    series = _cargar_series(inicio, fin, id_negocio, args.get("granularidad", "semana"), agrupacion_gastos)
 
     return {
         **series,

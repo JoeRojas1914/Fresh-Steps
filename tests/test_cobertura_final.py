@@ -468,18 +468,6 @@ def test_dashboard_api_agrupacion_categoria(app):
     assert err is None
 
 
-def test_exportar_estadisticas_tipo_fecha_invalido(app):
-    """Cubre estadisticas_service.py:181 — col se resetea a 'fecha_recibo'."""
-    from services.estadisticas_service import exportar_estadisticas_service
-    with app.test_request_context("/"):
-        result, err = exportar_estadisticas_service({
-            "inicio": "2026-01-01",
-            "fin": "2026-01-31",
-            "tipo_fecha": "campo_invalido",
-        })
-    assert err is None
-
-
 def test_exportar_estadisticas_fecha_invalida(app):
     """Cubre estadisticas_service.py:188-189 — formato de fecha inválido."""
     from services.estadisticas_service import exportar_estadisticas_service

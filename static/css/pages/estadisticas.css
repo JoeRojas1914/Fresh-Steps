@@ -26,7 +26,6 @@
 .st-field input[type="month"] { width: 170px; }
 
 .st-field--negocio select { width: 180px; }
-.st-field--tipo select    { width: 170px; }
 
 .st-label {
     font-size: 13px;
@@ -34,35 +33,43 @@
     color: #0b3c5d;
 }
 
+/* Periodo: control segmentado tonal (gris) con la opción activa en azul tonal */
+.st-filtros .filtro-item.st-field--auto {
+    flex-shrink: 0;
+    max-width: none;        /* filters.css limita .filtro-item a 300px y cortaba "Personalizado" */
+}
+
 .modo-group {
     display: inline-flex;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    overflow: hidden;
-    background: #ffffff;
+    gap: 3px;
+    padding: 3px;
     height: 42px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    background: #eef2f6;
+    box-shadow: inset 0 0 0 1px #d3dbe4;
 }
 
 .st-filtros .modo-btn {
     border: none;
-    border-right: 1px solid var(--color-border);
-    border-radius: 0;
+    border-radius: 8px;
     background: transparent;
     color: #475569;
-    padding: 0 16px;
+    padding: 0 14px;
     font-size: 14px;
     font-weight: 600;
+    white-space: nowrap;
     box-shadow: none;
     cursor: pointer;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.st-filtros .modo-btn:last-child { border-right: none; }
-.st-filtros .modo-btn:hover { background: #f0f7ff; color: var(--color-primary-dark); border-color: var(--color-border); }
+.st-filtros .modo-btn:hover { background: #e2e8f0; color: #0f172a; }
 .st-filtros .modo-btn.active {
-    background: var(--color-primary-dark);
-    color: #ffffff;
-    box-shadow: none;
+    background: #e8f2fc;
+    color: #1765b5;
+    box-shadow: inset 0 0 0 1px #b9d4f1, 0 1px 2px rgba(15, 23, 42, 0.08);
 }
+.st-filtros .modo-btn:focus-visible { outline: 2px solid #1e7fd6; outline-offset: 1px; }
 
 .st-acciones {
     display: flex;
@@ -418,8 +425,7 @@ body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
     .st-field input[type="date"],
     .st-field input[type="week"],
     .st-field input[type="month"],
-    .st-field--negocio select,
-    .st-field--tipo select { width: 100%; }
+    .st-field--negocio select { width: 100%; }
 
     .modo-group { display: flex; }
     .st-filtros .modo-btn { flex: 1; padding: 0 8px; }
