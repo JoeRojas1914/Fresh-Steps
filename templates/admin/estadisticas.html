@@ -1,218 +1,246 @@
 {% extends "base.html" %}
 
+{% macro negocio_select(id) -%}
+<div class="filtro-item st-field st-field--negocio">
+    <label for="{{ id }}">Negocio</label>
+    <select id="{{ id }}">
+        <option value="all">Todos</option>
+        {% for n in negocios %}<option value="{{ n.id_negocio }}">{{ n.nombre }}</option>{% endfor %}
+    </select>
+</div>
+{%- endmacro %}
+
 {% block content %}
 
 <h1><i data-lucide="bar-chart-2" width="24" height="24"></i> Estadísticas</h1>
-<p class="page-sub">Análisis de ingresos, gastos y rendimiento por período</p>
+<p class="page-sub">Cómo va el negocio en el periodo que elijas</p>
 
-{# ── Selector de modo + tipo de fecha ── #}
-<div class="modo-selector">
-    <button class="modo-btn" data-modo="dia"><i data-lucide="calendar" width="14" height="14"></i> Día</button>
-    <button class="modo-btn" data-modo="semana"><i data-lucide="calendar-days" width="14" height="14"></i> Semana</button>
-    <button class="modo-btn active" data-modo="mes"><i data-lucide="calendar" width="14" height="14"></i> Mes</button>
-    <button class="modo-btn" data-modo="personalizado"><i data-lucide="search" width="14" height="14"></i> Personalizado</button>
+{# ── Filtros: todo en una sola caja y una sola fila ── #}
+<div class="filtro-box st-filtros">
+    <div class="st-filtros-row">
 
-    <div class="filtro-item filtro-item--max200 filtro-item--ml-auto">
-        <label class="filtro-sublabel">Filtrar por</label>
-        <select id="tipo-fecha" class="select--sm">
-            <option value="fecha_recibo">Fecha de recibo</option>
-            <option value="fecha_entrega">Fecha de entrega</option>
-        </select>
-    </div>
-    <button id="btn-exportar-stats" class="btn btn--success btn--sm">
-        <i data-lucide="download" width="14" height="14"></i> Exportar Excel
-    </button>
-</div>
-
-{# ── Paneles de filtro por modo ── #}
-<div class="filtro-box mt-16">
-
-    <div id="panel-dia" class="modo-panel d-none">
-        <div class="filtro-row">
-            <div class="filtro-item"><label>Fecha</label><input type="date" id="fecha-dia"></div>
-            <div class="filtro-item"><label>Negocio</label><div class="select-wrapper"><select id="negocio-dia"><option value="all">Todos</option>{% for n in negocios %}<option value="{{ n.id_negocio }}">{{ n.nombre }}</option>{% endfor %}</select></div></div>
-            <div class="filtro-actions">
-                <button class="btn btn--info btn--sm js-ver-ventas"><i data-lucide="clipboard-list" width="14" height="14"></i> Ver ventas</button>
+        <div class="filtro-item st-field st-field--auto">
+            <span class="st-label" id="lbl-periodo">Periodo</span>
+            <div class="modo-group" role="group" aria-labelledby="lbl-periodo">
+                <button type="button" class="modo-btn" data-modo="dia">Día</button>
+                <button type="button" class="modo-btn" data-modo="semana">Semana</button>
+                <button type="button" class="modo-btn active" data-modo="mes">Mes</button>
+                <button type="button" class="modo-btn" data-modo="personalizado">Personalizado</button>
             </div>
         </div>
-    </div>
 
-    <div id="panel-semana" class="modo-panel d-none">
-        <div class="filtro-row">
-            <div class="filtro-item"><label>Semana</label><input type="week" id="fecha-semana"></div>
-            <div class="filtro-item"><label>Negocio</label><div class="select-wrapper"><select id="negocio-semana"><option value="all">Todos</option>{% for n in negocios %}<option value="{{ n.id_negocio }}">{{ n.nombre }}</option>{% endfor %}</select></div></div>
-            <div class="filtro-actions">
-                <button class="btn btn--info btn--sm js-ver-ventas"><i data-lucide="clipboard-list" width="14" height="14"></i> Ver ventas</button>
-            </div>
+        <div id="panel-dia" class="modo-panel st-panel d-none">
+            <div class="filtro-item st-field"><label for="fecha-dia">Fecha</label><input type="date" id="fecha-dia"></div>
+            {{ negocio_select("negocio-dia") }}
         </div>
-    </div>
 
-    <div id="panel-mes" class="modo-panel">
-        <div class="filtro-row">
-            <div class="filtro-item"><label>Mes</label><input type="month" id="fecha-mes" value="{{ fecha_inicio[:7] }}"></div>
-            <div class="filtro-item"><label>Negocio</label><div class="select-wrapper"><select id="negocio-mes"><option value="all">Todos</option>{% for n in negocios %}<option value="{{ n.id_negocio }}">{{ n.nombre }}</option>{% endfor %}</select></div></div>
-            <div class="filtro-actions">
-                <button class="btn btn--info btn--sm js-ver-ventas"><i data-lucide="clipboard-list" width="14" height="14"></i> Ver ventas</button>
-            </div>
+        <div id="panel-semana" class="modo-panel st-panel d-none">
+            <div class="filtro-item st-field"><label for="fecha-semana">Semana</label><input type="week" id="fecha-semana"></div>
+            {{ negocio_select("negocio-semana") }}
         </div>
-    </div>
 
-    <div id="panel-personalizado" class="modo-panel d-none">
-        <div class="filtro-row">
-            <div class="filtro-item"><label>Desde</label><input type="date" id="fecha-inicio-custom" value="{{ fecha_inicio }}"></div>
-            <div class="filtro-item"><label>Hasta</label><input type="date" id="fecha-fin-custom" value="{{ fecha_fin }}"></div>
-            <div class="filtro-item"><label>Negocio</label><div class="select-wrapper"><select id="negocio-custom"><option value="all">Todos</option>{% for n in negocios %}<option value="{{ n.id_negocio }}">{{ n.nombre }}</option>{% endfor %}</select></div></div>
-            <div class="filtro-actions">
-                <button class="btn btn--info btn--sm js-ver-ventas"><i data-lucide="clipboard-list" width="14" height="14"></i> Ver ventas</button>
-            </div>
+        <div id="panel-mes" class="modo-panel st-panel">
+            <div class="filtro-item st-field"><label for="fecha-mes">Mes</label><input type="month" id="fecha-mes" value="{{ fecha_inicio[:7] }}"></div>
+            {{ negocio_select("negocio-mes") }}
+        </div>
+
+        <div id="panel-personalizado" class="modo-panel st-panel d-none">
+            <div class="filtro-item st-field"><label for="fecha-inicio-custom">Desde</label><input type="date" id="fecha-inicio-custom" value="{{ fecha_inicio }}"></div>
+            <div class="filtro-item st-field"><label for="fecha-fin-custom">Hasta</label><input type="date" id="fecha-fin-custom" value="{{ fecha_fin }}"></div>
+            {{ negocio_select("negocio-custom") }}
+        </div>
+
+        <div class="filtro-item st-field st-field--tipo">
+            <label for="tipo-fecha">Contar ventas por</label>
+            <select id="tipo-fecha">
+                <option value="fecha_recibo">Fecha de recibo</option>
+                <option value="fecha_entrega">Fecha de entrega</option>
+            </select>
+        </div>
+
+        <div class="st-acciones">
+            <button type="button" class="btn btn--secondary js-ver-ventas">
+                <i data-lucide="clipboard-list" width="15" height="15"></i> Ver ventas
+            </button>
+            <button type="button" id="btn-exportar-stats" class="btn btn--success">
+                <i data-lucide="download" width="15" height="15"></i> Exportar Excel
+            </button>
         </div>
     </div>
 
     <div id="comparativaBox" class="comparativa-box">
         <span class="comparativa-label">Comparando</span>
         <span id="comparativaPeriodoActual" class="comparativa-badge--actual"></span>
-        <span class="comparativa-vs">vs</span>
+        <span class="comparativa-vs">con</span>
         <span id="comparativaPeriodoAnterior" class="comparativa-badge--anterior"></span>
-        <span id="comparativaNota" class="text-xs dim-soft text-muted"></span>
+        <span id="comparativaNota" class="comparativa-nota"></span>
     </div>
 </div>
 
-{# ── KPI Cards ── #}
-<div class="kpis-header">
-    <button type="button" id="toggleMontos" class="btn-blur-toggle" aria-pressed="false" title="Mostrar montos">
-        <i data-lucide="eye" width="19" height="19" class="icon-eye"></i>
-        <i data-lucide="eye-off" width="19" height="19" class="icon-eye-off"></i>
+{# ── Cifras del periodo ── #}
+<div class="st-kpis">
+    {# Esquina superior derecha de las cifras (ver .st-toggle-montos) #}
+    <button type="button" id="toggleMontos" class="btn-blur-toggle st-toggle-montos" aria-pressed="false">
+        <i data-lucide="eye" width="16" height="16" class="icon-eye"></i>
+        <i data-lucide="eye-off" width="16" height="16" class="icon-eye-off"></i>
+        <span class="st-toggle-texto">Mostrar montos</span>
     </button>
-</div>
-<div class="monthly-cards">
-    <div class="monthly-card ventas"><h4><i data-lucide="dollar-sign" width="14" height="14"></i> Ingresos</h4><p id="ventasMes" class="dato-sensible">$0</p></div>
-    <div class="monthly-card gastos"><h4><i data-lucide="banknote" width="14" height="14"></i> Gastos</h4><p id="gastosMes" class="dato-sensible">$0</p></div>
-    <div class="monthly-card ganancia"><h4><i data-lucide="trending-up" width="14" height="14"></i> Ganancia</h4><p id="gananciaMes" class="dato-sensible">$0</p></div>
-    <div class="monthly-card total-ventas"><h4><i data-lucide="shopping-cart" width="14" height="14"></i> Total ventas</h4><p id="totalVentas">0</p></div>
-    <div class="monthly-card ticket">
-        <h4><i data-lucide="receipt" width="14" height="14"></i> Ticket promedio</h4>
-        <p id="ticketPromedio" class="dato-sensible">$0</p>
-        <span class="kpi-sub" id="ticketVentas">0 ventas</span>
-    </div>
-    <div class="monthly-card cobrar">
-        <h4><i data-lucide="clock" width="14" height="14"></i> Por cobrar</h4>
-        <p id="saldoCobrar" class="dato-sensible">$0</p>
-        <span class="kpi-sub">Saldo pendiente</span>
-    </div>
+    <section class="st-grupo st-grupo--dinero" aria-labelledby="st-dinero">
+        <div class="st-grupo-head">
+            <h2 class="st-grupo-titulo" id="st-dinero">Dinero</h2>
+        </div>
+        <div class="st-grid">
+            <div class="st-kpi">
+                <span class="st-kpi-label">Cobrado</span>
+                <p id="ventasMes" class="st-kpi-num st-kpi-num--ok dato-sensible">$0</p>
+                <span class="st-kpi-sub">Pagos recibidos en el periodo</span>
+            </div>
+            <div class="st-kpi">
+                <span class="st-kpi-label">Gastos</span>
+                <p id="gastosMes" class="st-kpi-num st-kpi-num--bad dato-sensible">$0</p>
+                <span class="st-kpi-sub">Gastos registrados</span>
+            </div>
+            <div class="st-kpi">
+                <span class="st-kpi-label">Ganancia</span>
+                <p id="gananciaMes" class="st-kpi-num dato-sensible">$0</p>
+                <span class="st-kpi-sub">Cobrado menos gastos</span>
+            </div>
+            <div class="st-kpi">
+                <span class="st-kpi-label">Por cobrar</span>
+                <p id="saldoCobrar" class="st-kpi-num st-kpi-num--warn dato-sensible">$0</p>
+                <span class="st-kpi-sub">Saldo pendiente de estas ventas</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="st-grupo st-grupo--ventas" aria-labelledby="st-ventas">
+        <div class="st-grupo-head">
+            <h2 class="st-grupo-titulo" id="st-ventas">Ventas</h2>
+        </div>
+        <div class="st-grid">
+            <div class="st-kpi">
+                <span class="st-kpi-label">Ventas</span>
+                <p id="totalVentas" class="st-kpi-num">0</p>
+                <span class="st-kpi-sub">Recibos registrados</span>
+            </div>
+            <div class="st-kpi">
+                <span class="st-kpi-label">Ticket promedio</span>
+                <p id="ticketPromedio" class="st-kpi-num dato-sensible">$0</p>
+                <span class="st-kpi-sub">Según el total de las ventas</span>
+            </div>
+        </div>
+    </section>
 </div>
 
 {# ── Pestañas ── #}
-<div class="tab-bar">
-    <button class="tab-btn active" data-tab="financiero"><i data-lucide="bar-chart-2" width="14" height="14"></i> Financiero</button>
-    <button class="tab-btn" data-tab="operacional"><i data-lucide="shopping-bag" width="14" height="14"></i> Operacional</button>
-    <button class="tab-btn" data-tab="clientes"><i data-lucide="users" width="14" height="14"></i> Clientes</button>
+<div class="tab-bar" role="tablist">
+    <button type="button" class="tab-btn active" data-tab="financiero" role="tab">Financiero</button>
+    <button type="button" class="tab-btn" data-tab="operacional" role="tab">Operación</button>
+    <button type="button" class="tab-btn" data-tab="clientes" role="tab">Clientes</button>
 </div>
 
 {# ── Financiero ── #}
 <div id="tab-financiero" class="tab-panel">
     <div class="stats-page">
-        <div class="card stats-card">
-            <h2 class="stats-title" id="titulo-ingresos">Ingresos</h2>
-            <canvas id="ingresosChart" class="dato-sensible"></canvas>
+        <div class="stats-card">
+            <h2 class="stats-title" id="titulo-ingresos">Cobrado</h2>
+            <div class="st-chart"><canvas id="ingresosChart" class="dato-sensible"></canvas></div>
         </div>
-        <div class="card stats-card">
+        <div class="stats-card">
             <div class="stats-card-header">
                 <h2 class="stats-title" id="titulo-gastos">Gastos</h2>
-                <div class="agrupacion-toggle" id="gastos-agrupacion">
-                    <button class="agrupacion-btn active" data-agrupacion="proveedor">Proveedor</button>
-                    <button class="agrupacion-btn" data-agrupacion="categoria">Categoría</button>
+                <div class="agrupacion-toggle" id="gastos-agrupacion" role="group" aria-label="Agrupar gastos por">
+                    <button type="button" class="agrupacion-btn active" data-agrupacion="proveedor">Proveedor</button>
+                    <button type="button" class="agrupacion-btn" data-agrupacion="categoria">Categoría</button>
                 </div>
             </div>
-            <canvas id="gastosChart" class="dato-sensible"></canvas>
+            <div class="st-chart"><canvas id="gastosChart" class="dato-sensible"></canvas></div>
         </div>
     </div>
     <div class="stats-page">
-        <div class="card stats-card">
-            <h2 class="stats-title">Prepago vs Sin prepago</h2>
-            <canvas id="tipoPagoChart"></canvas>
+        <div class="stats-card" id="card-ingresos-negocio">
+            <h2 class="stats-title">Vendido por negocio</h2>
+            <p class="stats-nota">Total de las ventas de cada negocio, cobradas o no.</p>
+            <div class="st-chart st-chart--auto"><canvas id="ingresosNegocioChart" class="dato-sensible"></canvas></div>
         </div>
-        <div class="card stats-card">
-            <h2 class="stats-title">Métodos de pago</h2>
-            <canvas id="metodosPagoChart"></canvas>
-        </div>
-    </div>
-    <div class="stats-page">
-        <div class="card stats-card" id="card-ingresos-negocio">
-            <h2 class="stats-title">Ingresos por negocio</h2>
-            <canvas id="ingresosNegocioChart" class="dato-sensible"></canvas>
+        <div class="stats-card">
+            <h2 class="stats-title">Cómo pagan</h2>
+            <h3 class="stats-subtitulo">Ventas con anticipo</h3>
+            <div class="st-chart st-chart--auto"><canvas id="tipoPagoChart"></canvas></div>
+            <h3 class="stats-subtitulo">Método de pago</h3>
+            <div class="st-chart st-chart--auto"><canvas id="metodosPagoChart"></canvas></div>
         </div>
     </div>
 </div>
 
-{# ── Operacional ── #}
+{# ── Operación ── #}
 <div id="tab-operacional" class="tab-panel d-none">
     <div class="stats-page">
-        <div class="card stats-card">
+        <div class="stats-card">
             <h2 class="stats-title" id="titulo-ventas">Número de ventas <span class="chart-total-badge" id="total-ventas"></span></h2>
-            <canvas id="ventasSemanaChart"></canvas>
+            <div class="st-chart"><canvas id="ventasSemanaChart"></canvas></div>
         </div>
-        <div class="card stats-card">
+        <div class="stats-card">
             <h2 class="stats-title" id="titulo-unidades">Unidades recibidas <span class="chart-total-badge" id="total-unidades"></span></h2>
-            <canvas id="unidadesSemanaChart"></canvas>
+            <div class="st-chart"><canvas id="unidadesSemanaChart"></canvas></div>
         </div>
     </div>
 
-    {# Ocultar ventas por día en modo "día" — no tiene sentido #}
+    {# En modo "día" se oculta: no tiene sentido #}
     <div id="card-ventas-por-dia" class="stats-page">
-        <div class="card stats-card full-width">
+        <div class="stats-card full-width">
             <h2 class="stats-title">Ventas por día de la semana <span class="chart-total-badge" id="total-ventas-dia"></span></h2>
-            <canvas id="ventasPorDiaChart"></canvas>
+            <div class="st-chart st-chart--sm"><canvas id="ventasPorDiaChart"></canvas></div>
         </div>
     </div>
 
     <div class="stats-page">
-        <div class="card stats-card">
-            <h2 class="stats-title"><i data-lucide="clock" width="18" height="18"></i> Hora pico — Recepciones</h2>
-            <canvas id="horaPicoRecepcionChart"></canvas>
-        </div>
-        <div class="card stats-card">
-            <h2 class="stats-title"><i data-lucide="clock" width="18" height="18"></i> Hora pico — Entregas</h2>
-            <canvas id="horaPicoEntregaChart"></canvas>
+        <div class="stats-card full-width">
+            <h2 class="stats-title">Hora pico</h2>
+            <p class="stats-nota">Cuántas ventas se reciben y cuántas se entregan en cada hora del día.</p>
+            <div class="st-chart"><canvas id="horaPicoChart"></canvas></div>
         </div>
     </div>
 
     <div class="stats-page">
-        <div class="card stats-card full-width">
+        <div class="stats-card full-width">
             <h2 class="stats-title">Uso de servicios</h2>
-            <canvas id="serviciosChart"></canvas>
+            <div class="st-chart st-chart--auto"><canvas id="serviciosChart"></canvas></div>
         </div>
     </div>
 </div>
 
 {# ── Clientes ── #}
 <div id="tab-clientes" class="tab-panel d-none">
-
-    <div class="monthly-cards mt-16">
-        <div class="monthly-card small indigo">
-            <h4><i data-lucide="user" width="14" height="14"></i> Clientes únicos</h4>
-            <p id="clientesUnicos">0</p>
-            <span class="kpi-sub">Visitaron el negocio</span>
-        </div>
-        <div class="monthly-card small ventas">
-            <h4><i data-lucide="sparkles" width="14" height="14"></i> Clientes nuevos</h4>
-            <p id="clientesNuevos">0</p>
-            <span class="kpi-sub">Primera visita</span>
-        </div>
-        <div class="monthly-card small ambar">
-            <h4><i data-lucide="refresh-cw" width="14" height="14"></i> Tasa de retorno</h4>
-            <p id="tasaRetorno">0%</p>
-            <span class="kpi-sub" id="tasaRetornoSub">Clientes recurrentes</span>
-        </div>
-        <div class="monthly-card small teal">
-            <h4><i data-lucide="dollar-sign" width="14" height="14"></i> Gasto promedio por cliente</h4>
-            <p id="gastoPorCliente" class="dato-sensible">$0</p>
-            <span class="kpi-sub">Promedio por visita única</span>
+    <div class="st-grupo st-grupo--clientes">
+        <div class="st-grid">
+            <div class="st-kpi">
+                <span class="st-kpi-label">Clientes atendidos</span>
+                <p id="clientesUnicos" class="st-kpi-num">0</p>
+                <span class="st-kpi-sub">Clientes distintos en el periodo</span>
+            </div>
+            <div class="st-kpi">
+                <span class="st-kpi-label">Clientes nuevos</span>
+                <p id="clientesNuevos" class="st-kpi-num">0</p>
+                <span class="st-kpi-sub">Su primera visita</span>
+            </div>
+            <div class="st-kpi">
+                <span class="st-kpi-label">Regresaron</span>
+                <p id="tasaRetorno" class="st-kpi-num">0%</p>
+                <span class="st-kpi-sub" id="tasaRetornoSub">Ya habían venido antes</span>
+            </div>
+            <div class="st-kpi">
+                <span class="st-kpi-label">Promedio por cliente</span>
+                <p id="gastoPorCliente" class="st-kpi-num dato-sensible">$0</p>
+                <span class="st-kpi-sub">Según el total de las ventas</span>
+            </div>
         </div>
     </div>
 
     <div class="stats-page">
-        <div class="card stats-card full-width">
-            <h2 class="stats-title"><i data-lucide="trophy" width="18" height="18"></i> Top 5 clientes del período</h2>
+        <div class="stats-card full-width">
+            <h2 class="stats-title">Clientes que más compraron</h2>
+            <p class="stats-nota">Ordenados por el total de sus ventas en el periodo.</p>
             {# Se llena por JS; mientras carga lo tapa el skeleton de .stats-card #}
             <div id="topClientesContainer" class="top-clientes-container"></div>
         </div>

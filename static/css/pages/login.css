@@ -61,8 +61,6 @@
     font-family: 'Poppins', 'Segoe UI', sans-serif;
     font-size: 26px;
     font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
     color: var(--color-navy);
 }
 
@@ -152,11 +150,6 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.login-card button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(30, 127, 214, 0.35);
-}
-
 
 .login-divider {
     margin: 18px 0 12px;
@@ -186,6 +179,4 @@
     background: #f0f7ff;
     border-color: var(--color-primary-dark);
     color: var(--color-primary-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(30,127,214,.12);
 }

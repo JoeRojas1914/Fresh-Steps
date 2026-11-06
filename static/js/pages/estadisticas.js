@@ -1,56 +1,47 @@
-import { escapeHtml, mostrarFeedback, countUp } from '../base/helpers.js';
+import { escapeHtml, countUp } from '../base/helpers.js';
 
 // ── Formatters ───────────────────────────────────────────────────────────────
 const fmt$ = n => "$" + Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtN = n => Number(n||0).toLocaleString("es-MX");
+const fmtPct = n => `${Number(n||0).toLocaleString("es-MX",{maximumFractionDigits:1})}%`;
+const MESES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
 const fmtFecha = iso => {
     const [y,m,d] = iso.split("-");
-    const M = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
-    return `${parseInt(d)} ${M[parseInt(m)-1]} ${y}`;
+    return `${parseInt(d)} ${MESES[parseInt(m)-1]} ${y}`;
+};
+// "1 – 5 nov 2026" cuando comparten mes y año; si no, ambas fechas completas
+const fmtRango = (ini, fin) => {
+    if (ini === fin) return fmtFecha(ini);
+    const [y1,m1] = ini.split("-"), [y2,m2] = fin.split("-");
+    if (y1 === y2 && m1 === m2) return `${parseInt(ini.split("-")[2])} – ${fmtFecha(fin)}`;
+    return `${fmtFecha(ini)} – ${fmtFecha(fin)}`;
 };
 const badgePct = (pct, invert=false) => {
-    if (pct===null||pct===undefined) return "";
-    const bueno = invert ? pct < 0 : pct >= 0;
-    return `<span class="badge-pct ${bueno ? 'badge-pct--ok' : 'badge-pct--mal'}">${pct>=0?"↑":"↓"} ${Math.abs(pct).toFixed(1)}%</span>`;
+    if (pct===null||pct===undefined) return `<span class="badge-pct badge-pct--na">sin datos previos</span>`;
+    if (pct === 0) return `<span class="badge-pct badge-pct--igual">= 0%</span>`;
+    const bueno = invert ? pct < 0 : pct > 0;
+    return `<span class="badge-pct ${bueno ? 'badge-pct--ok' : 'badge-pct--mal'}">${pct>0?"↑":"↓"} ${Math.abs(pct).toFixed(1)}%</span>`;
 };
 
-// ── Color palettes ────────────────────────────────────────────────────────────
-const redPalette       = ["#7f1d1d","#991b1b","#b91c1c","#dc2626","#ef4444"];
-const serviciosPalette = ["#60a5fa","#34d399","#fbbf24","#a78bfa","#fb7185","#38bdf8","#4ade80"];
-const negocioPalette   = ["#6366f1","#22c55e","#f59e0b","#ef4444","#3b82f6"];
-const pagoPalette      = ["#22c55e","#3b82f6","#f59e0b","#a78bfa","#fb7185"];
-const rankColors       = ["#f59e0b","#9ca3af","#b45309","#6366f1","#22c55e"];
-const aplicarRojos = ds => ds.map((d,i) => ({
-    ...d,
-    backgroundColor: redPalette[i%5],
-    borderColor: "transparent",
-    borderWidth: 0,
-    borderRadius: 6,
-    borderSkipped: false
-}));
+// ── Paleta fija (colores de la app) ──────────────────────────────────────────
+const C = {
+    azul:   "#1e7fd6",
+    marino: "#0b3c5d",
+    verde:  "#15803d",
+    rojo:   "#dc2626",
+    ambar:  "#b45309",
+    gris:   "#94a3b8",
+};
+// Mismos colores que los badges .negocio-* (components/badges.css)
+const COLOR_NEGOCIO = { 1: "#1e7fd6", 2: "#c44569", 3: "#1a7a87" };
+// Gastos apilados: tonos de rojo, del más fuerte al más claro
+const ROJOS = ["#991b1b", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fecaca"];
 
 Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
 Chart.defaults.font.size   = 12;
 Chart.defaults.color       = '#64748b';
-Chart.defaults.borderColor = 'rgba(226, 232, 240, 0.6)';
-
-
-Chart.register({
-    id: 'gradientBg',
-    beforeDatasetsDraw(chart) {
-        chart.data.datasets.forEach((ds, i) => {
-            if (!ds._gradient) return;
-            const { ctx, chartArea } = chart;
-            if (!chartArea) return;
-            const { top, bottom } = chartArea;
-            if (bottom <= top) return;
-            const g = ctx.createLinearGradient(0, top, 0, bottom);
-            g.addColorStop(0, ds._gradient[0]);
-            g.addColorStop(1, ds._gradient[1]);
-            chart.data.datasets[i].backgroundColor = g;
-        });
-    }
-});
+Chart.defaults.borderColor = 'rgba(226, 232, 240, 0.7)';
+Chart.defaults.maintainAspectRatio = false;
 
 const tooltipStyle = {
     backgroundColor: '#ffffff',
@@ -58,66 +49,99 @@ const tooltipStyle = {
     bodyColor: '#475569',
     borderColor: '#e2e8f0',
     borderWidth: 1,
-    cornerRadius: 10,
-    padding: 12,
-    titleFont: { weight: '700', size: 13 },
+    cornerRadius: 8,
+    padding: 10,
+    titleFont: { weight: '600', size: 13 },
     bodyFont: { size: 12 },
 };
 
-const gridSoft   = { color: 'rgba(226,232,240,0.5)' };
-const gridNone   = { display: false };
-const noBorder   = { display: false };
+const gridSoft = { color: 'rgba(226,232,240,0.7)' };
+const gridNone = { display: false };
+const noBorder = { display: false };
+const legendTop = { position: 'top', align: 'end', labels: { color: '#334155', boxWidth: 12, boxHeight: 12, padding: 14, font: { size: 12 } } };
 
-const legendBottom = { position: 'bottom', labels: { color: '#1e293b', padding: 16, font: { size: 12 } } };
+// Línea con relleno suave y plano (sin degradado)
+const lineaDataset = (label, color) => ({
+    label, data: [],
+    borderColor: color,
+    borderWidth: 2,
+    backgroundColor: color + "1A",   // ~10% de opacidad
+    fill: true,
+    tension: 0.3,
+    pointBackgroundColor: color,
+    pointBorderColor: "#ffffff",
+    pointBorderWidth: 1.5,
+    pointRadius: 3,
+    pointHoverRadius: 5,
+});
 
-const barOpts = (fmtVal=fmtN, horizontal=false) => ({
+const lineaOpts = (fmtVal=fmtN) => ({
     responsive: true,
-    indexAxis: horizontal ? "y" : "x",
     plugins: {
         legend: { display: false },
         tooltip: { ...tooltipStyle, callbacks: { label: c => ` ${fmtVal(c.raw)}` } }
     },
-    scales: horizontal ? {
-        x: { beginAtZero: true, ticks: { precision: 0 }, grid: gridSoft, border: noBorder },
-        y: { grid: gridNone, border: noBorder }
-    } : {
-        y: { beginAtZero: true, ticks: { precision: 0 }, grid: gridSoft, border: noBorder },
+    scales: {
+        y: { beginAtZero: true, ticks: { precision: 0, callback: v => fmtVal(v) }, grid: gridSoft, border: noBorder },
         x: { grid: gridNone, border: noBorder }
     }
 });
 
-const pieOpts = (label="") => ({
+// Barras horizontales con el % del total en el tooltip
+const barrasHOpts = (fmtVal=fmtN, unidad="") => ({
+    responsive: true,
+    indexAxis: "y",
     plugins: {
-        legend: legendBottom,
+        legend: { display: false },
         tooltip: {
             ...tooltipStyle,
             callbacks: {
                 label: c => {
-                    const t = c.dataset.data.reduce((a,b) => a+b, 0);
-                    return ` ${c.label}: ${((c.raw/t)*100).toFixed(1)}% (${fmtN(c.raw)}${label})`;
+                    const t = c.dataset.data.reduce((a,b) => a+b, 0) || 1;
+                    return ` ${fmtVal(c.raw)}${unidad} · ${fmtPct(c.raw / t * 100)}`;
                 }
             }
         }
     },
-    hoverOffset: 10
+    scales: {
+        x: { beginAtZero: true, ticks: { precision: 0, callback: v => fmtVal(v) }, grid: gridSoft, border: noBorder },
+        y: { grid: gridNone, border: noBorder, ticks: { color: '#334155' } }
+    }
 });
+
+const barraDataset = color => ({
+    data: [],
+    backgroundColor: color,
+    borderWidth: 0,
+    borderRadius: 4,
+    borderSkipped: false,
+    maxBarThickness: 28,
+});
+
+// Altura de las gráficas horizontales según cuántas filas tienen
+function ajustarAltura(chart, filas) {
+    const wrap = chart.canvas.parentElement;
+    if (wrap) wrap.style.height = `${Math.max(filas, 1) * 34 + 36}px`;
+    chart.resize();
+}
 
 let modoActual = "mes";
 let agrupacionGastos = "proveedor";
 
 let gastosChart, ingresosChart, ventasSemanaChart, unidadesSemanaChart,
     tipoPagoChart, serviciosChart, ventasPorDiaChart, ingresosNegocioChart,
-    metodosPagoChart, horaPicoRecepcionChart, horaPicoEntregaChart;
+    metodosPagoChart, horaPicoChart;
 
 function initCharts() {
+    const el = id => document.getElementById(id);
 
-    gastosChart = new Chart(document.getElementById("gastosChart"), {
+    gastosChart = new Chart(el("gastosChart"), {
         type: "bar",
         data: { labels: [], datasets: [] },
         options: {
             responsive: true,
             plugins: {
-                legend: { display: true, ...legendBottom },
+                legend: legendTop,
                 tooltip: { ...tooltipStyle, callbacks: { label: c => ` ${c.dataset.label}: ${fmt$(c.raw)}` } }
             },
             scales: {
@@ -127,258 +151,98 @@ function initCharts() {
         }
     });
 
-    ingresosChart = new Chart(document.getElementById("ingresosChart"), {
-        type: "line",
-        data: {
-            labels: [],
-            datasets: [{
-                label: "Ingresos",
-                data: [],
-                borderColor: '#22c55e',
-                borderWidth: 2.5,
-                backgroundColor: 'rgba(34,197,94,0.15)',
-                _gradient: ['rgba(34,197,94,0.30)', 'rgba(34,197,94,0)'],
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#22c55e',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 7,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: { ...tooltipStyle, callbacks: { label: c => ` ${fmt$(c.raw)}` } }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { callback: v => fmt$(v) }, grid: gridSoft, border: noBorder },
-                x: { grid: gridNone, border: noBorder }
-            }
-        }
-    });
+    ingresosChart       = new Chart(el("ingresosChart"),       { type: "line", data: { labels: [], datasets: [lineaDataset("Cobrado", C.verde)] }, options: lineaOpts(fmt$) });
+    ventasSemanaChart   = new Chart(el("ventasSemanaChart"),   { type: "line", data: { labels: [], datasets: [lineaDataset("Ventas", C.azul)] },   options: lineaOpts() });
+    unidadesSemanaChart = new Chart(el("unidadesSemanaChart"), { type: "line", data: { labels: [], datasets: [lineaDataset("Unidades", C.marino)] }, options: lineaOpts() });
 
-    ventasSemanaChart = new Chart(document.getElementById("ventasSemanaChart"), {
-        type: "line",
-        data: {
-            labels: [],
-            datasets: [{
-                label: "Ventas",
-                data: [],
-                borderColor: '#f59e0b',
-                borderWidth: 2.5,
-                backgroundColor: 'rgba(245,158,11,0.15)',
-                _gradient: ['rgba(245,158,11,0.30)', 'rgba(245,158,11,0)'],
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#f59e0b',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 7,
-            }]
-        },
-        options: barOpts()
-    });
-
-    unidadesSemanaChart = new Chart(document.getElementById("unidadesSemanaChart"), {
-        type: "line",
-        data: {
-            labels: [],
-            datasets: [{
-                label: "Unidades",
-                data: [],
-                borderColor: '#14b8a6',
-                borderWidth: 2.5,
-                backgroundColor: 'rgba(20,184,166,0.15)',
-                _gradient: ['rgba(20,184,166,0.30)', 'rgba(20,184,166,0)'],
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#14b8a6',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 7,
-            }]
-        },
-        options: barOpts()
-    });
-
-    tipoPagoChart = new Chart(document.getElementById("tipoPagoChart"), {
-        type: "pie",
-        data: {
-            labels: [],
-            datasets: [{ data: [], backgroundColor: ["#34d399","#fbbf24","#60a5fa"], borderColor: "#fff", borderWidth: 3 }]
-        },
-        options: pieOpts(" ventas")
-    });
-
-    metodosPagoChart = new Chart(document.getElementById("metodosPagoChart"), {
-        type: "doughnut",
-        data: {
-            labels: [],
-            datasets: [{ data: [], backgroundColor: pagoPalette, borderColor: "#fff", borderWidth: 3 }]
-        },
-        options: {
-            cutout: '62%',
-            plugins: {
-                legend: legendBottom,
-                tooltip: {
-                    ...tooltipStyle,
-                    callbacks: {
-                        label: c => {
-                            const t = c.dataset.data.reduce((a,b) => a+b, 0);
-                            return ` ${c.label}: ${((c.raw/t)*100).toFixed(1)}% (${fmtN(c.raw)} pagos)`;
-                        }
-                    }
-                }
-            },
-            hoverOffset: 10
-        }
-    });
-
-    serviciosChart = new Chart(document.getElementById("serviciosChart"), {
+    ventasPorDiaChart = new Chart(el("ventasPorDiaChart"), {
         type: "bar",
-        data: {
-            labels: [],
-            datasets: [{
-                label: "Usos",
-                data: [],
-                backgroundColor: serviciosPalette,
-                borderWidth: 0,
-                borderRadius: 8,
-                borderSkipped: false,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: { ...tooltipStyle, callbacks: { label: c => ` ${fmtN(c.raw)} usos` } }
-            },
-            scales: {
-                y: { beginAtZero: true, grid: gridSoft, border: noBorder },
-                x: { grid: gridNone, border: noBorder }
-            }
-        }
-    });
-
-    ventasPorDiaChart = new Chart(document.getElementById("ventasPorDiaChart"), {
-        type: "line",
         data: {
             labels: ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
-            datasets: [{
-                label: "Ventas",
-                data: [0,0,0,0,0,0],
-                borderColor: '#6366f1',
-                borderWidth: 2.5,
-                backgroundColor: 'rgba(99,102,241,0.15)',
-                _gradient: ['rgba(99,102,241,0.30)', 'rgba(99,102,241,0)'],
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#6366f1',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 7,
-            }]
-        },
-        options: barOpts()
-    });
-
-    ingresosNegocioChart = new Chart(document.getElementById("ingresosNegocioChart"), {
-        type: "pie",
-        data: {
-            labels: [],
-            datasets: [{ data: [], backgroundColor: negocioPalette, borderColor: "#fff", borderWidth: 3 }]
+            datasets: [{ ...barraDataset(C.azul), label: "Ventas", data: [0,0,0,0,0,0] }]
         },
         options: {
+            responsive: true,
+            plugins: { legend: { display: false }, tooltip: { ...tooltipStyle, callbacks: { label: c => ` ${fmtN(c.raw)} ventas` } } },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 }, grid: gridSoft, border: noBorder },
+                x: { grid: gridNone, border: noBorder }
+            }
+        }
+    });
+
+    ingresosNegocioChart = new Chart(el("ingresosNegocioChart"), { type: "bar", data: { labels: [], datasets: [barraDataset(C.azul)] }, options: barrasHOpts(fmt$) });
+    tipoPagoChart        = new Chart(el("tipoPagoChart"),        { type: "bar", data: { labels: [], datasets: [barraDataset(C.azul)] }, options: barrasHOpts(fmtN, " ventas") });
+    metodosPagoChart     = new Chart(el("metodosPagoChart"),     { type: "bar", data: { labels: [], datasets: [barraDataset(C.marino)] }, options: barrasHOpts(fmtN, " pagos") });
+    serviciosChart       = new Chart(el("serviciosChart"),       { type: "bar", data: { labels: [], datasets: [barraDataset(C.azul)] }, options: barrasHOpts(fmtN, " usos") });
+
+    horaPicoChart = new Chart(el("horaPicoChart"), {
+        type: "bar",
+        data: {
+            labels: [],
+            datasets: [
+                { ...barraDataset(C.azul),   label: "Recepciones", maxBarThickness: 16 },
+                { ...barraDataset(C.marino), label: "Entregas",    maxBarThickness: 16 },
+            ]
+        },
+        options: {
+            responsive: true,
             plugins: {
-                legend: legendBottom,
-                tooltip: {
-                    ...tooltipStyle,
-                    callbacks: {
-                        label: c => {
-                            const t = c.dataset.data.reduce((a,b) => a+b, 0);
-                            return ` ${c.label}: ${((c.raw/t)*100).toFixed(1)}% (${fmt$(c.raw)})`;
-                        }
-                    }
-                }
+                legend: legendTop,
+                tooltip: { ...tooltipStyle, mode: "index", intersect: false, callbacks: { label: c => ` ${c.dataset.label}: ${fmtN(c.raw)}` } }
             },
-            hoverOffset: 10
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 }, grid: gridSoft, border: noBorder },
+                x: { grid: gridNone, border: noBorder }
+            }
         }
     });
+}
 
-    const horaOpts = (labelSuffix) => ({
-        responsive: true,
-        indexAxis: "y",
-        plugins: {
-            legend: { display: false },
-            tooltip: { ...tooltipStyle, callbacks: { label: c => ` ${fmtN(c.raw)} ${labelSuffix}` } }
-        },
-        scales: {
-            x: { beginAtZero: true, ticks: { precision: 0 }, grid: gridSoft, border: noBorder },
-            y: { grid: gridNone, border: noBorder, ticks: { font: { size: 11 } } }
-        }
-    });
+// Fecha local en formato YYYY-MM-DD (toISOString usa UTC y de noche adelanta el día)
+const pad = n => String(n).padStart(2,"0");
+const isoLocal = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
-    horaPicoRecepcionChart = new Chart(document.getElementById("horaPicoRecepcionChart"), {
-        type: "bar",
-        data: {
-            labels: [],
-            datasets: [{
-                data: [],
-                _gradient: ['rgba(96,165,250,0.85)', 'rgba(96,165,250,0.18)'],
-                backgroundColor: 'rgba(96,165,250,0.75)',
-                borderWidth: 0,
-                borderRadius: 6,
-                borderSkipped: false,
-            }]
-        },
-        options: horaOpts("recepciones")
-    });
+// Semana ISO 8601 de una fecha → { anio, semana }
+function semanaISO(fecha) {
+    const d = new Date(Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()));
+    const dia = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dia);              // jueves de esa semana
+    const inicioAnio = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return { anio: d.getUTCFullYear(), semana: Math.ceil(((d - inicioAnio) / 86400000 + 1) / 7) };
+}
 
-    horaPicoEntregaChart = new Chart(document.getElementById("horaPicoEntregaChart"), {
-        type: "bar",
-        data: {
-            labels: [],
-            datasets: [{
-                data: [],
-                _gradient: ['rgba(52,211,153,0.85)', 'rgba(52,211,153,0.18)'],
-                backgroundColor: 'rgba(52,211,153,0.75)',
-                borderWidth: 0,
-                borderRadius: 6,
-                borderSkipped: false,
-            }]
-        },
-        options: horaOpts("entregas")
-    });
+// Lunes de la semana ISO indicada
+function lunesDeSemanaISO(anio, semana) {
+    const cuatroEne = new Date(anio, 0, 4);
+    const lunesSem1 = new Date(cuatroEne);
+    lunesSem1.setDate(cuatroEne.getDate() - ((cuatroEne.getDay() || 7) - 1));
+    const lunes = new Date(lunesSem1);
+    lunes.setDate(lunesSem1.getDate() + (semana - 1) * 7);
+    return lunes;
 }
 
 function setModo(modo, btn) {
     modoActual = modo;
-    document.querySelectorAll(".modo-panel").forEach(p => p.style.display="none");
-    document.querySelectorAll(".modo-btn").forEach(b => b.classList.remove("active"));
-    document.getElementById(`panel-${modo}`).style.display = "block";
-    if (btn) btn.classList.add("active");
+    document.querySelectorAll(".modo-panel").forEach(p => p.classList.toggle("d-none", p.id !== `panel-${modo}`));
+    document.querySelectorAll(".modo-btn").forEach(b => {
+        const activo = b === btn;
+        b.classList.toggle("active", activo);
+        b.setAttribute("aria-pressed", activo ? "true" : "false");
+    });
 
     const hoy = new Date();
-    const pad = n => String(n).padStart(2,"0");
     if (modo==="dia") {
-        document.getElementById("fecha-dia").value = hoy.toISOString().split("T")[0];
+        document.getElementById("fecha-dia").value = isoLocal(hoy);
     } else if (modo==="semana") {
-        const d = new Date(hoy); d.setDate(hoy.getDate()-((hoy.getDay()||7)-1));
-        const dif = d - new Date(d.getFullYear(),0,1);
-        const w = Math.ceil((dif/86400000 + new Date(d.getFullYear(),0,1).getDay()+1)/7);
-        document.getElementById("fecha-semana").value = `${d.getFullYear()}-W${pad(w)}`;
+        const { anio, semana } = semanaISO(hoy);
+        document.getElementById("fecha-semana").value = `${anio}-W${pad(semana)}`;
     } else if (modo==="mes") {
         document.getElementById("fecha-mes").value = `${hoy.getFullYear()}-${pad(hoy.getMonth()+1)}`;
     }
 
     const cardDia = document.getElementById("card-ventas-por-dia");
-    if (cardDia) cardDia.style.display = modo==="dia" ? "none" : "block";
+    if (cardDia) cardDia.classList.toggle("d-none", modo === "dia");
 
     cargarDashboard();
 }
@@ -390,29 +254,32 @@ function getTipoFecha() {
 function getParams() {
     const neg = id => document.getElementById(id)?.value || "all";
     const tipo_fecha = getTipoFecha();
-    if (modoActual==="dia") {
+    const modo = modoActual;
+    if (modo==="dia") {
         const f = document.getElementById("fecha-dia").value;
-        return {inicio:f, fin:f, id_negocio:neg("negocio-dia"), granularidad:"hora", tipo_fecha};
+        if (!f) return null;
+        return {inicio:f, fin:f, id_negocio:neg("negocio-dia"), granularidad:"hora", tipo_fecha, modo};
     }
-    if (modoActual==="semana") {
+    if (modo==="semana") {
         const val = document.getElementById("fecha-semana").value;
         if (!val) return null;
         const [y,w] = val.split("-W");
-        const d = new Date(parseInt(y),0,1+(parseInt(w)-1)*7);
-        d.setDate(d.getDate()-((d.getDay()||7)-1));
-        const fin = new Date(d); fin.setDate(d.getDate()+6);
-        const iso = dd => dd.toISOString().split("T")[0];
-        return {inicio:iso(d), fin:iso(fin), id_negocio:neg("negocio-semana"), granularidad:"dia", tipo_fecha};
+        const lunes = lunesDeSemanaISO(parseInt(y), parseInt(w));
+        const domingo = new Date(lunes); domingo.setDate(lunes.getDate()+6);
+        return {inicio:isoLocal(lunes), fin:isoLocal(domingo), id_negocio:neg("negocio-semana"), granularidad:"dia", tipo_fecha, modo};
     }
-    if (modoActual==="mes") {
+    if (modo==="mes") {
         const val = document.getElementById("fecha-mes").value;
         if (!val) return null;
         const [y,m] = val.split("-");
         const ultimo = new Date(parseInt(y),parseInt(m),0).getDate();
-        return {inicio:`${y}-${m}-01`, fin:`${y}-${m}-${String(ultimo).padStart(2,"0")}`, id_negocio:neg("negocio-mes"), granularidad:"semana", tipo_fecha};
+        return {inicio:`${y}-${m}-01`, fin:`${y}-${m}-${pad(ultimo)}`, id_negocio:neg("negocio-mes"), granularidad:"semana", tipo_fecha, modo};
     }
-    if (modoActual==="personalizado") {
-        return {inicio:document.getElementById("fecha-inicio-custom").value, fin:document.getElementById("fecha-fin-custom").value, id_negocio:neg("negocio-custom"), granularidad:"semana", tipo_fecha};
+    if (modo==="personalizado") {
+        const inicio = document.getElementById("fecha-inicio-custom").value;
+        const fin    = document.getElementById("fecha-fin-custom").value;
+        if (!inicio || !fin) return null;
+        return {inicio, fin, id_negocio:neg("negocio-custom"), granularidad:"semana", tipo_fecha, modo};
     }
     return null;
 }
@@ -424,31 +291,42 @@ function actualizarTitulos() {
     const baseVentas   = esEntrega ? "Ventas entregadas"  : "Número de ventas";
     const baseUnidades = esEntrega ? "Unidades entregadas" : "Unidades recibidas";
     [
-        ["titulo-ingresos", "Ingresos"],
+        ["titulo-ingresos", "Cobrado"],
         ["titulo-gastos",   "Gastos"],
         ["titulo-ventas",   baseVentas],
         ["titulo-unidades", baseUnidades],
     ].forEach(([id,base]) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            const badge = el.querySelector('.chart-total-badge');
-            el.textContent = `${base} ${s}`;
-            if (badge) el.appendChild(badge);
-        });
+        const el = document.getElementById(id);
+        if (!el) return;
+        const badge = el.querySelector('.chart-total-badge');
+        el.textContent = `${base} ${s}`;
+        if (badge) el.appendChild(badge);
+    });
 }
 
 const chartsPerTab = {
     financiero:  () => [ingresosChart, gastosChart, tipoPagoChart, metodosPagoChart, ingresosNegocioChart],
-    operacional: () => [ventasSemanaChart, unidadesSemanaChart, ventasPorDiaChart, horaPicoRecepcionChart, horaPicoEntregaChart, serviciosChart],
+    operacional: () => [ventasSemanaChart, unidadesSemanaChart, ventasPorDiaChart, horaPicoChart, serviciosChart],
     clientes:    () => [],
 };
 
 function switchTab(nombre, btn) {
-    document.querySelectorAll(".tab-panel").forEach(p => p.style.display="none");
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    document.getElementById(`tab-${nombre}`).style.display="block";
-    btn.classList.add("active");
-    (chartsPerTab[nombre]?.() || []).forEach(c => c?.update('none'));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("d-none", p.id !== `tab-${nombre}`));
+    document.querySelectorAll(".tab-btn").forEach(b => {
+        const activo = b === btn;
+        b.classList.toggle("active", activo);
+        b.setAttribute("aria-selected", activo ? "true" : "false");
+    });
+    // Las gráficas creadas dentro de un panel oculto miden 0: hay que redimensionarlas al mostrarlas
+    (chartsPerTab[nombre]?.() || []).forEach(c => { if (c) { c.resize(); c.update('none'); } });
+}
+
+function setBarrasH(chart, filas, valor, etiqueta, colores) {
+    chart.data.labels = filas.map(etiqueta);
+    chart.data.datasets[0].data = filas.map(valor);
+    if (colores) chart.data.datasets[0].backgroundColor = filas.map(colores);
+    ajustarAltura(chart, filas.length);
+    chart.update();
 }
 
 async function cargarDashboard() {
@@ -465,82 +343,94 @@ async function cargarDashboard() {
     const skeletonTimer = setTimeout(() => document.body.classList.add("stats-cargando"), 150);
 
     try {
-        const url = `/api/estadisticas/dashboard?inicio=${p.inicio}&fin=${p.fin}&id_negocio=${p.id_negocio}&granularidad=${p.granularidad||"semana"}&tipo_fecha=${p.tipo_fecha||"fecha_recibo"}&agrupacion_gastos=${agrupacionGastos}`;
-        const res = await fetch(url);
+        const qs = new URLSearchParams({
+            inicio: p.inicio, fin: p.fin, id_negocio: p.id_negocio,
+            granularidad: p.granularidad || "semana", tipo_fecha: p.tipo_fecha || "fecha_recibo",
+            agrupacion_gastos: agrupacionGastos, modo: p.modo,
+        });
+        const res = await fetch(`/api/estadisticas/dashboard?${qs.toString()}`);
         if (!res.ok) { const j=await res.json().catch(()=>({})); mostrarError(j.error||`Error ${res.status}`); return; }
         const data = await res.json();
 
-        if (data.periodo_anterior) {
-            const pa = data.periodo_anterior;
-            const actual   = p.inicio === p.fin ? fmtFecha(p.inicio) : `${fmtFecha(p.inicio)} – ${fmtFecha(p.fin)}`;
-            const anterior = pa.inicio === pa.fin ? fmtFecha(pa.inicio) : `${fmtFecha(pa.inicio)} – ${fmtFecha(pa.fin)}`;
-
-            const elActual   = document.getElementById("comparativaPeriodoActual");
-            const elAnterior = document.getElementById("comparativaPeriodoAnterior");
-            const elNota     = document.getElementById("comparativaNota");
-            const elBox      = document.getElementById("comparativaBox");
-
-            if (elActual)   elActual.textContent   = actual;
-            if (elAnterior) elAnterior.textContent = anterior;
-            if (elNota)     elNota.textContent     = "Los % ↑↓ de los KPIs se calculan contra este período";
-            if (elBox)      elBox.style.display    = "flex";
+        // ── Texto "Comparando X con Y" ──
+        const elBox = document.getElementById("comparativaBox");
+        if (data.periodo_anterior && elBox) {
+            const act = data.periodo_actual || { inicio: p.inicio, fin: p.fin };
+            const ant = data.periodo_anterior;
+            document.getElementById("comparativaPeriodoActual").textContent   = fmtRango(act.inicio, act.fin);
+            document.getElementById("comparativaPeriodoAnterior").textContent = fmtRango(ant.inicio, ant.fin);
+            const enCurso = act.fin !== p.fin;
+            document.getElementById("comparativaNota").textContent = enCurso
+                ? "El periodo va en curso: se compara contra los mismos días del periodo anterior."
+                : "";
+            elBox.style.display = "flex";
         }
 
+        // ── Cifras ──
         const k = data.kpis||{};
-        setKpi("ventasMes",     k.ingresos,        k.ingresos_pct);
-        setKpi("gastosMes",     k.gastos,           k.gastos_pct,  true);
-        setKpi("gananciaMes",   k.ganancia,         k.ganancia_pct);
-        setKpi("ticketPromedio",k.ticket_promedio,  k.ticket_pct);
-        setKpi("saldoCobrar",   k.saldo_por_cobrar, k.saldo_pct);
-        const elT=document.getElementById("totalVentas");
-        if(elT) {
-            elT.innerHTML=`<span class="kpi-anim-num"></span>${badgePct(k.ventas_pct)}`;
-            countUp(elT.querySelector(".kpi-anim-num"), Number(k.total_ventas||0), false);
-        }
-        const elV=document.getElementById("ticketVentas"); if(elV) elV.textContent=`${fmtN(k.num_ventas)} ventas`;
+        setKpi("ventasMes",      k.ingresos,         k.ingresos_pct, true);
+        setKpi("gastosMes",      k.gastos,           k.gastos_pct,   true, true);
+        setKpi("gananciaMes",    k.ganancia,         k.ganancia_pct, true);
+        setKpi("ticketPromedio", k.ticket_promedio,  k.ticket_pct,   true);
+        setKpi("saldoCobrar",    k.saldo_por_cobrar, undefined,      true);
+        setKpi("totalVentas",    k.num_ventas,       k.ventas_pct,   false);
 
-        if (data.ingresos_semanales) { ingresosChart.data.labels=data.ingresos_semanales.map(x=>x.label); ingresosChart.data.datasets[0].data=data.ingresos_semanales.map(x=>x.total); ingresosChart.update(); }
-        if (data.gastos_semanales)   { gastosChart.data.labels=data.gastos_semanales.labels||[]; gastosChart.data.datasets=aplicarRojos(data.gastos_semanales.datasets||[]); gastosChart.update(); }
-        if (data.ventas_semanales)   {
-            ventasSemanaChart.data.labels=data.ventas_semanales.map(x=>x.label);
-            ventasSemanaChart.data.datasets[0].data=data.ventas_semanales.map(x=>x.total);
-            ventasSemanaChart.update();
-            const elTV=document.getElementById("total-ventas");
-            if(elTV) elTV.textContent=`Total: ${fmtN(data.ventas_semanales.reduce((s,x)=>s+x.total,0))}`;
+        // ── Series en el tiempo ──
+        const setLinea = (chart, serie) => {
+            chart.data.labels = serie.map(x => x.label);
+            chart.data.datasets[0].data = serie.map(x => x.total);
+            chart.update();
+        };
+        if (data.ingresos_semanales) setLinea(ingresosChart, data.ingresos_semanales);
+        if (data.gastos_semanales) {
+            gastosChart.data.labels = data.gastos_semanales.labels || [];
+            gastosChart.data.datasets = (data.gastos_semanales.datasets || []).map((d, i) => ({
+                ...d, backgroundColor: ROJOS[i % ROJOS.length], borderWidth: 0, borderRadius: 4, maxBarThickness: 40,
+            }));
+            gastosChart.update();
+        }
+        if (data.ventas_semanales) {
+            setLinea(ventasSemanaChart, data.ventas_semanales);
+            const el = document.getElementById("total-ventas");
+            if (el) el.textContent = `Total: ${fmtN(data.ventas_semanales.reduce((s,x)=>s+x.total,0))}`;
         }
         if (data.unidades_semanales) {
-            unidadesSemanaChart.data.labels=data.unidades_semanales.map(x=>x.label);
-            unidadesSemanaChart.data.datasets[0].data=data.unidades_semanales.map(x=>x.total);
-            unidadesSemanaChart.update();
-            const elTU=document.getElementById("total-unidades");
-            if(elTU) elTU.textContent=`Total: ${fmtN(data.unidades_semanales.reduce((s,x)=>s+x.total,0))}`;
+            setLinea(unidadesSemanaChart, data.unidades_semanales);
+            const el = document.getElementById("total-unidades");
+            if (el) el.textContent = `Total: ${fmtN(data.unidades_semanales.reduce((s,x)=>s+x.total,0))}`;
         }
-        if (data.ventas_prepago)     { tipoPagoChart.data.labels=data.ventas_prepago.map(x=>x.tipo); tipoPagoChart.data.datasets[0].data=data.ventas_prepago.map(x=>x.total); tipoPagoChart.update(); }
-        if (data.uso_servicios)      { serviciosChart.data.labels=data.uso_servicios.map(x=>x.nombre); serviciosChart.data.datasets[0].data=data.uso_servicios.map(x=>x.total); serviciosChart.update(); }
-        if (data.ventas_por_dia)     {
-            ventasPorDiaChart.data.datasets[0].data=data.ventas_por_dia;
+        if (data.ventas_por_dia) {
+            ventasPorDiaChart.data.datasets[0].data = data.ventas_por_dia;
             ventasPorDiaChart.update();
-            const elTD=document.getElementById("total-ventas-dia");
-            if(elTD) elTD.textContent=`Total: ${fmtN(data.ventas_por_dia.reduce((s,v)=>s+v,0))}`;
+            const el = document.getElementById("total-ventas-dia");
+            if (el) el.textContent = `Total: ${fmtN(data.ventas_por_dia.reduce((s,v)=>s+v,0))}`;
         }
 
+        // ── Barras horizontales ──
+        if (data.ventas_prepago) setBarrasH(tipoPagoChart, data.ventas_prepago, x => x.total, x => x.tipo);
         if (data.metodos_pago) {
-            metodosPagoChart.data.labels=data.metodos_pago.map(x=>x.metodo);
-            metodosPagoChart.data.datasets[0].data=data.metodos_pago.map(x=>x.total);
-            metodosPagoChart.update();
+            const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : "Otro";
+            setBarrasH(metodosPagoChart, data.metodos_pago, x => x.total, x => cap(x.metodo));
+        }
+        if (data.uso_servicios) setBarrasH(serviciosChart, data.uso_servicios, x => x.total, x => x.nombre);
+
+        const cardN = document.getElementById("card-ingresos-negocio");
+        if (data.ingresos_x_negocio?.length > 0) {
+            setBarrasH(ingresosNegocioChart, data.ingresos_x_negocio, x => x.total, x => x.nombre,
+                       x => COLOR_NEGOCIO[x.id_negocio] || C.gris);
+            if (cardN) cardN.classList.remove("d-none");
+        } else if (cardN) {
+            cardN.classList.add("d-none");
         }
 
-        if (data.hora_recepcion) { horaPicoRecepcionChart.data.labels=data.hora_recepcion.map(x=>x.hora); horaPicoRecepcionChart.data.datasets[0].data=data.hora_recepcion.map(x=>x.total); horaPicoRecepcionChart.update(); }
-        if (data.hora_entrega)   { horaPicoEntregaChart.data.labels=data.hora_entrega.map(x=>x.hora); horaPicoEntregaChart.data.datasets[0].data=data.hora_entrega.map(x=>x.total); horaPicoEntregaChart.update(); }
+        if (data.hora_recepcion && data.hora_entrega) {
+            horaPicoChart.data.labels = data.hora_recepcion.map(x => x.hora);
+            horaPicoChart.data.datasets[0].data = data.hora_recepcion.map(x => x.total);
+            horaPicoChart.data.datasets[1].data = data.hora_entrega.map(x => x.total);
+            horaPicoChart.update();
+        }
 
-        const cardN=document.getElementById("card-ingresos-negocio");
-        if (data.ingresos_x_negocio?.length>0) {
-            ingresosNegocioChart.data.labels=data.ingresos_x_negocio.map(x=>x.nombre);
-            ingresosNegocioChart.data.datasets[0].data=data.ingresos_x_negocio.map(x=>x.total);
-            ingresosNegocioChart.update();
-            if(cardN) cardN.style.display="";
-        } else { if(cardN) cardN.style.display="none"; }
-
+        // ── Clientes ──
         const elCU = document.getElementById("clientesUnicos");
         if (elCU && data.clientes_unicos !== undefined) countUp(elCU, Number(data.clientes_unicos), false);
 
@@ -550,8 +440,8 @@ async function cargarDashboard() {
         if (data.tasa_retorno) {
             const elTR  = document.getElementById("tasaRetorno");
             const elSub = document.getElementById("tasaRetornoSub");
-            if (elTR)  countUp(elTR, Number(data.tasa_retorno.tasa), false);
-            if (elSub) elSub.textContent = `${fmtN(data.tasa_retorno.recurrentes)} de ${fmtN(data.tasa_retorno.total)} clientes`;
+            if (elTR)  elTR.textContent = fmtPct(data.tasa_retorno.tasa);
+            if (elSub) elSub.textContent = `${fmtN(data.tasa_retorno.recurrentes)} de ${fmtN(data.tasa_retorno.total)} ya habían venido antes`;
         }
 
         const elGP = document.getElementById("gastoPorCliente");
@@ -559,7 +449,7 @@ async function cargarDashboard() {
 
         renderTopClientes(data.top_clientes||[]);
 
-    } catch(err) { mostrarError("Error inesperado al cargar el dashboard."); }
+    } catch(err) { mostrarError("No se pudieron cargar las estadísticas. Revisa tu conexión e intenta de nuevo."); }
     finally {
         clearTimeout(skeletonTimer);
         document.body.classList.remove("stats-cargando");
@@ -570,47 +460,49 @@ function renderTopClientes(clientes) {
     const c = document.getElementById("topClientesContainer");
     if (!c) return;
     if (!clientes.length) {
-        c.innerHTML = '<div class="tc-empty">Sin datos para este período.</div>';
+        c.innerHTML = '<div class="tc-empty">No hay ventas con cliente en este periodo.</div>';
         return;
     }
-    const maxVisitas = clientes[0].visitas || 1;
+    const maxMonto = Math.max(...clientes.map(cl => cl.total_gastado)) || 1;
 
-    c.innerHTML = `<div class="tc-list">${clientes.map((cl, i) => {
-        const rank     = i + 1;
-        const initials = cl.nombre.split(' ').slice(0,2).map(w => w[0]?.toUpperCase() || '').join('');
-        const barPct   = ((cl.visitas / maxVisitas) * 100).toFixed(0);
+    c.innerHTML = `<ol class="tc-list">${clientes.map((cl, i) => {
+        const barPct = ((cl.total_gastado / maxMonto) * 100).toFixed(0);
         return `
-        <div class="tc-item">
-            <div class="tc-rank tc-rank--${rank}">${rank}</div>
-            <div class="tc-avatar tc-avatar--${rank}">${escapeHtml(initials)}</div>
+        <li class="tc-item">
+            <span class="tc-rank">${i + 1}</span>
             <div class="tc-body">
                 <div class="tc-name">${escapeHtml(cl.nombre)}</div>
-                <div class="tc-bar-wrap">
-                    <div class="tc-bar tc-bar--${rank}" data-pct="${barPct}"></div>
-                </div>
+                <div class="tc-bar-wrap"><div class="tc-bar" data-pct="${barPct}"></div></div>
             </div>
             <div class="tc-meta">
                 <div class="tc-monto dato-sensible">${fmt$(cl.total_gastado)}</div>
                 <div class="tc-visitas">${fmtN(cl.visitas)} visita${cl.visitas !== 1 ? 's' : ''}</div>
             </div>
-        </div>`;
-    }).join('')}</div>`;
+        </li>`;
+    }).join('')}</ol>`;
 
     c.querySelectorAll(".tc-bar[data-pct]").forEach(bar => { bar.style.width = `${bar.dataset.pct}%`; });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function setKpi(id, valor, pct, invert=false) {
+function setKpi(id, valor, pct, monetario, invert=false) {
     const el = document.getElementById(id);
     if (!el) return;
-    const badge = badgePct(pct, invert);
+    const badge = pct === undefined ? "" : badgePct(pct, invert);
     el.innerHTML = `<span class="kpi-anim-num"></span>${badge}`;
-    countUp(el.querySelector(".kpi-anim-num"), Number(valor || 0), true);
+    countUp(el.querySelector(".kpi-anim-num"), Number(valor || 0), monetario);
 }
 function mostrarError(msg) {
-    let el=document.getElementById("dashboard-error");
-    if (!el) { el=document.createElement("div"); el.id="dashboard-error"; el.style.cssText="background:#fee2e2;color:#b91c1c;padding:10px 16px;border-radius:8px;margin:12px 0;font-size:13px;font-weight:500;"; document.querySelector(".filtro-box").after(el); }
-    el.textContent=msg; el.style.display="block";
+    let el = document.getElementById("dashboard-error");
+    if (!el) {
+        el = document.createElement("div");
+        el.id = "dashboard-error";
+        el.className = "alert error";
+        el.setAttribute("role", "alert");
+        document.querySelector(".st-filtros").after(el);
+    }
+    el.textContent = msg;
+    el.style.display = "flex";
 }
 function ocultarError() { const el=document.getElementById("dashboard-error"); if(el) el.style.display="none"; }
 function verVentasRelacionadas() {
@@ -635,7 +527,8 @@ function initToggleMontos() {
         const visible = toggleBtn.getAttribute("aria-pressed") !== "true";
         document.body.classList.toggle("montos-visibles", visible);
         toggleBtn.setAttribute("aria-pressed", visible ? "true" : "false");
-        toggleBtn.title = visible ? "Ocultar montos" : "Mostrar montos";
+        const texto = toggleBtn.querySelector(".st-toggle-texto");
+        if (texto) texto.textContent = visible ? "Ocultar montos" : "Mostrar montos";
     });
 }
 
@@ -643,13 +536,18 @@ document.addEventListener("DOMContentLoaded", () => {
     initCharts();
     initToggleMontos();
 
-    const inputs = [
+    // Chart.js mide las etiquetas al dibujar; si Inter aún no carga, las corta. Redibujar al cargar.
+    document.fonts?.ready.then(() => {
+        [gastosChart, ingresosChart, ventasSemanaChart, unidadesSemanaChart, tipoPagoChart, serviciosChart,
+         ventasPorDiaChart, ingresosNegocioChart, metodosPagoChart, horaPicoChart].forEach(c => c?.update('none'));
+    });
+
+    [
         "fecha-dia", "fecha-semana", "fecha-mes",
         "fecha-inicio-custom", "fecha-fin-custom",
         "negocio-dia", "negocio-semana", "negocio-mes", "negocio-custom",
         "tipo-fecha",
-    ];
-    inputs.forEach(id => {
+    ].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener("change", _cargarDashboardDebounced);
     });
@@ -663,8 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const btnAgrupacion = e.target.closest(".agrupacion-btn[data-agrupacion]");
         if (btnAgrupacion) {
             agrupacionGastos = btnAgrupacion.dataset.agrupacion;
-            document.querySelectorAll("#gastos-agrupacion .agrupacion-btn").forEach(b => b.classList.remove("active"));
-            btnAgrupacion.classList.add("active");
+            document.querySelectorAll("#gastos-agrupacion .agrupacion-btn").forEach(b => b.classList.toggle("active", b === btnAgrupacion));
             cargarDashboard();
             return;
         }
@@ -679,7 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (btnExportar && !btnExportar.dataset.exporting) {
             const p = getParams();
             if (!p || !p.inicio || !p.fin) {
-                mostrarError("Selecciona un período antes de exportar.");
+                mostrarError("Elige un periodo antes de exportar.");
                 return;
             }
             const params = new URLSearchParams({
@@ -697,7 +594,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = `/estadisticas/exportar?${params.toString()}`;
 
             setTimeout(() => {
-                btnExportar.innerHTML = "✓ Descargado";
+                btnExportar.textContent = "Descargado";
                 setTimeout(() => {
                     btnExportar.innerHTML = originalHTML;
                     btnExportar.style.pointerEvents = "";

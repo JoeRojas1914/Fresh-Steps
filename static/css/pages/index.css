@@ -62,8 +62,6 @@
     font-size: 11px;
     font-weight: 600;
     color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: .07em;
     margin-bottom: 10px;
     margin-top: 28px;
 }
@@ -81,8 +79,6 @@
     font-size: 11px;
     font-weight: 600;
     color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: .06em;
     margin-right: 4px;
 }
 
@@ -155,9 +151,7 @@
 .accion-card.nueva-venta:hover,
 .accion-card.pendientes:hover,
 .accion-card.procesadas:hover {
-    transform: translateY(-3px);
     border-color: #1e7fd6;
-    box-shadow: 0 8px 24px rgba(30,127,214,.16);
 }
 
 .accion-icon {
@@ -204,9 +198,7 @@
 }
 
 .admin-card:hover {
-    transform: translateY(-2px);
     border-color: #1e7fd6;
-    box-shadow: 0 6px 18px rgba(30,127,214,.16);
 }
 
 .admin-icon {
@@ -231,8 +223,6 @@
     background: #dbeafe;
     color: #1e7fd6;
 }
-
-.admin-card:hover .admin-icon { transform: scale(1.08); }
 
 .admin-label { font-size: 13px; font-weight: 600; color: #0b3c5d; }
 
@@ -265,8 +255,6 @@
 }
 
 .kpi-hoy-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(30,127,214,.16);
     border-color: #1e7fd6;
 }
 
@@ -290,8 +278,6 @@ a.kpi-hoy-card--link:focus-visible {
     font-size: 11px;
     font-weight: 600;
     color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: .06em;
     display: block;
 }
 
@@ -324,8 +310,6 @@ a.kpi-hoy-card--link:focus-visible {
     font-size: 12px;
     font-weight: 600;
     color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: .05em;
     margin-bottom: 10px;
     display: block;
 }
@@ -416,8 +400,6 @@ a.kpi-hoy-card--link:focus-visible {
     font-size: 11px;
     font-weight: 600;
     color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: .06em;
     display: block;
 }
 

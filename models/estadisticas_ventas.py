@@ -511,7 +511,7 @@ def obtener_ingresos_por_negocio(inicio, fin, col: str = "fecha_recibo"):
     col = _col_v(col)
     with get_db() as (_, cursor):
         cursor.execute(f"""
-            SELECT n.nombre, COALESCE(SUM(v.total), 0) AS total
+            SELECT v.id_negocio, n.nombre, COALESCE(SUM(v.total), 0) AS total
             FROM venta v
             JOIN negocio n ON n.id_negocio = v.id_negocio
             WHERE DATE(v.{col}) BETWEEN %s AND %s
@@ -519,7 +519,10 @@ def obtener_ingresos_por_negocio(inicio, fin, col: str = "fecha_recibo"):
             GROUP BY v.id_negocio
             ORDER BY total DESC
         """, [inicio, fin])
-        return [{"nombre": r["nombre"], "total": float(r["total"])} for r in cursor.fetchall()]
+        return [
+            {"id_negocio": int(r["id_negocio"]), "nombre": r["nombre"], "total": float(r["total"])}
+            for r in cursor.fetchall()
+        ]
 
 
 def obtener_ventas_por_mes(anio, id_negocio):

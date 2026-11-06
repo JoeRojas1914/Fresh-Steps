@@ -2,7 +2,7 @@ html {
   width: 100%;
   margin: 0;
   overflow-x: hidden;
-  background: #eaf5ff;
+  background: #f3f8ff;
 }
 
 body {
@@ -17,17 +17,14 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(ellipse 900px 700px at 8% -5%, rgba(47, 164, 255, 0.10) 0%, transparent 65%),
-    radial-gradient(ellipse 600px 500px at 92% 8%, rgba(30, 127, 214, 0.07) 0%, transparent 60%),
-    linear-gradient(165deg, #eaf5ff 0%, #f3f8ff 20%, #fafcff 50%, #ffffff 100%);
+  background: #f3f8ff;
   color: var(--color-text);
 }
 
 hr {
   border: none;
   height: 1px;
-  background: linear-gradient(to right, transparent, #c7ddff, transparent);
+  background: #dbe7f5;
   margin: 28px 0;
 }
 

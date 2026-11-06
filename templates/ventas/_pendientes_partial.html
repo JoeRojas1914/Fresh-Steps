@@ -50,9 +50,9 @@
                 <span>{{ v.fecha_estimada.day }} {{ meses[v.fecha_estimada.month] }}
                 {{ "%02d:%02d"|format(v.fecha_estimada.hour, v.fecha_estimada.minute) }}</span>
                 {% if v.fecha_estimada.date() < hoy %}
-                    <span class="badge-atrasado">ATRASADO</span>
+                    <span class="badge-atrasado">Atrasado</span>
                 {% elif v.fecha_estimada.date() == hoy %}
-                    <span class="badge-hoy">HOY</span>
+                    <span class="badge-hoy">Hoy</span>
                 {% endif %}
             </span>
         </td>

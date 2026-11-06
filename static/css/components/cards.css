@@ -40,15 +40,10 @@
   text-align: center;
   padding: 26px 20px;
   border-radius: var(--radius-xl);
-  background: linear-gradient(145deg, #ffffff, #f8fbff);
+  background: #ffffff;
   border: 1px solid rgba(47,164,255,0.12);
   transition: transform var(--transition-base), box-shadow var(--transition-base);
   box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-}
-
-.kpi-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(47,164,255,0.15);
 }
 
 .kpi-icon {
@@ -97,16 +92,9 @@
   transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 
-.monthly-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.11);
-}
-
 .monthly-card h4 {
   font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
   color: #94a3b8;
   margin-bottom: 10px;
   display: flex;
@@ -165,7 +153,7 @@
   flex: 1 1 200px;
   text-align: center;
   padding: 20px;
-  background: linear-gradient(135deg, var(--color-bg-light), var(--color-bg-blue));
+  background: var(--color-bg-blue);
   border-radius: var(--radius-lg);
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
@@ -253,7 +241,6 @@
   color: #fff;
   border-color: var(--color-primary);
   transform: none;
-  box-shadow: none;
 }
 
 
@@ -270,8 +257,6 @@
   font-weight: 600;
   color: var(--color-muted);
   border-bottom: 1px solid var(--color-border);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .top-clientes-table td {

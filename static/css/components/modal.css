@@ -84,7 +84,6 @@ html.modal-open {
 
 .modal__close:hover {
   background: rgba(255,255,255,.28);
-  transform: scale(1.05);
 }
 
 
@@ -248,9 +247,9 @@ html.modal-open {
   padding: 28px 0;
 }
 
-.modal-confirm__hero--danger  { background: linear-gradient(135deg, #fee2e2, #fecaca); }
-.modal-confirm__hero--warning { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-.modal-confirm__hero--success { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+.modal-confirm__hero--danger  { background: #fee2e2; }
+.modal-confirm__hero--warning { background: #fef3c7; }
+.modal-confirm__hero--success { background: #d1fae5; }
 
 .modal-confirm__icon {
   width: 72px;
@@ -267,7 +266,7 @@ html.modal-open {
 .modal-confirm__hero--success .modal-confirm__icon { background: rgba(5,150,105,.15);  color: #059669; }
 
 .modal-confirm__icon--success {
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  background: #d1fae5;
   color: #059669;
   box-shadow: 0 4px 16px rgba(5, 150, 105, 0.2);
 }
@@ -305,7 +304,7 @@ html.modal-open {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  background: #d1fae5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -327,7 +326,7 @@ html.modal-open {
 }
 
 .entrega-saldo {
-  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  background: #fff7ed;
   border: 1px solid #fed7aa;
   border-radius: 12px;
   padding: 18px 20px;
@@ -340,8 +339,6 @@ html.modal-open {
 .entrega-saldo__label {
   font-size: 11px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .7px;
   color: #9a3412;
 }
 

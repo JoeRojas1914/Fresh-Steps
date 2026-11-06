@@ -30,8 +30,6 @@
 .paginacion a:hover {
     background: linear-gradient(to right, #2fa4ff, #1e7fd6);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(30,127,214,0.25);
 }
 
 .paginacion strong {

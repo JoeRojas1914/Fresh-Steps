@@ -99,8 +99,6 @@
   border-bottom: 1px solid #e5e7eb;
   font-size: 0.72rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
   color: #6b7280;
 }
 
@@ -146,8 +144,6 @@
 .perfil-field__label {
   font-size: 0.7rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: #9ca3af;
 }
 

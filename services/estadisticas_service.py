@@ -54,6 +54,9 @@ def dashboard_page_data_service():
     }
 
 
+_MODOS = frozenset({"dia", "semana", "mes", "personalizado"})
+
+
 def _periodo_anterior(inicio: date, fin: date):
     """Devuelve (inicio, fin) del período inmediatamente anterior de igual duración."""
     duracion   = (fin - inicio).days + 1
@@ -62,8 +65,50 @@ def _periodo_anterior(inicio: date, fin: date):
     return inicio_ant, fin_ant
 
 
+def _ultimo_dia_mes(d: date) -> date:
+    siguiente = (d.replace(day=28) + timedelta(days=4)).replace(day=1)
+    return siguiente - timedelta(days=1)
+
+
+def _mes_anterior(d: date) -> date:
+    """Mismo número de día en el mes anterior (ajustado si ese mes es más corto)."""
+    ultimo_ant = d.replace(day=1) - timedelta(days=1)
+    return ultimo_ant.replace(day=min(d.day, ultimo_ant.day))
+
+
+def _periodo_comparacion(inicio: date, fin: date, modo: str | None, hoy: date | None = None):
+    """
+    Devuelve ((inicio_act, fin_act), (inicio_ant, fin_ant)) con el criterio "mismo avance":
+    si el período aún no termina, se compara solo el tramo transcurrido contra el mismo
+    tramo del período anterior (1–5 nov vs 1–5 oct).
+
+    - mes:    mes calendario anterior, mismos días.
+    - semana: semana anterior, mismos días de la semana.
+    - dia:    mismo día de la semana anterior.
+    - personalizado / None: período inmediato anterior de igual duración (comportamiento original).
+    """
+    if modo not in _MODOS or modo == "personalizado":
+        return (inicio, fin), _periodo_anterior(inicio, fin)
+
+    hoy   = hoy or date.today()
+    corte = fin if hoy < inicio else min(fin, hoy)
+
+    if modo == "mes":
+        inicio_ant = _mes_anterior(inicio)
+        if corte == fin and fin == _ultimo_dia_mes(fin):
+            fin_ant = _ultimo_dia_mes(inicio_ant)   # mes completo vs mes completo
+        else:
+            fin_ant = _mes_anterior(corte)
+        return (inicio, corte), (inicio_ant, fin_ant)
+
+    # semana y día: una semana atrás
+    semana = timedelta(days=7)
+    return (inicio, corte), (inicio - semana, corte - semana)
+
+
 def _pct_cambio(actual, anterior) -> float | None:
-    if anterior == 0:
+    # Sin base positiva no hay comparación honesta (evita ÷0 y signos invertidos en ganancia)
+    if anterior is None or anterior <= 0:
         return None
     return round((actual - anterior) / anterior * 100, 1)
 
@@ -84,12 +129,14 @@ def _calcular_kpis(inicio: date, fin: date, id_negocio, col: str = "fecha_recibo
     }
 
 
-def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio, col: str = "fecha_recibo") -> tuple[dict, dict]:
-    inicio_ant, fin_ant    = _periodo_anterior(inicio, fin)
+def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio, col: str = "fecha_recibo",
+                          modo: str | None = None) -> tuple[dict, dict, dict]:
+    # Los KPIs del período actual no necesitan recalcularse para el tramo transcurrido:
+    # los días que aún no llegan no tienen ventas, pagos ni gastos.
+    (inicio_act, fin_act), (inicio_ant, fin_ant) = _periodo_comparacion(inicio, fin, modo)
     ingresos_ant           = obtener_total_ingresos(inicio_ant, fin_ant, id_negocio)
     gastos_ant             = obtener_total_gastos(inicio_ant,   fin_ant, id_negocio)
     ticket_ant, ventas_ant = obtener_ticket_promedio(inicio_ant, fin_ant, id_negocio, col)
-    saldo_ant              = obtener_saldo_por_cobrar(inicio_ant, fin_ant, id_negocio, col)
     ganancia_ant           = ingresos_ant - gastos_ant
 
     pcts = {
@@ -98,10 +145,10 @@ def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio, col: 
         "ganancia_pct": _pct_cambio(kpis["ganancia"],         ganancia_ant),
         "ticket_pct":   _pct_cambio(kpis["ticket_promedio"],  ticket_ant),
         "ventas_pct":   _pct_cambio(kpis["num_ventas"],       ventas_ant),
-        "saldo_pct":    _pct_cambio(kpis["saldo_por_cobrar"], saldo_ant),
     }
     periodo_anterior_str = {"inicio": inicio_ant.isoformat(), "fin": fin_ant.isoformat()}
-    return pcts, periodo_anterior_str
+    periodo_actual_str   = {"inicio": inicio_act.isoformat(), "fin": fin_act.isoformat()}
+    return pcts, periodo_anterior_str, periodo_actual_str
 
 
 def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, col: str = "fecha_recibo", agrupacion_gastos: str = "proveedor") -> dict:
@@ -275,12 +322,17 @@ def dashboard_api_service(args):
     if agrupacion_gastos not in {"proveedor", "categoria"}:
         agrupacion_gastos = "proveedor"
 
-    kpis                       = _calcular_kpis(inicio, fin, id_negocio, col)
-    pcts, periodo_anterior_str = _calcular_comparativa(kpis, inicio, fin, id_negocio, col)
-    series                     = _cargar_series(inicio, fin, id_negocio, args.get("granularidad", "semana"), col, agrupacion_gastos)
+    modo = args.get("modo")
+    if modo not in _MODOS:
+        modo = None
+
+    kpis   = _calcular_kpis(inicio, fin, id_negocio, col)
+    pcts, periodo_anterior_str, periodo_actual_str = _calcular_comparativa(kpis, inicio, fin, id_negocio, col, modo)
+    series = _cargar_series(inicio, fin, id_negocio, args.get("granularidad", "semana"), col, agrupacion_gastos)
 
     return {
         **series,
+        "periodo_actual":   periodo_actual_str,
         "periodo_anterior": periodo_anterior_str,
         "kpis":             {**kpis, **pcts},
     }, None

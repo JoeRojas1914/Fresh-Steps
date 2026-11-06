@@ -21,7 +21,7 @@ def obtener_top_clientes(inicio, fin, id_negocio, limit=5, col: str = "fecha_rec
     if id_negocio != "all":
         sql += " AND v.id_negocio = %s"
         params.append(id_negocio)
-    sql += " GROUP BY c.id_cliente ORDER BY visitas DESC, total_gastado DESC LIMIT %s"
+    sql += " GROUP BY c.id_cliente ORDER BY total_gastado DESC, visitas DESC LIMIT %s"
     params.append(limit)
 
     with get_db() as (_, cursor):

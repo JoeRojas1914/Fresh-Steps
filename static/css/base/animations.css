@@ -118,7 +118,13 @@
 .is-skeleton * { visibility: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton, .is-skeleton { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton, .is-skeleton { animation: none !important; }
 }
 
 
@@ -182,19 +188,6 @@
 }
 
 .field--error-pulse { animation: errorPulse 0.5s ease forwards; }
-
-@keyframes btnRipple {
-  to { transform: scale(4); opacity: 0; }
-}
-
-.btn-ripple {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.35);
-  transform: scale(0);
-  pointer-events: none;
-  animation: btnRipple 0.55s ease-out forwards;
-}
 
 /* ── Clases utilitarias ── */
 .animate-slide-in { animation: slideIn 0.25s ease both; }

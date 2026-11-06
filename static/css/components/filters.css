@@ -177,8 +177,6 @@
 .date-selector select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(47, 164, 255, 0.2);
-  transform: translateY(-1px);
 }
 
 .date-selector select:hover { border-color: var(--color-primary-dark); }

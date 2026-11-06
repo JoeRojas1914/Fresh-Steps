@@ -24,27 +24,25 @@
     box-shadow 0.15s ease,
     background 0.15s ease;
 }
-
-.btn:hover   { transform: translateY(-1px); }
 .btn:active  { transform: scale(0.95) translateY(1px); box-shadow: none; transition-duration: 0.08s; }
 
 .btn--primary       { background: #1e7fd6; }
-.btn--primary:hover { background: #1568b8; box-shadow: 0 6px 16px rgba(30,127,214,0.32); }
+.btn--primary:hover { background: #1568b8; }
 
 .btn--success       { background: #15803d; }
-.btn--success:hover { background: #116830; box-shadow: 0 6px 16px rgba(21,128,61,0.32); }
+.btn--success:hover { background: #116830; }
 
 .btn--danger        { background: #dc2626; }
-.btn--danger:hover  { background: #b91c1c; box-shadow: 0 6px 16px rgba(220,38,38,0.32); }
+.btn--danger:hover  { background: #b91c1c; }
 
 .btn--info          { background: #0369a1; }
-.btn--info:hover    { background: #025882; box-shadow: 0 6px 16px rgba(3,105,161,0.32); }
+.btn--info:hover    { background: #025882; }
 
 .btn--warning       { background: #b45309; }
-.btn--warning:hover { background: #92400e; box-shadow: 0 6px 16px rgba(180,83,9,0.32); }
+.btn--warning:hover { background: #92400e; }
 
 .btn--secondary       { background: #64748b; }
-.btn--secondary:hover { background: #475569; box-shadow: 0 6px 16px rgba(71,85,105,0.28); }
+.btn--secondary:hover { background: #475569; }
 
 
 .btn--sm { padding: 6px 12px; font-size: 13px; border-radius: 8px; }

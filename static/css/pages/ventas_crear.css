@@ -91,8 +91,6 @@
 .result-item:hover {
   background: #f0f7ff;
   border-color: #1e7fd6;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(30,127,214,.12);
 }
 
 .result-avatar {
@@ -321,9 +319,9 @@
 }
 
 @keyframes totalPulse {
-  0%   { color: var(--color-primary-dark); transform: scale(1); }
-  40%  { color: #b45309;                  transform: scale(1.05); }
-  100% { color: var(--color-primary-dark); transform: scale(1); }
+  0%   { color: var(--color-primary-dark); }
+  40%  { color: #b45309; }
+  100% { color: var(--color-primary-dark); }
 }
 
 .total-amount--pulse { animation: totalPulse 0.4s ease; }
@@ -507,7 +505,6 @@
 
 .articulo-resumen:hover {
   border-color: #1e7fd6;
-  box-shadow: 0 4px 12px rgba(30,127,214,.1);
 }
 
 .resumen-header-bar {
@@ -548,8 +545,6 @@
   font-size: 11px;
   font-weight: 600;
   color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: .05em;
   margin-bottom: 4px;
 }
 
@@ -835,8 +830,6 @@
     font-size: 11px;
     font-weight: 600;
     color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: .05em;
     margin-bottom: 0;
 }
 
@@ -1227,8 +1220,6 @@
   font-size: 11px;
   font-weight: 700;
   color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
 }
 
 .art-ro-body .edit-campos-compact { padding-top: 0; }
