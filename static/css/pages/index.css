@@ -3,7 +3,7 @@
     position: absolute;
     inset: 0;
     border-radius: 10px;
-    background: linear-gradient(90deg, #e6f0fa 25%, #d6e4f2 50%, #e6f0fa 75%);
+    background: linear-gradient(90deg, #f0f4f8 25%, #e2e8f0 50%, #f0f4f8 75%);
     background-size: 200% 100%;
     opacity: 0;
     pointer-events: none;
@@ -14,56 +14,35 @@
     animation: skeleton-slide 1.4s ease infinite;
 }
 
-.pill-dot--calzado    { background: #3b82f6; }
-.pill-dot--confeccion { background: #22c55e; }
-.pill-dot--maquila    { background: #f97316; }
-
+/* ── Encabezado ── */
 .home-header {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: 28px;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 16px;
+    margin-bottom: 22px;
 }
 
-.home-greeting h1 {
-    font-size: 32px;
+.page-content .home-greeting h1 {
+    margin: 0;
+    font-size: 28px;
     font-weight: 800;
     color: #0b3c5d;
-    margin: 0;
-    letter-spacing: -0.8px;
-    line-height: 1.1;
-}
-
-.home-greeting h1 strong {
-    color: #1e7fd6;
-}
-
-.home-greeting p {
-    font-size: 14px;
-    color: #94a3b8;
-    margin-top: 6px;
-    font-weight: 500;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
 }
 
 .home-fecha {
-    font-size: 12px;
-    font-weight: 600;
-    color: #1e7fd6;
-    background: #dbeafe;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 6px;
-    white-space: nowrap;
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
 }
 
-.home-section-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #94a3b8;
-    margin-bottom: 10px;
-    margin-top: 28px;
+.home-cta {
+    padding: 12px 22px;
+    font-size: 15px;
 }
 
 /* ── Selector de negocio ── */
@@ -72,360 +51,320 @@
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.negocio-pills-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #94a3b8;
-    margin-right: 4px;
+    margin-bottom: 8px;
 }
 
 .negocio-pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 14px;
-    border-radius: 20px;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: 999px;
     font-size: 13px;
-    font-weight: 500;
-    border: 1.5px solid #e2e8f0;
-    color: #64748b;
-    background: #fff;
+    font-weight: 600;
+    border: 1px solid #dbe3ec;
+    color: #475569;
+    background: #ffffff;
     text-decoration: none;
-    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
-    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 
 .negocio-pill:hover {
     border-color: #1e7fd6;
     color: #1e7fd6;
-    background: #f0f7ff;
 }
 
 .negocio-pill.active {
     background: #1e7fd6;
-    color: #fff;
     border-color: #1e7fd6;
-    box-shadow: 0 2px 8px rgba(30, 127, 214, 0.28);
-}
-
-.negocio-pill.active .pill-dot {
-    background: rgba(255, 255, 255, 0.7) !important;
+    color: #ffffff;
 }
 
 .pill-dot {
-    width: 7px;
-    height: 7px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
-/* ── Acciones rápidas ── */
-.acciones-grid {
+/* Mismos colores que los badges de negocio en las tablas */
+.pill-dot--calzado    { background: #1e7fd6; }
+.pill-dot--confeccion { background: #c44569; }
+.pill-dot--maquila    { background: #1a7a87; }
+
+.negocio-pill.active .pill-dot { box-shadow: 0 0 0 2px #ffffff; }
+
+/* ── Secciones ── */
+.home-section { margin-top: 28px; }
+
+.page-content .home-section-title {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0b3c5d;
+    letter-spacing: 0;
+}
+
+/* Tarjeta base de la página */
+.entregar-card,
+.kpi-hoy-card,
+.hoy-chart,
+.mes-card {
+    background: #ffffff;
+    border: 1px solid #e8eef5;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Por entregar ── */
+.entregar-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
-.accion-card {
-    border-radius: 16px;
-    border: none;
-    padding: 22px 20px;
-    text-decoration: none;
+.entregar-card {
     display: flex;
     align-items: center;
     gap: 16px;
-    transition: transform .2s ease, box-shadow .2s ease;
-}
-
-.accion-card.nueva-venta,
-.accion-card.pendientes,
-.accion-card.procesadas {
-    background: #ffffff;
-    border: 1.5px solid #e8eef5;
-    box-shadow: 0 2px 10px rgba(0,0,0,.05);
-}
-
-.accion-card.nueva-venta:hover,
-.accion-card.pendientes:hover,
-.accion-card.procesadas:hover {
-    border-color: #1e7fd6;
-}
-
-.accion-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    background: #dbeafe;
-    color: #1e7fd6;
-}
-
-.accion-card.nueva-venta .accion-icon,
-.accion-card.pendientes  .accion-icon,
-.accion-card.procesadas  .accion-icon {
-    background: #dbeafe;
-    color: #1e7fd6;
-}
-
-.accion-label { font-size: 14px; font-weight: 700; color: #0b3c5d; }
-.accion-sub   { font-size: 12px; color: #94a3b8; margin-top: 3px; }
-.accion-num   { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 2px; color: #1e7fd6 !important; }
-
-/* ── Admin grid ── */
-.admin-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-
-.admin-card {
-    background: white;
-    border-radius: 14px;
-    border: 1px solid #e8eef5;
-    padding: 16px 18px;
+    padding: 18px 20px;
     text-decoration: none;
+    color: inherit;
+    transition: border-color .15s ease;
+}
+
+.entregar-card:hover { border-color: #1e7fd6; }
+.entregar-card:focus-visible { outline: 2px solid #1e7fd6; outline-offset: 2px; }
+
+.accion-num {
+    min-width: 2ch;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    color: #0b3c5d;
+    letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+}
+
+.entregar-texto {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    flex-direction: column;
+    gap: 2px;
 }
 
-.admin-card:hover {
-    border-color: #1e7fd6;
+.entregar-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
 }
 
-.admin-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: transform .18s ease;
-    background: #dbeafe;
-    color: #1e7fd6;
+.entregar-sub {
+    font-size: 13px;
+    color: #64748b;
 }
 
-.admin-card.clientes  .admin-icon,
-.admin-card.servicios .admin-icon,
-.admin-card.gastos    .admin-icon,
-.admin-card.usuarios  .admin-icon,
-.admin-card.historial .admin-icon,
-.admin-card.estadisticas .admin-icon {
-    background: #dbeafe;
-    color: #1e7fd6;
-}
-
-.admin-label { font-size: 13px; font-weight: 600; color: #0b3c5d; }
-
-/* ── KPIs del día ── */
-.hoy-grid {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 12px;
-    margin-bottom: 0;
-    align-items: stretch;
-}
-
+/* ── Hoy ── */
 .hoy-kpis {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
 .kpi-hoy-card {
-    border-radius: 14px;
-    background: #ffffff;
-    border: 1px solid #e8eef5;
-    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 6px;
-    min-width: 170px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    padding: 16px 18px;
 }
 
-.kpi-hoy-card:hover {
-    border-color: #1e7fd6;
-}
-
-/* KPIs que llevan al historial filtrado */
 a.kpi-hoy-card--link {
     text-decoration: none;
     color: inherit;
-    cursor: pointer;
+    transition: border-color .15s ease;
 }
 
-a.kpi-hoy-card--link:focus-visible {
-    outline: 2px solid #1e7fd6;
-    outline-offset: 2px;
-}
+a.kpi-hoy-card--link:hover { border-color: #1e7fd6; }
+a.kpi-hoy-card--link:focus-visible { outline: 2px solid #1e7fd6; outline-offset: 2px; }
 
-.hoy-kpis .kpi-hoy-card:last-child:nth-child(odd) {
-    grid-column: span 2;
+/* Ícono de línea en color junto a la etiqueta de cada cifra */
+.kpi-icono {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+.kpi-icono svg { width: 17px; height: 17px; stroke-width: 2.2; }
+
+.kpi-icono--azul   { color: #1e7fd6; }
+.kpi-icono--verde  { color: #15803d; }
+.kpi-icono--marino { color: #0b3c5d; }
+.kpi-icono--teal   { color: #1a7a87; }
+.kpi-icono--rojo   { color: #dc2626; }
+
+.kpi-hoy-label,
+.mes-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
 }
 
 .kpi-hoy-label {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
-    color: #94a3b8;
-    display: block;
+    color: #475569;
 }
 
 .kpi-hoy-num {
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 800;
-    letter-spacing: -1px;
     line-height: 1.1;
-    display: block;
+    color: #0b3c5d;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
 }
 
-.kpi-hoy-card.azul   .kpi-hoy-num { color: #1e7fd6; }
-.kpi-hoy-card.verde  .kpi-hoy-num { color: #15803d; }
-.kpi-hoy-card.naranja .kpi-hoy-num { color: #b45309; }
-.kpi-hoy-card.morado  .kpi-hoy-num { color: #6d28d9; }
-.kpi-hoy-card.teal    .kpi-hoy-num { color: #0f766e; }
-
-/* ── Mini chart ── */
-.hoy-chart {
-    background: #f0f8ff;
-    border: 1px solid #dceeff;
-    border-radius: 14px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-    padding: 18px 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-.hoy-chart-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #64748b;
-    margin-bottom: 10px;
-    display: block;
-}
-
-.hoy-chart-wrap {
-    position: relative;
-    height: 110px;
-}
+/* ── Gráfica de la semana ── */
+.hoy-chart { padding: 16px 20px 14px; }
 
 .hoy-chart-head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 4px 12px;
+    gap: 4px 16px;
     margin-bottom: 10px;
 }
 
-.hoy-chart-head .hoy-chart-title { margin-bottom: 0; }
+.page-content .hoy-chart-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0b3c5d;
+}
 
 .hoy-chart-leyenda {
     display: flex;
-    gap: 12px;
-    font-size: 11px;
+    gap: 16px;
+    font-size: 12px;
     font-weight: 500;
-    color: #64748b;
+    color: #475569;
 }
 
 .leyenda-item {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
 .leyenda-dot {
-    width: 10px;
-    height: 3px;
-    border-radius: 2px;
+    width: 16px;
+    height: 0;
+    border-top: 2px solid;
 }
 
-.leyenda-dot--ventas   { background: #2fa4ff; }
-.leyenda-dot--unidades { background: #8b5cf6; }
+.leyenda-dot--ventas   { border-color: #1e7fd6; }
+.leyenda-dot--unidades { border-color: #0b3c5d; border-top-style: dashed; }
 
-/* ── Resumen del mes ── */
+.hoy-chart-wrap {
+    position: relative;
+    height: 150px;
+}
+
+/* ── Este mes ── */
 .mes-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
-.mes-section-header .home-section-label { margin: 0; }
+.page-content .mes-section-header .home-section-title { margin: 0; }
+
+.mes-acciones {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.btn-blur-toggle.home-toggle-montos {
+    width: auto;
+    height: 32px;
+    padding: 0 12px;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.mes-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e7fd6;
+    text-decoration: none;
+}
+.mes-link:hover { text-decoration: underline; }
 
 .mes-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 12px;
 }
 
 .mes-card {
-    border-radius: 14px;
-    background: #ffffff;
-    border: 1px solid #e8eef5;
-    padding: 18px 20px;
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 14px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
 }
-
-.mes-icon {
-    display: flex;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.mes-card.ingresos .mes-icon { background: #dcfce7; color: #15803d; }
-.mes-card.gastos   .mes-icon { background: #fee2e2; color: #dc2626; }
-.mes-card.ganancia .mes-icon { background: #dbeafe; color: #1e7fd6; }
 
 .mes-label {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
-    color: #94a3b8;
-    display: block;
+    color: #475569;
 }
 
 .mes-num {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 800;
     letter-spacing: -0.5px;
-    display: block;
-    margin-top: 2px;
+    color: #0b3c5d;
+    font-variant-numeric: tabular-nums;
 }
 
 .mes-card.ingresos .mes-num { color: #15803d; }
 .mes-card.gastos   .mes-num { color: #dc2626; }
-.mes-card.ganancia .mes-num { color: #1e7fd6; }
 
-@media (max-width: 768px) {
-    .acciones-grid { grid-template-columns: 1fr; }
-    .kpi-grid      { grid-template-columns: 1fr; }
-    .admin-grid    { grid-template-columns: repeat(2, 1fr); }
-    .kpi-num       { font-size: 36px; }
-    .hoy-grid      { grid-template-columns: 1fr; }
-    .mes-grid      { grid-template-columns: 1fr; }
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .entregar-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 480px) {
-    .admin-grid { grid-template-columns: 1fr; }
-    .home-fecha { display: none; }
-    .hoy-kpis   { flex-direction: column; }
+@media (max-width: 768px) {
+    .page-content .home-greeting h1 { font-size: 24px; }
+    .home-cta { width: 100%; }
+    .mes-grid { grid-template-columns: 1fr; }
+
+    /* Hoy en el celular: lista compacta (etiqueta | número), sin tarjetas sueltas */
+    .hoy-kpis {
+        grid-template-columns: 1fr;
+        gap: 0;
+        background: #ffffff;
+        border: 1px solid #e8eef5;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    .hoy-kpis .kpi-hoy-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border: none;
+        border-bottom: 1px solid #eef2f7;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .hoy-kpis .kpi-hoy-card:last-child { border-bottom: none; }
+    .kpi-hoy-num { font-size: 22px; }
 }

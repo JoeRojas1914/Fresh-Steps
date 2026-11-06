@@ -42,9 +42,8 @@ var _canvas   = document.getElementById("miniVentasChart");
 
 if (_canvas && _rawChart) {
     var ctx      = _canvas.getContext("2d");
-    var gradient = ctx.createLinearGradient(0, 0, 0, 110);
-    gradient.addColorStop(0, "rgba(47,164,255,0.35)");
-    gradient.addColorStop(1, "rgba(47,164,255,0)");
+    var AZUL   = "#1e7fd6";
+    var MARINO = "#0b3c5d";
 
     _chart = new Chart(ctx, {
         type: "line",
@@ -52,27 +51,27 @@ if (_canvas && _rawChart) {
             labels: _rawChart.labels,
             datasets: [{
                 data: _rawChart.data,
-                borderColor: "#2fa4ff",
+                borderColor: AZUL,
                 borderWidth: 2,
-                backgroundColor: gradient,
+                backgroundColor: "rgba(30,127,214,0.08)",
                 fill: true,
-                tension: 0.4,
+                tension: 0.3,
                 pointRadius: 0,
                 pointHoverRadius: 5,
-                pointHoverBackgroundColor: "#2fa4ff",
+                pointHoverBackgroundColor: AZUL,
                 pointHoverBorderColor: "#ffffff",
                 pointHoverBorderWidth: 2
             }, {
                 label: "unidades",
                 data: _rawChart.unidades || [],
-                borderColor: "#8b5cf6",
+                borderColor: MARINO,
                 borderWidth: 2,
                 borderDash: [5, 4],
                 fill: false,
-                tension: 0.4,
+                tension: 0.3,
                 pointRadius: 0,
                 pointHoverRadius: 5,
-                pointHoverBackgroundColor: "#8b5cf6",
+                pointHoverBackgroundColor: MARINO,
                 pointHoverBorderColor: "#ffffff",
                 pointHoverBorderWidth: 2
             }]
@@ -97,7 +96,11 @@ if (_canvas && _rawChart) {
             },
             scales: {
                 y: { display: false, beginAtZero: true },
-                x: { display: false }
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { color: "#64748b", font: { size: 11 } }
+                }
             }
         }
     });
@@ -110,10 +113,12 @@ if (_canvas && _rawChart) {
 
     var STORAGE_KEY = "fs_montos_visibles";
 
+    var texto = toggleBtn.querySelector(".home-toggle-texto");
+
     function aplicar(visible) {
         document.body.classList.toggle("montos-visibles", visible);
         toggleBtn.setAttribute("aria-pressed", visible ? "true" : "false");
-        toggleBtn.title = visible ? "Ocultar montos" : "Mostrar montos";
+        if (texto) texto.textContent = visible ? "Ocultar montos" : "Mostrar montos";
     }
 
     aplicar(localStorage.getItem(STORAGE_KEY) === "1");
@@ -159,7 +164,7 @@ document.addEventListener("click", function(e) {
         p.classList.toggle("active", p.dataset.negocio === negocio);
     });
 
-    document.querySelectorAll("a.kpi-hoy-card--link").forEach(function(a) {
+    document.querySelectorAll("a.kpi-hoy-card--link, a.entregar-card").forEach(function(a) {
         var url = new URL(a.href, window.location.href);
         if (negocio === "all") url.searchParams.delete("id_negocio");
         else url.searchParams.set("id_negocio", negocio);

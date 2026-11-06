@@ -6,19 +6,20 @@
 
 {% block content %}
 
-{# ── Header ── #}
+{# ── Encabezado ── #}
 <div class="home-header">
     <div class="home-greeting">
-        <h1>Buen día, <strong>{{ nombre_usuario }}</strong></h1>
-        <p>Aquí está el resumen de hoy</p>
+        <h1>Buen día, {{ nombre_usuario }}</h1>
+        <p class="home-fecha">{{ fecha_bonita }}</p>
     </div>
-    <span class="home-fecha">{{ fecha_bonita }}</span>
+    <a class="btn btn--primary home-cta" href="/ventas">
+        <i data-lucide="plus" width="18" height="18"></i> Nueva venta
+    </a>
 </div>
 
 {# ── Selector de negocio — solo admin (caja ve sus negocios asignados) ── #}
 {% if session.rol == "admin" %}
-<div class="negocio-pills">
-    <span class="negocio-pills-label">Negocio</span>
+<div class="negocio-pills" role="group" aria-label="Filtrar por negocio">
     <a href="/" data-negocio="all" class="negocio-pill{% if negocio_sel == 'all' %} active{% endif %}">Todos</a>
     <a href="/?negocio=1" data-negocio="1" class="negocio-pill{% if negocio_sel == '1' %} active{% endif %}">
         <span class="pill-dot pill-dot--calzado"></span> Calzado
@@ -32,79 +33,94 @@
 </div>
 {% endif %}
 
-{# ── Resumen del mes — solo admin ── #}
+{# ── Este mes — solo admin ── #}
 {% if session.rol == "admin" and kpis_mes %}
-<div class="mes-section">
+<section class="home-section" aria-labelledby="sec-mes">
     <div class="mes-section-header">
-        <span class="home-section-label">Resumen del mes</span>
-        <button type="button" id="toggleMontos" class="btn-blur-toggle" aria-pressed="false" title="Mostrar montos">
-            <i data-lucide="eye" width="19" height="19" class="icon-eye"></i>
-            <i data-lucide="eye-off" width="19" height="19" class="icon-eye-off"></i>
-        </button>
+        <h2 class="home-section-title" id="sec-mes">Este mes</h2>
+        <div class="mes-acciones">
+            <button type="button" id="toggleMontos" class="btn-blur-toggle home-toggle-montos" aria-pressed="false">
+                <i data-lucide="eye" width="16" height="16" class="icon-eye"></i>
+                <i data-lucide="eye-off" width="16" height="16" class="icon-eye-off"></i>
+                <span class="home-toggle-texto">Mostrar montos</span>
+            </button>
+            <a href="/estadisticas" class="mes-link">Ver estadísticas</a>
+        </div>
     </div>
     <div class="mes-grid">
         <div class="mes-card ingresos">
-            <span class="mes-icon"><i data-lucide="trending-up" width="18" height="18"></i></span>
-            <div>
-                <span class="mes-label">Ingresos del mes</span>
-                <span class="mes-num dato-sensible" data-kpi="ingresos_mes">${{ "%.2f"|format(kpis_mes.ingresos) }}</span>
-            </div>
+            <span class="mes-label"><span class="kpi-icono kpi-icono--verde" aria-hidden="true"><i data-lucide="trending-up"></i></span>Ingresos del mes</span>
+            <span class="mes-num dato-sensible" data-kpi="ingresos_mes">${{ "%.2f"|format(kpis_mes.ingresos) }}</span>
         </div>
         <div class="mes-card gastos">
-            <span class="mes-icon"><i data-lucide="banknote" width="18" height="18"></i></span>
-            <div>
-                <span class="mes-label">Gastos del mes</span>
-                <span class="mes-num dato-sensible" data-kpi="gastos_mes">${{ "%.2f"|format(kpis_mes.gastos) }}</span>
-            </div>
+            <span class="mes-label"><span class="kpi-icono kpi-icono--rojo" aria-hidden="true"><i data-lucide="trending-down"></i></span>Gastos del mes</span>
+            <span class="mes-num dato-sensible" data-kpi="gastos_mes">${{ "%.2f"|format(kpis_mes.gastos) }}</span>
         </div>
         <div class="mes-card ganancia">
-            <span class="mes-icon"><i data-lucide="wallet" width="18" height="18"></i></span>
-            <div>
-                <span class="mes-label">Ganancia del mes</span>
-                <span class="mes-num dato-sensible" data-kpi="ganancia_mes">${{ "%.2f"|format(kpis_mes.ganancia) }}</span>
-            </div>
+            <span class="mes-label"><span class="kpi-icono kpi-icono--marino" aria-hidden="true"><i data-lucide="wallet"></i></span>Ganancia del mes</span>
+            <span class="mes-num dato-sensible" data-kpi="ganancia_mes">${{ "%.2f"|format(kpis_mes.ganancia) }}</span>
         </div>
     </div>
-</div>
+</section>
 {% endif %}
 
+{# ── Por entregar ── #}
+{% set neg_qs = ('?id_negocio=' ~ negocio_sel) if (session.rol == 'admin' and negocio_sel != 'all') else '' %}
+<section class="home-section" aria-labelledby="sec-entregar">
+    <h2 class="home-section-title" id="sec-entregar">Por entregar</h2>
+    <div class="entregar-grid">
+        <a class="entregar-card" href="/ventas/pendientes{{ neg_qs }}">
+            <span class="accion-num" data-kpi="total_pendientes">{{ total_pendientes }}</span>
+            <span class="entregar-texto">
+                <span class="entregar-label">Pendientes</span>
+                <span class="entregar-sub">En proceso en el taller</span>
+            </span>
+        </a>
+        <a class="entregar-card" href="/ventas/listas{{ neg_qs }}">
+            <span class="accion-num" data-kpi="total_entregas">{{ total_entregas }}</span>
+            <span class="entregar-texto">
+                <span class="entregar-label">Listas para recoger</span>
+                <span class="entregar-sub">Esperando al cliente</span>
+            </span>
+        </a>
+    </div>
+</section>
 
+{# ── Hoy ── #}
 {% macro url_historial_hoy(tipo_fecha) -%}
 {{ url_for('ventas.historial_ventas', tipo_fecha=tipo_fecha, fecha_inicio=hoy_iso, fecha_fin=hoy_iso,
            id_negocio=negocio_sel if (session.rol == 'admin' and negocio_sel != 'all') else None) }}
 {%- endmacro %}
-<div class="hoy-grid">
-    <div class="hoy-kpis{% if session.rol != 'admin' %} hoy-kpis--solo{% endif %}">
-        <a class="kpi-hoy-card kpi-hoy-card--link azul" href="{{ url_historial_hoy('fecha_recibo') }}"
-           title="Ver en el historial">
-            <span class="kpi-hoy-label">Ventas hoy</span>
+<section class="home-section" aria-labelledby="sec-hoy">
+    <h2 class="home-section-title" id="sec-hoy">Hoy</h2>
+    <div class="hoy-kpis">
+        <a class="kpi-hoy-card kpi-hoy-card--link" href="{{ url_historial_hoy('fecha_recibo') }}" title="Ver en el historial">
+            <span class="kpi-hoy-label"><span class="kpi-icono kpi-icono--azul" aria-hidden="true"><i data-lucide="receipt"></i></span>Ventas hoy</span>
             <span class="kpi-hoy-num" data-kpi="ventas_hoy">{{ ventas_hoy }}</span>
         </a>
         {% if session.rol == "admin" %}
-        <div class="kpi-hoy-card verde">
-            <span class="kpi-hoy-label">Ingresos hoy</span>
+        <div class="kpi-hoy-card">
+            <span class="kpi-hoy-label"><span class="kpi-icono kpi-icono--verde" aria-hidden="true"><i data-lucide="banknote"></i></span>Ingresos hoy</span>
             <span class="kpi-hoy-num dato-sensible" data-kpi="ingresos_hoy">${{ "%.2f"|format(ingresos_hoy) }}</span>
         </div>
         {% endif %}
-        <a class="kpi-hoy-card kpi-hoy-card--link naranja" href="{{ url_historial_hoy('fecha_recibo') }}"
-           title="Ver en el historial">
-            <span class="kpi-hoy-label">Unidades recibidas</span>
+        <a class="kpi-hoy-card kpi-hoy-card--link" href="{{ url_historial_hoy('fecha_recibo') }}" title="Ver en el historial">
+            <span class="kpi-hoy-label"><span class="kpi-icono kpi-icono--azul" aria-hidden="true"><i data-lucide="package-open"></i></span>Unidades recibidas</span>
             <span class="kpi-hoy-num" data-kpi="unidades_recibidas">{{ unidades_recibidas_hoy }}</span>
         </a>
-        <a class="kpi-hoy-card kpi-hoy-card--link morado" href="{{ url_historial_hoy('fecha_entrega') }}"
-           title="Ver en el historial">
-            <span class="kpi-hoy-label">Unidades entregadas</span>
+        <a class="kpi-hoy-card kpi-hoy-card--link" href="{{ url_historial_hoy('fecha_entrega') }}" title="Ver en el historial">
+            <span class="kpi-hoy-label"><span class="kpi-icono kpi-icono--teal" aria-hidden="true"><i data-lucide="package-check"></i></span>Unidades entregadas</span>
             <span class="kpi-hoy-num" data-kpi="unidades_entregadas">{{ unidades_entregadas_hoy }}</span>
         </a>
-        <a class="kpi-hoy-card kpi-hoy-card--link teal" href="{{ url_historial_hoy('fecha_entrega') }}"
-           title="Ver en el historial">
-            <span class="kpi-hoy-label">Ventas cerradas hoy</span>
+        <a class="kpi-hoy-card kpi-hoy-card--link" href="{{ url_historial_hoy('fecha_entrega') }}" title="Ver en el historial">
+            <span class="kpi-hoy-label"><span class="kpi-icono kpi-icono--verde" aria-hidden="true"><i data-lucide="circle-check"></i></span>Ventas cerradas hoy</span>
             <span class="kpi-hoy-num" data-kpi="ventas_entregadas_hoy">{{ ventas_entregadas_hoy }}</span>
         </a>
     </div>
+
     <div class="hoy-chart">
         <div class="hoy-chart-head">
-            <span class="hoy-chart-title">Esta semana</span>
+            <h3 class="hoy-chart-title">Esta semana</h3>
             <span class="hoy-chart-leyenda">
                 <span class="leyenda-item"><span class="leyenda-dot leyenda-dot--ventas"></span> Ventas</span>
                 <span class="leyenda-item"><span class="leyenda-dot leyenda-dot--unidades"></span> Unidades recibidas</span>
@@ -114,46 +130,7 @@
             <canvas id="miniVentasChart"></canvas>
         </div>
     </div>
-</div>
-
-{# ── Acciones rápidas ── #}
-<p class="home-section-label">Acciones rápidas</p>
-<div class="acciones-grid">
-    <a class="accion-card nueva-venta" href="/ventas">
-        <div class="accion-icon"><i data-lucide="receipt" width="32" height="32"></i></div>
-        <div>
-            <div class="accion-label">Nueva venta</div>
-            <div class="accion-sub">Registrar recibo</div>
-        </div>
-    </a>
-    <a class="accion-card pendientes" href="/ventas/pendientes">
-        <div class="accion-icon"><i data-lucide="package" width="32" height="32"></i></div>
-        <div>
-            <div class="accion-label">Pendientes</div>
-            <div class="accion-num text-primary" data-kpi="total_pendientes">{{ total_pendientes }}</div>
-        </div>
-    </a>
-    <a class="accion-card procesadas" href="/ventas/listas">
-        <div class="accion-icon"><i data-lucide="check-circle" width="32" height="32"></i></div>
-        <div>
-            <div class="accion-label">Listas para recoger</div>
-            <div class="accion-num text-success" data-kpi="total_entregas">{{ total_entregas }}</div>
-        </div>
-    </a>
-</div>
-
-{# ── Administración — solo admin ── #}
-{% if session.rol == "admin" %}
-<p class="home-section-label">Administración</p>
-<div class="admin-grid">
-    <a class="admin-card clientes" href="/clientes"><span class="admin-icon"><i data-lucide="users" width="22" height="22"></i></span><span class="admin-label">Clientes</span></a>
-    <a class="admin-card servicios" href="/servicios"><span class="admin-icon"><i data-lucide="store" width="22" height="22"></i></span><span class="admin-label">Servicios</span></a>
-    <a class="admin-card gastos" href="/gastos"><span class="admin-icon"><i data-lucide="banknote" width="22" height="22"></i></span><span class="admin-label">Gastos</span></a>
-    <a class="admin-card usuarios" href="/usuarios"><span class="admin-icon"><i data-lucide="user" width="22" height="22"></i></span><span class="admin-label">Usuarios</span></a>
-    <a class="admin-card historial" href="/ventas/historial"><span class="admin-icon"><i data-lucide="clipboard-list" width="22" height="22"></i></span><span class="admin-label">Historial</span></a>
-    <a class="admin-card estadisticas" href="/estadisticas"><span class="admin-icon"><i data-lucide="bar-chart-2" width="22" height="22"></i></span><span class="admin-label">Estadísticas</span></a>
-</div>
-{% endif %}
+</section>
 
 {% endblock %}
 
