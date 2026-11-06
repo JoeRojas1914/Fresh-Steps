@@ -7,10 +7,11 @@ export function fmtDinero(n) {
     return v < 0 ? "-" + txt : txt;
 }
 
+// Escapa también comillas para que sirva dentro de atributos (value="...", data-*="...")
+const _HTML_ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+
 export function escapeHtml(str) {
-    const d = document.createElement("div");
-    d.appendChild(document.createTextNode(String(str ?? "")));
-    return d.innerHTML;
+    return String(str ?? "").replace(/[&<>"']/g, c => _HTML_ESC[c]);
 }
 
 export function normalizar(txt) {

@@ -1,6 +1,6 @@
 import json
 from db import get_db
-from utils import construir_order_by
+from utils import calcular_paginacion, construir_order_by
 
 COLUMNAS_ORDEN_USUARIOS = {
     "usuario":   "usuario",
@@ -34,9 +34,7 @@ def obtener_usuarios(q=None, rol=None, activo=None, pagina=1, por_pagina=20,
 
         cursor.execute(f"SELECT COUNT(*) AS cnt {where}", params)
         total = cursor.fetchone()["cnt"]
-        total_paginas = max(1, (total + por_pagina - 1) // por_pagina)
-
-        offset = (pagina - 1) * por_pagina
+        offset, total_paginas = calcular_paginacion(total, pagina, por_pagina)
         cursor.execute(
             f"""SELECT id_usuario, usuario, nombre, apellido,
                        telefono, correo, cp, rol, activo, creado_en
@@ -59,9 +57,31 @@ def obtener_usuario_por_id(id_usuario):
         return cursor.fetchone()
 
 
-def crear_usuario(usuario_nombre, password_hash, rol, pin_hash,
-                  nombre=None, apellido=None, telefono=None,
-                  correo=None, cp=None):
+def toggle_activo(id_usuario):
+    """Activa/desactiva al usuario. Al desactivarlo se invalida su sesión abierta.
+
+    MySQL evalúa las asignaciones de izquierda a derecha: en el IF, `activo`
+    ya tiene el valor nuevo."""
+    with get_db() as (_, cursor):
+        cursor.execute("""
+            UPDATE usuario
+            SET activo = NOT activo,
+                session_token = IF(activo = 0, NULL, session_token)
+            WHERE id_usuario=%s
+        """, (id_usuario,))
+
+
+def _reemplazar_negocios(cursor, id_usuario, ids_negocio):
+    cursor.execute("DELETE FROM usuario_negocio WHERE id_usuario=%s", (id_usuario,))
+    for id_negocio in ids_negocio:
+        cursor.execute("""
+            INSERT INTO usuario_negocio (id_usuario, id_negocio) VALUES (%s, %s)
+        """, (id_usuario, id_negocio))
+
+
+def crear_usuario_completo(usuario_nombre, password_hash, rol, pin_hash, ids_negocio,
+                           nombre=None, apellido=None, telefono=None, correo=None, cp=None):
+    """Crea el usuario y sus negocios en UNA transacción. Regresa el id."""
     with get_db() as (_, cursor):
         cursor.execute("""
             INSERT INTO usuario
@@ -70,12 +90,17 @@ def crear_usuario(usuario_nombre, password_hash, rol, pin_hash,
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (usuario_nombre, password_hash, rol, pin_hash,
               nombre, apellido, telefono, correo, cp))
-        return cursor.lastrowid
+        nuevo_id = cursor.lastrowid
+        if ids_negocio:
+            _reemplazar_negocios(cursor, nuevo_id, ids_negocio)
+        return nuevo_id
 
 
-def actualizar_usuario(id_usuario, usuario_nombre, rol,
-                       nombre=None, apellido=None, telefono=None,
-                       correo=None, cp=None):
+def actualizar_usuario_completo(id_usuario, usuario_nombre, rol,
+                                nombre=None, apellido=None, telefono=None,
+                                correo=None, cp=None,
+                                password_hash=None, pin_hash=None, ids_negocio=None):
+    """Actualiza datos, password/PIN (si vienen) y negocios (si no es None) en UNA transacción."""
     with get_db() as (_, cursor):
         cursor.execute("""
             UPDATE usuario
@@ -83,23 +108,15 @@ def actualizar_usuario(id_usuario, usuario_nombre, rol,
                 nombre=%s, apellido=%s,
                 telefono=%s, correo=%s, cp=%s
             WHERE id_usuario=%s
-        """, (usuario_nombre, rol,
-              nombre, apellido, telefono, correo, cp,
-              id_usuario))
-
-
-def actualizar_password(id_usuario, password_hash):
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            UPDATE usuario SET password_hash=%s WHERE id_usuario=%s
-        """, (password_hash, id_usuario))
-
-
-def toggle_activo(id_usuario):
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            UPDATE usuario SET activo = NOT activo WHERE id_usuario=%s
-        """, (id_usuario,))
+        """, (usuario_nombre, rol, nombre, apellido, telefono, correo, cp, id_usuario))
+        if password_hash:
+            cursor.execute("UPDATE usuario SET password_hash=%s WHERE id_usuario=%s",
+                           (password_hash, id_usuario))
+        if pin_hash:
+            cursor.execute("UPDATE usuario SET pin_hash=%s WHERE id_usuario=%s",
+                           (pin_hash, id_usuario))
+        if ids_negocio is not None:
+            _reemplazar_negocios(cursor, id_usuario, ids_negocio)
 
 
 def registrar_historial_usuario(id_usuario, accion, antes, despues, admin):
@@ -127,13 +144,6 @@ def obtener_pines_caja(excluir_id=None):
               AND id_usuario != %s
         """, (excluir_id or 0,))
         return cursor.fetchall()
-
-
-def actualizar_pin(id_usuario, pin_hash):
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            UPDATE usuario SET pin_hash=%s WHERE id_usuario=%s
-        """, (pin_hash, id_usuario))
 
 
 def actualizar_session_token(id_usuario, token):
@@ -178,16 +188,6 @@ def obtener_negocios_usuarios(ids_usuario):
         for r in cursor.fetchall():
             resultado.setdefault(r["id_usuario"], []).append(r["id_negocio"])
         return resultado
-
-
-def guardar_negocios_usuario(id_usuario, ids_negocio):
-    """Reemplaza los negocios asignados al usuario."""
-    with get_db() as (_, cursor):
-        cursor.execute("DELETE FROM usuario_negocio WHERE id_usuario=%s", (id_usuario,))
-        for id_negocio in ids_negocio:
-            cursor.execute("""
-                INSERT INTO usuario_negocio (id_usuario, id_negocio) VALUES (%s, %s)
-            """, (id_usuario, id_negocio))
 
 
 def obtener_historial_usuario(id_usuario):

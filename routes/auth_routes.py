@@ -8,7 +8,6 @@ from services.auth_service import (
     registrar_logout_service,
 )
 from extensions import limiter
-from config import BLOQUEO_MIN_PIN
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -82,8 +81,8 @@ def pin_login():
     )
 
     if usuario == "LOCKED":
-        flash(f"Demasiados PIN incorrectos. Espera {BLOQUEO_MIN_PIN} minutos o pide a un "
-              "administrador que inicie sesión en esta terminal para desbloquearla.", "error")
+        flash("Demasiados PIN incorrectos. La terminal quedó bloqueada temporalmente; "
+              "pide a un administrador que inicie sesión en ella para desbloquearla.", "error")
         return render_template("auth/pin.html")
 
     if usuario == "DUPLICADO":
@@ -102,7 +101,7 @@ def pin_login():
     return redirect(url_for("index"))
 
 
-@auth_bp.route("/logout")
+@auth_bp.route("/logout", methods=["POST"])
 def logout():
     pin_habilitado = session.get("pin_habilitado")
     id_usuario     = session.get("id_usuario")

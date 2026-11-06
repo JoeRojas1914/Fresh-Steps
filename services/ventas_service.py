@@ -1,5 +1,6 @@
+import logging
 from datetime import date, datetime, timedelta
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 
 from config import METODOS_PAGO_VALIDOS, POR_PAGINA_VENTAS_ACTIVAS
 from utils import a_entero, a_monto, calcular_paginacion
@@ -27,6 +28,10 @@ from models.pagos import (
 )
 
 from models.negocio import obtener_negocios, cargar_tipos_por_negocio
+from models.clientes import cliente_activo
+from models.servicios import ids_servicios_activos
+
+logger = logging.getLogger(__name__)
 
 
 def semanas_desde(fecha, hoy: date | None = None) -> int:
@@ -222,34 +227,75 @@ def _parsear_prepago(form: dict) -> tuple[bool, Decimal]:
 def _parsear_descuento(form: dict) -> tuple[bool, Decimal]:
     if form.get("aplica_descuento") != "si":
         return False, Decimal(0)
-    try:
-        return True, Decimal(form.get("cantidad_descuento") or "0")
-    except (InvalidOperation, TypeError):
+    raw = form.get("cantidad_descuento")
+    monto = a_monto(raw) if raw not in (None, "") else Decimal(0)
+    if monto is None or monto < 0:
         raise ValueError("El monto del descuento no es válido.")
+    return True, monto
+
+
+def _cantidad(valor) -> int:
+    """Cantidad de piezas: entero >= 1 (vacío = 1)."""
+    if valor in (None, ""):
+        return 1
+    n = a_entero(str(valor).strip())
+    if n is None:
+        raise ValueError("La cantidad debe ser un número entero mayor a 0.")
+    return n
+
+
+def _precio_unitario(valor) -> Decimal:
+    monto = a_monto(valor)
+    if monto is None or monto <= 0:
+        raise ValueError("El precio unitario debe ser mayor a 0.")
+    return monto
+
+
+def _texto(valor) -> str | None:
+    return valor.strip() if isinstance(valor, str) else valor
+
+
+def _parsear_fecha_estimada(valor) -> str | None:
+    """Fecha estimada en formato ISO ('2026-11-06 14:30' o '2026-11-06T14:30'); None si viene vacía."""
+    if not valor or not str(valor).strip():
+        return None
+    try:
+        return datetime.fromisoformat(str(valor).strip()).strftime("%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        raise ValueError("La fecha estimada no es válida.")
+
+
+def validar_servicios_negocio(articulos: list, id_negocio: int) -> None:
+    """Todos los servicios de los artículos deben existir, estar activos y ser del negocio."""
+    ids = {s["id_servicio"] for a in articulos for s in (a.get("servicios") or [])}
+    if not ids:
+        return
+    if ids - ids_servicios_activos(ids, id_negocio):
+        raise ValueError("Uno de los servicios no existe, está eliminado o no pertenece a este negocio.")
 
 
 
 _CAMPOS_ARTICULO: dict[str, dict[str, object]] = {
     "calzado": {
-        "tipo":             str,
-        "marca":            str,
-        "material":         str,
-        "color_base":       str,
-        "color_secundario": str,
-        "color_agujetas":   str,
+        "tipo":             _texto,
+        "marca":            _texto,
+        "material":         _texto,
+        "color_base":       _texto,
+        "color_secundario": _texto,
+        "color_agujetas":   _texto,
     },
     "confeccion": {
-        "tipo":             str,
-        "marca":            str,
-        "material":         str,
-        "color_base":       str,
-        "color_secundario": str,
-        "cantidad":         lambda v: int(v or 1),
+        "tipo":             _texto,
+        "marca":            _texto,
+        "material":         _texto,
+        "color_base":       _texto,
+        "color_secundario": _texto,
+        "cantidad":         _cantidad,
     },
     "maquila": {
-        "tipo":            str,
-        "cantidad":        lambda v: int(v or 1),
-        "precio_unitario": lambda v: Decimal(str(v or 0)),
+        "tipo":            _texto,
+        "cantidad":        _cantidad,
+        "precio_unitario": _precio_unitario,
     },
 }
 
@@ -323,8 +369,8 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None,
         except (KeyError, ValueError):
             return None, "Negocio inválido."
 
-        id_cliente     = form.get("id_cliente") or None
-        fecha_estimada = form.get("fecha_estimada") or None
+        id_cliente     = a_entero(form.get("id_cliente") or "")
+        fecha_estimada = _parsear_fecha_estimada(form.get("fecha_estimada"))
 
         prepago, monto_prepago   = _parsear_prepago(form)
         aplica_descuento, cantidad_descuento = _parsear_descuento(form)
@@ -338,6 +384,10 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None,
             return None, "Debes agregar al menos 1 artículo."
 
         _validar_reglas_negocio(tipo_negocio, articulos)
+        validar_servicios_negocio(articulos, id_negocio)
+
+        if not cliente_activo(id_cliente):
+            return None, "El cliente seleccionado no existe o está eliminado."
 
         datos_prepago = None
         if prepago and monto_prepago > 0:
@@ -376,8 +426,12 @@ def _parsear_servicios(form: dict, i: int) -> list[dict]:
         id_serv = form.get(f"articulos[{i}][servicios][{j}][id_servicio]")
         if not id_serv:
             break
-        precio_ap = form.get(f"articulos[{i}][servicios][{j}][precio_aplicado]") or 0
-        servicios.append({"id_servicio": int(id_serv), "precio_aplicado": Decimal(str(precio_ap or 0))})
+        id_servicio = a_entero(str(id_serv).strip())
+        precio_raw  = form.get(f"articulos[{i}][servicios][{j}][precio_aplicado]")
+        precio_ap   = a_monto(precio_raw) if precio_raw not in (None, "") else Decimal(0)
+        if id_servicio is None or precio_ap is None:
+            raise ValueError("Servicio o precio inválido.")
+        servicios.append({"id_servicio": id_servicio, "precio_aplicado": precio_ap})
         j += 1
     return servicios
 

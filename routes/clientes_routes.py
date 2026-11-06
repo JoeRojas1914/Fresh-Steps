@@ -84,7 +84,7 @@ def guardar_cliente():
         logger.exception("Error al guardar cliente id_usuario=%s", id_usuario)
         flash("Error al guardar el cliente. Verifica los datos.", "error")
     next_url = request.form.get('next', '').strip()
-    if next_url and next_url.startswith('/') and not next_url.startswith('//'):
+    if next_url and next_url.startswith('/') and not next_url.startswith(('//', '/\\')):
         return redirect(next_url)
     return redirect(url_for("clientes.clientes"))
 
@@ -250,6 +250,8 @@ def exportar_cliente_excel(id_cliente):
     cliente, pedidos, detalles_map, pagos_map = exportar_cliente_service(
         id_cliente, id_negocio, fecha_inicio, fecha_fin
     )
+    if not cliente:
+        return render_template("errors/404.html"), 404
 
     nombre_cliente = f"{cliente['nombre']} {cliente['apellido']}"
     filtro_txt = "  ".join(filter(None, [

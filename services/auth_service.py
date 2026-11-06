@@ -1,6 +1,6 @@
 import secrets
 from datetime import datetime
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask import request
 
 from models.login import (
@@ -11,8 +11,11 @@ from models.login import (
     registrar_fallo,
     limpiar_intentos
 )
-from config import MAX_INTENTOS_PIN, BLOQUEO_MIN_PIN, CLAVE_PIN_TERMINAL
+from config import MAX_INTENTOS_PIN, BLOQUEO_MIN_PIN, BLOQUEO_REINCIDENTE_MIN_PIN, CLAVE_PIN_TERMINAL
 from models.usuario import actualizar_session_token
+
+
+_HASH_FALSO = generate_password_hash(secrets.token_hex(16))
 
 
 def _ua() -> str | None:
@@ -69,7 +72,11 @@ def login_password_service(username: str, password: str, ip: str) -> dict | str 
 
     usuario = obtener_usuario_por_username(username)
 
-    if not usuario or not check_password_hash(usuario["password_hash"], password):
+    # Siempre se compara contra un hash (uno falso si el usuario no existe) para
+    # que el tiempo de respuesta no revele qué usuarios existen.
+    hash_bd = (usuario or {}).get("password_hash") or _HASH_FALSO
+    valido  = check_password_hash(hash_bd, password or "")
+    if not usuario or not usuario.get("password_hash") or not valido:
         _fallo(username, "password_admin", ip)
         return None
 
@@ -108,7 +115,8 @@ def login_pin_service(pin: str, ip: str) -> dict | str | None:
         registrar_login_log(None, "pin_caja_duplicado", False, ip, user_agent=_ua())
         return "DUPLICADO"
 
-    registrar_fallo(CLAVE_PIN_TERMINAL, ip, max_intentos=MAX_INTENTOS_PIN, bloqueo_min=BLOQUEO_MIN_PIN)
+    registrar_fallo(CLAVE_PIN_TERMINAL, ip, max_intentos=MAX_INTENTOS_PIN, bloqueo_min=BLOQUEO_MIN_PIN,
+                    bloqueo_reincidente_min=BLOQUEO_REINCIDENTE_MIN_PIN)
     registrar_login_log(None, "pin_caja", False, ip, user_agent=_ua())
     return "LOCKED" if _bloqueado(CLAVE_PIN_TERMINAL, ip) else None
 

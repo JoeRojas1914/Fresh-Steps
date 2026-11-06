@@ -173,3 +173,18 @@ def restaurar_servicio(id_servicio, id_usuario):
         """, (id_servicio,))
 
         registrar_historial(cursor, id_servicio, "RESTAURADO", id_usuario, antes, None)
+
+
+def ids_servicios_activos(ids_servicio, id_negocio):
+    """Subconjunto de `ids_servicio` que existen, están activos y son de ese negocio."""
+    ids = list({int(i) for i in ids_servicio})
+    if not ids:
+        return set()
+    ph = ",".join(["%s"] * len(ids))
+    with get_db() as (_, cursor):
+        cursor.execute(
+            f"SELECT id_servicio FROM servicio"
+            f" WHERE activo = 1 AND id_negocio = %s AND id_servicio IN ({ph})",
+            [id_negocio] + ids,
+        )
+        return {r["id_servicio"] for r in cursor.fetchall()}

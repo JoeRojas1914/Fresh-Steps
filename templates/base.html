@@ -76,10 +76,13 @@
                         <i data-lucide="user" width="16" height="16"></i>
                         Mi perfil
                     </a>
-                    <a href="{{ url_for('auth.logout') }}">
-                        <i data-lucide="log-out" width="16" height="16"></i>
-                        Cerrar sesión
-                    </a>
+                    <form method="post" action="{{ url_for('auth.logout') }}" class="nav-user-logout">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit">
+                            <i data-lucide="log-out" width="16" height="16"></i>
+                            Cerrar sesión
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

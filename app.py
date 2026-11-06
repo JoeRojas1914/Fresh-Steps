@@ -60,6 +60,12 @@ from services.permisos_service import negocios_permitidos, restringir_negocios
 load_dotenv()
 app = Flask(__name__)
 
+# Detrás de un proxy inverso (nginx, IIS…) define TRUST_PROXY=1 para que
+# request.remote_addr sea la IP real de la terminal (bloqueo de PIN y rate limit).
+if os.getenv("TRUST_PROXY") == "1":  # pragma: no cover
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
 from utils import dinero, fecha, fecha_hora  # noqa: E402
 app.add_template_filter(dinero)
 app.add_template_filter(fecha)

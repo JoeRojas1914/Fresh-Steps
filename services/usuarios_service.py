@@ -1,3 +1,4 @@
+import json
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 import models.usuario as usuario
@@ -25,6 +26,19 @@ def _validar_negocios(negocios) -> list[int]:
     return ids
 
 
+ROLES_VALIDOS = {"admin", "caja"}
+
+# Columnas que nunca deben quedar en el historial ni salir por la API
+_CAMPOS_SECRETOS = ("password_hash", "pin_hash", "session_token")
+
+
+def _snapshot_usuario(fila: dict | None) -> dict | None:
+    """Copia de la fila del usuario sin hashes ni token de sesión."""
+    if not fila:
+        return fila
+    return {k: v for k, v in fila.items() if k not in _CAMPOS_SECRETOS}
+
+
 def guardar_usuario_service(
     id_usuario: int | None,
     username: str,
@@ -41,7 +55,8 @@ def guardar_usuario_service(
     """Crea o edita un usuario.
 
     `negocios`: negocios que el usuario de caja puede ver. Obligatorio al crear;
-    al editar, None significa "no cambiar los negocios asignados"."""
+    al editar, None significa "no cambiar los negocios asignados".
+    Todo se valida antes de escribir y se guarda en una sola transacción."""
     admin = session.get("usuario")
 
     if not username or not username.strip():
@@ -53,6 +68,8 @@ def guardar_usuario_service(
 
     if not id_usuario:
         rol = rol or "caja"
+        if rol not in ROLES_VALIDOS:
+            raise ValueError("Rol inválido.")
 
         validar_password(password, obligatorio=True)
         pin = validar_pin(pin)
@@ -62,15 +79,10 @@ def guardar_usuario_service(
 
         ids_negocio = _validar_negocios(negocios) if rol == "caja" else []
 
-        password_hash = generate_password_hash(password)
-        pin_hash      = generate_password_hash(pin)
-
-        nuevo_id = usuario.crear_usuario(
-            username, password_hash, rol, pin_hash,
-            nombre, apellido, telefono, correo, cp
+        nuevo_id = usuario.crear_usuario_completo(
+            username, generate_password_hash(password), rol, generate_password_hash(pin),
+            ids_negocio, nombre, apellido, telefono, correo, cp,
         )
-        if ids_negocio:
-            usuario.guardar_negocios_usuario(nuevo_id, ids_negocio)
 
         usuario.registrar_historial_usuario(
             nuevo_id, "CREADO", None,
@@ -85,30 +97,36 @@ def guardar_usuario_service(
     if not antes:
         raise ValueError(f"Usuario con id {id_usuario} no encontrado.")
     if antes["rol"] == "admin":
-        return
+        raise ValueError("Los administradores no se pueden editar desde esta pantalla.")
 
-    ids_negocio = _validar_negocios(negocios) if negocios is not None else None
-    antes["negocios"] = usuario.obtener_negocios_usuario(id_usuario)
+    rol = rol or antes["rol"]
+    if rol not in ROLES_VALIDOS:
+        raise ValueError("Rol inválido.")
 
-    usuario.actualizar_usuario(
-        id_usuario, username, rol,
-        nombre, apellido, telefono, correo, cp
-    )
-
-    if password:
-        validar_password(password)
-        usuario.actualizar_password(id_usuario, generate_password_hash(password))
-
-    pin = validar_pin(pin)
+    # Validar todo ANTES de escribir para no dejar ediciones a medias
+    password      = validar_password(password)
+    pin           = validar_pin(pin)
     if pin:
         _verificar_pin_unico(pin, excluir_id=id_usuario)
-        usuario.actualizar_pin(id_usuario, generate_password_hash(pin))
+    ids_negocio   = _validar_negocios(negocios) if negocios is not None else None
 
-    if ids_negocio is not None:
-        usuario.guardar_negocios_usuario(id_usuario, ids_negocio)
+    antes = _snapshot_usuario(antes)
+    antes["negocios"] = usuario.obtener_negocios_usuario(id_usuario)
 
-    despues = usuario.obtener_usuario_por_id(id_usuario)
+    usuario.actualizar_usuario_completo(
+        id_usuario, username, rol,
+        nombre, apellido, telefono, correo, cp,
+        password_hash=generate_password_hash(password) if password else None,
+        pin_hash=generate_password_hash(pin) if pin else None,
+        ids_negocio=ids_negocio,
+    )
+
+    despues = _snapshot_usuario(usuario.obtener_usuario_por_id(id_usuario))
     despues["negocios"] = usuario.obtener_negocios_usuario(id_usuario)
+    if password:
+        despues["password_cambiado"] = True
+    if pin:
+        despues["pin_cambiado"] = True
 
     usuario.registrar_historial_usuario(
         id_usuario, "EDITADO", antes, despues, admin
@@ -125,7 +143,7 @@ def toggle_usuario_service(id_usuario: int) -> int | None:
     usuario.toggle_activo(id_usuario)
     despues = usuario.obtener_usuario_por_id(id_usuario)
     usuario.registrar_historial_usuario(
-        id_usuario, "TOGGLE_ACTIVO", antes, despues, admin
+        id_usuario, "TOGGLE_ACTIVO", _snapshot_usuario(antes), _snapshot_usuario(despues), admin
     )
     return despues["activo"]
 
@@ -147,5 +165,24 @@ def listar_usuarios_service(
     return data
 
 
+def _limpiar_json_historial(texto):
+    """Quita los campos secretos de un JSON de historial (registros antiguos los incluían)."""
+    if not texto:
+        return texto
+    if isinstance(texto, dict):
+        return json.dumps(_snapshot_usuario(texto), default=str)
+    try:
+        datos = json.loads(texto)
+    except (TypeError, ValueError):
+        return texto
+    if isinstance(datos, dict):
+        datos = _snapshot_usuario(datos)
+    return json.dumps(datos, default=str)
+
+
 def obtener_historial_usuario_service(id_usuario: int) -> list[dict]:
-    return usuario.obtener_historial_usuario(id_usuario)
+    filas = usuario.obtener_historial_usuario(id_usuario)
+    for f in filas:
+        f["datos_antes"]   = _limpiar_json_historial(f.get("datos_antes"))
+        f["datos_despues"] = _limpiar_json_historial(f.get("datos_despues"))
+    return filas

@@ -1,4 +1,7 @@
-from utils import calcular_paginacion
+from datetime import date
+
+from config import PAGO_LABEL, COMPROBANTE_LABEL
+from utils import a_monto, calcular_paginacion
 from models.negocio import obtener_negocios  # re-exported for routes
 from models.gastos import (
     crear_gasto,
@@ -54,7 +57,27 @@ def listar_gastos(
     }
 
 
+def _validar_gasto(datos: tuple) -> None:
+    """datos = (id_negocio, id_categoria, descripcion, proveedor, total,
+                fecha_registro, tipo_comprobante, tipo_pago, notas)"""
+    _, _, descripcion, _, total, fecha_registro, tipo_comprobante, tipo_pago, _ = datos
+    if not descripcion:
+        raise ValueError("La descripción es obligatoria.")
+    monto = a_monto(total)
+    if monto is None or monto < 0:
+        raise ValueError("El total del gasto no es válido.")
+    try:
+        date.fromisoformat(str(fecha_registro))
+    except ValueError:
+        raise ValueError("La fecha del gasto no es válida.")
+    if tipo_comprobante not in COMPROBANTE_LABEL:
+        raise ValueError("Tipo de comprobante no válido.")
+    if tipo_pago not in PAGO_LABEL:
+        raise ValueError("Método de pago no válido.")
+
+
 def guardar_gasto_service(id_gasto: str | None, datos: tuple, id_usuario: int) -> str:
+    _validar_gasto(datos)
     if id_gasto:
         actualizar_gasto(id_gasto, *datos, id_usuario)
         return "actualizado"

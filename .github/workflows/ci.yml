@@ -33,9 +33,6 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Install system dependencies for mysqlclient
-        run: sudo apt-get install -y default-libmysqlclient-dev build-essential pkg-config
-
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
@@ -49,12 +46,9 @@ jobs:
             GRANT ALL PRIVILEGES ON freshsteps.* TO 'FreshStepsTest'@'%';
             FLUSH PRIVILEGES;
           "
-          for f in migrations/001_schema_completo.sql \
-                   migrations/002_indices_performance.sql \
-                   migrations/003_gastos_categoria_notas.sql \
-                   migrations/004_indices.sql; do
-            mysql -h 127.0.0.1 -uroot -p"${MYSQL_ROOT_PASSWORD}" freshsteps < "$f"
-          done
+          # 001 ya incluye todas las migraciones incrementales (ver migrations/README.md)
+          mysql -h 127.0.0.1 -uroot -p"${MYSQL_ROOT_PASSWORD}" freshsteps < migrations/001_schema_completo.sql
+          mkdir -p scripts
 
       - name: Write test env file
         env:

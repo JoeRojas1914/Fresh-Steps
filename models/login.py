@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from db import get_db
-from config import MAX_INTENTOS_LOGIN, BLOQUEO_MIN_LOGIN
+from config import MAX_INTENTOS_LOGIN, BLOQUEO_MIN_LOGIN, VENTANA_REINCIDENCIA_HORAS
 
 
 def obtener_usuario_por_username(username):
@@ -48,7 +48,12 @@ def obtener_intentos(usuario, ip):
         return cursor.fetchone()
 
 
-def registrar_fallo(usuario, ip, max_intentos=MAX_INTENTOS_LOGIN, bloqueo_min=BLOQUEO_MIN_LOGIN):
+def registrar_fallo(usuario, ip, max_intentos=MAX_INTENTOS_LOGIN, bloqueo_min=BLOQUEO_MIN_LOGIN,
+                    bloqueo_reincidente_min=None):
+    """Suma un fallo y bloquea al llegar a `max_intentos`.
+
+    Con `bloqueo_reincidente_min`, un bloqueo que ocurre dentro de la ventana de
+    reincidencia tras el anterior dura ese tiempo en vez de `bloqueo_min`."""
     with get_db() as (_, cursor):
         cursor.execute("""
             SELECT *
@@ -67,7 +72,12 @@ def registrar_fallo(usuario, ip, max_intentos=MAX_INTENTOS_LOGIN, bloqueo_min=BL
             intentos = 1 if bloqueo_vencido else row["intentos"] + 1
 
             if intentos >= max_intentos:
-                bloqueo = datetime.now() + timedelta(minutes=bloqueo_min)
+                minutos = bloqueo_min
+                if (bloqueo_reincidente_min and row["bloqueado_hasta"]
+                        and datetime.now() - row["bloqueado_hasta"]
+                        < timedelta(hours=VENTANA_REINCIDENCIA_HORAS)):
+                    minutos = bloqueo_reincidente_min
+                bloqueo = datetime.now() + timedelta(minutes=minutos)
                 cursor.execute("""
                     UPDATE login_intentos
                     SET intentos=%s, bloqueado_hasta=%s

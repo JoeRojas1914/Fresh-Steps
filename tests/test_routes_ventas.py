@@ -202,10 +202,52 @@ def test_pago_final_valido_200(logged_client, venta_pendiente):
     assert res.get_json()["ok"] is True
 
 
-def test_entregar_venta_200(logged_client, venta_pendiente):
+def _lista_y_pagada(client, db_conn, id_venta, id_usuario, monto="150.00"):
+    """Marca la venta como lista y registra un pago que liquida el saldo."""
+    client.post(f"/ventas/marcar-lista/{id_venta}")
+    cur = db_conn.cursor()
+    cur.execute(
+        "INSERT INTO pago_venta (id_venta, fecha_pago, monto, tipo_pago, tipo_pago_venta, id_usuario_cobro)"
+        " VALUES (%s, NOW(), %s, 'efectivo', 'prepago', %s)",
+        (id_venta, monto, id_usuario),
+    )
+    db_conn.commit()
+    cur.close()
+
+
+def test_entregar_venta_200(logged_client, venta_pendiente, db_conn, usuario_admin):
+    _lista_y_pagada(logged_client, db_conn, venta_pendiente["id_venta"], usuario_admin["id_usuario"])
     res = logged_client.post(f"/ventas/entregar/{venta_pendiente['id_venta']}")
     assert res.status_code == 200
     assert res.get_json()["ok"] is True
+
+
+def test_entregar_venta_pendiente_rechazada(logged_client, venta_pendiente):
+    """Una venta que no está lista no se puede entregar."""
+    res = logged_client.post(f"/ventas/entregar/{venta_pendiente['id_venta']}")
+    assert res.status_code == 400
+    assert res.get_json()["ok"] is False
+
+
+def test_entregar_venta_con_saldo_rechazada(logged_client, venta_pendiente):
+    """Una venta lista con saldo pendiente solo se entrega con el pago final."""
+    logged_client.post(f"/ventas/marcar-lista/{venta_pendiente['id_venta']}")
+    res = logged_client.post(f"/ventas/entregar/{venta_pendiente['id_venta']}")
+    assert res.status_code == 400
+    assert "saldo" in res.get_json()["error"].lower()
+
+
+def test_entregar_venta_eliminada_rechazada(logged_client, venta_pendiente, db_conn, usuario_admin):
+    _lista_y_pagada(logged_client, db_conn, venta_pendiente["id_venta"], usuario_admin["id_usuario"])
+    logged_client.post(f"/ventas/eliminar/{venta_pendiente['id_venta']}")
+    res = logged_client.post(f"/ventas/entregar/{venta_pendiente['id_venta']}")
+    assert res.get_json()["ok"] is False
+
+
+def test_marcar_lista_venta_eliminada_rechazada(logged_client, venta_pendiente):
+    logged_client.post(f"/ventas/eliminar/{venta_pendiente['id_venta']}")
+    res = logged_client.post(f"/ventas/marcar-lista/{venta_pendiente['id_venta']}")
+    assert res.get_json()["ok"] is False
 
 
 # ===========================================================================

@@ -25,7 +25,8 @@ def test_login_credenciales_incorrectas(page, base_url):
 
 
 def test_logout(page, base_url, admin_page):
-    admin_page.goto(f"{base_url}/logout")
+    admin_page.click("#userBtn")
+    admin_page.click(".nav-user-logout button")
     expect(admin_page).to_have_url(f"{base_url}/login")
 
 

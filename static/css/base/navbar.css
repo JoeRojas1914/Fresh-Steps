@@ -186,7 +186,8 @@
     pointer-events: auto;
 }
 
-.nav-user-menu a {
+.nav-user-menu a,
+.nav-user-logout button {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -203,11 +204,20 @@
     color: #111827;
 }
 
-.nav-user-menu a:last-child {
+.nav-user-logout { margin: 0; }
+
+.nav-user-logout button {
+    width: 100%;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
     color: #dc2626;
 }
 
-.nav-user-menu a:last-child:hover {
+.nav-user-logout button:hover,
+.nav-user-logout button:focus-visible {
     background: #fff5f5;
     color: #b91c1c;
 }

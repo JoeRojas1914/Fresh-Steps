@@ -8,6 +8,10 @@ BLOQUEO_MIN_LOGIN  = 10
 
 MAX_INTENTOS_PIN = 5
 BLOQUEO_MIN_PIN  = 5
+# Si la terminal vuelve a bloquearse dentro de las 24 h siguientes a un bloqueo,
+# el nuevo bloqueo dura más (frena la fuerza bruta del PIN).
+BLOQUEO_REINCIDENTE_MIN_PIN = 60
+VENTANA_REINCIDENCIA_HORAS  = 24
 CLAVE_PIN_TERMINAL = "__pin_terminal__"
 
 # Paginación
@@ -25,5 +29,6 @@ TIPO_PAGO_PREPAGO = "prepago"
 TIPO_PAGO_FINAL   = "final"
 
 # Etiquetas legibles para exportaciones y reportes
+# Métodos de pago y comprobantes de GASTOS (distintos de los de ventas)
 PAGO_LABEL = {"efectivo": "Efectivo", "transferencia": "Transferencia", "TDC": "Tarjeta de crédito"}
 COMPROBANTE_LABEL = {"factura": "Factura", "ticket": "Ticket"}

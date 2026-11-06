@@ -40,10 +40,20 @@ BORDE_MED = Border(
 )
 
 
+_PREFIJOS_FORMULA = ("=", "+", "-", "@", "\t", "\r")
+
+
+def texto_seguro(value):
+    """Evita que un texto capturado por el usuario se interprete como fórmula en Excel."""
+    if isinstance(value, str) and value.startswith(_PREFIJOS_FORMULA):
+        return "'" + value
+    return value
+
+
 def xl_cell(ws, r, col, value="", bold=False, fg=None, color=None,
             align="left", num_fmt=None, italic=False, size=9, wrap=False):
     """Escribe y estiliza una celda."""
-    c = ws.cell(row=r, column=col, value=value)
+    c = ws.cell(row=r, column=col, value=texto_seguro(value))
     c.font = Font(
         bold=bold, italic=italic,
         color=color or C["dark"],
@@ -79,7 +89,7 @@ def xl_titulo_hoja(ws, texto, ncols, subtexto=""):
 
     ws.merge_cells(f"A2:{get_column_letter(ncols)}2")
     s = ws["A2"]
-    s.value     = subtexto or "Fresh Steps"
+    s.value     = texto_seguro(subtexto or "Fresh Steps")
     s.font      = Font(italic=True, color=C["gris_txt"], name="Arial", size=9)
     s.fill      = PatternFill("solid", fgColor=C["azul_cl"])
     s.alignment = Alignment(horizontal="left", vertical="center")

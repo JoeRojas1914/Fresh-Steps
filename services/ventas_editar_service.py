@@ -8,7 +8,12 @@ from models.ventas_editar import (
     editar_venta,
 )
 from models.negocio import cargar_tipos_por_negocio
-from services.ventas_service import _parsear_articulos_form, _validar_reglas_negocio
+from services.ventas_service import (
+    _parsear_articulos_form,
+    _parsear_fecha_estimada,
+    _validar_reglas_negocio,
+    validar_servicios_negocio,
+)
 
 
 def _validar_precios_edicion(ediciones_servicio: list) -> None:
@@ -153,7 +158,8 @@ def editar_venta_service(id_venta: int, form, id_usuario: int) -> dict:
 
     fecha_fecha = (form.get("fecha_estimada_fecha") or "").strip()
     fecha_hora  = (form.get("fecha_estimada_hora") or "").strip()
-    fecha_estimada = f"{fecha_fecha} {fecha_hora}:00" if (fecha_fecha and fecha_hora) else None
+    fecha_estimada = (_parsear_fecha_estimada(f"{fecha_fecha} {fecha_hora}")
+                      if (fecha_fecha and fecha_hora) else None)
 
     id_cliente_raw   = (form.get("id_cliente_nuevo") or "").strip()
     id_cliente_nuevo = int(id_cliente_raw) if id_cliente_raw.isdigit() else None
@@ -182,6 +188,7 @@ def editar_venta_service(id_venta: int, form, id_usuario: int) -> dict:
         raise ValueError("No hay cambios para guardar.")
 
     _validar_precios_edicion(ediciones_servicio)
+    validar_servicios_negocio(nuevos_articulos + nuevos_servicios, id_negocio)
     _validar_post_eliminaciones(id_venta, tipo_negocio, eliminaciones_servicio)
 
     return editar_venta(

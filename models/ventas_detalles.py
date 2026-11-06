@@ -309,7 +309,7 @@ def contar_ventas_cliente(id_cliente, id_negocio=None, fecha_inicio=None, fecha_
             sql += " AND v.fecha_recibo >= %s"
             params.append(fecha_inicio)
         if fecha_fin:
-            sql += " AND v.fecha_recibo <= %s"
+            sql += " AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)"  # incluye todo ese día
             params.append(fecha_fin)
         cursor.execute(sql, params)
         return cursor.fetchone()["total"]
@@ -335,7 +335,7 @@ def obtener_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin, limi
             sql += " AND v.fecha_recibo >= %s"
             params.append(fecha_inicio)
         if fecha_fin:
-            sql += " AND v.fecha_recibo <= %s"
+            sql += " AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)"  # incluye todo ese día
             params.append(fecha_fin)
         sql += construir_order_by(orden, direccion, "v.fecha_recibo DESC",
                                   COLUMNAS_ORDEN_PEDIDOS_CLIENTE)

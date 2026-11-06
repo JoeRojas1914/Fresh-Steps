@@ -40,13 +40,18 @@ Two flows, both using `werkzeug.security.check_password_hash`:
 - **Admin** — username + password via `login_password_service()`
 - **Caja** — PIN-only via `login_pin_service()`
 
-Middleware in `middleware/auth_middleware.py` enforces session validity and per-role timeouts (15 min admin, 20 min caja). `ultima_actividad` must be set in session or the request is rejected.
+Middleware in `middleware/auth_middleware.py` enforces session validity (the `session_token` in the cookie must match `usuario.session_token`) and per-role inactivity timeouts from `config.py` (`TIMEOUT_ADMIN` = 10 min, `TIMEOUT_CAJA` = 60 min). Caja users can only reach endpoints listed in `RUTAS_CAJA`; admin-only routes also carry `@admin_required`.
+
+- Deactivating a user clears its `session_token`, which logs it out on the next request.
+- PIN failures are counted per terminal (IP) under `CLAVE_PIN_TERMINAL`; a repeat lockout within 24 h lasts `BLOQUEO_REINCIDENTE_MIN_PIN`. Behind a reverse proxy set `TRUST_PROXY=1` so `remote_addr` is the real terminal IP.
+- `logout` is POST-only (form in `base.html`).
+- `historial_usuario` must never store `password_hash`, `pin_hash` or `session_token` — use `_snapshot_usuario()` in `services/usuarios_service.py`.
 
 ## Database
 
 - Production DB: `freshstepsproduccion`
 - Test DB: `freshsteps` (configured in `scripts/.env.test`)
-- Full schema: `migrations/001_schema_completo.sql` — apply to an empty DB with `mysql -u user -p freshsteps < migrations/001_schema_completo.sql`
+- Full schema: `migrations/001_schema_completo.sql` — apply to an empty DB with `mysql -u user -p freshsteps < migrations/001_schema_completo.sql`. It already contains every incremental migration; `002+` files are only for existing DBs (CI applies only `001`).
 
 ## Tests
 
@@ -72,9 +77,9 @@ for u in ('test_admin_pytest', 'test_caja_pytest'):
 conn.commit()
 ```
 
-## Frontend state (static/js/pages/ventas_crear.js)
+## Frontend state (static/js/pages/ventas_state.js)
 
-All mutable state lives in a single object `ventaState` (declared once with `typeof` guard):
+All mutable state of the "crear venta" page lives in a single sealed object exported from `ventas_state.js`:
 
 ```javascript
 ventaState.contadorArticulos   // int
@@ -83,4 +88,9 @@ ventaState.negocioSeleccionado // string
 ventaState.enProceso           // bool
 ```
 
-Template files call JS functions directly via `oninput`/`onclick` — do not rename public functions without updating the Jinja templates.
+The CSP is `script-src 'self'` with no `unsafe-inline`: templates must not use inline `<script>` or `on*=` handlers — wire events in the JS modules. Use `escapeHtml()` from `static/js/base/helpers.js` for any user data placed into `innerHTML` (it also escapes quotes, so it is safe inside attributes).
+
+## Business rules enforced server-side
+
+- A venta can only be delivered (`marcar_entregada`) when it is `lista`, not deleted and has no saldo pendiente; otherwise it must go through `registrar_pago_final_y_entregar`.
+- Excel exports go through `xl_cell` / `texto_seguro` in `services/excel_helpers.py`, which neutralizes cell values starting with `= + - @` (formula injection).

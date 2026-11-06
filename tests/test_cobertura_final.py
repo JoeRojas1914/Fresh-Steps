@@ -147,10 +147,9 @@ def test_guardar_usuario_service_editar_inexistente(app):
 
 
 def test_guardar_usuario_service_editar_admin_no_cambia(app, usuario_admin):
-    """Cubre usuarios_service.py:58 — editar un admin retorna sin hacer cambios."""
+    """Editar un admin desde la pantalla de usuarios se rechaza con un error claro."""
     from services.usuarios_service import guardar_usuario_service
-    with app.test_request_context("/"):
-        # No debe lanzar excepción; simplemente retorna (return early)
+    with app.test_request_context("/"), pytest.raises(ValueError, match="administradores"):
         guardar_usuario_service(
             usuario_admin["id_usuario"],
             usuario_admin["usuario"],
@@ -575,8 +574,10 @@ def test_exportar_historial_tipo_fecha_invalido(logged_client):
 
 def test_entregar_venta_ya_entregada(logged_client, venta_pendiente, usuario_admin):
     """Cubre ventas_routes.py:104-107 — entregar venta ya entregada retorna ok:False."""
-    from services.ventas_service import marcar_entregada
-    marcar_entregada(venta_pendiente["id_venta"], usuario_admin["id_usuario"])
+    logged_client.post(f"/ventas/marcar-lista/{venta_pendiente['id_venta']}")
+    logged_client.post("/ventas/pago-final", json={
+        "id_venta": venta_pendiente["id_venta"], "monto": "150.00", "metodo_pago": "efectivo",
+    })
     res = logged_client.post(f"/ventas/entregar/{venta_pendiente['id_venta']}")
     assert res.status_code == 200
     data = res.get_json()

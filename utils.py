@@ -126,7 +126,10 @@ def construir_order_by(
 
 
 def calcular_paginacion(total: int, pagina: int, por_pagina: int) -> tuple[int, int]:
-    """Devuelve (offset, total_paginas). Garantiza mínimo 1 página."""
+    """Devuelve (offset, total_paginas). Garantiza mínimo 1 página.
+
+    Una página <= 0 (o inválida) se trata como la 1: un OFFSET negativo rompe el SQL."""
+    pagina        = pagina if isinstance(pagina, int) and pagina > 0 else 1
     offset        = (pagina - 1) * por_pagina
     total_paginas = max(1, (total + por_pagina - 1) // por_pagina)
     return offset, total_paginas

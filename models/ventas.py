@@ -3,8 +3,6 @@ from decimal import Decimal
 from db import get_db
 from config import TIPO_PAGO_FINAL
 from utils import dinero
-from .ventas_historial import registrar_historial_venta
-
 from .ventas_crear import crear_venta
 from .ventas_historial import (
     registrar_historial_venta,
@@ -26,21 +24,59 @@ from .ventas_detalles import (
 )
 
 
+class VentaNoDisponible(ValueError):
+    """La venta no existe, está eliminada o ya fue entregada."""
+
+
+def _bloquear_venta_para_entrega(cursor, id_venta):
+    """Bloquea la venta (FOR UPDATE) y regresa (venta, saldo_pendiente).
+
+    Lanza ValueError si no existe, está eliminada, ya se entregó o no está lista."""
+    cursor.execute("""
+        SELECT total, fecha_lista, fecha_entrega, eliminado
+        FROM venta
+        WHERE id_venta = %s
+        FOR UPDATE
+    """, (id_venta,))
+    venta = cursor.fetchone()
+    if not venta or venta["eliminado"]:
+        raise VentaNoDisponible("La venta no existe.")
+    if venta["fecha_entrega"]:
+        raise VentaNoDisponible("La venta ya fue entregada.")
+    if not venta["fecha_lista"]:
+        raise ValueError("La venta todavía no está lista para entregar.")
+
+    cursor.execute(
+        "SELECT COALESCE(SUM(monto), 0) AS pagado FROM pago_venta WHERE id_venta = %s",
+        (id_venta,),
+    )
+    saldo = Decimal(str(venta["total"])) - Decimal(str(cursor.fetchone()["pagado"]))
+    return venta, saldo
+
+
 def marcar_entregada(id_venta, id_usuario):
+    """Entrega una venta lista y ya pagada por completo.
+
+    Regresa False si la venta ya estaba entregada o no existe. Lanza ValueError
+    si no está lista o tiene saldo pendiente (debe cobrarse con el pago final)."""
     with get_db() as (_, cursor):
+        try:
+            _, saldo = _bloquear_venta_para_entrega(cursor, id_venta)
+        except VentaNoDisponible:
+            return False
+        if saldo > 0:
+            raise ValueError(
+                f"La venta tiene saldo pendiente ({dinero(saldo)}). Registra el pago final para entregarla."
+            )
+
         cursor.execute("""
             UPDATE venta
             SET fecha_entrega = NOW(),
                 id_usuario_entrego = %s
             WHERE id_venta = %s
-              AND fecha_entrega IS NULL
         """, (id_usuario, id_venta))
-
-        afectadas = cursor.rowcount
-        if afectadas > 0:
-            registrar_historial_venta(cursor, id_venta, "ENTREGADO", id_usuario)
-
-        return afectadas > 0
+        registrar_historial_venta(cursor, id_venta, "ENTREGADO", id_usuario)
+        return True
 
 
 def registrar_pago_final_y_entregar(id_venta, monto: Decimal, metodo_pago, id_usuario):
@@ -51,25 +87,7 @@ def registrar_pago_final_y_entregar(id_venta, monto: Decimal, metodo_pago, id_us
     venta no existe, está eliminada, no está lista, ya se entregó, no tiene
     saldo o el monto no es exactamente el saldo pendiente."""
     with get_db() as (_, cursor):
-        cursor.execute("""
-            SELECT total, fecha_lista, fecha_entrega, eliminado
-            FROM venta
-            WHERE id_venta = %s
-            FOR UPDATE
-        """, (id_venta,))
-        venta = cursor.fetchone()
-        if not venta or venta["eliminado"]:
-            raise ValueError("La venta no existe.")
-        if venta["fecha_entrega"]:
-            raise ValueError("La venta ya fue entregada.")
-        if not venta["fecha_lista"]:
-            raise ValueError("La venta todavía no está lista para entregar.")
-
-        cursor.execute(
-            "SELECT COALESCE(SUM(monto), 0) AS pagado FROM pago_venta WHERE id_venta = %s",
-            (id_venta,),
-        )
-        saldo = Decimal(str(venta["total"])) - Decimal(str(cursor.fetchone()["pagado"]))
+        _, saldo = _bloquear_venta_para_entrega(cursor, id_venta)
         if saldo <= 0:
             raise ValueError("La venta no tiene saldo pendiente.")
         if monto != saldo:
@@ -98,6 +116,7 @@ def marcar_como_lista(id_venta, id_usuario=None):
             WHERE id_venta = %s
               AND fecha_lista IS NULL
               AND fecha_entrega IS NULL
+              AND eliminado = 0
         """, (id_venta,))
 
         afectadas = cursor.rowcount

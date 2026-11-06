@@ -1,5 +1,7 @@
 import time
 
+from utils import a_monto, calcular_paginacion
+
 from models.negocio import obtener_negocios
 from models.servicios import (
     contar_servicios,
@@ -26,15 +28,13 @@ def listar_servicios(
     orden: str | None = None,
     direccion: str | None = None,
 ) -> dict:
-    offset = (pagina - 1) * por_pagina
-
     total = contar_servicios(
         id_negocio=id_negocio,
         q=q,
         incluir_eliminados=incluir_eliminados
     )
 
-    total_paginas = (total + por_pagina - 1) // por_pagina
+    offset, total_paginas = calcular_paginacion(total, pagina, por_pagina)
 
     servicios = obtener_servicios(
         id_negocio=id_negocio,
@@ -74,6 +74,11 @@ def guardar_servicio_service(
     precio: float,
     id_usuario: int,
 ) -> str:
+    if not nombre:
+        raise ValueError("El nombre del servicio es obligatorio.")
+    monto = a_monto(precio)
+    if monto is None or monto < 0:
+        raise ValueError("El precio del servicio no es válido.")
     if existe_servicio_activo(id_negocio, nombre, excluir_id=id_servicio or None):
         raise ValueError(f"Ya existe un servicio activo con el nombre '{nombre}' en este negocio.")
     if id_servicio:

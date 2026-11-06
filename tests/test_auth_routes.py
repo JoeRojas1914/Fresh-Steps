@@ -179,7 +179,7 @@ def test_logout_con_pin_habilitado_redirige_a_pin(client, usuario_admin):
         ultima_actividad=datetime.now().isoformat(),
         rol="admin",
     )
-    res = _req("get", client, "/logout", follow_redirects=False)
+    res = _req("post", client, "/logout", follow_redirects=False)
     assert res.status_code == 302
     assert "pin" in res.headers.get("Location", "")
 
@@ -196,7 +196,7 @@ def test_logout_sin_pin_habilitado_redirige_a_login(client, usuario_admin):
         ultima_actividad=datetime.now().isoformat(),
         rol="admin",
     )
-    res = _req("get", client, "/logout", follow_redirects=False)
+    res = _req("post", client, "/logout", follow_redirects=False)
     assert res.status_code == 302
     assert "login" in res.headers.get("Location", "")
 
@@ -214,5 +214,5 @@ def test_logout_sin_username_en_sesion(client, usuario_admin):
         ultima_actividad=datetime.now().isoformat(),
         rol="admin",
     )
-    res = _req("get", client, "/logout", follow_redirects=False)
+    res = _req("post", client, "/logout", follow_redirects=False)
     assert res.status_code == 302

@@ -28,6 +28,7 @@ from services.servicios_service import (
 servicios_bp = Blueprint("servicios", __name__)
 
 @servicios_bp.route("/servicios")
+@admin_required
 def servicios():
     q = request.args.get("q", "")
     id_negocio = ids_de_args(request.args)
@@ -126,6 +127,7 @@ def api_servicios():
 
 
 @servicios_bp.route("/servicios/<int:id_servicio>/historial")
+@admin_required
 def historial_servicio(id_servicio):
     data = obtener_historial_servicio_service(id_servicio)
     return jsonify(data)

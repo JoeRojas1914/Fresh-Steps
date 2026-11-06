@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from utils import calcular_paginacion
+from utils import a_entero, calcular_paginacion
 from validators import validar_nombre, validar_correo, validar_telefono
 from models.clientes import (
     buscar_clientes,
@@ -126,7 +126,7 @@ def obtener_cliente_detalle_service(
     id_negocio   = filtros.get("id_negocio")
     fecha_inicio = filtros.get("fecha_inicio")
     fecha_fin    = filtros.get("fecha_fin")
-    pagina       = int(filtros.get("pagina", 1))
+    pagina       = a_entero(filtros.get("pagina") or "") or 1
 
     cliente       = obtener_cliente_por_id(id_cliente)
     total_pedidos = contar_ventas_cliente(id_cliente, id_negocio, fecha_inicio, fecha_fin)

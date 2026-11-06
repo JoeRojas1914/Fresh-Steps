@@ -59,6 +59,7 @@ def gastos():
 
 
 @gastos_bp.route("/gastos/guardar", methods=["POST"])
+@admin_required
 @limiter.limit("30 per minute")
 def guardar_gasto():
     id_gasto   = request.form.get("id_gasto")
@@ -88,6 +89,7 @@ def guardar_gasto():
 
 
 @gastos_bp.route("/gastos/eliminar/<int:id_gasto>", methods=["POST"])
+@admin_required
 @limiter.limit("30 per minute")
 def eliminar_gasto(id_gasto):
     id_usuario = session.get("id_usuario")
@@ -100,11 +102,13 @@ def eliminar_gasto(id_gasto):
 
 
 @gastos_bp.route("/gastos/<int:id_gasto>/historial")
+@admin_required
 def historial_gasto(id_gasto):
     return jsonify(obtener_historial_gasto(id_gasto))
 
 
 @gastos_bp.route("/gastos/restaurar/<int:id_gasto>", methods=["POST"])
+@admin_required
 @limiter.limit("30 per minute")
 def restaurar_gasto_route(id_gasto):
     id_usuario = session.get("id_usuario")

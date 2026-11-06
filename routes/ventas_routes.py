@@ -49,6 +49,9 @@ _CHROME_PATHS = [
     os.path.join(os.path.expanduser("~"), r"AppData\Local\Google\Chrome\Application\chrome.exe"),
 ]
 
+_IPS_LOCALES = {"127.0.0.1", "::1"}
+
+
 def _encontrar_browser(paths):
     for p in paths:
         if os.path.exists(p):
@@ -63,10 +66,12 @@ def abrir_whatsapp():
         return jsonify({"ok": False}), 401
     data       = request.get_json(silent=True) or {}
     url        = data.get("url", "")
-    negocio_id = int(data.get("negocio_id", 0))
-    if not url.startswith("https://web.whatsapp.com/send?"):
+    negocio_id = a_entero(data.get("negocio_id")) or 0
+    if not isinstance(url, str) or not url.startswith("https://web.whatsapp.com/send?"):
         return jsonify({"ok": False, "error": "URL no válida"}), 400
-    is_local = not request.headers.get("X-Forwarded-For")
+    # Solo se abre el navegador en el servidor si la petición viene del mismo equipo;
+    # desde otra terminal se regresa la URL para abrirla en el navegador del cliente.
+    is_local = request.remote_addr in _IPS_LOCALES and not request.headers.get("X-Forwarded-For")
     if is_local:
         try:
             paths = _EDGE_PATHS if negocio_id == 1 else _CHROME_PATHS
@@ -105,7 +110,7 @@ def ventas():
 @limiter.limit("30 per minute")
 def entregar_venta(id_venta):
     id_usuario = session.get("id_usuario")
-    if not puede_ver_venta(id_venta):
+    if not puede_ver_venta(id_venta, estricto=True):
         return jsonify({"ok": False, "error": _SIN_PERMISO}), 403
 
     try:
@@ -119,7 +124,8 @@ def entregar_venta(id_venta):
                 "ok": False,
                 "error": "La venta ya fue entregada o no existe"
             })
-
+    except ValueError as e:
+        return jsonify({"ok": False, "error": str(e)}), 400
     except Exception:  # pragma: no cover
         logger.exception("Error en entregar_venta id_venta=%s id_usuario=%s", id_venta, id_usuario)
         return jsonify({"ok": False, "error": "Error interno del servidor"}), 500
@@ -194,7 +200,7 @@ def ventas_pendientes():
 @ventas_bp.route("/ventas/marcar-lista/<int:id_venta>", methods=["POST"])
 @limiter.limit("30 per minute")
 def marcar_lista(id_venta):
-    if not puede_ver_venta(id_venta):
+    if not puede_ver_venta(id_venta, estricto=True):
         return jsonify({"ok": False, "error": _SIN_PERMISO}), 403
     try:
         id_usuario = session.get('id_usuario')

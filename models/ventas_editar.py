@@ -269,7 +269,10 @@ def editar_venta(id_venta, fecha_estimada, nuevos_articulos, nuevos_servicios_po
                 invalido = str_val == ""
                 if not invalido and campo_req in _CAMPOS_MINIMO:
                     try:
-                        invalido = Decimal(str_val) < _CAMPOS_MINIMO[campo_req]
+                        num = Decimal(str_val)
+                        invalido = (not num.is_finite()
+                                    or num < _CAMPOS_MINIMO[campo_req]
+                                    or (campo_req == "cantidad" and num != num.to_integral_value()))
                     except Exception:
                         invalido = True
                 if invalido:
@@ -280,7 +283,9 @@ def editar_venta(id_venta, fecha_estimada, nuevos_articulos, nuevos_servicios_po
                     )
                     pos = cursor.fetchone()["pos"]
                     etiq = _ETIQUETAS_CAMPO.get(campo_req, campo_req)
-                    sufijo = "debe ser mayor a 0." if campo_req in _CAMPOS_MINIMO else "es obligatorio."
+                    sufijo = ("debe ser un entero mayor a 0." if campo_req == "cantidad"
+                              else "debe ser mayor a 0." if campo_req in _CAMPOS_MINIMO
+                              else "es obligatorio.")
                     raise ValueError(f"Art. #{pos}: \"{etiq}\" {sufijo}")
 
             cols = ", ".join(f"`{c}`" for c in campos_validos)

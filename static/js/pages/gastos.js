@@ -197,7 +197,7 @@ document.addEventListener("click", async function (e) {
         const accsEl   = item.querySelector(".cat-acciones");
 
         const originalNombre = nombreEl.textContent;
-        nombreEl.innerHTML = `<input class="cat-edit-input" value="${originalNombre}" maxlength="100">`;
+        nombreEl.innerHTML = `<input class="cat-edit-input" value="${escapeHtml(originalNombre)}" maxlength="100">`;
 
         accsEl.innerHTML = `
             <button class="btn btn--primary btn--sm js-guardar-cat" data-id="${id}">Guardar</button>

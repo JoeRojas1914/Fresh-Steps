@@ -7,12 +7,14 @@ from services.estadisticas_service import (
     exportar_estadisticas_service
 )
 from extensions import limiter
+from middleware.auth_middleware import admin_required
 
 estadisticas_bp = Blueprint("estadisticas", __name__)
 logger = logging.getLogger(__name__)
 
 
 @estadisticas_bp.route("/estadisticas")
+@admin_required
 def estadisticas():
     try:
         data = dashboard_page_data_service()
@@ -23,6 +25,7 @@ def estadisticas():
 
 
 @estadisticas_bp.route("/estadisticas/exportar")
+@admin_required
 @limiter.limit("10 per minute")
 def exportar_estadisticas():
     try:
@@ -36,6 +39,7 @@ def exportar_estadisticas():
 
 
 @estadisticas_bp.route("/api/estadisticas/dashboard")
+@admin_required
 @limiter.limit("60 per minute")
 def api_dashboard():
     try:
