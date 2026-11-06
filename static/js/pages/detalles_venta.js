@@ -115,7 +115,7 @@ export function toggleDetalles(idVenta, btn) {
 
     if (visible) {
         const box = fila.querySelector(".detalles-box");
-        if (chevron) chevron.style.transform = "";
+        if (chevron) chevron.classList.remove("chevron-icon--abierto");
         if (box) {
             box.classList.add("detalles-box--closing");
             box.addEventListener("animationend", () => {
@@ -129,7 +129,7 @@ export function toggleDetalles(idVenta, btn) {
     }
 
     fila.style.display = "table-row";
-    if (chevron) chevron.style.transform = "rotate(180deg)";
+    if (chevron) chevron.classList.add("chevron-icon--abierto");
 
     if (lista.dataset.cargado) return;
 

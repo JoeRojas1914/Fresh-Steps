@@ -60,6 +60,7 @@
 
 /* ── Transitions ───────────────── */
 .transition-transform { transition: transform .2s; }
+.chevron-icon--abierto { transform: rotate(180deg); }
 
 /* ── Positioning ───────────────── */
 .relative     { position: relative; }
