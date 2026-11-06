@@ -1,12 +1,25 @@
 {# Totales de ventas y artículos según los filtros aplicados.
    Va dentro del parcial para que se actualice con cada recarga AJAX. #}
 {% macro contador_ventas(total_ventas, total_articulos, filtrado=false) %}
-<p class="contador-ventas" aria-live="polite">
-    <strong data-contador="ventas">{{ total_ventas }}</strong> {{ "venta" if total_ventas == 1 else "ventas" }}
-    <span class="contador-ventas__sep" aria-hidden="true">·</span>
-    <strong data-contador="articulos">{{ total_articulos }}</strong> {{ "artículo" if total_articulos == 1 else "artículos" }}
+<div class="contador-ventas" aria-live="polite">
     {% if filtrado %}
-    <span class="contador-ventas__nota">— con los filtros aplicados</span>
+    <span class="contador-ventas__nota">
+        <i data-lucide="filter" width="13" height="13"></i> con los filtros aplicados
+    </span>
     {% endif %}
-</p>
+    <div class="contador-chip">
+        <span class="contador-chip__icono contador-chip__icono--marino" aria-hidden="true"><i data-lucide="receipt" width="16" height="16"></i></span>
+        <span class="contador-chip__texto">
+            <strong data-contador="ventas">{{ total_ventas }}</strong>
+            <span class="contador-chip__label">{{ "venta" if total_ventas == 1 else "ventas" }}</span>
+        </span>
+    </div>
+    <div class="contador-chip">
+        <span class="contador-chip__icono contador-chip__icono--marino" aria-hidden="true"><i data-lucide="package" width="16" height="16"></i></span>
+        <span class="contador-chip__texto">
+            <strong data-contador="articulos">{{ total_articulos }}</strong>
+            <span class="contador-chip__label">{{ "artículo" if total_articulos == 1 else "artículos" }}</span>
+        </span>
+    </div>
+</div>
 {% endmacro %}

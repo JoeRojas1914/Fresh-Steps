@@ -11,8 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const form      = document.getElementById("form-filtro-historial");
     const container = document.getElementById("tabla-paginada");
-    const clearEl   = document.getElementById("btn-limpiar-filtro-historial");
-    if (form && container) window.initFiltroAjax(form, container, { clearEl });
+    if (form && container) window.initFiltroAjax(form, container);
 });
 
 async function verHistorialVenta(idVenta) {

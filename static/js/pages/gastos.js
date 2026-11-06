@@ -7,8 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const formFiltro = document.getElementById("form-filtro-gastos");
     const container   = document.getElementById("tabla-paginada");
-    const clearEl     = document.getElementById("btn-limpiar-filtro-gastos");
-    if (formFiltro && container) window.initFiltroAjax(formFiltro, container, { clearEl });
+    if (formFiltro && container) window.initFiltroAjax(formFiltro, container);
 
     const form      = document.getElementById("formGasto");
     const submitBtn = document.querySelector('[form="formGasto"][type="submit"]');
