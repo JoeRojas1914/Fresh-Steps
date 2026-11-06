@@ -116,19 +116,16 @@ def registrar_historial_usuario(id_usuario, accion, antes, despues, admin):
         ))
 
 
-def obtener_pines_caja_activos(excluir_id=None):
+def obtener_pines_caja(excluir_id=None):
+    """PIN (hash) de TODOS los usuarios de caja, activos e inactivos.
+
+    Incluye inactivos para que al reactivar un usuario su PIN no choque con otro."""
     with get_db() as (_, cursor):
-        if excluir_id:
-            cursor.execute("""
-                SELECT pin_hash FROM usuario
-                WHERE rol = 'caja' AND activo = 1
-                  AND id_usuario != %s AND pin_hash IS NOT NULL
-            """, (excluir_id,))
-        else:
-            cursor.execute("""
-                SELECT pin_hash FROM usuario
-                WHERE rol = 'caja' AND activo = 1 AND pin_hash IS NOT NULL
-            """)
+        cursor.execute("""
+            SELECT pin_hash FROM usuario
+            WHERE rol = 'caja' AND pin_hash IS NOT NULL
+              AND id_usuario != %s
+        """, (excluir_id or 0,))
         return cursor.fetchall()
 
 

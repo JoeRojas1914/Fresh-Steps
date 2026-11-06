@@ -41,6 +41,25 @@ def db_conn():
     conn.close()
 
 
+def limpiar_bloqueo_pin_terminal():
+    """Borra los fallos de PIN acumulados por terminal (login_intentos)."""
+    from config import CLAVE_PIN_TERMINAL
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM login_intentos WHERE usuario = %s", (CLAVE_PIN_TERMINAL,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+@pytest.fixture(autouse=True, scope="module")
+def _limpiar_bloqueo_pin_por_modulo():
+    """Los fallos de PIN se cuentan por terminal (IP): al terminar cada archivo
+    de tests se limpian para que un bloqueo no afecte a los siguientes."""
+    yield
+    limpiar_bloqueo_pin_terminal()
+
+
 # ---------------------------------------------------------------------------
 # Usuarios de prueba
 # ---------------------------------------------------------------------------

@@ -11,7 +11,7 @@ from models.login import (
     registrar_fallo,
     limpiar_intentos
 )
-from config import MAX_INTENTOS_PIN, BLOQUEO_MIN_PIN
+from config import MAX_INTENTOS_PIN, BLOQUEO_MIN_PIN, CLAVE_PIN_TERMINAL
 from models.usuario import actualizar_session_token
 
 
@@ -19,32 +19,22 @@ def _ua() -> str | None:
     return request.headers.get("User-Agent")
 
 
-def _esta_bloqueado(username: str, ip: str, metodo: str, id_usuario: int | None = None) -> bool:
+def _bloqueado(username: str, ip: str) -> bool:
     intento = obtener_intentos(username, ip)
-
-    if intento and intento["bloqueado_hasta"]:
-        if datetime.now() < intento["bloqueado_hasta"]:
-
-            registrar_login_log(
-                username,
-                f"{metodo}_locked",
-                False,
-                ip,
-                id_usuario=id_usuario,
-                user_agent=_ua()
-            )
-            return True
-
-    return False
+    return bool(intento and intento["bloqueado_hasta"] and datetime.now() < intento["bloqueado_hasta"])
 
 
-def _fallo(username: str, metodo: str, ip: str, max_intentos: int | None = None, bloqueo_min: int | None = None) -> None:
-    kwargs = {}
-    if max_intentos is not None:
-        kwargs["max_intentos"] = max_intentos
-    if bloqueo_min is not None:
-        kwargs["bloqueo_min"] = bloqueo_min
-    registrar_fallo(username, ip, **kwargs)
+def _esta_bloqueado(username: str, ip: str, metodo: str, id_usuario: int | None = None) -> bool:
+    """True si está bloqueado; además deja constancia en login_log."""
+    if not _bloqueado(username, ip):
+        return False
+    registrar_login_log(username, f"{metodo}_locked", False, ip,
+                        id_usuario=id_usuario, user_agent=_ua())
+    return True
+
+
+def _fallo(username: str, metodo: str, ip: str) -> None:
+    registrar_fallo(username, ip)
 
     registrar_login_log(
         username,
@@ -84,33 +74,43 @@ def login_password_service(username: str, password: str, ip: str) -> dict | str 
         return None
 
     _exito(usuario, "password_admin", ip)
+    if usuario.get("rol") == "admin":
+        # Un admin en la terminal la desbloquea si quedó bloqueada por PIN incorrectos
+        limpiar_intentos(CLAVE_PIN_TERMINAL, ip)
     return usuario
 
 
 def login_pin_service(pin: str, ip: str) -> dict | str | None:
+    """Acceso de caja por PIN.
 
-    usuarios = obtener_usuarios_caja_activos()
-
-    if not usuarios:
+    Los fallos se cuentan por terminal (IP), una vez por intento: antes cada PIN
+    incorrecto sumaba un fallo a CADA cajero y unos pocos errores bloqueaban a todos.
+    Regresa el usuario, None (PIN incorrecto), "LOCKED" o "DUPLICADO"
+    (el PIN coincide con más de un usuario: nunca se entra con uno al azar)."""
+    if not pin:
         return None
 
-    for usuario in usuarios:
-        username = usuario["usuario"]
+    if _esta_bloqueado(CLAVE_PIN_TERMINAL, ip, "pin_caja"):
+        return "LOCKED"
 
-        if _esta_bloqueado(username, ip, "pin_caja", usuario["id_usuario"]):
-            continue
+    coincidencias = [
+        u for u in obtener_usuarios_caja_activos()
+        if u.get("pin_hash") and check_password_hash(u["pin_hash"], pin)
+    ]
 
-        if check_password_hash(usuario["pin_hash"], pin):
-            _exito(usuario, "pin_caja", ip)
-            return usuario
+    if len(coincidencias) == 1:
+        usuario = coincidencias[0]
+        _exito(usuario, "pin_caja", ip)
+        limpiar_intentos(CLAVE_PIN_TERMINAL, ip)
+        return usuario
 
-        _fallo(username, "pin_caja", ip, max_intentos=MAX_INTENTOS_PIN, bloqueo_min=BLOQUEO_MIN_PIN)
+    if len(coincidencias) > 1:
+        registrar_login_log(None, "pin_caja_duplicado", False, ip, user_agent=_ua())
+        return "DUPLICADO"
 
-    for usuario in usuarios:
-        if _esta_bloqueado(usuario["usuario"], ip, "pin_caja", usuario["id_usuario"]):
-            return "LOCKED"
-
-    return None
+    registrar_fallo(CLAVE_PIN_TERMINAL, ip, max_intentos=MAX_INTENTOS_PIN, bloqueo_min=BLOQUEO_MIN_PIN)
+    registrar_login_log(None, "pin_caja", False, ip, user_agent=_ua())
+    return "LOCKED" if _bloqueado(CLAVE_PIN_TERMINAL, ip) else None
 
 
 def registrar_logout_service(id_usuario: int, username: str, ip: str) -> None:

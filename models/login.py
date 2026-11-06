@@ -63,7 +63,8 @@ def registrar_fallo(usuario, ip, max_intentos=MAX_INTENTOS_LOGIN, bloqueo_min=BL
                 VALUES (%s,%s,1)
             """, (usuario, ip))
         else:
-            intentos = row["intentos"] + 1
+            bloqueo_vencido = row["bloqueado_hasta"] and datetime.now() >= row["bloqueado_hasta"]
+            intentos = 1 if bloqueo_vencido else row["intentos"] + 1
 
             if intentos >= max_intentos:
                 bloqueo = datetime.now() + timedelta(minutes=bloqueo_min)

@@ -2,13 +2,13 @@
 TIMEOUT_ADMIN = 10
 TIMEOUT_CAJA  = 60
 
-# Control de intentos de login fallidos — contraseña admin
 MAX_INTENTOS_LOGIN = 5
 BLOQUEO_MIN_LOGIN  = 10
 
-# Control de intentos fallidos — PIN caja (más estricto: PIN es de 4-6 dígitos)
-MAX_INTENTOS_PIN = 3
-BLOQUEO_MIN_PIN  = 30
+
+MAX_INTENTOS_PIN = 5
+BLOQUEO_MIN_PIN  = 5
+CLAVE_PIN_TERMINAL = "__pin_terminal__"
 
 # Paginación
 POR_PAGINA_HISTORIAL_VENTAS = 20

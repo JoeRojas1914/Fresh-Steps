@@ -137,15 +137,15 @@ def test_pin_post_incorrecto_rerender_200(client, usuario_caja, db_conn):
 def test_pin_post_bloqueado(client, usuario_caja, db_conn):
     """Pre-pobla intentos hasta bloqueado → POST devuelve LOCKED (200)."""
     from models.login import registrar_fallo
-    from config import MAX_INTENTOS_PIN, BLOQUEO_MIN_PIN
+    from config import MAX_INTENTOS_PIN, BLOQUEO_MIN_PIN, CLAVE_PIN_TERMINAL
 
-    un = usuario_caja["usuario"]
     for _ in range(MAX_INTENTOS_PIN):
-        registrar_fallo(un, _IP, max_intentos=MAX_INTENTOS_PIN, bloqueo_min=BLOQUEO_MIN_PIN)
+        registrar_fallo(CLAVE_PIN_TERMINAL, _IP, max_intentos=MAX_INTENTOS_PIN, bloqueo_min=BLOQUEO_MIN_PIN)
 
     _set_session(client, pin_habilitado=True)
-    res = _req("post", client, "/pin", data={"pin": "0000"})
-    assert res.status_code in (200, 302)
+    res = _req("post", client, "/pin", data={"pin": usuario_caja["pin"]})
+    assert res.status_code == 200
+    assert "Demasiados PIN incorrectos" in res.data.decode()
 
     # Limpiar todos los intentos para esta IP (incluye seed users)
     cursor = db_conn.cursor()
