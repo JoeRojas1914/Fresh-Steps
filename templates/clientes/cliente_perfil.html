@@ -11,76 +11,79 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-content">
 
   {{ alerts(get_flashed_messages(with_categories=true)) }}
 
-  <a href="{{ volver_url or url_for('clientes.clientes') }}" class="btn btn--secondary btn--sm no-underline mb-20">
-    <i data-lucide="arrow-left" width="14" height="14"></i> Regresar a clientes
-  </a>
+  {# ── Acciones: regresar y editar ───────────────────────── #}
+  <div class="perfil-acciones">
+    <a href="{{ volver_url or url_for('clientes.clientes') }}" class="btn btn--info btn--sm no-underline">
+      <i data-lucide="arrow-left" width="14" height="14"></i> Regresar a clientes
+    </a>
+    <button type="button"
+            data-modal-open="modalEditarCliente"
+            class="btn btn--info btn--sm">
+      <i data-lucide="edit-2" width="14" height="14"></i> Editar cliente
+    </button>
+  </div>
 
-  {# ── Perfil del cliente ────────────────────────────────── #}
-  <div class="cliente-card">
-    <div class="cliente-avatar-wrap">
-      {% if cliente.avatar_url %}
-        <img src="{{ cliente.avatar_url }}" alt="Avatar" class="avatar-img">
-      {% else %}
-        <div class="avatar-placeholder">
-          {{ cliente.nombre[0] }}{{ cliente.apellido[0] }}
+  {# ── Cliente y sus cifras en una sola tarjeta ─────────── #}
+  <div class="cliente-card{% if not kpis %} cliente-card--solo{% endif %}">
+    <div class="cliente-ident">
+      <div class="cliente-avatar-wrap">
+        {% if cliente.avatar_url %}
+          <img src="{{ cliente.avatar_url }}" alt="Avatar" class="avatar-img">
+        {% else %}
+          <div class="avatar-placeholder">
+            {{ cliente.nombre[0] }}{{ cliente.apellido[0] }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="cliente-body">
+        <h1 class="cliente-nombre">{{ cliente.nombre }} {{ cliente.apellido }}</h1>
+        <div class="cliente-meta">
+          {% if cliente.telefono %}
+          <span class="cliente-meta__item">
+            <i data-lucide="phone" width="13" height="13"></i> {{ cliente.telefono }}
+          </span>
+          {% endif %}
+          {% if cliente.correo %}
+          <span class="cliente-meta__item">
+            <i data-lucide="mail" width="13" height="13"></i> {{ cliente.correo }}
+          </span>
+          {% endif %}
+          {% if cliente.direccion %}
+          <span class="cliente-meta__item">
+            <i data-lucide="map-pin" width="13" height="13"></i> {{ cliente.direccion }}
+          </span>
+          {% endif %}
+          <span class="cliente-meta__item">
+            <i data-lucide="calendar" width="13" height="13"></i> Cliente desde {{ cliente.fecha_registro_fmt }}
+          </span>
         </div>
-      {% endif %}
-    </div>
-
-    <div class="cliente-body">
-      <h1 class="cliente-nombre">{{ cliente.nombre }} {{ cliente.apellido }}</h1>
-      <div class="cliente-meta">
-        {% if cliente.telefono %}
-        <span class="cliente-meta__item">
-          <i data-lucide="phone" width="13" height="13"></i> {{ cliente.telefono }}
-        </span>
-        {% endif %}
-        {% if cliente.correo %}
-        <span class="cliente-meta__item">
-          <i data-lucide="mail" width="13" height="13"></i> {{ cliente.correo }}
-        </span>
-        {% endif %}
-        <span class="cliente-meta__item">
-          <i data-lucide="map-pin" width="13" height="13"></i> {{ cliente.direccion or '—' }}
-        </span>
-        <span class="cliente-meta__item">
-          <i data-lucide="calendar" width="13" height="13"></i> Cliente desde {{ cliente.fecha_registro_fmt }}
-        </span>
       </div>
     </div>
 
-    <div class="cliente-actions">
-      <button type="button"
-              data-modal-open="modalEditarCliente"
-              class="btn btn--secondary btn--sm">
-        <i data-lucide="edit-2" width="14" height="14"></i> Editar
-      </button>
+    {# ── KPIs — montos solo para admin ─────────────────────── #}
+    <div class="cliente-kpis{% if not kpis %} cliente-kpis--solo{% endif %}">
+      <div class="kpi-card kpi-card--pedidos">
+        <div class="kpi-card__label"><i data-lucide="shopping-bag" width="16" height="16"></i> Total pedidos</div>
+        <div class="kpi-card__value">{{ total_pedidos }}</div>
+      </div>
+      {% if kpis %}
+      <div class="kpi-card kpi-card--gastado">
+        <div class="kpi-card__label"><i data-lucide="banknote" width="16" height="16"></i> Total gastado</div>
+        <div class="kpi-card__value">{{ kpis.total_gastado|dinero }}</div>
+      </div>
+      <div class="kpi-card kpi-card--alert">
+        <div class="kpi-card__label"><i data-lucide="clock" width="16" height="16"></i> Saldo pendiente</div>
+        <div class="kpi-card__value">{{ kpis.saldo_pendiente_total|dinero }}</div>
+      </div>
+      {% endif %}
     </div>
   </div>
 
-  {# ── KPIs — montos solo para admin ─────────────────────── #}
-  <div class="cliente-kpis{% if not kpis %} cliente-kpis--solo{% endif %}">
-    <div class="kpi-card">
-      <div class="kpi-card__label"><i data-lucide="shopping-bag" width="13" height="13"></i> Total pedidos</div>
-      <div class="kpi-card__value">{{ total_pedidos }}</div>
-    </div>
-    {% if kpis %}
-    <div class="kpi-card">
-      <div class="kpi-card__label"><i data-lucide="dollar-sign" width="13" height="13"></i> Total gastado</div>
-      <div class="kpi-card__value">{{ kpis.total_gastado|dinero }}</div>
-    </div>
-    <div class="kpi-card kpi-card--alert">
-      <div class="kpi-card__label"><i data-lucide="clock" width="13" height="13"></i> Saldo pendiente</div>
-      <div class="kpi-card__value">{{ kpis.saldo_pendiente_total|dinero }}</div>
-    </div>
-    {% endif %}
-  </div>
-
-  <h2 class="mb-20"><i data-lucide="package" width="22" height="22"></i> Historial de pedidos</h2>
+  <h2 class="perfil-seccion-titulo"><i data-lucide="package" width="20" height="20"></i> Historial de pedidos</h2>
 
   {# ── Filtros ────────────────────────────────────────────── #}
   <form id="form-filtro-cliente"
@@ -128,8 +131,6 @@
   <div id="tabla-paginada">
     {% include "clientes/_cliente_pedidos_partial.html" %}
   </div>
-
-</div>
 
 {# ── Modal editar cliente ─────────────────────────────── #}
 {% call(section) modal("modalEditarCliente", "Editar cliente", "md") %}

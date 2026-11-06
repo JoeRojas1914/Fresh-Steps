@@ -88,15 +88,13 @@
           <div class="dim-soft text-sm nota-italic">Sin pagos registrados</div>
         {% endif %}
 
+        <div class="pedido-saldo">
         {% if p.saldo_pendiente > 0 %}
-        <div class="text-sm saldo-pendiente">
-          Saldo pendiente: {{ p.saldo_pendiente|dinero }}
-        </div>
+          <span class="status status--warn">Saldo pendiente: {{ p.saldo_pendiente|dinero }}</span>
         {% else %}
-        <div class="text-sm pedido-liquidado">
-          <i data-lucide="check" width="14" height="14"></i> Pedido liquidado
-        </div>
+          <span class="status status--ok">Pedido liquidado</span>
         {% endif %}
+        </div>
 
         <div class="btn-row">
           <button type="button"
