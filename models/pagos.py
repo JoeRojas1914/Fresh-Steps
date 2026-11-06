@@ -1,20 +1,5 @@
 from db import get_db
-from config import TIPO_PAGO_FINAL
 from utils import build_where, cond_in, construir_order_by
-
-
-def registrar_pago(id_venta, monto, tipo_pago, id_usuario_cobro):
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            INSERT INTO pago_venta (
-                id_venta,
-                fecha_pago,
-                monto,
-                tipo_pago,
-                id_usuario_cobro
-            )
-            VALUES (%s, NOW(), %s, %s, %s)
-        """, (id_venta, monto, tipo_pago, id_usuario_cobro))
 
 
 def obtener_pagos_venta(ids_venta):
@@ -35,21 +20,6 @@ def obtener_pagos_venta(ids_venta):
             pagos_por_venta.setdefault(p["id_venta"], []).append(p)
 
         return pagos_por_venta
-
-
-def registrar_pago_final_db(id_venta, monto, metodo_pago, id_usuario):
-    with get_db() as (_, cursor):
-        cursor.execute("""
-            INSERT INTO pago_venta (
-                id_venta,
-                monto,
-                tipo_pago,
-                tipo_pago_venta,
-                fecha_pago,
-                id_usuario_cobro
-            )
-            VALUES (%s, %s, %s, %s, NOW(), %s)
-        """, (id_venta, monto, metodo_pago, TIPO_PAGO_FINAL, id_usuario))
 
 
 def _filtros_historial(id_negocio, tipo_pago, tipo_pago_venta, fecha_inicio, fecha_fin):

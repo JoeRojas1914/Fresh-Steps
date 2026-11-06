@@ -31,7 +31,7 @@ from services.permisos_service import (
 )
 from middleware.auth_middleware import admin_required
 from extensions import limiter
-from utils import ids_de_args
+from utils import a_entero, ids_de_args
 
 logger = logging.getLogger(__name__)
 
@@ -226,9 +226,12 @@ def registrar_pago_final():
     data = request.get_json(silent=True) or {}
     id_usuario = session.get("id_usuario")
 
-    id_venta_pago = data.get("id_venta")
-    if str(id_venta_pago).isdigit() and not puede_ver_venta(int(id_venta_pago)):
+    id_venta_pago = a_entero(data.get("id_venta"))
+    if id_venta_pago is None:
+        return jsonify({"ok": False, "error": "Datos incompletos para el pago final"}), 400
+    if not puede_ver_venta(id_venta_pago, estricto=True):
         return jsonify({"ok": False, "error": _SIN_PERMISO}), 403
+    data["id_venta"] = id_venta_pago
 
     ok, mensaje = registrar_pago_final_service(data, id_usuario)
     if not ok:

@@ -1,5 +1,6 @@
 from decimal import Decimal, InvalidOperation
 from db import get_db
+from config import TIPO_PAGO_PREPAGO
 from .negocio import cargar_tipos_por_negocio
 from .ventas_historial import registrar_historial_venta
 
@@ -92,7 +93,12 @@ def crear_venta(
     cantidad_descuento,
     articulos,
     id_usuario_creo,
+    prepago=None,
 ):
+    """Crea la venta, sus artículos y (opcional) el prepago en UNA transacción.
+
+    `prepago`: {"monto": Decimal, "tipo_pago": str}. Si el prepago no es válido
+    (p. ej. mayor al total) se lanza ValueError y no se guarda nada."""
     with get_db() as (_, cursor):
         cursor.execute("""
             INSERT INTO venta (
@@ -132,6 +138,15 @@ def crear_venta(
             "UPDATE venta SET total = %s WHERE id_venta = %s",
             (str(total), id_venta),
         )
+
+        if prepago:
+            if prepago["monto"] > total:
+                raise ValueError("El prepago no puede ser mayor al total de la venta.")
+            cursor.execute("""
+                INSERT INTO pago_venta
+                    (id_venta, fecha_pago, monto, tipo_pago, tipo_pago_venta, id_usuario_cobro)
+                VALUES (%s, NOW(), %s, %s, %s, %s)
+            """, (id_venta, prepago["monto"], prepago["tipo_pago"], TIPO_PAGO_PREPAGO, id_usuario_creo))
 
         registrar_historial_venta(cursor, id_venta, "CREADO", id_usuario_creo, None, {
             "id_negocio":     id_negocio,

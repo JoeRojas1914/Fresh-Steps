@@ -270,6 +270,15 @@ def _cleanup_ultima_venta_cliente(db_conn, id_cliente):
         cleanup_venta(db_conn, row["id_venta"])
 
 
+def _ventas_de_cliente(db_conn, id_cliente):
+    db_conn.commit()
+    cursor = db_conn.cursor(dictionary=True)
+    cursor.execute("SELECT COUNT(*) AS n FROM venta WHERE id_cliente = %s", (id_cliente,))
+    n = cursor.fetchone()["n"]
+    cursor.close()
+    return n
+
+
 def test_guardar_venta_prepago_sin_tipo_pago(app, usuario_admin, cliente_test, servicio_calzado, db_conn):
     """Cubre ventas_service.py:314-316 — prepago sin tipo_pago."""
     from services.ventas_service import guardar_venta_service
@@ -292,7 +301,9 @@ def test_guardar_venta_prepago_sin_tipo_pago(app, usuario_admin, cliente_test, s
     with app.test_request_context("/"):
         id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
     assert error == "Debes seleccionar el tipo de pago del prepago."
-    # La venta se crea antes de la verificación → limpiar la venta huérfana
+    assert id_venta is None
+    # Antes la venta quedaba guardada aunque fallara el prepago; ahora no se guarda nada.
+    assert _ventas_de_cliente(db_conn, cliente_test["id_cliente"]) == 0
     _cleanup_ultima_venta_cliente(db_conn, cliente_test["id_cliente"])
 
 
@@ -318,7 +329,9 @@ def test_guardar_venta_prepago_mayor_al_total(app, usuario_admin, cliente_test, 
     with app.test_request_context("/"):
         id_venta, error = guardar_venta_service(form, id_usuario_creo=usuario_admin["id_usuario"])
     assert error == "El prepago no puede ser mayor al total de la venta."
-    # La venta se crea antes de la verificación → limpiar la venta huérfana
+    assert id_venta is None
+    # Antes la venta quedaba guardada aunque fallara el prepago; ahora no se guarda nada.
+    assert _ventas_de_cliente(db_conn, cliente_test["id_cliente"]) == 0
     _cleanup_ultima_venta_cliente(db_conn, cliente_test["id_cliente"])
 
 

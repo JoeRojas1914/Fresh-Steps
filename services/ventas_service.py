@@ -2,10 +2,11 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 from config import METODOS_PAGO_VALIDOS, POR_PAGINA_VENTAS_ACTIVAS
-from utils import calcular_paginacion
+from utils import a_entero, a_monto, calcular_paginacion
 from models.ventas import (
     eliminar_venta,
     marcar_entregada,
+    registrar_pago_final_y_entregar,
     marcar_como_lista,
     revertir_lista,
     obtener_venta,
@@ -23,8 +24,6 @@ from models.ventas import (
 
 from models.pagos import (
     obtener_pagos_venta,
-    registrar_pago_final_db,
-    registrar_pago,
 )
 
 from models.negocio import obtener_negocios, cargar_tipos_por_negocio
@@ -175,24 +174,30 @@ def listar_entregas_pendientes_service(
 
 
 def registrar_pago_final_service(data: dict, id_usuario: int) -> tuple[bool, str]:
-    id_venta    = data.get("id_venta")
-    monto       = data.get("monto")
+    """Cobra el saldo pendiente de una venta lista y la marca como entregada.
+
+    Toda la validación de estado y saldo ocurre dentro de una sola transacción
+    en `registrar_pago_final_y_entregar`."""
+    id_venta    = a_entero(data.get("id_venta"))
+    monto_raw   = data.get("monto")
     metodo_pago = data.get("metodo_pago")
 
-    if not id_venta or not monto or not metodo_pago:
+    if not id_venta or monto_raw in (None, "") or not metodo_pago:
         return False, "Datos incompletos para el pago final"
 
     if metodo_pago not in METODOS_PAGO_VALIDOS:
         return False, f"Método de pago no válido: '{metodo_pago}'"
 
-    registrar_pago_final_db(
-        id_venta=id_venta,
-        monto=monto,
-        metodo_pago=metodo_pago,
-        id_usuario=id_usuario
-    )
+    monto = a_monto(monto_raw)
+    if monto is None:
+        return False, "El monto no es válido."
+    if monto <= 0:
+        return False, "El monto debe ser mayor a 0."
 
-    marcar_entregada(id_venta, id_usuario)
+    try:
+        registrar_pago_final_y_entregar(id_venta, monto, metodo_pago, id_usuario)
+    except ValueError as e:
+        return False, str(e)
 
     return True, "Pago final registrado y venta marcada como entregada"
 
@@ -207,10 +212,11 @@ def eliminar_venta_service(id_venta: int, id_usuario: int | None = None) -> None
 def _parsear_prepago(form: dict) -> tuple[bool, Decimal]:
     if form.get("prepago") != "si":
         return False, Decimal(0)
-    try:
-        return True, Decimal(form.get("monto_prepago") or "0")
-    except (InvalidOperation, TypeError):
+    raw = form.get("monto_prepago")
+    monto = a_monto(raw) if raw not in (None, "") else Decimal(0)
+    if monto is None or monto < 0:
         raise ValueError("El monto del prepago no es válido.")
+    return True, monto
 
 
 def _parsear_descuento(form: dict) -> tuple[bool, Decimal]:
@@ -333,6 +339,16 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None,
 
         _validar_reglas_negocio(tipo_negocio, articulos)
 
+        datos_prepago = None
+        if prepago and monto_prepago > 0:
+            tipo_pago = form.get("tipo_pago")
+            if not tipo_pago:
+                return None, "Debes seleccionar el tipo de pago del prepago."
+            if tipo_pago not in METODOS_PAGO_VALIDOS:
+                return None, f"Método de pago no válido: '{tipo_pago}'"
+            datos_prepago = {"monto": monto_prepago, "tipo_pago": tipo_pago}
+
+        # Venta, artículos y prepago en una sola transacción: si algo falla no queda nada guardado.
         id_venta = crear_venta(
             id_negocio=id_negocio,
             id_cliente=id_cliente,
@@ -341,29 +357,8 @@ def guardar_venta_service(form: dict, id_usuario_creo: int) -> tuple[int | None,
             cantidad_descuento=cantidad_descuento,
             articulos=articulos,
             id_usuario_creo=id_usuario_creo,
+            prepago=datos_prepago,
         )
-
-        if prepago and monto_prepago > 0:
-            tipo_pago = form.get("tipo_pago")
-            if not tipo_pago:
-                return None, "Debes seleccionar el tipo de pago del prepago."
-            venta_creada = obtener_venta(id_venta)
-            if venta_creada and monto_prepago > Decimal(str(venta_creada["total"] or 0)):
-                return None, "El prepago no puede ser mayor al total de la venta."
-            try:
-                registrar_pago(
-                    id_venta=id_venta,
-                    monto=monto_prepago,
-                    tipo_pago=tipo_pago,
-                    id_usuario_cobro=id_usuario_creo,
-                )
-            except Exception:  # pragma: no cover
-                # Compensación: si el prepago falla, revertimos la venta para evitar datos huérfanos.
-                try:
-                    eliminar_venta(id_venta, id_usuario_creo)
-                except Exception:
-                    pass
-                return None, "Error al registrar el prepago. La venta no fue guardada."
 
         return id_venta, None
 

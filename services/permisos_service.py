@@ -9,9 +9,8 @@ from flask import g, session
 from models.usuario import obtener_negocios_usuario
 from models.negocio import obtener_negocios
 from models.ventas import obtener_venta
-from models.clientes import cliente_visible
+from models.clientes import cliente_activo
 
-# Ningún negocio tiene id 0: filtrar por [0] no devuelve nada.
 SIN_NEGOCIOS = [0]
 
 
@@ -76,11 +75,12 @@ def puede_ver_venta(id_venta: int, estricto: bool = False) -> bool:
 
 
 def puede_ver_cliente(id_cliente: int) -> bool:
-    """La caja solo ve clientes activos con alguna venta en sus negocios."""
-    permitidos = negocios_permitidos()
-    if permitidos is None:
+    """Los clientes son de toda la tienda: la caja puede ver y editar cualquier
+    cliente activo (no los eliminados). Los pedidos y KPIs que se le muestran
+    se siguen filtrando por sus negocios en cada pantalla."""
+    if negocios_permitidos() is None:
         return True
-    return cliente_visible(id_cliente, restringir_negocios())
+    return cliente_activo(id_cliente)
 
 
 def negocios_visibles() -> list[dict]:

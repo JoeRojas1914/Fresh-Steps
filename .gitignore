@@ -13,4 +13,5 @@ htmlcov/
 scripts/
 backups/
 logs/
+reviews/
 .claude/settings.local.json

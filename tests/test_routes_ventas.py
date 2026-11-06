@@ -192,6 +192,7 @@ def test_pago_final_metodo_invalido_400(logged_client, venta_pendiente):
 
 
 def test_pago_final_valido_200(logged_client, venta_pendiente):
+    logged_client.post(f"/ventas/marcar-lista/{venta_pendiente['id_venta']}")
     res = logged_client.post("/ventas/pago-final", json={
         "id_venta": venta_pendiente["id_venta"],
         "monto": "150.00",

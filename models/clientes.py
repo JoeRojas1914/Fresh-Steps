@@ -177,15 +177,10 @@ def obtener_cliente_por_id(id_cliente):
         return cursor.fetchone()
 
 
-def cliente_visible(id_cliente, id_negocio):
-    """True si el cliente está activo y tiene alguna venta activa en esos negocios."""
-    where, params = build_where([
-        ("id_cliente = %s", id_cliente),
-        ("activo = %s", 1),
-        _cond_negocios(id_negocio),
-    ])
+def cliente_activo(id_cliente):
+    """True si el cliente existe y no está eliminado."""
     with get_db() as (_, cursor):
-        cursor.execute("SELECT 1 AS ok FROM cliente " + where, params)
+        cursor.execute("SELECT 1 AS ok FROM cliente WHERE id_cliente = %s AND activo = 1", (id_cliente,))
         return cursor.fetchone() is not None
 
 

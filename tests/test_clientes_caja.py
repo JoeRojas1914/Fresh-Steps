@@ -1,9 +1,10 @@
 """
 Clientes para usuarios de caja.
 
-La caja ve solo los clientes con compras en sus negocios y, en el perfil,
-solo los pedidos de esos negocios. No puede eliminar/restaurar clientes,
-ver eliminados ni exportar a Excel.
+Los clientes son de toda la tienda: la caja puede abrir y editar cualquier
+cliente activo. El listado le muestra los clientes con compras en sus negocios
+y, en el perfil, solo los pedidos de esos negocios. No puede ver ni editar
+clientes eliminados, eliminarlos/restaurarlos ni exportar a Excel.
 
 venta_pendiente (Calzado, 1) y venta_confeccion (Confección, 2) son del mismo cliente_test.
 """
@@ -126,11 +127,13 @@ def test_caja_pedidos_del_listado_cuentan_solo_sus_negocios(
 # Perfil e historial de pedidos
 # ---------------------------------------------------------------------------
 
-def test_caja_no_puede_abrir_perfil_de_cliente_ajeno(
+def test_caja_abre_perfil_de_cliente_de_otro_negocio_sin_sus_pedidos(
     logged_client_caja, usuario_caja, db_conn, cliente_test, venta_pendiente
 ):
     _asignar_negocios(db_conn, usuario_caja["id_usuario"], [2])
-    assert logged_client_caja.get(f"/clientes/{cliente_test['id_cliente']}").status_code == 403
+    res = logged_client_caja.get(f"/clientes/{cliente_test['id_cliente']}")
+    assert res.status_code == 200
+    assert _fila_venta(venta_pendiente["id_venta"]) not in res.data
 
 
 def test_caja_perfil_solo_muestra_pedidos_de_sus_negocios(
@@ -198,22 +201,23 @@ def test_caja_historial_cambios_cliente(
     _asignar_negocios(db_conn, usuario_caja["id_usuario"], [1])
     assert logged_client_caja.get(f"/clientes/{cid}/historial").status_code == 200
     _asignar_negocios(db_conn, usuario_caja["id_usuario"], [2])
-    assert logged_client_caja.get(f"/clientes/{cid}/historial").status_code == 403
+    assert logged_client_caja.get(f"/clientes/{cid}/historial").status_code == 200
 
 
-def test_caja_no_puede_editar_cliente_ajeno(
+def test_caja_puede_editar_cliente_de_otro_negocio(
     logged_client_caja, usuario_caja, db_conn, cliente_test, venta_pendiente
 ):
     _asignar_negocios(db_conn, usuario_caja["id_usuario"], [2])
     logged_client_caja.post("/clientes/guardar", data={
         "id_cliente": str(cliente_test["id_cliente"]),
-        "nombre":     "Hackeado",
+        "nombre":     "Compartido",
         "apellido":   "TestApellido",
         "telefono":   "5512345678",
     })
     cursor = db_conn.cursor(dictionary=True)
+    db_conn.commit()
     cursor.execute("SELECT nombre FROM cliente WHERE id_cliente = %s", (cliente_test["id_cliente"],))
-    assert cursor.fetchone()["nombre"] == "TestNombre"
+    assert cursor.fetchone()["nombre"] == "Compartido"
     cursor.close()
 
 
@@ -231,3 +235,41 @@ def test_caja_puede_editar_cliente_propio(
     cursor.execute("SELECT nombre FROM cliente WHERE id_cliente = %s", (cliente_test["id_cliente"],))
     assert cursor.fetchone()["nombre"] == "Editado"
     cursor.close()
+
+
+# ---------------------------------------------------------------------------
+# Clientes eliminados: la caja no los ve ni los edita por ninguna vía
+# ---------------------------------------------------------------------------
+
+def _eliminar(db_conn, id_cliente):
+    cursor = db_conn.cursor()
+    cursor.execute("UPDATE cliente SET activo = 0 WHERE id_cliente = %s", (id_cliente,))
+    db_conn.commit()
+    cursor.close()
+
+
+def test_caja_no_accede_a_cliente_eliminado(logged_client_caja, db_conn, cliente_test):
+    cid = cliente_test["id_cliente"]
+    _eliminar(db_conn, cid)
+    assert logged_client_caja.get(f"/clientes/{cid}").status_code == 403
+    assert logged_client_caja.get(f"/clientes/{cid}/historial").status_code == 403
+    assert logged_client_caja.get(f"/api/clientes/{cid}").status_code == 403
+    res = logged_client_caja.post(f"/api/clientes/{cid}/editar",
+                                  data={"nombre": "X", "apellido": "Y", "telefono": "5512345678"})
+    assert res.status_code == 403
+
+
+def test_caja_api_cliente_de_otro_negocio(logged_client_caja, usuario_caja, db_conn, cliente_test, venta_pendiente):
+    """Hallazgo C7: la API y el perfil siguen la misma regla (clientes compartidos)."""
+    _asignar_negocios(db_conn, usuario_caja["id_usuario"], [2])
+    cid = cliente_test["id_cliente"]
+    assert logged_client_caja.get(f"/api/clientes/{cid}").status_code == 200
+    assert logged_client_caja.get(f"/clientes/{cid}").status_code == 200
+
+
+def test_admin_si_accede_a_cliente_eliminado(logged_client, db_conn, cliente_test):
+    cid = cliente_test["id_cliente"]
+    _eliminar(db_conn, cid)
+    assert logged_client.get(f"/clientes/{cid}").status_code == 200
+    # La API de edición rápida nunca devuelve eliminados (también para admin)
+    assert logged_client.get(f"/api/clientes/{cid}").status_code == 404

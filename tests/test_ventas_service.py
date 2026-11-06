@@ -216,6 +216,8 @@ def test_pago_final_valido_registra_y_marca_entregada(app, db_conn, cliente_test
     assert error is None
 
     try:
+        from models.ventas import marcar_como_lista
+        marcar_como_lista(id_venta, usuario_admin["id_usuario"])
         ok, _ = registrar_pago_final_service(
             {"id_venta": id_venta, "monto": "150.00", "metodo_pago": "efectivo"},
             id_usuario=usuario_admin["id_usuario"],

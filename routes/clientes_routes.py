@@ -174,6 +174,8 @@ def api_crear_cliente():
 
 @clientes_bp.route("/api/clientes/<int:id_cliente>")
 def api_obtener_cliente(id_cliente):
+    if not puede_ver_cliente(id_cliente):
+        return jsonify({"ok": False, "error": _SIN_PERMISO_CLIENTE}), 403
     cliente = obtener_cliente_service(id_cliente)
     if not cliente:
         return jsonify({"ok": False, "error": "Cliente no encontrado."}), 404
@@ -183,6 +185,8 @@ def api_obtener_cliente(id_cliente):
 @clientes_bp.route("/api/clientes/<int:id_cliente>/editar", methods=["POST"])
 @limiter.limit("30 per minute")
 def api_editar_cliente(id_cliente):
+    if not puede_ver_cliente(id_cliente):
+        return jsonify({"ok": False, "error": _SIN_PERMISO_CLIENTE}), 403
     if not obtener_cliente_service(id_cliente):
         return jsonify({"ok": False, "error": "Cliente no encontrado."}), 404
     form = request.form.to_dict()

@@ -1,5 +1,5 @@
 import json
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from datetime import date, datetime
 
 
@@ -59,6 +59,31 @@ def sql_negocios(params, id_negocio, columna="id_negocio"):
     sql, valores = filtro_negocios(id_negocio, columna)
     params.extend(valores)
     return sql
+
+
+def a_entero(valor):
+    """Entero positivo de un valor recibido (int o texto de solo dígitos); None si no lo es.
+
+    Estricto a propósito: "12 " o "12.0" no son ids válidos (MySQL los aceptaría como 12)."""
+    if isinstance(valor, bool):
+        return None
+    if isinstance(valor, int):
+        return valor if valor > 0 else None
+    if isinstance(valor, str) and valor.isdigit():
+        n = int(valor)
+        return n if n > 0 else None
+    return None
+
+
+def a_monto(valor):
+    """Decimal con 2 decimales de un monto recibido; None si no es un número finito."""
+    if valor is None or isinstance(valor, bool) or str(valor).strip() == "":
+        return None
+    try:
+        monto = Decimal(str(valor).strip()).quantize(Decimal("0.01"))
+    except InvalidOperation:
+        return None
+    return monto if monto.is_finite() else None
 
 
 def ids_de_args(args, clave="id_negocio"):
