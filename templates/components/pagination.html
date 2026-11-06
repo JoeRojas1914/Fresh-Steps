@@ -1,5 +1,5 @@
 {% macro pagination(pagina, total_paginas, endpoint, params={}) %}
-<div class="paginacion">
+<nav class="paginacion" aria-label="Paginación">
 {% if total_paginas > 1 %}
 
     {% set bloque = ((pagina - 1) // 10) %}
@@ -9,22 +9,38 @@
         {% set fin = total_paginas %}
     {% endif %}
 
+    {# Ir a la primera página #}
+    {% if pagina > 1 %}
+        <a href="{{ url_for(endpoint, pagina=1, **params) }}" class="paginacion__extremo"
+           title="Primera página" aria-label="Primera página"><i data-lucide="chevrons-left" width="16" height="16"></i></a>
+    {% else %}
+        <span class="paginacion__extremo is-disabled" aria-hidden="true"><i data-lucide="chevrons-left" width="16" height="16"></i></span>
+    {% endif %}
+
     {% if inicio > 1 %}
-        <a href="{{ url_for(endpoint, pagina=inicio-10, **params) }}">«</a>
+        <a href="{{ url_for(endpoint, pagina=inicio-10, **params) }}" title="10 páginas atrás" aria-label="10 páginas atrás">…</a>
     {% endif %}
 
     {% for p in range(inicio, fin + 1) %}
         {% if p == pagina %}
-            <strong>{{ p }}</strong>
+            <strong aria-current="page">{{ p }}</strong>
         {% else %}
             <a href="{{ url_for(endpoint, pagina=p, **params) }}">{{ p }}</a>
         {% endif %}
     {% endfor %}
 
     {% if fin < total_paginas %}
-        <a href="{{ url_for(endpoint, pagina=inicio+10, **params) }}">»</a>
+        <a href="{{ url_for(endpoint, pagina=inicio+10, **params) }}" title="10 páginas adelante" aria-label="10 páginas adelante">…</a>
+    {% endif %}
+
+    {# Ir a la última página #}
+    {% if pagina < total_paginas %}
+        <a href="{{ url_for(endpoint, pagina=total_paginas, **params) }}" class="paginacion__extremo"
+           title="Última página ({{ total_paginas }})" aria-label="Última página"><i data-lucide="chevrons-right" width="16" height="16"></i></a>
+    {% else %}
+        <span class="paginacion__extremo is-disabled" aria-hidden="true"><i data-lucide="chevrons-right" width="16" height="16"></i></span>
     {% endif %}
 
 {% endif %}
-</div>
+</nav>
 {% endmacro %}

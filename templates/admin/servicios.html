@@ -17,6 +17,7 @@
 <form method="GET" action="/servicios" id="form-filtro-servicios">
     <div class="filtro-box">
         <div class="filtro-row">
+            {{ filtro_negocios(negocios, id_negocio, input_id="select-negocio-servicios") }}
             <div class="filtro-item filtro-item--max280">
                 <label for="buscar-servicio">Buscar servicio</label>
                 <input type="text" id="buscar-servicio" name="q"
@@ -24,9 +25,7 @@
                        placeholder="Nombre del servicio..."
                        autocomplete="off">
             </div>
-            {{ filtro_negocios(negocios, id_negocio, input_id="select-negocio-servicios") }}
-            <div class="filtro-item filtro-item--auto">
-                <label>&nbsp;</label>
+            <div class="filtro-actions">
                 <div class="filtro-toggle filtro-toggle--compact">
                     <label class="switch">
                         <input type="checkbox"
@@ -38,8 +37,6 @@
                     </label>
                     <span class="toggle-text">Mostrar eliminados</span>
                 </div>
-            </div>
-            <div class="filtro-actions">
                 <a href="{{ url_for('servicios.exportar_servicios_excel',
                             q=q or None,
                             id_negocio=request.args.getlist('id_negocio'),

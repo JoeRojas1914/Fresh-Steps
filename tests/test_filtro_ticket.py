@@ -1,5 +1,6 @@
 """
-El campo "N° Ticket" es el primer filtro (y con estilo destacado) en las páginas de ventas.
+Orden de los filtros en las páginas de ventas: primero el Negocio (cuando se muestra)
+y enseguida el "N° Ticket".
 """
 import pytest
 
@@ -11,18 +12,33 @@ def _form(html):
     return html[inicio:html.index("</form>", inicio)]
 
 
+def _nombres(form):
+    """Nombres de los campos del filtro en el orden en que aparecen (sin repetir)."""
+    import re
+    vistos = []
+    for n in re.findall(r'name="([^"]+)"', form):
+        if n not in vistos:
+            vistos.append(n)
+    return vistos
+
+
 @pytest.mark.parametrize("url", PAGINAS)
-def test_ticket_es_el_primer_filtro(logged_client, url):
+def test_negocio_primero_y_luego_ticket(logged_client, url):
     form = _form(logged_client.get(url).data.decode())
-    primer_campo = form.index('name="')
-    assert form[primer_campo:].startswith('name="id_venta"'), url
+    nombres = _nombres(form)
+    assert nombres[:2] == ["id_negocio", "id_venta"], (url, nombres[:3])
     assert "filtro-item--ticket" in form
 
 
 @pytest.mark.parametrize("url", PAGINAS)
-def test_ticket_es_el_primer_filtro_para_caja(logged_client_caja, url):
+def test_ticket_primero_si_caja_no_ve_negocio(logged_client_caja, url):
     form = _form(logged_client_caja.get(url).data.decode())
-    assert form[form.index('name="'):].startswith('name="id_venta"'), url
+    nombres = _nombres(form)
+    # La caja con un solo negocio no ve el selector: el ticket queda primero
+    if "id_negocio" in nombres:
+        assert nombres[:2] == ["id_negocio", "id_venta"], (url, nombres[:3])
+    else:
+        assert nombres[0] == "id_venta", (url, nombres[:3])
 
 
 @pytest.mark.parametrize("url", PAGINAS)

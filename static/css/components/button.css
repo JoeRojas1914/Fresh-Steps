@@ -12,6 +12,7 @@
   justify-content: center;
   gap: 6px;
 
+  box-sizing: border-box;   /* <a class="btn"> mide igual que <button> */
   min-height: 40px;
   padding: 0 16px;
   border-radius: 10px;

@@ -20,12 +20,12 @@
     <div class="filtro-box">
         <div class="filtro-row">
 
-            {{ filtro_ticket(id_venta, "buscador-ticket-historial") }}
-
             {# La caja solo ve sus negocios; con uno solo no hay nada que elegir #}
             {% if es_admin or negocios | length > 1 %}
             {{ filtro_negocios(negocios, id_negocio) }}
             {% endif %}
+
+            {{ filtro_ticket(id_venta, "buscador-ticket-historial") }}
 
             <div class="filtro-item">
                 <label>Buscar cliente</label>
@@ -74,9 +74,9 @@
                 </details>
             </div>
 
-            {% if es_admin %}
-            <div class="filtro-item filtro-item--auto">
-                <label>&nbsp;</label>
+
+            <div class="filtro-actions">
+                {% if es_admin %}
                 <div class="filtro-toggle filtro-toggle--compact">
                     <label class="switch">
                         <input type="checkbox"
@@ -88,10 +88,7 @@
                     </label>
                     <span class="toggle-text">Mostrar eliminadas</span>
                 </div>
-            </div>
-            {% endif %}
-
-            <div class="filtro-actions">
+                {% endif %}
                 <button type="submit" class="btn btn--secondary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
                 {% if id_negocio or fecha_inicio or fecha_fin or q or articulo or id_venta or estado or (tipo_fecha and tipo_fecha != 'fecha_recibo') %}
                 <a href="/ventas/historial" id="btn-limpiar-filtro-historial" class="btn btn--secondary btn--sm no-underline"><i data-lucide="x" width="14" height="14"></i> Limpiar filtros</a>

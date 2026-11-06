@@ -201,6 +201,7 @@ export function confirmarEliminarVenta(idVenta) {
 
 
 export function initModalForm(form, submitBtn) {
+
     function validate() {
         const fields = Array.from(form.querySelectorAll("[required]"));
         let allValid = true;

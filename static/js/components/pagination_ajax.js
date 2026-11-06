@@ -2,7 +2,17 @@
 
     const reqCounters = new WeakMap();
 
-    async function cargarTablaAjax(url, container, { push = true } = {}) {
+    function animarFilas(container) {
+        const filas = container.querySelectorAll('.table tbody tr:not(.table--details)');
+        filas.forEach((tr, i) => tr.style.setProperty('--i', Math.min(i, 12)));
+        container.classList.remove('tabla-anim');
+        void container.offsetWidth;            
+        container.classList.add('tabla-anim');
+        clearTimeout(container._animTimer);
+        container._animTimer = setTimeout(() => container.classList.remove('tabla-anim'), 900);
+    }
+
+    async function cargarTablaAjax(url, container, { push = true, animar = false } = {}) {
         const myId = (reqCounters.get(container) || 0) + 1;
         reqCounters.set(container, myId);
 
@@ -25,6 +35,7 @@
             container.innerHTML = html;
             if (push) history.pushState(null, '', url);
             if (window.lucide) window.lucide.createIcons();
+            if (animar) animarFilas(container);
         } catch {
             if (reqCounters.get(container) === myId) window.location.href = url;
         } finally {
@@ -100,7 +111,7 @@
         if (!container) return;
 
         e.preventDefault();
-        cargarTablaAjax(link.href, container);
+        cargarTablaAjax(link.href, container, { animar: true });
     });
 
     function ordenarPorColumna(th) {

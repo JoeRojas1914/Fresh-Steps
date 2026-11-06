@@ -20,18 +20,17 @@
 
 
 .table thead {
-  background: linear-gradient(135deg, #1e7fd6, #0b3c5d);
+  background: #0b3c5d;
   color: #ffffff;
 }
 
 .table th {
-  padding: 12px 14px;
+  padding: 11px 14px;
   text-align: left;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
-/* ── Encabezados ordenables ── */
 .table th.th-sort {
   cursor: pointer;
   user-select: none;
@@ -39,11 +38,11 @@
   transition: background .15s ease;
 }
 
-.table th.th-sort:hover,
-.table th.th-sort:focus-visible {
-  background: rgba(255,255,255,.12);
-  outline: none;
-}
+.table th.th-sort:hover { background: #0e4a72; }
+.table th.th-sort:focus-visible { background: #0e4a72; outline: 2px solid #ffffff; outline-offset: -3px; }
+
+.table th.th-sort.is-asc,
+.table th.th-sort.is-desc { color: #9fd0ff; }
 
 .th-sort-icon {
   display: inline-block;
@@ -58,7 +57,6 @@
 .th-sort.is-asc  .th-sort-icon,
 .th-sort.is-desc .th-sort-icon    { opacity: 1; }
 
-/* Tabla compacta: filas de ~44px */
 .table td {
   padding: 8px 14px;
   color: #1f2933;
@@ -67,9 +65,8 @@
   line-height: 1.35;
 }
 
-/* Botones de texto dentro de las filas (Detalles, Lista, Entregar…) más bajos */
 .table td .btn--sm {
-  padding: 5px 10px;
+  padding: 0 10px;
   font-size: 12.5px;
   border-radius: 8px;
 }
@@ -113,7 +110,6 @@
   background-color: #fdecea;
 }
 
-/* Acciones de cada fila: botones de ícono en una sola línea */
 .td-acciones { white-space: nowrap; }
 .td-acciones .acciones {
   display: inline-flex;

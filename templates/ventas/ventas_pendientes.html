@@ -16,10 +16,10 @@
     <input type="hidden" name="dir" value="{{ direccion or '' }}">
     <div class="filtro-box">
         <div class="filtro-row">
-            {{ filtro_ticket(id_venta, "buscador-ticket") }}
             {% if session.rol == 'admin' %}
             {{ filtro_negocios(negocios, id_negocio, clase="filtro-item--max220") }}
             {% endif %}
+            {{ filtro_ticket(id_venta, "buscador-ticket") }}
             <div class="filtro-item filtro-item--max280">
                 <label>Buscar cliente</label>
                 <input type="text" id="buscador-cliente" name="q"
