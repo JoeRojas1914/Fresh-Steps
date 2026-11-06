@@ -2,58 +2,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Acceso rápido</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso rápido</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='vendor/lucide.min.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/pin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/auth.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FreshStepsLogo.png') }}">
 </head>
 
-<body>
+<body class="auth-page">
 
-<div class="pin-container">
-    <h2>Acceso</h2>
+<main class="auth-card">
+    <div class="auth-logo">
+        <picture>
+            <source srcset="{{ url_for('static', filename='images/FreshStepsLogo.webp') }}" type="image/webp">
+            <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
+        </picture>
+    </div>
+
+    <h1>Acceso de caja</h1>
+    <p class="auth-sub">Ingresa tu PIN para continuar</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, msg in messages %}
-        <div class="alert {{ category }}">
-{{ msg }}
-        </div>
+        <div class="alert {{ category }}">{{ msg }}</div>
       {% endfor %}
-    {% endwith %}   
+    {% endwith %}
 
-    <form method="POST" class="pin-form">
-
+    <form method="POST" class="auth-form" data-auth-form data-texto-cargando="Entrando…">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <div class="pin-input-wrap">
-            <input
-                type="password"
-                name="pin"
-                id="pinInput"
-                maxlength="6"
-                inputmode="numeric"
-                pattern="[0-9]{4,6}"
-                placeholder="••••"
-                class="pin-input"
-                required
-            >
-            <span id="togglePin" class="pin-toggle">
-                <svg id="iconoOjoPin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                </svg>
-            </span>
+        <div class="auth-field">
+            <label for="pinInput">PIN</label>
+            <div class="auth-input auth-input--pin">
+                <input
+                    type="password"
+                    name="pin"
+                    id="pinInput"
+                    maxlength="6"
+                    inputmode="numeric"
+                    pattern="[0-9]{4,6}"
+                    placeholder="••••"
+                    autocomplete="off"
+                    required
+                    autofocus
+                >
+                <button type="button" class="auth-ojo" id="togglePin" aria-label="Mostrar PIN" aria-pressed="false">
+                    <svg id="iconoOjoPin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+            </div>
         </div>
 
-        <button type="submit" class="pin-btn">Entrar</button>
+        <button type="submit" class="auth-btn">Entrar</button>
     </form>
 
-    <a href="{{ url_for('auth.login', admin=1) }}" class="admin-secret">
-        <i data-lucide="settings" width="16" height="16"></i>
+    <a href="{{ url_for('auth.login', admin=1) }}" class="auth-admin" title="Acceso de administrador" aria-label="Acceso de administrador">
+        <i data-lucide="settings" width="18" height="18"></i>
     </a>
-
-</div>
+</main>
 
 <script type="module" src="{{ url_for('static', filename='js/pages/password-toggle.js') }}"></script>
 </body>

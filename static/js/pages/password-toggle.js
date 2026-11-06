@@ -9,9 +9,9 @@ const _SVG_OJO_CERRADO = `
 
 document.addEventListener("DOMContentLoaded", function () {
     [
-        { toggle: "togglePwd", input: "passwordInput", icon: "iconoOjo" },
-        { toggle: "togglePin", input: "pinInput",      icon: "iconoOjoPin" },
-    ].forEach(function ({ toggle, input, icon }) {
+        { toggle: "togglePwd", input: "passwordInput", icon: "iconoOjo",    nombre: "contraseña" },
+        { toggle: "togglePin", input: "pinInput",      icon: "iconoOjoPin", nombre: "PIN" },
+    ].forEach(function ({ toggle, input, icon, nombre }) {
         const btn = document.getElementById(toggle);
         if (!btn) return;
         btn.addEventListener("click", function () {
@@ -19,7 +19,25 @@ document.addEventListener("DOMContentLoaded", function () {
             const showing = inp.type === "password";
             inp.type      = showing ? "text" : "password";
             document.getElementById(icon).innerHTML = showing ? _SVG_OJO_CERRADO : _SVG_OJO_ABIERTO;
-            this.style.color = showing ? "#1e7fd6" : "#94a3b8";
+            btn.classList.toggle("is-activo", showing);
+            btn.setAttribute("aria-pressed", showing ? "true" : "false");
+            btn.setAttribute("aria-label", (showing ? "Ocultar " : "Mostrar ") + nombre);
+            inp.focus();
+        });
+    });
+
+    document.querySelectorAll("form[data-auth-form]").forEach(function (form) {
+        const btn = form.querySelector("button[type=submit]");
+        if (!btn) return;
+        const original = btn.innerHTML;
+        form.addEventListener("submit", function () {
+            btn.disabled  = true;
+            btn.innerHTML = '<span class="auth-spinner" aria-hidden="true"></span> ' +
+                            (form.dataset.textoCargando || "Cargando…");
+        });
+        window.addEventListener("pageshow", function () {
+            btn.disabled  = false;
+            btn.innerHTML = original;
         });
     });
 

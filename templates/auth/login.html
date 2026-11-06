@@ -7,68 +7,68 @@
     <title>Iniciar sesión</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='vendor/lucide.min.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/login.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/auth.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FreshStepsLogo.png') }}">
 </head>
 
-<body class="login-page">
+<body class="auth-page">
 
-<div class="login-wrapper">
-    <div class="login-card">
-        <div class="login-logo">
-            <picture>
-                <source srcset="{{ url_for('static', filename='images/FreshStepsLogo.webp') }}" type="image/webp">
-                <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
-            </picture>
+<main class="auth-card">
+    <div class="auth-logo">
+        <picture>
+            <source srcset="{{ url_for('static', filename='images/FreshStepsLogo.webp') }}" type="image/webp">
+            <img src="{{ url_for('static', filename='images/FreshStepsLogo.png') }}" alt="Fresh Steps">
+        </picture>
+    </div>
+
+    <h1>Bienvenido</h1>
+    <p class="auth-sub">Inicia sesión para continuar</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+        <div class="alert {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" class="auth-form" data-auth-form data-texto-cargando="Ingresando…">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="auth-field">
+            <label for="usuarioInput">Usuario</label>
+            <div class="auth-input">
+                <span class="auth-input__icono" aria-hidden="true"><i data-lucide="user" width="18" height="18"></i></span>
+                <input type="text" name="usuario" id="usuarioInput" placeholder="Tu usuario"
+                       autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+            </div>
         </div>
 
-        <h2>Bienvenido</h2>
-        <p class="login-subtitle">Inicia sesión para continuar</p>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% for category, msg in messages %}
-            <div class="alert {{ category }}">
-        {{ msg }}
-            </div>
-          {% endfor %}
-        {% endwith %}
-
-        <form method="POST" class="login-form">
-
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-            <div class="input-group">
-                <span class="input-icon"><i data-lucide="user" width="18" height="18"></i></span>
-                <input type="text" name="usuario" placeholder="Usuario" required>
-            </div>
-
-            <div class="input-group password-group">
-                <span class="input-icon"><i data-lucide="lock" width="18" height="18"></i></span>
-                <input type="password" name="password" id="passwordInput" placeholder="Contraseña" required>
-                <span class="toggle-password" id="togglePwd">
-                    <svg id="iconoOjo" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="auth-field">
+            <label for="passwordInput">Contraseña</label>
+            <div class="auth-input">
+                <span class="auth-input__icono" aria-hidden="true"><i data-lucide="lock" width="18" height="18"></i></span>
+                <input type="password" name="password" id="passwordInput" placeholder="Tu contraseña"
+                       autocomplete="current-password" required>
+                <button type="button" class="auth-ojo" id="togglePwd" aria-label="Mostrar contraseña" aria-pressed="false">
+                    <svg id="iconoOjo" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                         <circle cx="12" cy="12" r="3"/>
                     </svg>
-                </span>
+                </button>
             </div>
+        </div>
 
-            <button type="submit" class="btn-login">
-                Ingresar
-            </button>
+        <button type="submit" class="auth-btn">Ingresar</button>
+    </form>
 
-        </form>
-        
-        {% if session.get("pin_habilitado") %}
-            <div class="login-divider">o</div>
-            <a href="/pin" class="btn-pin">
-                <i data-lucide="hash" width="16" height="16"></i> Acceso con PIN
-            </a>
-        {% endif %}
-    </div>
-</div>
+    {% if session.get("pin_habilitado") %}
+        <div class="auth-divider">o</div>
+        <a href="/pin" class="auth-btn auth-btn--secundario">
+            <i data-lucide="hash" width="16" height="16"></i> Acceso con PIN
+        </a>
+    {% endif %}
+</main>
 
 <script type="module" src="{{ url_for('static', filename='js/pages/password-toggle.js') }}"></script>
 </body>
