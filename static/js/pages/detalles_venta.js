@@ -1,13 +1,99 @@
-import { escapeHtml } from '../base/helpers.js';
+import { escapeHtml, fmtDinero } from '../base/helpers.js';
 
-function _caracteristicasHTML(datos) {
+const _ICONO_ARTICULO = { calzado: "footprints", confeccion: "scissors", maquila: "factory" };
+
+function _caracteristicas(d) {
     const partes = [];
-    const colores = [datos.color_base, datos.color_secundario].filter(Boolean).map(escapeHtml).join(" / ");
-    if (colores)              partes.push(`Color: <b>${colores}</b>`);
-    if (datos.color_agujetas) partes.push(`Agujetas: <b>${escapeHtml(datos.color_agujetas)}</b>`);
-    if (datos.material)       partes.push(`Material: <b>${escapeHtml(datos.material)}</b>`);
-    if (!partes.length) return "";
-    return `<div class="detalle-caracteristicas">${partes.join(" · ")}</div>`;
+    const colores = [d.color_base, d.color_secundario].filter(Boolean).join(" / ");
+    if (colores)         partes.push(colores);
+    if (d.color_agujetas) partes.push(`agujetas ${d.color_agujetas}`);
+    if (d.material)       partes.push(d.material);
+    return partes.map(escapeHtml).join(", ") || '<span class="dim-soft">—</span>';
+}
+
+
+function _filasArticulo(item) {
+    const d = item.datos || {};
+    const icono = _ICONO_ARTICULO[item.tipo_articulo] || "package";
+    const esMaquila = item.tipo_articulo === "maquila";
+    const nombre = [d.tipo, esMaquila ? null : d.marca].filter(Boolean).map(escapeHtml).join(" ") || "Artículo";
+    const cantidad = d.cantidad && Number(d.cantidad) > 1 ? ` <span class="dt-cant">×${escapeHtml(d.cantidad)}</span>` : "";
+
+    let servicios = (item.servicios || []).map(s => [escapeHtml(s.nombre), fmtDinero(s.precio_aplicado)]);
+    if (esMaquila) {
+        const cant = Number(d.cantidad || 0);
+        const unit = Number(d.precio_unitario || 0);
+        servicios = [[`${cant} × ${fmtDinero(unit)}`, fmtDinero(cant * unit)]];
+    }
+    if (!servicios.length) servicios = [['<span class="dim-soft">Sin servicios</span>', ""]];
+
+    const n = servicios.length;
+    const filas = servicios.map(([serv, precio], i) => `
+        <tr>
+            ${i === 0 ? `
+            <td class="dt-articulo" rowspan="${n}">
+                <span class="dt-icono"><i data-lucide="${icono}" width="14" height="14"></i></span>
+                <span>${nombre}${cantidad}</span>
+            </td>
+            <td class="dt-caract" rowspan="${n}">${esMaquila ? '<span class="dim-soft">—</span>' : _caracteristicas(d)}</td>` : ""}
+            <td>${serv}</td>
+            <td class="dt-precio">${precio}</td>
+        </tr>`).join("");
+
+    const nota = item.comentario ? `
+        <tr class="dt-nota-fila">
+            <td colspan="4">
+                <span class="dt-nota"><i data-lucide="message-circle" width="13" height="13"></i> ${escapeHtml(item.comentario)}</span>
+            </td>
+        </tr>` : "";
+
+    return `<tbody class="dt-grupo">${filas}${nota}</tbody>`;
+}
+
+function _tablaDetalles(detalles, total, descuento) {
+    const desc = Number(descuento || 0);
+    const tieneTotal = total !== undefined && total !== "";
+    let pie = "";
+    if (tieneTotal && desc > 0) {
+        pie = `
+        <tfoot>
+            <tr class="dt-subtotal">
+                <td colspan="3">Subtotal</td>
+                <td class="dt-precio">${fmtDinero(Number(total) + desc)}</td>
+            </tr>
+            <tr class="dt-descuento">
+                <td colspan="3">Descuento</td>
+                <td class="dt-precio">−${fmtDinero(desc)}</td>
+            </tr>
+            <tr class="dt-total">
+                <td colspan="3">Total de la venta</td>
+                <td class="dt-precio">${fmtDinero(total)}</td>
+            </tr>
+        </tfoot>`;
+    } else if (tieneTotal) {
+        pie = `
+        <tfoot>
+            <tr class="dt-total">
+                <td colspan="3">Total de la venta</td>
+                <td class="dt-precio">${fmtDinero(total)}</td>
+            </tr>
+        </tfoot>`;
+    }
+    return `
+        <li class="detalles-tabla-wrap">
+            <table class="detalles-tabla">
+                <thead>
+                    <tr>
+                        <th>Artículo</th>
+                        <th>Características</th>
+                        <th>Servicio</th>
+                        <th class="dt-precio">Precio</th>
+                    </tr>
+                </thead>
+                ${detalles.map(_filasArticulo).join("")}
+                ${pie}
+            </table>
+        </li>`;
 }
 
 document.addEventListener("click", function (e) {
@@ -56,82 +142,14 @@ export function toggleDetalles(idVenta, btn) {
             lista.dataset.cargado = "1";
 
             if (!detalles.length) {
-                lista.innerHTML = `<li>Sin detalles</li>`;
+                lista.innerHTML = `<li class="detalle-vacio">Esta venta no tiene artículos registrados.</li>`;
                 return;
             }
 
-            lista.innerHTML = detalles.map(item => {
-
-                let html = "";
-
-                if (item.tipo_articulo === "calzado") {
-                    html += `
-                        <div class="detalle-zapato">
-                            <i data-lucide="footprints" width="14" height="14"></i>
-                            ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
-                        </div>
-                        ${_caracteristicasHTML(item.datos)}
-                    `;
-
-                    html += item.servicios.map(s => `
-                        <div class="detalle-servicio">
-                            ${escapeHtml(s.nombre)}
-                            <span class="detalle-precio">
-                                $${parseFloat(s.precio_aplicado).toFixed(2)}
-                            </span>
-                        </div>
-                    `).join("");
-                }
-
-                else if (item.tipo_articulo === "confeccion") {
-                    html += `
-                        <div class="detalle-zapato">
-                            <i data-lucide="scissors" width="14" height="14"></i>
-                            ${escapeHtml(item.datos.tipo)} ${escapeHtml(item.datos.marca)}
-                        </div>
-                        ${_caracteristicasHTML(item.datos)}
-                        <div>
-                            Cantidad: <b>${escapeHtml(item.datos.cantidad)}</b>
-                        </div>
-                    `;
-
-                    html += item.servicios.map(s => `
-                        <div class="detalle-servicio">
-                            ${escapeHtml(s.nombre)}
-                            <span class="detalle-precio">
-                                $${parseFloat(s.precio_aplicado).toFixed(2)}
-                            </span>
-                        </div>
-                    `).join("");
-                }
-
-                else if (item.tipo_articulo === "maquila") {
-                    html += `
-                        <div class="detalle-zapato">
-                            <i data-lucide="factory" width="14" height="14"></i>
-                            ${escapeHtml(item.datos.tipo)}
-                        </div>
-                        <div>
-                            Cantidad: <b>${escapeHtml(item.datos.cantidad)}</b> |
-                            Precio: <b>$${parseFloat(item.datos.precio_unitario).toFixed(2)}</b>
-                        </div>
-                    `;
-                }
-
-                if (item.comentario) {
-                    html += `
-                        <div class="mt-6 dim-mid nota-italic">
-                            <i data-lucide="message-circle" width="13" height="13"></i>
-                            ${escapeHtml(item.comentario)}
-                        </div>
-                    `;
-                }
-
-                return `<li class="detalle-item">${html}</li>`;
-            }).join("");
+            lista.innerHTML = _tablaDetalles(detalles, lista.dataset.total, lista.dataset.descuento);
             if (window.lucide) lucide.createIcons();
         })
         .catch(() => {
-            lista.innerHTML = `<li>Error al cargar detalles</li>`;
+            lista.innerHTML = `<li class="detalle-vacio">No se pudieron cargar los detalles. Intenta de nuevo.</li>`;
         });
 }

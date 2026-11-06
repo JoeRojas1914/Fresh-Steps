@@ -199,7 +199,7 @@ def test_clientes_ordena_por_fecha_registro(logged_client, db_conn, cliente_test
     try:
         resp = logged_client.get("/clientes?partial=1&q=TestNombre&orden=fecha_registro&dir=asc")
         html = resp.data
-        assert html.index(b"01/01/2020") < html.index(b"TestApellido")
+        assert html.index("1 ene 2020".encode()) < html.index(b"TestApellido")
     finally:
         cursor.execute("DELETE FROM clientes_historial WHERE id_cliente = %s", (id_antiguo,))
         cursor.execute("DELETE FROM cliente WHERE id_cliente = %s", (id_antiguo,))

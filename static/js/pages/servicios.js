@@ -1,5 +1,5 @@
 import { abrirModal, cerrarModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, escapeHtml, csrfFetch } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, escapeHtml, csrfFetch, apiAction } from '../base/helpers.js';
 import { validarRequerido, validarPrecio } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
@@ -147,4 +147,17 @@ document.addEventListener("click", function (e) {
 
     const btnEjecutar = e.target.closest(".js-ejecutar-eliminar-servicio");
     if (btnEjecutar) { ejecutarEliminarServicio(); return; }
+
+    // La ruta solo acepta POST y responde JSON (antes era un enlace GET y daba 405)
+    const btnRestaurar = e.target.closest(".js-restaurar-servicio");
+    if (btnRestaurar) {
+        apiAction({
+            url: `/servicios/restaurar/${btnRestaurar.dataset.id}`,
+            msgError: "No se pudo restaurar el servicio.",
+            loadingBtn: btnRestaurar,
+            reload: true,
+            reloadDelay: 300,
+        });
+        return;
+    }
 });

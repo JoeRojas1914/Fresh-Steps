@@ -63,11 +63,11 @@
     </div>
 
     <div class="filtro-actions">
-      <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
+      <button type="submit" class="btn btn--secondary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
       {% if request.args.get('id_negocio') or request.args.get('id_categoria') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
         <a href="{{ url_for('gastos.gastos') }}"
            id="btn-limpiar-filtro-gastos"
-           class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
+           class="btn btn--secondary btn--sm no-underline"><i data-lucide="x" width="14" height="14"></i> Limpiar filtros</a>
       {% endif %}
       <a href="{{ url_for('gastos.exportar_gastos_excel',
                   id_negocio=request.args.getlist('id_negocio'),
@@ -78,7 +78,7 @@
          class="btn btn--success btn--sm no-underline js-exportar">
         <i data-lucide="download" width="14" height="14"></i> Exportar Excel
       </a>
-      <button type="button" data-modal-open="modalGasto" class="btn btn--primary btn--sm">
+      <button type="button" data-modal-open="modalGasto" class="btn btn--info btn--sm">
         <i data-lucide="plus" width="14" height="14"></i> Agregar gasto
       </button>
       <button type="button" id="btn-gestionar-categorias" class="btn btn--secondary btn--sm">
@@ -173,7 +173,7 @@
 
 {% if section == 'footer' %}
 <button type="button"
-        class="btn btn--danger btn--sm"
+        class="btn btn--secondary"
         data-modal-close="modalGasto">
     Cancelar
 </button>
@@ -189,7 +189,6 @@
 
 
 
-<hr>
 
 <div id="tabla-paginada">
 {% include "admin/_gastos_partial.html" %}
@@ -225,7 +224,7 @@
 </div>
 {% endif %}
 {% if section == 'footer' %}
-<button class="btn btn--primary btn--sm" data-modal-close="modalConfirmarEliminarGasto">Cancelar</button>
+<button class="btn btn--secondary" data-modal-close="modalConfirmarEliminarGasto">Cancelar</button>
 <button class="btn btn--danger btn--sm js-ejecutar-eliminar-gasto">Sí, eliminar</button>
 {% endif %}
 {% endcall %}
@@ -246,7 +245,7 @@
            class="input-nueva-cat"
            placeholder="Nueva categoría..."
            maxlength="100">
-    <button type="button" id="btn-agregar-cat" class="btn btn--primary btn--sm">
+    <button type="button" id="btn-agregar-cat" class="btn btn--info btn--sm">
         <i data-lucide="plus" width="14" height="14"></i> Agregar
     </button>
 </div>
@@ -254,7 +253,7 @@
 {% endif %}
 
 {% if section == 'footer' %}
-<button class="btn btn--primary btn--sm" data-modal-close="modalCategorias">Cerrar</button>
+<button class="btn btn--secondary" data-modal-close="modalCategorias">Cerrar</button>
 {% endif %}
 
 {% endcall %}

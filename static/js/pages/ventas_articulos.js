@@ -92,7 +92,7 @@ export function agregarArticulo() {
                 <div class="zapato-titulo">
                     <i data-lucide="receipt" width="14" height="14"></i> Artículo ${index + 1}${negNombre ? `<span class="zapato-titulo-badge">${escapeHtml(negNombre)}</span>` : ""}
                 </div>
-                <button type="button" data-action="delete-article" class="btn btn--danger btn--sm">
+                <button type="button" data-action="delete-article" class="btn btn--danger btn--soft btn--sm" aria-label="Quitar artículo">
                     <i data-lucide="x" width="14" height="14"></i>
                 </button>
             </div>

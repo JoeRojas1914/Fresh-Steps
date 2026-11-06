@@ -60,6 +60,11 @@ from services.permisos_service import negocios_permitidos, restringir_negocios
 # ================= APP =================
 load_dotenv()
 app = Flask(__name__)
+
+from utils import dinero, fecha, fecha_hora  # noqa: E402
+app.add_template_filter(dinero)
+app.add_template_filter(fecha)
+app.add_template_filter(fecha_hora)
 app.secret_key = os.environ.get("SECRET_KEY")
 if not app.secret_key:  # pragma: no cover
     raise RuntimeError("SECRET_KEY no está configurada. Defínela en el archivo .env antes de arrancar.")

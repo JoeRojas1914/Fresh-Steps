@@ -2,9 +2,9 @@
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border-radius: 16px;
-  border: 1px solid #c8dff0;
-  box-shadow: 0 4px 20px rgba(30,127,214,0.13);
+  border-radius: 14px;
+  border: 1px solid #e8eef5;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .table {
@@ -25,7 +25,7 @@
 }
 
 .table th {
-  padding: 16px 16px;
+  padding: 12px 14px;
   text-align: left;
   font-size: 11px;
   font-weight: 700;
@@ -58,11 +58,20 @@
 .th-sort.is-asc  .th-sort-icon,
 .th-sort.is-desc .th-sort-icon    { opacity: 1; }
 
+/* Tabla compacta: filas de ~44px */
 .table td {
-  padding: 12px 16px;
+  padding: 8px 14px;
   color: #1f2933;
-  border-bottom: 1px solid #f3f6fa;
+  border-bottom: 1px solid #eef2f7;
   vertical-align: middle;
+  line-height: 1.35;
+}
+
+/* Botones de texto dentro de las filas (Detalles, Lista, Entregar…) más bajos */
+.table td .btn--sm {
+  padding: 5px 10px;
+  font-size: 12.5px;
+  border-radius: 8px;
 }
 
 .table tbody tr:last-child td {
@@ -89,20 +98,29 @@
 }
 
 @media (max-width: 1024px) {
-  .table th { font-size: 11px; padding: 14px 12px; }
-  .table td { font-size: 13px; padding: 11px 12px; }
+  .table th { font-size: 11px; padding: 11px 10px; }
+  .table td { font-size: 13px; padding: 7px 10px; }
 }
 
 @media (max-width: 768px) {
   .table-wrapper { border-radius: 12px; }
-  .table th { font-size: 10px; padding: 12px 10px; letter-spacing: .5px; }
-  .table td { font-size: 13px; padding: 10px 10px; }
+  .table th { font-size: 10px; padding: 10px 8px; letter-spacing: .5px; }
+  .table td { font-size: 13px; padding: 7px 8px; }
 }
 
 
 .table__row--danger {
   background-color: #fdecea;
 }
+
+/* Acciones de cada fila: botones de ícono en una sola línea */
+.td-acciones { white-space: nowrap; }
+.td-acciones .acciones {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.td-acciones form { display: inline-flex; margin: 0; }
 
 .clickable-row {
   cursor: pointer;

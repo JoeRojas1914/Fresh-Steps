@@ -42,7 +42,7 @@
                 <i data-lucide="download" width="14" height="14"></i> Exportar Excel
             </a>
             {% endif %}
-            <button type="button" data-modal-open="modalCliente" class="btn btn--primary btn--sm">
+            <button type="button" data-modal-open="modalCliente" class="btn btn--info btn--sm">
                 <i data-lucide="plus" width="14" height="14"></i> Agregar cliente
             </button>
         </div>
@@ -89,7 +89,7 @@
 
 {% if section == 'footer' %}
 <button type="button"
-        class="btn btn--danger btn--sm"
+        class="btn btn--secondary"
         data-modal-close="modalCliente">
   Cancelar
 </button>
@@ -106,7 +106,6 @@
 
 
 
-<hr>
 
 <div id="tabla-paginada">
 {% include "clientes/_clientes_partial.html" %}
@@ -149,7 +148,7 @@
 </div>
 {% endif %}
 {% if section == 'footer' %}
-<button class="btn btn--primary btn--sm" data-modal-close="modalConfirmarEliminarCliente">Cancelar</button>
+<button class="btn btn--secondary" data-modal-close="modalConfirmarEliminarCliente">Cancelar</button>
 <button class="btn btn--danger btn--sm js-ejecutar-eliminar-cliente">Sí, eliminar</button>
 {% endif %}
 {% endcall %}

@@ -1,5 +1,5 @@
 import { abrirModal } from '../components/modal.js';
-import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, csrfFetch, escapeHtml } from '../base/helpers.js';
+import { initModalForm, mostrarFeedback, crearEliminarHandler, shakeEl, csrfFetch, escapeHtml, apiAction } from '../base/helpers.js';
 import { validarRequerido, validarPrecio } from '../base/form_validators.js';
 import { renderDiff, abrirHistorial } from '../base/historial_helpers.js';
 
@@ -88,6 +88,19 @@ document.addEventListener("click", function (e) {
 
     const btnEjecutar = e.target.closest(".js-ejecutar-eliminar-gasto");
     if (btnEjecutar) { ejecutarEliminarGasto(); return; }
+
+    // La ruta solo acepta POST y responde JSON (antes era un enlace GET y daba 405)
+    const btnRestaurar = e.target.closest(".js-restaurar-gasto");
+    if (btnRestaurar) {
+        apiAction({
+            url: `/gastos/restaurar/${btnRestaurar.dataset.id}`,
+            msgError: "No se pudo restaurar el gasto.",
+            loadingBtn: btnRestaurar,
+            reload: true,
+            reloadDelay: 300,
+        });
+        return;
+    }
 });
 
 

@@ -7,11 +7,6 @@
 <div id="toast-container"></div>
 <div id="tabla-ventas">
 
-{% set meses = {
-    1:'enero', 2:'febrero', 3:'marzo', 4:'abril',
-    5:'mayo', 6:'junio', 7:'julio', 8:'agosto',
-    9:'septiembre', 10:'octubre', 11:'noviembre', 12:'diciembre'
-} %}
 
 {% call table([
     {"label": "Recibo", "sort": "id"}, {"label": "Negocio", "sort": "negocio"},
@@ -29,27 +24,23 @@
     <td>{{ badge_negocio(v.negocio) }}</td>
     <td>{{ v.nombre }} {{ v.apellido }}</td>
     <td>{{ telefono_wa(v.telefono, 'Sin teléfono') }}</td>
-    <td>
-        {{ v.fecha_recibo.day }} {{ meses[v.fecha_recibo.month] }}
-        {{ "%02d:%02d" | format(v.fecha_recibo.hour, v.fecha_recibo.minute) }}
+    <td class="nowrap">
+        {{ v.fecha_recibo|fecha_hora }}
     </td>
-    <td>
-        {{ v.fecha_estimada.day }} {{ meses[v.fecha_estimada.month] }}
-        {{ "%02d:%02d" | format(v.fecha_estimada.hour, v.fecha_estimada.minute) }}
+    <td class="nowrap">
+        {{ v.fecha_estimada|fecha_hora }}
     </td>
-    <td>
+    <td class="nowrap">
         {% if v.fecha_lista %}
-            {{ v.fecha_lista.day }} {{ meses[v.fecha_lista.month] }}
-            {{ "%02d:%02d" | format(v.fecha_lista.hour, v.fecha_lista.minute) }}
+            {{ v.fecha_lista|fecha_hora }}
         {% else %}<span class="dim">—</span>{% endif %}
     </td>
-    <td>
+    <td class="nowrap">
         {% if v.fecha_entrega %}
-            {{ v.fecha_entrega.day }} {{ meses[v.fecha_entrega.month] }}
-            {{ "%02d:%02d" | format(v.fecha_entrega.hour, v.fecha_entrega.minute) }}
+            {{ v.fecha_entrega|fecha_hora }}
         {% else %}<span class="dim">—</span>{% endif %}
     </td>
-    <td>${{ "%.2f" | format(v.total) }}</td>
+    <td>{{ v.total|dinero }}</td>
     <td>
         <span class="badge-estado {{ v.estado }}">
             {% if v.estado == 'pendiente' %}Pendiente
@@ -68,9 +59,11 @@
 <tr id="detalles-{{ v.id_venta }}" class="table--details d-none">
     <td colspan="11">
         <div class="detalles-box">
-            <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta</div>
+            <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta
+                {% if (v.cantidad_descuento or 0) > 0 %}<span class="status status--warn detalles-aviso-descuento">Con descuento de {{ v.cantidad_descuento|dinero }}</span>{% endif %}
+            </div>
 
-            <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}">
+            <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}" data-total="{{ v.total }}" data-descuento="{{ v.cantidad_descuento or 0 }}">
                 <li class="dim-soft">Cargando detalles...</li>
             </ul>
 
@@ -79,12 +72,12 @@
                 {% for p in v.pagos %}
                 <div class="pago-fila">
                     <span class="pago-tipo">
-                        {{ p.tipo_pago or '—' }}
+                        {{ (p.tipo_pago or '—')|capitalize }}
                         {% if p.tipo_pago_venta %}
                             <span class="pago-tag">{{ p.tipo_pago_venta }}</span>
                         {% endif %}
                     </span>
-                    <span class="pago-monto">${{ "%.2f" | format(p.monto | float) }}</span>
+                    <span class="pago-monto">{{ p.monto|dinero }}</span>
                 </div>
                 {% endfor %}
             {% else %}
@@ -95,13 +88,13 @@
                 {% if v.usuario_creo %}
                 <div class="pago-fila">
                     <span class="pago-tipo">Registrada por</span>
-                    <span class="pago-monto" class="text-primary">{{ v.usuario_creo }}</span>
+                    <span class="pago-monto text-primary">{{ v.usuario_creo }}</span>
                 </div>
                 {% endif %}
                 {% if v.usuario_entrego %}
                 <div class="pago-fila">
                     <span class="pago-tipo">Entregada por</span>
-                    <span class="pago-monto" class="text-primary">{{ v.usuario_entrego }}</span>
+                    <span class="pago-monto text-primary">{{ v.usuario_entrego }}</span>
                 </div>
                 {% endif %}
 

@@ -2,6 +2,12 @@ import { abrirModal, cerrarModal } from '../components/modal.js';
 
 const _TOAST_KEY = "_pendingToast";
 
+export function fmtDinero(n) {
+    const v = Number(n || 0);
+    const txt = "$" + Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return v < 0 ? "-" + txt : txt;
+}
+
 export function escapeHtml(str) {
     const d = document.createElement("div");
     d.appendChild(document.createTextNode(String(str ?? "")));

@@ -108,6 +108,13 @@ html.modal-open {
   background: var(--color-bg-light);
 }
 
+.modal__footer .btn {
+  min-height: 40px;
+  padding: 0 18px;
+  font-size: 14px;
+  border-radius: 10px;
+}
+
 
 .modal-field {
   display: flex;

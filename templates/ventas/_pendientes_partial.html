@@ -15,7 +15,7 @@
     {"label": "Negocio", "sort": "negocio"},
     {"label": "Cliente", "sort": "cliente"},
     "Teléfono",
-    {"label": "Fecha Recibo", "sort": "fecha_recibo"},
+    {"label": "Fecha recibo", "sort": "fecha_recibo"},
     {"label": "Fecha estimada", "sort": "fecha_estimada"},
     {"label": "Total", "sort": "total"},
     "Prepago",
@@ -24,11 +24,6 @@
     "Acción"
     ], orden, direccion) %}
 
-    {% set meses = {
-        1:'ene', 2:'feb', 3:'mar', 4:'abr',
-        5:'may', 6:'jun', 7:'jul', 8:'ago',
-        9:'sep', 10:'oct', 11:'nov', 12:'dic'
-    } %}
 
     {% for v in ventas %}
         {% set total = v.total | float(0) %}
@@ -40,15 +35,13 @@
 
         <td>{{ telefono_wa(v.telefono, 'Sin teléfono') }}</td>
 
-        <td>
-            {{ v.fecha_recibo.day }} {{ meses[v.fecha_recibo.month] }}
-            {{ "%02d:%02d"|format(v.fecha_recibo.hour, v.fecha_recibo.minute) }}
+        <td class="nowrap">
+            {{ v.fecha_recibo|fecha_hora }}
         </td>
 
         <td>
             <span class="fecha-estimada-cell">
-                <span>{{ v.fecha_estimada.day }} {{ meses[v.fecha_estimada.month] }}
-                {{ "%02d:%02d"|format(v.fecha_estimada.hour, v.fecha_estimada.minute) }}</span>
+                <span>{{ v.fecha_estimada|fecha_hora }}</span>
                 {% if v.fecha_estimada.date() < hoy %}
                     <span class="badge-atrasado">Atrasado</span>
                 {% elif v.fecha_estimada.date() == hoy %}
@@ -57,17 +50,17 @@
             </span>
         </td>
 
-        <td>${{ total | round(2) }}</td>
+        <td>{{ total|dinero }}</td>
 
         <td>
             {% if v.total_pagado > 0 %}
-                ${{ v.total_pagado | float | round(2) }}
+                {{ v.total_pagado|dinero }}
             {% else %}
-                <span class="dim-soft">Sin prepago</span>
+                <span class="dim-soft nowrap">Sin prepago</span>
             {% endif %}
         </td>
 
-        <td>${{ v.saldo_pendiente | float | round(2) }}</td>
+        <td>{{ v.saldo_pendiente|dinero }}</td>
 
         <td>
             <button class="btn btn--info btn--sm btn-detalles" data-id="{{ v.id_venta }}">
@@ -89,11 +82,13 @@
     </tr>
 
     <tr id="detalles-{{ v.id_venta }}" class="table--details d-none">
-        <td colspan="13">
+        <td colspan="11">
             <div class="detalles-box">
-                <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta</div>
+                <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta
+                {% if (v.cantidad_descuento or 0) > 0 %}<span class="status status--warn detalles-aviso-descuento">Con descuento de {{ v.cantidad_descuento|dinero }}</span>{% endif %}
+            </div>
 
-                <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}">
+                <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}" data-total="{{ v.total }}" data-descuento="{{ v.cantidad_descuento or 0 }}">
                     <li class="dim-soft">Cargando detalles...</li>
                 </ul>
 

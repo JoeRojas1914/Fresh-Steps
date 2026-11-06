@@ -22,7 +22,7 @@
         <td>{{ g.descripcion }}</td>
         <td>{{ g.categoria or "—" }}</td>
         <td>{{ g.proveedor }}</td>
-        <td>${{ "%.2f"|format(g.total) }}</td>
+        <td>{{ g.total|dinero }}</td>
 
         <td>
             {% if g.tipo_comprobante == "factura" %}
@@ -42,21 +42,21 @@
             {% endif %}
         </td>
 
-        <td>{{ g.fecha_registro.strftime("%d %b %Y") if g.fecha_registro else "—" }}</td>
+        <td class="nowrap">{{ g.fecha_registro|fecha }}</td>
 
         <td>
             {% if g.activo %}
-                <span class="status status-completado">Activo</span>
+                <span class="status status--ok">Activo</span>
             {% else %}
-                <span class="status status-pendiente">Eliminado</span>
+                <span class="status status--neutral">Eliminado</span>
             {% endif %}
         </td>
 
-        <td>
+        <td class="td-acciones">
         {% if g.activo %}
 
             <button type="button"
-                class="btn btn--info btn--sm js-editar-gasto"
+                class="btn-icono js-editar-gasto"
                 data-id="{{ g.id_gasto }}"
                 data-id-negocio="{{ g.id_negocio }}"
                 data-id-categoria="{{ g.id_categoria or '' }}"
@@ -66,29 +66,22 @@
                 data-fecha="{{ g.fecha_registro.strftime('%Y-%m-%d') if g.fecha_registro else '' }}"
                 data-tipo-comprobante="{{ g.tipo_comprobante }}"
                 data-tipo-pago="{{ g.tipo_pago }}"
-                data-notas="{{ g.notas or '' }}">
-                Editar
-            </button>
+                data-notas="{{ g.notas or '' }}" title="Editar" aria-label="Editar"><i data-lucide="pencil"></i></button>
 
             <button type="button"
-                    class="btn btn--warning btn--sm js-ver-historial-gasto"
-                    data-id="{{ g.id_gasto }}">
-                Cambios
-            </button>
+                    class="btn-icono js-ver-historial-gasto"
+                    data-id="{{ g.id_gasto }}" title="Cambios" aria-label="Cambios"><i data-lucide="history"></i></button>
 
             <button type="button"
-                    class="btn btn--danger btn--sm js-confirmar-eliminar-gasto"
+                    class="btn-icono btn-icono--peligro js-confirmar-eliminar-gasto"
                     data-id="{{ g.id_gasto }}"
-                    data-descripcion="{{ g.descripcion }}">
-                Eliminar
-            </button>
+                    data-descripcion="{{ g.descripcion }}" title="Eliminar" aria-label="Eliminar"><i data-lucide="trash-2"></i></button>
 
         {% else %}
 
-            <a href="/gastos/restaurar/{{ g.id_gasto }}"
-               class="btn btn--primary btn--sm">
-               Restaurar
-            </a>
+            <button type="button"
+                    class="btn-icono btn-icono--primario js-restaurar-gasto"
+                    data-id="{{ g.id_gasto }}" title="Restaurar" aria-label="Restaurar"><i data-lucide="rotate-ccw"></i></button>
 
         {% endif %}
         </td>

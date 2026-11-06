@@ -1,5 +1,5 @@
 import { abrirModal } from '../components/modal.js';
-import { escapeHtml } from '../base/helpers.js';
+import { escapeHtml, fmtDinero } from '../base/helpers.js';
 import { toggleDetalles } from './detalles_venta.js';
 
 document.addEventListener("click", function (e) {
@@ -43,14 +43,14 @@ async function verHistorialVenta(idVenta) {
             if (accion === "CREADO" && h.datos_despues) {
                 try {
                     const d = JSON.parse(h.datos_despues);
-                    detalle = `Total: $${parseFloat(d.total || 0).toFixed(2)}`;
+                    detalle = `Total: ${fmtDinero(d.total)}`;
                 } catch {}
             }
             if (accion === "EDITADO" && h.datos_antes && h.datos_despues) {
                 try {
                     const a    = JSON.parse(h.datos_antes);
                     const d    = JSON.parse(h.datos_despues);
-                    const fmt$ = v => `$${parseFloat(v || 0).toFixed(2)}`;
+                    const fmt$ = fmtDinero;
                     const fmtF = s => {
                         if (!s) return "—";
                         const [fecha, hora] = String(s).split(" ");

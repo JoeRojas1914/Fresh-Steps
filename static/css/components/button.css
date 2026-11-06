@@ -1,17 +1,28 @@
+/* ── Botones ────────────────────────────────────────────────────
+   Sistema único para toda la app: todos tonales (fondo claro del color,
+   texto e ícono del color, borde fino del mismo tono y sombra ligera).
+   · .btn--primary / --info → azul    · .btn--success → verde
+   · .btn--warning → ámbar            · .btn--danger  → rojo
+   · .btn--secondary → gris neutro (cancelar, cerrar, filtrar)
+   · .btn--soft → se conserva por compatibilidad; ya no cambia nada
+   Tamaños: normal 40px · --sm 32px · --lg 46px                        */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
 
-  padding: 10px 18px;
+  min-height: 40px;
+  padding: 0 16px;
   border-radius: 10px;
   border: none;
 
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
   text-decoration: none;
+  white-space: nowrap;
 
   color: #fff;
   background: #1e7fd6;
@@ -22,31 +33,77 @@
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease,
-    background 0.15s ease;
+    background 0.15s ease,
+    color 0.15s ease;
 }
-.btn:active  { transform: scale(0.95) translateY(1px); box-shadow: none; transition-duration: 0.08s; }
+.btn:active  { transform: scale(0.95) translateY(1px); transition-duration: 0.08s; }
+.btn:focus-visible { outline: 2px solid #1e7fd6; outline-offset: 2px; }
 
-.btn--primary       { background: #1e7fd6; }
-.btn--primary:hover { background: #1568b8; }
+.btn--sm   { min-height: 32px; padding: 0 12px; font-size: 13px; border-radius: 8px; }
+.btn--lg   { min-height: 46px; padding: 0 22px; font-size: 15px; }
+.btn--full { width: 100%; }
 
-.btn--success       { background: #15803d; }
-.btn--success:hover { background: #116830; }
+/* ── Tonales ──────────────────────────────────────────────────
+   Fondo claro del color, texto e ícono del color, borde fino del mismo
+   tono y sombra ligera. Misma familia que los badges, con forma de botón.
+   --tb: fondo · --tc: texto · --tl: borde (y sus versiones hover)        */
+.btn--primary,
+.btn--danger,
+.btn--info,
+.btn--success,
+.btn--warning {
+  background: var(--tb);
+  color: var(--tc);
+  box-shadow: inset 0 0 0 1px var(--tl), 0 1px 2px rgba(15, 23, 42, 0.08);
+}
 
-.btn--danger        { background: #dc2626; }
-.btn--danger:hover  { background: #b91c1c; }
+.btn--primary:hover,
+.btn--danger:hover,
+.btn--info:hover,
+.btn--success:hover,
+.btn--warning:hover {
+  background: var(--tb-h);
+  color: var(--tc-h);
+  box-shadow: inset 0 0 0 1px var(--tl-h), 0 1px 3px rgba(15, 23, 42, 0.12);
+}
 
-.btn--info          { background: #0369a1; }
-.btn--info:hover    { background: #025882; }
+/* Azul: acciones principales, Detalles, Ver ticket, + Nuevo, Agregar… */
+.btn--primary,
+.btn--info {
+  --tb: #e8f2fc; --tc: #1765b5; --tl: #b9d4f1;
+  --tb-h: #d5e7fa; --tc-h: #0f4f91; --tl-h: #8fbbe8;
+}
 
-.btn--warning       { background: #b45309; }
-.btn--warning:hover { background: #92400e; }
+/* Verde: Exportar Excel, Lista, Entregar */
+.btn--success {
+  --tb: #e8f7ee; --tc: #15803d; --tl: #b5e2c4;
+  --tb-h: #d3f0de; --tc-h: #116830; --tl-h: #8fd1a6;
+}
 
-.btn--secondary       { background: #64748b; }
-.btn--secondary:hover { background: #475569; }
+/* Ámbar: Editar, Cambios, Regresar a pendiente */
+.btn--warning {
+  --tb: #fdf1e4; --tc: #b4530b; --tl: #f2cfa3;
+  --tb-h: #fbe3c9; --tc-h: #92400e; --tl-h: #e8b77c;
+}
 
+/* Rojo: eliminar, quitar artículo/servicio, confirmar borrado */
+.btn--danger {
+  --tb: #fdecec; --tc: #c62828; --tl: #f4c0c0;
+  --tb-h: #fad6d6; --tc-h: #a61b1b; --tl-h: #ec9d9d;
+}
 
-.btn--sm { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
-.btn--lg { padding: 12px 22px; font-size: 15px; }
+/* ── Neutro: cancelar, cerrar, filtrar ──
+   Tonal gris: misma familia que los demás, sin color de acción */
+.btn--secondary {
+  background: #eef2f6;
+  color: #334155;
+  box-shadow: inset 0 0 0 1px #d3dbe4, 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+.btn--secondary:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  box-shadow: inset 0 0 0 1px #b6c2d0, 0 1px 3px rgba(15, 23, 42, 0.12);
+}
 
 
 .btn:disabled,
@@ -61,6 +118,33 @@
   transition: opacity 0.2s ease, background 0.2s ease;
 }
 
+
+/* ── Botón de ícono (acciones de las filas de tabla) ── */
+.btn-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #dbe3ec;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.btn-icono svg { width: 16px; height: 16px; }
+.btn-icono:hover { background: #f0f7ff; border-color: #1e7fd6; color: #1e7fd6; }
+.btn-icono:focus-visible { outline: 2px solid #1e7fd6; outline-offset: 2px; }
+
+.btn-icono--primario { color: #1e7fd6; }
+
+.btn-icono--peligro { color: #dc2626; }
+.btn-icono--peligro:hover { background: #fef2f2; border-color: #dc2626; color: #b91c1c; }
+
+.btn-icono:disabled { opacity: .5; cursor: wait; }
 
 .btn-row {
   display: flex;

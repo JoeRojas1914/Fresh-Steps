@@ -24,7 +24,7 @@
 </div>
 {% endif %}
 {% if section == 'footer' %}
-<button type="button" class="btn btn--danger btn--sm" data-modal-close="modalConfirmarEdicion">Cancelar</button>
+<button type="button" class="btn btn--secondary" data-modal-close="modalConfirmarEdicion">Cancelar</button>
 <button id="btnConfirmarEdicion" class="btn btn--primary btn--sm">Confirmar cambios</button>
 {% endif %}
 {% endcall %}
@@ -157,7 +157,7 @@
                                                    min="0" step="0.01"
                                                    aria-label="Precio de {{ s.nombre }}">
                                             <button type="button"
-                                                    class="btn btn--danger btn--sm btn-delete-existing-srv"
+                                                    class="btn btn--danger btn--soft btn--sm btn-delete-existing-srv"
                                                     aria-label="Eliminar {{ s.nombre }}">
                                                 <i data-lucide="x" width="14" height="14"></i>
                                             </button>
@@ -221,7 +221,7 @@
                         <p id="empty-articulos-msg">Agrega artículos nuevos si es necesario</p>
                     </div>
                 </div>
-                <button type="button" id="btn-agregar-articulo" class="btn btn--primary btn--sm edit-agregar-btn">
+                <button type="button" id="btn-agregar-articulo" class="btn btn--info btn--sm edit-agregar-btn">
                     <i data-lucide="plus" width="14" height="14"></i> Agregar artículo
                 </button>
             </div>

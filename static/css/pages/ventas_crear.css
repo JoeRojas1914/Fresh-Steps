@@ -488,7 +488,6 @@
   height: 56px;
   font-size: 17px;
   font-weight: 800;
-  letter-spacing: 0.02em;
   margin-top: 10px;
 }
 
@@ -1118,7 +1117,6 @@
   text-decoration: line-through;
 }
 
-.btn--full { width: 100%; }
 
 .info-row {
   display: flex;

@@ -33,56 +33,46 @@
 
         <td>{{ c.total_pedidos }}</td>
 
-        <td>{{ c.fecha_registro.strftime('%d/%m/%Y') if c.fecha_registro else '—' }}</td>
+        <td class="nowrap">{{ c.fecha_registro|fecha }}</td>
 
         <td>
             {% if c.activo %}
-                <span class="status status-completado">Activo</span>
+                <span class="status status--ok">Activo</span>
             {% else %}
-                <span class="status status-pendiente">Eliminado</span>
+                <span class="status status--neutral">Eliminado</span>
             {% endif %}
         </td>
 
-        <td>
+        <td class="td-acciones">
         {% if c.activo %}
 
             <button type="button"
-                class="btn btn--info btn--sm no-row-click js-editar-cliente"
+                class="btn-icono no-row-click js-editar-cliente"
                 data-id="{{ c.id_cliente }}"
                 data-nombre="{{ c.nombre }}"
                 data-apellido="{{ c.apellido }}"
                 data-correo="{{ c.correo or '' }}"
                 data-telefono="{{ c.telefono }}"
-                data-direccion="{{ c.direccion or '' }}">
-                Editar
-            </button>
+                data-direccion="{{ c.direccion or '' }}" title="Editar" aria-label="Editar"><i data-lucide="pencil"></i></button>
 
             <a href="{{ url_for('clientes.ver_cliente', id_cliente=c.id_cliente) }}"
-               class="btn btn--success btn--sm no-underline no-row-click">
-                Ver perfil
-            </a>
+               class="btn-icono btn-icono--primario no-row-click" title="Ver perfil" aria-label="Ver perfil"><i data-lucide="user"></i></a>
 
             <button type="button"
-                    class="btn btn--warning btn--sm no-row-click js-ver-historial-cliente"
-                    data-id="{{ c.id_cliente }}">
-                Cambios
-            </button>
+                    class="btn-icono no-row-click js-ver-historial-cliente"
+                    data-id="{{ c.id_cliente }}" title="Cambios" aria-label="Cambios"><i data-lucide="history"></i></button>
 
             {% if session.rol == 'admin' %}
             <button type="button"
-                    class="btn btn--danger btn--sm no-row-click js-confirmar-eliminar-cliente"
-                    data-id="{{ c.id_cliente }}">
-                Eliminar
-            </button>
+                    class="btn-icono btn-icono--peligro no-row-click js-confirmar-eliminar-cliente"
+                    data-id="{{ c.id_cliente }}" title="Eliminar" aria-label="Eliminar"><i data-lucide="trash-2"></i></button>
             {% endif %}
 
         {% elif session.rol == 'admin' %}
 
             <button type="button"
-                    class="btn btn--primary btn--sm no-row-click js-restaurar-cliente"
-                    data-id="{{ c.id_cliente }}">
-                Restaurar
-            </button>
+                    class="btn-icono btn-icono--primario no-row-click js-restaurar-cliente"
+                    data-id="{{ c.id_cliente }}" title="Restaurar" aria-label="Restaurar"><i data-lucide="rotate-ccw"></i></button>
 
         {% endif %}
         </td>

@@ -34,7 +34,7 @@
         </div>
 
         <div class="filtro-actions--right">
-            <button type="button" class="btn btn--primary btn--sm js-abrir-modal-usuario">
+            <button type="button" class="btn btn--info btn--sm js-abrir-modal-usuario">
                 <i data-lucide="plus" width="14" height="14"></i> Agregar usuario
             </button>
         </div>
@@ -44,7 +44,6 @@
     <input type="hidden" name="dir" value="{{ request.args.get('dir', '') }}">
 </form>
 
-<hr>
 
 <div id="tabla-paginada">
 {% include "admin/_usuarios_partial.html" %}
@@ -148,7 +147,7 @@
         </div>
 
         <div class="modal__footer">
-            <button type="button" class="btn btn--danger"
+            <button type="button" class="btn btn--secondary"
                     data-modal-close="modalUsuario">Cancelar</button>
             <button type="submit" class="btn btn--primary">Guardar usuario</button>
         </div>
@@ -182,7 +181,7 @@
         </div>
 
         <div class="modal__footer">
-            <button class="btn btn--primary" data-modal-close="modalHistorialUsuario">Cerrar</button>
+            <button class="btn btn--secondary" data-modal-close="modalHistorialUsuario">Cerrar</button>
         </div>
 
     </div>
@@ -208,7 +207,7 @@
           </div>
         </div>
         <div class="modal__footer">
-            <button class="btn btn--primary btn--sm" data-modal-close="modalConfirmarToggleUsuario">Cancelar</button>
+            <button class="btn btn--secondary" data-modal-close="modalConfirmarToggleUsuario">Cancelar</button>
             <button class="btn btn--danger btn--sm js-ejecutar-toggle-usuario">Confirmar</button>
         </div>
     </div>

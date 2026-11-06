@@ -47,7 +47,7 @@
                    class="btn btn--success btn--sm no-underline js-exportar">
                     <i data-lucide="download" width="14" height="14"></i> Exportar Excel
                 </a>
-                <button type="button" class="btn btn--primary btn--sm js-abrir-nuevo-servicio">
+                <button type="button" class="btn btn--info btn--sm js-abrir-nuevo-servicio">
                     <i data-lucide="plus" width="14" height="14"></i> Agregar servicio
                 </button>
             </div>
@@ -88,7 +88,7 @@
 {% endif %}
 
 {% if section == 'footer' %}
-    <button class="btn btn--danger btn--sm"
+    <button class="btn btn--secondary"
             data-modal-close="modalServicio">
         Cancelar
     </button>
@@ -103,7 +103,6 @@
 {% endcall %}
 
 
-<hr>
 
 <div id="tabla-paginada">
 {% include "admin/_servicios_partial.html" %}
@@ -144,7 +143,7 @@
 </div>
 {% endif %}
 {% if section == 'footer' %}
-<button class="btn btn--danger btn--sm" data-modal-close="modalConfirmarDefaultServicio">Cancelar</button>
+<button class="btn btn--secondary" data-modal-close="modalConfirmarDefaultServicio">Cancelar</button>
 <button class="btn btn--primary btn--sm js-confirmar-default-servicio">Sí, actualizar</button>
 {% endif %}
 {% endcall %}
@@ -163,7 +162,7 @@
 </div>
 {% endif %}
 {% if section == 'footer' %}
-<button class="btn btn--primary btn--sm" data-modal-close="modalConfirmarEliminarServicio">Cancelar</button>
+<button class="btn btn--secondary" data-modal-close="modalConfirmarEliminarServicio">Cancelar</button>
 <button class="btn btn--danger btn--sm js-ejecutar-eliminar-servicio">Sí, eliminar</button>
 {% endif %}
 {% endcall %}

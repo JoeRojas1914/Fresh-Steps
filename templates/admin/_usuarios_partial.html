@@ -34,9 +34,9 @@
 
         <td>
             {% if u.rol == 'admin' %}
-                <span class="status status-completado">Admin</span>
+                <span class="status status--info">Admin</span>
             {% else %}
-                <span class="status status-pendiente">Caja</span>
+                <span class="status status--neutral">Caja</span>
             {% endif %}
         </td>
 
@@ -52,17 +52,17 @@
 
         <td>
             {% if u.activo %}
-                <span class="status status-completado">Activo</span>
+                <span class="status status--ok">Activo</span>
             {% else %}
-                <span class="status status-pendiente">Inactivo</span>
+                <span class="status status--neutral">Inactivo</span>
             {% endif %}
         </td>
 
-        <td>{{ u.creado_en.strftime('%d/%m/%Y') if u.creado_en else '—' }}</td>
+        <td class="nowrap">{{ u.creado_en|fecha }}</td>
 
-        <td>
+        <td class="td-acciones">
         {% if u.rol != 'admin' %}
-            <button class="btn btn--info btn--sm no-row-click js-editar-usuario"
+            <button type="button" class="btn-icono no-row-click js-editar-usuario"
                 data-id="{{ u.id_usuario }}"
                 data-usuario="{{ u.usuario }}"
                 data-nombre="{{ u.nombre or '' }}"
@@ -71,20 +71,18 @@
                 data-correo="{{ u.correo or '' }}"
                 data-cp="{{ u.cp or '' }}"
                 data-rol="{{ u.rol or 'caja' }}"
-                data-negocios="{{ u.negocios | join(',') }}">
-                Editar
-            </button>
+                data-negocios="{{ u.negocios | join(',') }}" title="Editar" aria-label="Editar"><i data-lucide="pencil"></i></button>
 
-            <button class="btn btn--warning btn--sm no-row-click js-ver-historial-usuario"
-                data-id="{{ u.id_usuario }}">
-                Cambios
-            </button>
+            <button type="button" class="btn-icono no-row-click js-ver-historial-usuario"
+                data-id="{{ u.id_usuario }}" title="Cambios" aria-label="Cambios"><i data-lucide="history"></i></button>
 
+            {% set accion = 'Desactivar' if u.activo else 'Activar' %}
             <button type="button"
-                    class="btn btn--danger btn--sm no-row-click js-confirmar-toggle"
+                    class="btn-icono{{ ' btn-icono--peligro' if u.activo else ' btn-icono--primario' }} no-row-click js-confirmar-toggle"
                     data-id="{{ u.id_usuario }}"
-                    data-accion="{{ 'Desactivar' if u.activo else 'Activar' }}">
-                {{ 'Desactivar' if u.activo else 'Activar' }}
+                    data-accion="{{ accion }}"
+                    title="{{ accion }}" aria-label="{{ accion }}">
+                <i data-lucide="{{ 'user-x' if u.activo else 'user-check' }}"></i>
             </button>
         {% else %}
             <span class="dim text-sm">Protegido</span>

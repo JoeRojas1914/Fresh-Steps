@@ -92,9 +92,9 @@
             {% endif %}
 
             <div class="filtro-actions">
-                <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
+                <button type="submit" class="btn btn--secondary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
                 {% if id_negocio or fecha_inicio or fecha_fin or q or articulo or id_venta or estado or (tipo_fecha and tipo_fecha != 'fecha_recibo') %}
-                <a href="/ventas/historial" id="btn-limpiar-filtro-historial" class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
+                <a href="/ventas/historial" id="btn-limpiar-filtro-historial" class="btn btn--secondary btn--sm no-underline"><i data-lucide="x" width="14" height="14"></i> Limpiar filtros</a>
                 {% endif %}
                 {% if es_admin %}
                 <a href="{{ url_for('ventas.exportar_historial_excel') }}"
@@ -129,7 +129,7 @@
 </table>
 {% endif %}
 {% if section == 'footer' %}
-<button class="btn btn--primary btn--sm" data-modal-close="modalHistorialVenta">Cerrar</button>
+<button class="btn btn--secondary" data-modal-close="modalHistorialVenta">Cerrar</button>
 {% endif %}
 {% endcall %}
 

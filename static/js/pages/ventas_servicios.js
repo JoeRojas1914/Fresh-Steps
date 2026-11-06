@@ -88,7 +88,7 @@ function crearFilaServicio(indexArticulo, indexServicio, opcionesHTML) {
                    name="articulos[${indexArticulo}][servicios][${indexServicio}][precio_aplicado]"
                    placeholder="Precio aplicado"
                    value="" disabled data-editado="0">
-            <button type="button" data-action="delete-service" class="btn btn--danger btn--sm">
+            <button type="button" data-action="delete-service" class="btn btn--danger btn--soft btn--sm" aria-label="Quitar servicio">
                 <i data-lucide="x" width="14" height="14"></i>
             </button>
         </div>

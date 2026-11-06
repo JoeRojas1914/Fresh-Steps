@@ -58,12 +58,14 @@
     </div>
 
     <div class="filtro-actions">
-      <button type="submit" class="btn btn--primary btn--sm">
+      <button type="submit" class="btn btn--secondary btn--sm">
         <i data-lucide="search" width="14" height="14"></i> Filtrar
       </button>
+      {% if request.args.get('id_negocio') or request.args.get('tipo_pago') or request.args.get('tipo_pago_venta') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
       <a href="{{ url_for('pagos.historial_pagos') }}"
          id="btn-limpiar-filtro"
-         class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
+         class="btn btn--secondary btn--sm no-underline"><i data-lucide="x" width="14" height="14"></i> Limpiar filtros</a>
+      {% endif %}
       <a href="{{ url_for('pagos.exportar_pagos_excel',
                   id_negocio=request.args.getlist('id_negocio'),
                   tipo_pago=request.args.get('tipo_pago') or '',
@@ -80,7 +82,6 @@
     <input type="hidden" name="dir" value="{{ request.args.get('dir', '') }}">
 </form>
 
-<hr>
 
 <div id="tabla-paginada">
 {% include "admin/_pagos_partial.html" %}

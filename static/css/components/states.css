@@ -85,10 +85,9 @@
 }
 
 .error-card .btn {
-  padding: 12px 32px;
+  min-height: 46px;
+  padding: 0 28px;
   font-size: 15px;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(30,127,214,.25);
 }
 
 .detalles-venta td {
@@ -107,10 +106,9 @@
 }
 
 .detalles-box {
-  padding: 18px 22px;
-  border-left: 4px solid var(--color-primary);
-  background: var(--color-bg-light);
-  border-radius: 0 0 14px 14px;
+  padding: 16px 20px 18px;
+  background: #f8fbff;
+  border-top: 1px solid #e8eef5;
   transform-origin: top;
   overflow: hidden;
   animation: detallesSlideDown 0.2s ease-out;
@@ -120,47 +118,178 @@
   animation: detallesSlideUp 0.18s ease-in forwards;
 }
 
-.detalles-title {
-  font-size: 15px;
+.detalles-title,
+.pagos-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 10px;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--color-navy-mid);
-  margin-bottom: 12px;
+  color: #0b3c5d;
 }
+
+.detalles-title svg,
+.pagos-title svg { color: #1e7fd6; }
 
 .detalles-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
-.detalle-item {
+.detalles-tabla-wrap { overflow-x: auto; }
+
+.detalles-tabla {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #ffffff;
+  border: 1px solid #e8eef5;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 13.5px;
+}
+
+.detalles-tabla th {
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Aislar de los estilos de la tabla principal (.table td, rayado, hover) */
+.table .detalles-tabla td,
+.detalles-tabla td {
+  padding: 7px 14px;
+  font-size: 13.5px;
+  color: #334155;
+  vertical-align: top;
+  border-bottom: none;
+  line-height: 1.4;
+  background: transparent;  
+}
+
+.table .detalles-tabla tbody tr:nth-child(n),
+.table .detalles-tabla tbody tr:nth-child(n):hover { background: transparent; }
+
+.table .detalles-tabla .dt-grupo + .dt-grupo tr:first-child td,
+.detalles-tabla .dt-grupo + .dt-grupo tr:first-child td { border-top: 1px solid #eef2f7; }
+
+.dt-articulo {
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+.dt-articulo > span { vertical-align: middle; }
+
+.dt-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 7px;
+  background: #e8f2fc;
+  color: #1e7fd6;
+}
+
+.dt-cant {
+  margin-left: 4px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.dt-caract { color: #64748b; }
+
+.detalles-tabla .dt-precio {
+  text-align: right;
+  font-weight: 700;
+  color: #0b3c5d;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.table .detalles-tabla .dt-nota-fila td { padding-top: 0; padding-bottom: 9px; }
+
+.dt-nota {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: #fdf8ec;
+  color: #7c5a12;
+  font-size: 12.5px;
+}
+
+.table .detalles-tabla tfoot td,
+.detalles-tabla tfoot td {
+  padding: 10px 14px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fbff;
+  font-weight: 700;
+  color: #0b3c5d;
+}
+.detalles-tabla tfoot td:first-child { text-align: right; color: #475569; }
+
+.table .detalles-tabla tfoot tr + tr td { border-top: none; padding-top: 4px; }
+.table .detalles-tabla tfoot tr.dt-subtotal td,
+.table .detalles-tabla tfoot tr.dt-descuento td { font-weight: 600; color: #475569; padding-bottom: 4px; }
+.table .detalles-tabla tfoot tr.dt-descuento td:last-child { color: #b45309; }
+.table .detalles-tabla tfoot tr.dt-descuento + tr.dt-total td { border-top: 1px solid #e2e8f0; padding-top: 10px; }
+
+.detalles-aviso-descuento { margin-left: 4px; }
+
+.detalle-vacio {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Pagos y usuarios (Historial y perfil de cliente) */
+.pagos-title {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e8eef5;
+}
+
+.pago-fila {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  max-width: 560px;
+  padding: 8px 14px;
+  margin-bottom: 6px;
+  background: #ffffff;
+  border: 1px solid #e8eef5;
+  border-radius: 10px;
+  font-size: 13.5px;
 }
 
-.detalle-zapato  { font-weight: 600; color: var(--color-navy); }
-.detalle-servicio { font-size: 14px; font-weight: 600; color: #374151; }
-.detalle-precio  { margin-left: 10px; font-weight: 700; color: #22c55e; }
-.detalle-caracteristicas { font-size: 13px; color: #64748b; margin: 2px 0 6px; }
+.pago-fila .pago-tipo  { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; }
+.pago-fila .pago-monto { font-weight: 700; color: #0b3c5d; font-variant-numeric: tabular-nums; }
+.pago-fila .pago-monto.text-primary { color: #1e6fc2; }
 
-.detalle-color {
-  display: inline-block;
-  margin-left: 6px;
-  font-size: 12px;
+.pago-fila .pago-tag {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
   font-weight: 600;
-  color: #2563eb;
-  background: var(--color-bg-blue);
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
+  text-transform: capitalize;
+  color: #1e6fc2;
+  background: #e8f2fc;
+}
+
+/* Acciones al pie de los detalles */
+.detalles-box .btn-row {
+  justify-content: flex-end;
+  margin-top: 16px;
 }
 
 .cliente-header {

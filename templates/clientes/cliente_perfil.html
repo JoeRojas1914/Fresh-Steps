@@ -71,11 +71,11 @@
     {% if kpis %}
     <div class="kpi-card">
       <div class="kpi-card__label"><i data-lucide="dollar-sign" width="13" height="13"></i> Total gastado</div>
-      <div class="kpi-card__value">${{ "%.2f"|format(kpis.total_gastado) }}</div>
+      <div class="kpi-card__value">{{ kpis.total_gastado|dinero }}</div>
     </div>
     <div class="kpi-card kpi-card--alert">
       <div class="kpi-card__label"><i data-lucide="clock" width="13" height="13"></i> Saldo pendiente</div>
-      <div class="kpi-card__value">${{ "%.2f"|format(kpis.saldo_pendiente_total) }}</div>
+      <div class="kpi-card__value">{{ kpis.saldo_pendiente_total|dinero }}</div>
     </div>
     {% endif %}
   </div>
@@ -103,11 +103,11 @@
                value="{{ request.args.get('fecha_fin', '') }}">
       </div>
       <div class="filtro-actions">
-        <button type="submit" class="btn btn--primary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
+        <button type="submit" class="btn btn--secondary btn--sm"><i data-lucide="search" width="14" height="14"></i> Filtrar</button>
         {% if request.args.get('id_negocio') or request.args.get('fecha_inicio') or request.args.get('fecha_fin') %}
           <a id="btn-limpiar-filtro"
              href="{{ url_for('clientes.ver_cliente', id_cliente=cliente.id_cliente) }}"
-             class="btn btn--danger btn--sm no-underline">✕ Limpiar</a>
+             class="btn btn--secondary btn--sm no-underline"><i data-lucide="x" width="14" height="14"></i> Limpiar filtros</a>
         {% endif %}
         {% if session.rol == 'admin' %}
         <a href="{{ url_for('clientes.exportar_cliente_excel', id_cliente=cliente.id_cliente,
@@ -173,7 +173,7 @@
 
 {% if section == 'footer' %}
 <button type="button"
-        class="btn btn--danger btn--sm"
+        class="btn btn--secondary"
         data-modal-close="modalEditarCliente">Cancelar</button>
 <button type="submit"
         form="modalEditarClienteForm"

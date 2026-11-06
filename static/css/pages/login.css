@@ -137,18 +137,22 @@
 
     margin-top: 10px;
 
-    border-radius: 14px;
+    border-radius: 10px;
     font-size: 15px;
     font-weight: 700;
 
-    background: var(--gradient-primary);
-    color: white;
+    background: #e8f2fc;
+    color: #1765b5;
+    box-shadow: inset 0 0 0 1px #b9d4f1, 0 1px 2px rgba(15, 23, 42, 0.08);
 
     border: none;
     cursor: pointer;
 
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
+
+.login-card button:hover { background: #d5e7fa; color: #0f4f91; box-shadow: inset 0 0 0 1px #8fbbe8, 0 1px 3px rgba(15, 23, 42, 0.12); }
+.login-card button:active { transform: scale(0.97); }
 
 
 .login-divider {
@@ -164,19 +168,20 @@
     gap: 8px;
     width: 100%;
     padding: 12px;
-    border-radius: 14px;
+    border-radius: 10px;
     text-align: center;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    color: #64748b;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    transition: all 0.2s ease;
+    color: #334155;
+    background: #eef2f6;
+    border: none;
+    box-shadow: inset 0 0 0 1px #d3dbe4, 0 1px 2px rgba(15, 23, 42, 0.08);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .btn-pin:hover {
-    background: #f0f7ff;
-    border-color: var(--color-primary-dark);
-    color: var(--color-primary-dark);
+    background: #e2e8f0;
+    color: #0f172a;
+    box-shadow: inset 0 0 0 1px #b6c2d0, 0 1px 3px rgba(15, 23, 42, 0.12);
 }

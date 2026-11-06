@@ -1,5 +1,5 @@
 import { abrirModal, cerrarModal } from '../components/modal.js';
-import { mostrarFeedback, redirigirConFeedback, csrfFetch, confirmarEliminarVenta } from '../base/helpers.js';
+import { mostrarFeedback, redirigirConFeedback, csrfFetch, confirmarEliminarVenta, fmtDinero } from '../base/helpers.js';
 
 let ventaEntregaActual  = null;
 let saldoPendienteActual = 0;
@@ -65,7 +65,7 @@ function abrirModalEntrega(idVenta, deuda, pagado, total) {
         textoSinDeuda.style.display = "none";
         bloquePago.style.display    = "block";
 
-        document.getElementById("montoPendiente").innerText = `$${deuda.toFixed(2)}`;
+        document.getElementById("montoPendiente").innerText = fmtDinero(deuda);
         btnConfirmar.disabled = true;
         btnConfirmar.onclick  = confirmarPagoYEntrega;
     }

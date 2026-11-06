@@ -41,7 +41,8 @@
 }
 
 .home-cta {
-    padding: 12px 22px;
+    min-height: 46px;
+    padding: 0 22px;
     font-size: 15px;
 }
 

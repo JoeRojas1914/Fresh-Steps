@@ -32,44 +32,37 @@
                 {{ s.nombre }}
             </span>
         </td>
-        <td>${{ s.precio }}</td>
+        <td>{{ s.precio|dinero }}</td>
         <td>
             {% if s.activo %}
-                <span class="status status-completado">Activo</span>
+                <span class="status status--ok">Activo</span>
             {% else %}
-                <span class="status status-pendiente">Eliminado</span>
+                <span class="status status--neutral">Eliminado</span>
             {% endif %}
         </td>
 
-        <td>
+        <td class="td-acciones">
         {% if s.activo %}
 
-            <button class="btn btn--info btn--sm js-editar-servicio"
+            <button type="button" class="btn-icono js-editar-servicio"
                 data-id="{{ s.id_servicio }}"
                 data-negocio="{{ s.id_negocio }}"
                 data-nombre="{{ s.nombre }}"
-                data-precio="{{ s.precio }}">
-                Editar
-            </button>
+                data-precio="{{ s.precio }}" title="Editar" aria-label="Editar"><i data-lucide="pencil"></i></button>
 
-            <button class="btn btn--warning btn--sm js-ver-historial-servicio"
-                data-id="{{ s.id_servicio }}">
-                Cambios
-            </button>
+            <button type="button" class="btn-icono js-ver-historial-servicio"
+                data-id="{{ s.id_servicio }}" title="Cambios" aria-label="Cambios"><i data-lucide="history"></i></button>
 
             <button type="button"
-                    class="btn btn--danger btn--sm js-confirmar-eliminar-servicio"
+                    class="btn-icono btn-icono--peligro js-confirmar-eliminar-servicio"
                     data-id="{{ s.id_servicio }}"
-                    data-nombre="{{ s.nombre }}">
-                Eliminar
-            </button>
+                    data-nombre="{{ s.nombre }}" title="Eliminar" aria-label="Eliminar"><i data-lucide="trash-2"></i></button>
 
         {% else %}
 
-            <a href="/servicios/restaurar/{{ s.id_servicio }}"
-               class="btn btn--primary btn--sm">
-               Restaurar
-            </a>
+            <button type="button"
+                    class="btn-icono btn-icono--primario js-restaurar-servicio"
+                    data-id="{{ s.id_servicio }}" title="Restaurar" aria-label="Restaurar"><i data-lucide="rotate-ccw"></i></button>
 
         {% endif %}
         </td>

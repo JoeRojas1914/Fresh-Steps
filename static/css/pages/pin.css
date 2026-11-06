@@ -89,19 +89,23 @@ body {
     width: 100%;
     height: 50px;
 
-    border-radius: 16px;
+    border-radius: 10px;
 
     font-size: 15px;
     font-weight: 700;
 
-    background: var(--gradient-primary);
-    color: white;
+    background: #e8f2fc;
+    color: #1765b5;
+    box-shadow: inset 0 0 0 1px #b9d4f1, 0 1px 2px rgba(15, 23, 42, 0.08);
 
     border: none;
     cursor: pointer;
 
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
+
+.pin-btn:hover { background: #d5e7fa; color: #0f4f91; box-shadow: inset 0 0 0 1px #8fbbe8, 0 1px 3px rgba(15, 23, 42, 0.12); }
+.pin-btn:active { transform: scale(0.97); }
 
 
 .link-login {

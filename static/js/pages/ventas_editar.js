@@ -265,7 +265,7 @@ function agregarServicioExistente(idArt) {
                    name="existing_servicios[${idArt}][${j}][precio_aplicado]"
                    placeholder="Precio"
                    disabled data-editado="0">
-            <button type="button" data-action="delete-existing-service" class="btn btn--danger btn--sm">
+            <button type="button" data-action="delete-existing-service" class="btn btn--danger btn--soft btn--sm" aria-label="Quitar servicio">
                 <i data-lucide="x" width="14" height="14"></i>
             </button>
         </div>
@@ -752,6 +752,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ? '<i data-lucide="undo-2" width="14" height="14"></i>'
                 : '<i data-lucide="x" width="14" height="14"></i>';
             delSrvBtn.classList.toggle("btn--danger", !deleting);
+            delSrvBtn.classList.toggle("btn--soft", !deleting);
             delSrvBtn.classList.toggle("btn--secondary", deleting);
             if (window.lucide) lucide.createIcons();
             actualizarUI();

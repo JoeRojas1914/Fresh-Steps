@@ -38,7 +38,7 @@
 </form>
 {% endif %}
 {% if section == 'footer' %}
-<button type="button" class="btn btn--danger btn--sm" data-modal-close="modalCliente">Cancelar</button>
+<button type="button" class="btn btn--secondary" data-modal-close="modalCliente">Cancelar</button>
 <button type="submit" form="formNuevoCliente" class="btn btn--primary btn--lg">Guardar cliente</button>
 {% endif %}
 {% endcall %}
@@ -70,7 +70,7 @@
 </form>
 {% endif %}
 {% if section == 'footer' %}
-<button type="button" class="btn btn--danger btn--sm" data-modal-close="modalEditarCliente">Cancelar</button>
+<button type="button" class="btn btn--secondary" data-modal-close="modalEditarCliente">Cancelar</button>
 <button type="submit" form="formEditarCliente" class="btn btn--primary btn--lg">Guardar cambios</button>
 {% endif %}
 {% endcall %}
@@ -98,7 +98,7 @@
                                 <input type="text" id="buscar-cliente"
                                        placeholder="Buscar por nombre o teléfono..."
                                        autocomplete="off">
-                                <button type="button" class="btn btn--primary btn--sm"
+                                <button type="button" class="btn btn--info btn--sm"
                                         data-modal-open="modalCliente">
                                     <i data-lucide="plus" width="14" height="14"></i> Nuevo
                                 </button>
@@ -156,7 +156,7 @@
                     </div>
                 </div>
                 <button type="button" id="btn-agregar-articulo"
-                        class="btn btn--primary btn--sm">
+                        class="btn btn--info btn--sm">
                     <i data-lucide="plus" width="14" height="14"></i> Agregar artículo
                 </button>
             </div>

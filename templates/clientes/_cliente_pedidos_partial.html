@@ -4,11 +4,6 @@
 
 {% if pedidos %}
 
-{% set meses = {
-    1:'enero', 2:'febrero', 3:'marzo', 4:'abril',
-    5:'mayo', 6:'junio', 7:'julio', 8:'agosto',
-    9:'septiembre', 10:'octubre', 11:'noviembre', 12:'diciembre'
-} %}
 
 <div id="toast-container"></div>
 
@@ -36,27 +31,23 @@
   <tr>
     <td>#{{ p.id_venta }}</td>
     <td>{{ badge_negocio(p.negocio) }}</td>
-    <td>
-      {{ p.fecha_recibo.day }} {{ meses[p.fecha_recibo.month] }}
-      {{ "%02d:%02d" | format(p.fecha_recibo.hour, p.fecha_recibo.minute) }}
+    <td class="nowrap">
+      {{ p.fecha_recibo|fecha_hora }}
     </td>
-    <td>
-      {{ p.fecha_estimada.day }} {{ meses[p.fecha_estimada.month] }}
-      {{ "%02d:%02d" | format(p.fecha_estimada.hour, p.fecha_estimada.minute) }}
+    <td class="nowrap">
+      {{ p.fecha_estimada|fecha_hora }}
     </td>
-    <td>
+    <td class="nowrap">
       {% if p.fecha_lista %}
-        {{ p.fecha_lista.day }} {{ meses[p.fecha_lista.month] }}
-        {{ "%02d:%02d" | format(p.fecha_lista.hour, p.fecha_lista.minute) }}
+        {{ p.fecha_lista|fecha_hora }}
       {% else %}<span class="dim">—</span>{% endif %}
     </td>
-    <td>
+    <td class="nowrap">
       {% if p.fecha_entrega %}
-        {{ p.fecha_entrega.day }} {{ meses[p.fecha_entrega.month] }}
-        {{ "%02d:%02d" | format(p.fecha_entrega.hour, p.fecha_entrega.minute) }}
+        {{ p.fecha_entrega|fecha_hora }}
       {% else %}<span class="dim">—</span>{% endif %}
     </td>
-    <td>${{ "%.2f" | format(p.total) }}</td>
+    <td>{{ p.total|dinero }}</td>
     <td>
       <span class="badge-estado {{ estado }}">
         {% if estado == 'pendiente' %}Pendiente
@@ -74,8 +65,10 @@
   <tr id="detalles-{{ p.id_venta }}" class="table--details d-none">
     <td colspan="9">
       <div class="detalles-box">
-        <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles del pedido</div>
-        <ul class="detalles-list" id="lista-detalles-{{ p.id_venta }}">
+        <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles del pedido
+          {% if (p.cantidad_descuento or 0) > 0 %}<span class="status status--warn detalles-aviso-descuento">Con descuento de {{ p.cantidad_descuento|dinero }}</span>{% endif %}
+        </div>
+        <ul class="detalles-list" id="lista-detalles-{{ p.id_venta }}" data-total="{{ p.total }}" data-descuento="{{ p.cantidad_descuento or 0 }}">
           <li class="dim-soft">Cargando detalles...</li>
         </ul>
         <div class="pagos-title"><i data-lucide="credit-card" width="14" height="14"></i> Pagos registrados</div>
@@ -83,12 +76,12 @@
           {% for pg in p.pagos %}
           <div class="pago-fila">
             <span class="pago-tipo">
-              {{ pg.tipo_pago or '—' }}
+              {{ (pg.tipo_pago or '—')|capitalize }}
               {% if pg.tipo_pago_venta %}
                 <span class="pago-tag">{{ pg.tipo_pago_venta }}</span>
               {% endif %}
             </span>
-            <span class="pago-monto">${{ "%.2f" | format(pg.monto | float) }}</span>
+            <span class="pago-monto">{{ pg.monto|dinero }}</span>
           </div>
           {% endfor %}
         {% else %}
@@ -97,7 +90,7 @@
 
         {% if p.saldo_pendiente > 0 %}
         <div class="text-sm saldo-pendiente">
-          Saldo pendiente: ${{ "%.2f" | format(p.saldo_pendiente) }}
+          Saldo pendiente: {{ p.saldo_pendiente|dinero }}
         </div>
         {% else %}
         <div class="text-sm pedido-liquidado">

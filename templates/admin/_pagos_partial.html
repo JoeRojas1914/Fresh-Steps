@@ -3,8 +3,6 @@
 {% from "components/pagination.html" import pagination %}
 {% from "components/empty_state.html" import fila_vacia %}
 
-{% set meses = {1:"Ene",2:"Feb",3:"Mar",4:"Abr",5:"May",6:"Jun",
-                7:"Jul",8:"Ago",9:"Sep",10:"Oct",11:"Nov",12:"Dic"} %}
 
 {% call table([
     {"label": "Negocio", "sort": "negocio"},
@@ -26,34 +24,31 @@
 
         <td>{{ p.cliente_nombre }} {{ p.cliente_apellido }}</td>
 
-        <td>
+        <td class="nowrap">
             {% if p.fecha_pago %}
-                {{ "%02d"|format(p.fecha_pago.day) }}
-                {{ meses[p.fecha_pago.month] }}
-                {{ p.fecha_pago.year }}
-                {{ p.fecha_pago.strftime("%H:%M") }}
+                {{ p.fecha_pago|fecha_hora }}
             {% else %}—{% endif %}
         </td>
 
         <td>
             {% if p.tipo_pago_venta == "prepago" %}
-                <span class="status status-pendiente">Prepago</span>
+                <span class="status status--info">Prepago</span>
             {% elif p.tipo_pago_venta == "final" %}
-                <span class="status status-completado">Final</span>
+                <span class="status status--ok">Final</span>
             {% else %}—{% endif %}
         </td>
 
         <td>
             {% if p.tipo_pago == "efectivo" %}
-                <span class="status status-completado">Efectivo</span>
+                <span class="status status--neutral">Efectivo</span>
             {% elif p.tipo_pago == "transferencia" %}
-                <span class="status status-pendiente">Transferencia</span>
+                <span class="status status--neutral">Transferencia</span>
             {% elif p.tipo_pago == "tarjeta" %}
-                <span class="status status-pendiente">Tarjeta</span>
+                <span class="status status--neutral">Tarjeta</span>
             {% else %}{{ p.tipo_pago or "—" }}{% endif %}
         </td>
 
-        <td>${{ "%.2f"|format(p.monto) }}</td>
+        <td>{{ p.monto|dinero }}</td>
 
         <td>{{ p.cobrado_por or "—" }}</td>
 

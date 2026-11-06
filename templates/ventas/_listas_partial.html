@@ -15,7 +15,7 @@
 {"label": "Negocio", "sort": "negocio"},
 {"label": "Cliente", "sort": "cliente"},
 "Teléfono",
-{"label": "Fecha Recibo", "sort": "fecha_recibo"},
+{"label": "Fecha recibo", "sort": "fecha_recibo"},
 {"label": "Fecha lista", "sort": "fecha_lista"},
 {"label": "Total", "sort": "total"},
 "Monto prepago",
@@ -24,11 +24,6 @@
 "Acción"
 ], orden, direccion) %}
 
-{% set meses = {
-    1:'enero', 2:'febrero', 3:'marzo', 4:'abril',
-    5:'mayo', 6:'junio', 7:'julio', 8:'agosto',
-    9:'septiembre', 10:'octubre', 11:'noviembre', 12:'diciembre'
-} %}
 
 {% for v in ventas %}
     {% set total = v.total | float(0) %}
@@ -42,16 +37,14 @@
 
     <td>{{ telefono_wa(v.telefono, 'Sin teléfono') }}</td>
 
-    <td>
-        {{ v.fecha_recibo.day }} {{ meses[v.fecha_recibo.month] }}
-        {{ "%02d:%02d"|format(v.fecha_recibo.hour, v.fecha_recibo.minute) }}
+    <td class="nowrap">
+        {{ v.fecha_recibo|fecha_hora }}
     </td>
 
     {# A partir de la primera semana desde que se marcó lista, badge con las semanas #}
     <td>
         <span class="fecha-estimada-cell">
-            <span>{{ v.fecha_lista.day }} {{ meses[v.fecha_lista.month] }}
-            {{ "%02d:%02d"|format(v.fecha_lista.hour, v.fecha_lista.minute) }}</span>
+            <span>{{ v.fecha_lista|fecha_hora }}</span>
             {% if v.semanas_lista >= 1 %}
                 <span class="badge-semanas{% if v.semanas_lista >= 4 %} badge-semanas--alta{% endif %}"
                       title="Lleva {{ v.semanas_lista }} semana{{ 's' if v.semanas_lista != 1 }} lista para entrega">
@@ -61,17 +54,17 @@
         </span>
     </td>
 
-    <td>${{ total | round(2) }}</td>
+    <td>{{ total|dinero }}</td>
 
     <td>
         {% if v.total_pagado > 0 %}
-            ${{ pagado | round(2) }}
+            {{ pagado|dinero }}
         {% else %}
-            <span class="dim-soft">Sin prepago</span>
+            <span class="dim-soft nowrap">Sin prepago</span>
         {% endif %}
     </td>
 
-    <td>${{ deuda | round(2) }}</td>
+    <td>{{ deuda|dinero }}</td>
 
     <td>
         <button class="btn btn--info btn--sm btn-detalles" data-id="{{ v.id_venta }}">
@@ -94,9 +87,11 @@
 <tr id="detalles-{{ v.id_venta }}" class="table--details d-none">
     <td colspan="11">
         <div class="detalles-box">
-            <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta</div>
+            <div class="detalles-title"><i data-lucide="receipt" width="16" height="16"></i> Detalles de la venta
+                {% if (v.cantidad_descuento or 0) > 0 %}<span class="status status--warn detalles-aviso-descuento">Con descuento de {{ v.cantidad_descuento|dinero }}</span>{% endif %}
+            </div>
 
-            <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}">
+            <ul class="detalles-list" id="lista-detalles-{{ v.id_venta }}" data-total="{{ v.total }}" data-descuento="{{ v.cantidad_descuento or 0 }}">
                 <li class="dim-soft">Cargando detalles...</li>
             </ul>
 
