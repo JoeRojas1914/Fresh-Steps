@@ -46,13 +46,21 @@
     font-size: 15px;
 }
 
-/* ── Selector de negocio ── */
+/* ── Barra: selector de negocio + mostrar montos ── */
+.home-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-bottom: 8px;
+}
+
 .negocio-pills {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-    margin-bottom: 8px;
 }
 
 .negocio-pill {
@@ -134,23 +142,53 @@
     transition: border-color .15s ease;
 }
 
-.entregar-card:hover { border-color: #1e7fd6; }
-.entregar-card:focus-visible { outline: 2px solid #1e7fd6; outline-offset: 2px; }
+.entregar-card:hover { border-color: var(--color-primary-dark); }
+.entregar-card:focus-visible { outline: 2px solid var(--color-primary-dark); outline-offset: 2px; }
+
+/* Ícono en un cuadro tonal, mismo lenguaje que los kpi-icono */
+.entregar-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+}
+.entregar-icono svg { width: 22px; height: 22px; stroke-width: 2; }
+
+/* Mismo cuadro tonal azul que el ícono de los títulos de página */
+.entregar-icono {
+    background: #e8f2fc;
+    color: #1765b5;
+    box-shadow: inset 0 0 0 1px #b9d4f1;
+}
 
 .accion-num {
+    margin-left: auto;
     min-width: 2ch;
-    font-size: 36px;
+    text-align: right;
+    font-size: 34px;
     font-weight: 800;
     line-height: 1;
-    color: #0b3c5d;
+    color: var(--color-navy);
     letter-spacing: -1px;
     font-variant-numeric: tabular-nums;
 }
+
+.entregar-flecha {
+    display: inline-flex;
+    color: #94a3b8;
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+.entregar-flecha svg { width: 20px; height: 20px; }
+.entregar-card:hover .entregar-flecha { color: var(--color-primary-dark); transform: translateX(2px); }
 
 .entregar-texto {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-width: 0;
 }
 
 .entregar-label {
@@ -195,11 +233,7 @@ a.kpi-hoy-card--link:focus-visible { outline: 2px solid #1e7fd6; outline-offset:
 }
 .kpi-icono svg { width: 17px; height: 17px; stroke-width: 2.2; }
 
-.kpi-icono--azul   { color: #1e7fd6; }
-.kpi-icono--verde  { color: #15803d; }
-.kpi-icono--marino { color: #0b3c5d; }
-.kpi-icono--teal   { color: #1a7a87; }
-.kpi-icono--rojo   { color: #dc2626; }
+.kpi-icono--azul   { color: var(--color-primary-dark); }
 
 .kpi-hoy-label,
 .mes-label {
@@ -224,27 +258,23 @@ a.kpi-hoy-card--link:focus-visible { outline: 2px solid #1e7fd6; outline-offset:
 }
 
 /* ── Gráfica de la semana ── */
-.hoy-chart { padding: 16px 20px 14px; }
+.hoy-chart { padding: 18px 20px 14px; }
 
 .hoy-chart-head {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 4px 16px;
-    margin-bottom: 10px;
+    gap: 8px 16px;
+    margin-bottom: 12px;
 }
 
-.page-content .hoy-chart-title {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 700;
-    color: #0b3c5d;
-}
+.page-content .hoy-chart-title { margin: 0; }
 
 .hoy-chart-leyenda {
     display: flex;
     gap: 16px;
+    padding-top: 2px;
     font-size: 12px;
     font-weight: 500;
     color: #475569;
@@ -256,38 +286,36 @@ a.kpi-hoy-card--link:focus-visible { outline: 2px solid #1e7fd6; outline-offset:
     gap: 6px;
 }
 
+/* Cuadros iguales a los de la leyenda de Estadísticas */
 .leyenda-dot {
-    width: 16px;
-    height: 0;
-    border-top: 2px solid;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
 }
 
-.leyenda-dot--ventas   { border-color: #1e7fd6; }
-.leyenda-dot--unidades { border-color: #0b3c5d; border-top-style: dashed; }
+.leyenda-dot--ventas   { background: #1e7fd6; }
+.leyenda-dot--unidades { background: #9cc8f0; }
 
 .hoy-chart-wrap {
     position: relative;
-    height: 150px;
+    height: 190px;
 }
+
+.hoy-chart-vacio {
+    position: absolute;
+    inset: 0 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    pointer-events: none;
+}
+.hoy-chart-vacio[hidden] { display: none; }
 
 /* ── Este mes ── */
-.mes-section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.page-content .mes-section-header .home-section-title { margin: 0; }
-
-.mes-acciones {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
 .btn-blur-toggle.home-toggle-montos {
     width: auto;
     height: 32px;
@@ -336,6 +364,11 @@ a.kpi-hoy-card--link:focus-visible { outline: 2px solid #1e7fd6; outline-offset:
 @media (max-width: 768px) {
     .page-content .home-greeting h1 { font-size: 24px; }
     .home-cta { width: 100%; }
+    .entregar-card { padding: 14px 16px; gap: 12px; }
+    .entregar-icono { width: 38px; height: 38px; }
+    .accion-num { font-size: 28px; }
+    .hoy-chart { padding: 14px 14px 10px; }
+    .hoy-chart-wrap { height: 170px; }
     .mes-grid { grid-template-columns: 1fr; }
 
     /* Hoy en el celular: lista compacta (etiqueta | número), sin tarjetas sueltas */

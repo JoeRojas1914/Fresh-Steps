@@ -365,6 +365,7 @@ def kpis_inicio_service(negocio, es_admin: bool) -> dict:
         "chart_labels":            [x["label"] for x in ventas_semana],
         "chart_data":              [x["total"]  for x in ventas_semana],
         "chart_unidades":          [x["total"]  for x in unidades_semana],
+        "chart_hoy_idx":           hoy_dt.weekday(),
         "unidades_recibidas_hoy":  unidades_recibidas_hoy,
         "unidades_entregadas_hoy": unidades_entregadas_hoy,
         "ventas_entregadas_hoy":   ventas_entregadas_hoy,

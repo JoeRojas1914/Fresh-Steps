@@ -88,7 +88,7 @@ def test_api_index_kpis_incluye_ventas_entregadas_hoy(logged_client):
 def test_index_muestra_kpi_ventas_cerradas(logged_client):
     resp = logged_client.get("/")
     assert resp.status_code == 200
-    assert "Ventas cerradas hoy".encode() in resp.data
+    assert "Ventas cerradas".encode() in resp.data
 
 
 # ---------------------------------------------------------------------------

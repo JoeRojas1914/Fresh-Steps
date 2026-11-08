@@ -22,75 +22,110 @@ document.querySelectorAll(".kpi-hoy-num, .accion-num, .mes-num").forEach(functio
     }
 });
 
-// ── Chart ─────────────────────────────────────────────────────────────────────
-var _chart = null;
+// ── Gráfica de la semana ──────────────────────────────────────────────────────
+var _chart    = null;
 var _rawChart = JSON.parse(document.getElementById("indexChartData").textContent);
 var _canvas   = document.getElementById("miniVentasChart");
+var _hoyIdx   = typeof _rawChart.hoyIdx === "number" ? _rawChart.hoyIdx : 6;
 
-if (_canvas && _rawChart) {
-    var ctx      = _canvas.getContext("2d");
-    var AZUL   = "#1e7fd6";
-    var MARINO = "#0b3c5d";
+var AZUL       = "#1e7fd6";
+var AZUL_CLARO = "#9cc8f0";
 
-    _chart = new Chart(ctx, {
-        type: "line",
+function _plural(n, uno, varios) { return n + " " + (n === 1 ? uno : varios); }
+
+function _hastaHoy(valores) {
+    return (valores || []).map(function(v, i) { return i > _hoyIdx ? null : v; });
+}
+
+function _suma(valores) {
+    return (valores || []).reduce(function(a, v) { return a + (v || 0); }, 0);
+}
+
+function _actualizarVacio(ventas, unidades) {
+    var vacio = document.getElementById("chartVacio");
+    if (vacio) vacio.hidden = (_suma(ventas) + _suma(unidades)) > 0;
+}
+
+if (_canvas && _rawChart && window.Chart) {
+    var tooltipStyle = {
+        backgroundColor: "#ffffff",
+        titleColor: "#0f172a",
+        bodyColor: "#475569",
+        borderColor: "#e2e8f0",
+        borderWidth: 1,
+        cornerRadius: 8,
+        padding: 10,
+        boxPadding: 4,
+        titleFont: { weight: "600", size: 13 },
+        bodyFont: { size: 12 }
+    };
+
+    var barra = function(color) {
+        return {
+            backgroundColor: color,
+            borderWidth: 0,
+            borderRadius: 4,
+            borderSkipped: false,
+            maxBarThickness: 22,
+            categoryPercentage: 0.7,
+            barPercentage: 0.9
+        };
+    };
+
+    var ventas   = _hastaHoy(_rawChart.data);
+    var unidades = _hastaHoy(_rawChart.unidades);
+
+    _chart = new Chart(_canvas.getContext("2d"), {
+        type: "bar",
         data: {
             labels: _rawChart.labels,
-            datasets: [{
-                data: _rawChart.data,
-                borderColor: AZUL,
-                borderWidth: 2,
-                backgroundColor: "rgba(30,127,214,0.08)",
-                fill: true,
-                tension: 0.3,
-                pointRadius: 0,
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: AZUL,
-                pointHoverBorderColor: "#ffffff",
-                pointHoverBorderWidth: 2
-            }, {
-                label: "unidades",
-                data: _rawChart.unidades || [],
-                borderColor: MARINO,
-                borderWidth: 2,
-                borderDash: [5, 4],
-                fill: false,
-                tension: 0.3,
-                pointRadius: 0,
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: MARINO,
-                pointHoverBorderColor: "#ffffff",
-                pointHoverBorderWidth: 2
-            }]
+            datasets: [
+                Object.assign({ label: "Ventas", data: ventas }, barra(AZUL)),
+                Object.assign({ label: "Unidades recibidas", data: unidades }, barra(AZUL_CLARO))
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
             plugins: {
                 legend: { display: false },
-                tooltip: {
-                    mode: "index",
-                    intersect: false,
+                tooltip: Object.assign({}, tooltipStyle, {
+                    filter: function(c) { return c.raw !== null; },
                     callbacks: {
                         label: function(c) {
-                            if (c.datasetIndex === 1) {
-                                return " " + c.raw + " unidad" + (c.raw !== 1 ? "es" : "") + " recibida" + (c.raw !== 1 ? "s" : "");
-                            }
-                            return " " + c.raw + " venta" + (c.raw !== 1 ? "s" : "");
+                            return c.datasetIndex === 1
+                                ? " " + _plural(c.raw, "unidad recibida", "unidades recibidas")
+                                : " " + _plural(c.raw, "venta", "ventas");
                         }
                     }
-                }
+                })
             },
             scales: {
-                y: { display: false, beginAtZero: true },
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: 4,
+                    ticks: { precision: 0, maxTicksLimit: 4, color: "#94a3b8", font: { size: 11 } },
+                    grid: { color: "rgba(226,232,240,0.7)" },
+                    border: { display: false }
+                },
                 x: {
                     grid: { display: false },
                     border: { display: false },
-                    ticks: { color: "#64748b", font: { size: 11 } }
+                    ticks: {
+                        callback: function(value, i) {
+                            var lbl = this.getLabelForValue(value);
+                            return this.chart.width < 480 ? String(lbl).split(" ")[0] : lbl;
+                        },
+                        color: function(c) { return c.index === _hoyIdx ? "#0b3c5d" : "#64748b"; },
+                        font:  function(c) { return { size: 11, weight: c.index === _hoyIdx ? "700" : "400" }; }
+                    }
                 }
             }
         }
     });
+
+    _actualizarVacio(ventas, unidades);
 }
 
 // ── Mostrar/ocultar montos sensibles ────────────────────────────────────────
@@ -186,10 +221,14 @@ document.addEventListener("click", function(e) {
         }
 
         if (_chart && data.chart_labels && data.chart_data) {
+            if (typeof data.chart_hoy_idx === "number") _hoyIdx = data.chart_hoy_idx;
+            var v = _hastaHoy(data.chart_data);
+            var u = _hastaHoy(data.chart_unidades);
             _chart.data.labels            = data.chart_labels;
-            _chart.data.datasets[0].data  = data.chart_data;
-            _chart.data.datasets[1].data  = data.chart_unidades || [];
+            _chart.data.datasets[0].data  = v;
+            _chart.data.datasets[1].data  = u;
             _chart.update("none");
+            _actualizarVacio(v, u);
         }
     })
     .catch(function() { _setLoading(false); });

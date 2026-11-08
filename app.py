@@ -1,7 +1,7 @@
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from datetime import date
+from datetime import date, datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from db import get_db
 from dotenv import load_dotenv
@@ -33,8 +33,6 @@ def _setup_logging() -> None:
     )
     fh.setLevel(logging.INFO)
     fh.setFormatter(fmt)
-    # Los accesos de werkzeug (GET /api/clientes?q=<nombre o teléfono>…) son el 95%
-    # del archivo y llevan datos de clientes: al archivo solo van sus advertencias/errores.
     fh.addFilter(lambda r: not (r.name == "werkzeug" and r.levelno < logging.WARNING))
     root.addHandler(fh)
 
@@ -61,8 +59,6 @@ from services.permisos_service import negocios_permitidos, restringir_negocios
 load_dotenv()
 app = Flask(__name__)
 
-# Detrás de un proxy inverso (nginx, IIS…) define TRUST_PROXY=1 para que
-# request.remote_addr sea la IP real de la terminal (bloqueo de PIN y rate limit).
 if os.getenv("TRUST_PROXY") == "1":  # pragma: no cover
     from werkzeug.middleware.proxy_fix import ProxyFix
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
@@ -115,6 +111,15 @@ init_auth_middleware(app)
 
 
 # ================= STATIC CACHE =================
+@app.url_defaults
+def static_cache_bust(endpoint, values):
+    if endpoint == "static" and "filename" in values:
+        try:
+            values["v"] = int(os.stat(os.path.join(app.static_folder, values["filename"])).st_mtime)
+        except OSError:
+            pass
+
+
 @app.after_request
 def add_cache_headers(response):
     if request.path.startswith("/static/"):
@@ -166,12 +171,18 @@ def index():
     hoy_dt = date.today()
     fecha_bonita = f"{dias[hoy_dt.weekday()]} {hoy_dt.day} de {meses[hoy_dt.month-1]}, {hoy_dt.year}"
 
+    hora   = datetime.now().hour
+    saludo = "Buenos días" if hora < 12 else "Buenas tardes" if hora < 19 else "Buenas noches"
+    nombre = (session.get("nombre") or "").split()
+    nombre_usuario = nombre[0] if nombre else session.get("usuario", "").capitalize()
+
     negocio = _negocio_index()
     kpis    = kpis_inicio_service(negocio, session.get("rol") == "admin")
 
     return render_template(
         "index.html",
-        nombre_usuario          = " ".join(filter(None, [session.get("nombre"), session.get("apellido")])) or session.get("usuario", "").capitalize(),
+        saludo                  = saludo,
+        nombre_usuario          = nombre_usuario,
         fecha_bonita            = fecha_bonita,
         negocio_sel             = negocio,
         hoy_iso                 = hoy_dt.isoformat(),

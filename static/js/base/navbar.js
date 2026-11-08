@@ -9,9 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("scroll", () => {
         if (window.scrollY > navbarBottom) {
             if (!navbar.classList.contains("navbar--fixed")) {
+                const estilo = getComputedStyle(navbar);
+                const alto   = navbar.offsetHeight
+                             + parseFloat(estilo.marginTop)
+                             + parseFloat(estilo.marginBottom);
                 navbar.classList.add("navbar--fixed");
                 placeholder = document.createElement("div");
-                placeholder.style.height = navbar.offsetHeight + "px";
+                placeholder.style.height = alto + "px";
                 navbar.parentNode.insertBefore(placeholder, navbar);
             }
         } else {
