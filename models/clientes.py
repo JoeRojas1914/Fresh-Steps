@@ -213,6 +213,25 @@ COLUMNAS_ORDEN_CLIENTES = {
 }
 
 
+def _columnas_orden(id_negocio):
+    """Columnas de orden. Con negocios asignados (caja), "pedidos" cuenta solo los de
+    esos negocios, igual que el número que se muestra (`contar_pedidos_por_cliente`).
+    Si contara todos, un cliente con muchos pedidos en otro negocio quedaría arriba.
+
+    Los ids van como enteros dentro del SQL (no como %s) porque la expresión aparece dos
+    veces en el ORDER BY; `int()` garantiza que solo entren dígitos."""
+    ids = como_lista(id_negocio)
+    if not ids:
+        return COLUMNAS_ORDEN_CLIENTES
+    ids_sql = ", ".join(str(int(i)) for i in ids)
+    return {
+        **COLUMNAS_ORDEN_CLIENTES,
+        "pedidos": "(SELECT COUNT(*) FROM venta vp"
+                   " WHERE vp.id_cliente = cliente.id_cliente AND vp.eliminado = 0"
+                   f" AND vp.id_negocio IN ({ids_sql}))",
+    }
+
+
 def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False,
                      orden=None, direccion=None, id_negocio=None):
     where, params = build_where([
@@ -228,7 +247,7 @@ def obtener_clientes(q=None, limit=10, offset=0, incluir_eliminados=False,
             FROM cliente
             {where}
             {construir_order_by(orden, direccion, "nombre ASC, apellido ASC",
-                                COLUMNAS_ORDEN_CLIENTES, "id_cliente")}
+                                _columnas_orden(id_negocio), "id_cliente")}
             LIMIT %s OFFSET %s
         """, params)
         return cursor.fetchall()
