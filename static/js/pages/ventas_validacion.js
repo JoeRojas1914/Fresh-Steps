@@ -111,6 +111,10 @@ export function actualizarTotal() {
 
 /* ─── Validación ─────────────────────────────────────────────────────────── */
 
+export function esEnteroPositivo(valor) {
+    return /^\d+$/.test(String(valor).trim()) && parseInt(valor, 10) >= 1;
+}
+
 function articulosCompletos() {
     const articulos = document.querySelectorAll(".articulo-item");
     if (articulos.length === 0) return false;
@@ -118,6 +122,12 @@ function articulosCompletos() {
     const negocio = document.getElementById("id_negocio").value;
 
     for (const art of articulos) {
+        // Mismas reglas que el servidor: cantidad entera >= 1 y precio unitario > 0
+        const cant = art.querySelector("input[name$='[cantidad]']");
+        if (cant && cant.value !== "" && !esEnteroPositivo(cant.value)) return false;
+        const pu = art.querySelector("input[name$='[precio_unitario]']");
+        if (pu && pu.value !== "" && !(parseFloat(pu.value) > 0)) return false;
+
         for (const campo of art.querySelectorAll("input, select, textarea")) {
             if (campo.offsetParent === null) continue;
             const name = campo.name || "";

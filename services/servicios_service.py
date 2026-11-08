@@ -1,6 +1,11 @@
 import time
 
-from utils import a_monto, calcular_paginacion
+from openpyxl import Workbook
+
+from utils import a_monto, calcular_paginacion, nombres_negocios
+from services.excel_helpers import (
+    xl_cell, xl_row_bg, xl_titulo_hoja, xl_fila_headers, xl_col_widths, xl_badge_activo,
+)
 
 from models.negocio import obtener_negocios
 from models.servicios import (
@@ -58,6 +63,9 @@ def listar_servicios_api(id_negocio: int | None) -> dict:
     entry = _servicios_cache.get(key)
     if entry and (time.time() - entry[1]) < _SERVICIOS_TTL:
         return entry[0]
+    # Solo se cachean negocios que existen: con ids arbitrarios la caché crecería sin límite
+    if id_negocio is not None and id_negocio not in {n["id_negocio"] for n in obtener_negocios()}:
+        return {"servicios": [], "total_paginas": 1, "total": 0}
     data = listar_servicios(id_negocio=id_negocio, pagina=1, por_pagina=1000)
     _servicios_cache[key] = (data, time.time())
     return data
@@ -124,3 +132,36 @@ def exportar_servicios_service(id_negocio, incluir_eliminados, q=None, orden=Non
         orden=orden,
         direccion=direccion,
     )
+
+
+def exportar_servicios_excel_service(id_negocio, incluir_eliminados, q=None,
+                                     orden=None, direccion=None) -> Workbook:
+    servicios = exportar_servicios_service(id_negocio, incluir_eliminados, q=q,
+                                           orden=orden, direccion=direccion)
+
+    subtexto = nombres_negocios(id_negocio, obtener_negocios()) or "Todos los negocios"
+    if q:
+        subtexto += f"  |  Búsqueda: {q}"
+    if incluir_eliminados:
+        subtexto += "  |  Incluye eliminados"
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Servicios"
+    ws.freeze_panes = "A4"
+
+    xl_titulo_hoja(ws, "Catálogo de Servicios — Fresh Steps", 4, subtexto)
+    xl_fila_headers(ws, ["Negocio", "Servicio", "Precio ($)", "Estado"])
+
+    for i, srv in enumerate(servicios):
+        r  = i + 4
+        bg = xl_row_bg(i)
+        xl_cell(ws, r, 1, srv.get("negocio", ""), fg=bg)
+        xl_cell(ws, r, 2, srv.get("nombre",  ""), fg=bg)
+        xl_cell(ws, r, 3, float(srv.get("precio") or 0), fg=bg, bold=True,
+                align="right", num_fmt='"$"#,##0.00')
+        xl_badge_activo(ws, r, 4, srv.get("activo", 1))
+        ws.row_dimensions[r].height = 16
+
+    xl_col_widths(ws, [20, 32, 14, 12])
+    return wb

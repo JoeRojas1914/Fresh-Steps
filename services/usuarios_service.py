@@ -186,3 +186,8 @@ def obtener_historial_usuario_service(id_usuario: int) -> list[dict]:
         f["datos_antes"]   = _limpiar_json_historial(f.get("datos_antes"))
         f["datos_despues"] = _limpiar_json_historial(f.get("datos_despues"))
     return filas
+
+
+def obtener_mi_perfil_service(id_usuario: int) -> dict | None:
+    """Datos del usuario en sesión para "Mi perfil" (sin hashes ni token)."""
+    return _snapshot_usuario(usuario.obtener_usuario_por_id(id_usuario))

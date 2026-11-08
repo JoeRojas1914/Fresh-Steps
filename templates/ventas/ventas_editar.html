@@ -127,12 +127,12 @@
                                 <div class="campo-item"><label class="form-label">Material</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][material]" value="{{ art.datos.material or '' }}" data-original="{{ art.datos.material or '' }}"></div>
                                 <div class="campo-item"><label class="form-label">Color base</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][color_base]" value="{{ art.datos.color_base or '' }}" data-original="{{ art.datos.color_base or '' }}"></div>
                                 <div class="campo-item"><label class="form-label">Color secundario</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][color_secundario]" value="{{ art.datos.color_secundario or '' }}" data-original="{{ art.datos.color_secundario or '' }}"></div>
-                                <div class="campo-item"><label class="form-label">Cantidad</label><input type="number" min="1" class="form-input" name="art_edit[{{ art.id_articulo }}][cantidad]" value="{{ art.datos.cantidad or '' }}" data-original="{{ art.datos.cantidad or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Cantidad</label><input type="number" min="1" step="1" class="form-input" name="art_edit[{{ art.id_articulo }}][cantidad]" value="{{ art.datos.cantidad or '' }}" data-original="{{ art.datos.cantidad or '' }}"></div>
                             </div>
                             {% elif art.tipo_articulo == "maquila" %}
                             <div class="form-group form-row articulo-row">
                                 <div class="campo-item"><label class="form-label">Tipo</label><input type="text" class="form-input" name="art_edit[{{ art.id_articulo }}][tipo]" value="{{ art.datos.tipo or '' }}" data-original="{{ art.datos.tipo or '' }}"></div>
-                                <div class="campo-item"><label class="form-label">Cantidad</label><input type="number" min="1" class="form-input" name="art_edit[{{ art.id_articulo }}][cantidad]" value="{{ art.datos.cantidad or '' }}" data-original="{{ art.datos.cantidad or '' }}"></div>
+                                <div class="campo-item"><label class="form-label">Cantidad</label><input type="number" min="1" step="1" class="form-input" name="art_edit[{{ art.id_articulo }}][cantidad]" value="{{ art.datos.cantidad or '' }}" data-original="{{ art.datos.cantidad or '' }}"></div>
                                 <div class="campo-item"><label class="form-label">Precio unitario</label><input type="number" min="0.01" step="0.01" class="form-input" name="art_edit[{{ art.id_articulo }}][precio_unitario]" value="{{ art.datos.precio_unitario | float | round(2) }}" data-original="{{ art.datos.precio_unitario | float | round(2) }}"></div>
                             </div>
                             {% endif %}

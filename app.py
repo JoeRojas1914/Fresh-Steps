@@ -1,7 +1,7 @@
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from datetime import date, timedelta
+from datetime import date
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from db import get_db
 from dotenv import load_dotenv
@@ -33,6 +33,9 @@ def _setup_logging() -> None:
     )
     fh.setLevel(logging.INFO)
     fh.setFormatter(fmt)
+    # Los accesos de werkzeug (GET /api/clientes?q=<nombre o teléfono>…) son el 95%
+    # del archivo y llevan datos de clientes: al archivo solo van sus advertencias/errores.
+    fh.addFilter(lambda r: not (r.name == "werkzeug" and r.levelno < logging.WARNING))
     root.addHandler(fh)
 
 _setup_logging()
@@ -49,9 +52,7 @@ from routes.usuarios_routes import usuarios_bp
 from routes.ventas_routes import ventas_bp
 from routes.pagos_routes import pagos_bp
 from middleware.auth_middleware import init_auth_middleware
-from models.ventas import contar_entregas_resumen
-from models.estadisticas_ventas import contar_ventas_por_dia_rango, contar_unidades_por_dia_rango, obtener_total_ingresos, contar_unidades_hoy, contar_ventas_entregadas_hoy
-from models.estadisticas_gastos import obtener_total_gastos
+from services.estadisticas_service import kpis_inicio_service
 from services.permisos_service import negocios_permitidos, restringir_negocios
 
 
@@ -146,46 +147,6 @@ def _negocio_index():
     return negocio if negocio in _NEGOCIOS_VALIDOS else "all"
 
 
-def _kpis_index(negocio, es_admin: bool) -> dict:
-    hoy_dt         = date.today()
-    negocio_filtro = negocio if negocio != "all" else None
-
-    total_entregas, total_pendientes = contar_entregas_resumen(id_negocio=negocio_filtro)
-
-    lunes         = hoy_dt - timedelta(days=hoy_dt.weekday())
-    sabado        = lunes + timedelta(days=5)
-    ventas_semana   = contar_ventas_por_dia_rango(lunes, sabado, negocio)
-    unidades_semana = contar_unidades_por_dia_rango(lunes, sabado, negocio)
-    ventas_hoy      = contar_ventas_por_dia_rango(hoy_dt, hoy_dt, negocio)[0]["total"]
-
-    unidades_recibidas_hoy  = contar_unidades_hoy("fecha_recibo",  negocio)
-    unidades_entregadas_hoy = contar_unidades_hoy("fecha_entrega", negocio)
-    ventas_entregadas_hoy   = contar_ventas_entregadas_hoy(negocio)
-
-    ingresos_hoy = None
-    kpis_mes     = None
-    if es_admin:
-        ingresos_hoy   = float(obtener_total_ingresos(hoy_dt, hoy_dt, negocio))
-        primer_dia_mes = date(hoy_dt.year, hoy_dt.month, 1)
-        ing_mes  = float(obtener_total_ingresos(primer_dia_mes, hoy_dt, negocio))
-        gas_mes  = float(obtener_total_gastos(primer_dia_mes, hoy_dt, negocio))
-        kpis_mes = {"ingresos": ing_mes, "gastos": gas_mes, "ganancia": ing_mes - gas_mes}
-
-    return {
-        "total_entregas":          total_entregas,
-        "total_pendientes":        total_pendientes,
-        "ventas_hoy":              ventas_hoy,
-        "chart_labels":            [x["label"] for x in ventas_semana],
-        "chart_data":              [x["total"]  for x in ventas_semana],
-        "chart_unidades":          [x["total"]  for x in unidades_semana],
-        "unidades_recibidas_hoy":  unidades_recibidas_hoy,
-        "unidades_entregadas_hoy": unidades_entregadas_hoy,
-        "ventas_entregadas_hoy":   ventas_entregadas_hoy,
-        "ingresos_hoy":            ingresos_hoy,
-        "kpis_mes":                kpis_mes,
-    }
-
-
 # ================= HOME =================
 @app.route("/")
 def index():
@@ -206,7 +167,7 @@ def index():
     fecha_bonita = f"{dias[hoy_dt.weekday()]} {hoy_dt.day} de {meses[hoy_dt.month-1]}, {hoy_dt.year}"
 
     negocio = _negocio_index()
-    kpis    = _kpis_index(negocio, session.get("rol") == "admin")
+    kpis    = kpis_inicio_service(negocio, session.get("rol") == "admin")
 
     return render_template(
         "index.html",
@@ -224,7 +185,7 @@ def api_index_kpis():
     if not session.get("id_usuario"):  # pragma: no cover
         return jsonify({"error": "No autorizado"}), 401
 
-    kpis = _kpis_index(_negocio_index(), session.get("rol") == "admin")
+    kpis = kpis_inicio_service(_negocio_index(), session.get("rol") == "admin")
     resp = jsonify(kpis)
     resp.cache_control.private = True
     resp.cache_control.max_age = 30

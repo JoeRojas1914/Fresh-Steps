@@ -2,13 +2,7 @@ import logging
 from flask import Blueprint, render_template, request, redirect, flash, url_for, session, jsonify
 
 logger = logging.getLogger(__name__)
-from config import PAGO_LABEL, COMPROBANTE_LABEL
-from openpyxl import Workbook
-from services.excel_helpers import (
-    xl_cell, xl_row_bg,
-    xl_titulo_hoja, xl_fila_headers, xl_fila_totales,
-    xl_col_widths, xl_badge_activo, send_excel
-)
+from services.excel_helpers import send_excel
 
 from services.gastos_service import (
     listar_gastos,
@@ -21,11 +15,11 @@ from services.gastos_service import (
     crear_categoria_service,
     actualizar_categoria_service,
     eliminar_categoria_service,
-    exportar_gastos_service,
+    exportar_gastos_excel_service,
 )
 from middleware.auth_middleware import admin_required
 from extensions import limiter
-from utils import ids_de_args, nombres_negocios
+from utils import ids_de_args
 
 gastos_bp = Blueprint("gastos", __name__)
 
@@ -160,62 +154,14 @@ def eliminar_categoria_route(id_categoria):
         return jsonify({"ok": False, "error": "Error al eliminar la categoría."}), 500
 
 
-def _nombres_categorias(ids):
-    """Nombres de las categorías elegidas, para el subtítulo del Excel."""
-    nombres = {c["id_categoria"]: c["nombre"] for c in obtener_categorias()}
-    return ", ".join(nombres.get(i, str(i)) for i in ids)
-
-
 @gastos_bp.route("/gastos/exportar")
 @admin_required
 def exportar_gastos_excel():
-    id_negocio         = ids_de_args(request.args)
-    id_categoria       = ids_de_args(request.args, "id_categoria") or None
-    fecha_inicio       = request.args.get("fecha_inicio") or None
-    fecha_fin          = request.args.get("fecha_fin")    or None
-    incluir_eliminados = request.args.get("eliminados") == "1"
-
-    gastos = exportar_gastos_service(id_negocio, id_categoria, fecha_inicio, fecha_fin, incluir_eliminados)
-
-    subtexto = "  ".join(filter(None, [
-        f"Negocio: {nombres_negocios(id_negocio, obtener_negocios())}" if id_negocio else "",
-        f"Categor\u00eda: {_nombres_categorias(id_categoria)}" if id_categoria else "",
-        f"Desde: {fecha_inicio}"      if fecha_inicio  else "",
-        f"Hasta: {fecha_fin}"         if fecha_fin     else "",
-    ])) or "Sin filtros \u2014 todos los registros"
-
-    NCOLS   = 11
-    HEADERS = ["Negocio", "Descripci\u00f3n", "Categor\u00eda", "Notas",
-               "Proveedor", "Total ($)", "Comprobante", "M\u00e9todo de pago",
-               "Fecha registro", "Registrado por", "Estado"]
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Gastos"
-    ws.freeze_panes = "A4"
-
-    xl_titulo_hoja(ws, "Gastos \u2014 Fresh Steps", NCOLS, subtexto)
-    xl_fila_headers(ws, HEADERS)
-
-    for i, g in enumerate(gastos):
-        r  = i + 4
-        bg = xl_row_bg(i)
-        xl_cell(ws, r,  1, g.get("negocio",     ""),   fg=bg)
-        xl_cell(ws, r,  2, g.get("descripcion", ""),   fg=bg)
-        xl_cell(ws, r,  3, g.get("categoria") or "\u2014", fg=bg)
-        xl_cell(ws, r,  4, g.get("notas") or "",        fg=bg)
-        xl_cell(ws, r,  5, g.get("proveedor",   ""),   fg=bg)
-        xl_cell(ws, r,  6, float(g.get("total") or 0), fg=bg, bold=True, align="right", num_fmt='"$"#,##0.00')
-        xl_cell(ws, r,  7, COMPROBANTE_LABEL.get(g.get("tipo_comprobante",""), g.get("tipo_comprobante","")), fg=bg)
-        xl_cell(ws, r,  8, PAGO_LABEL.get(g.get("tipo_pago",""), g.get("tipo_pago","")), fg=bg)
-        fr = g.get("fecha_registro")
-        xl_cell(ws, r,  9, fr.strftime("%d/%m/%Y") if fr else "\u2014", fg=bg)
-        xl_cell(ws, r, 10, g.get("creado_por", "\u2014"), fg=bg)
-        xl_badge_activo(ws, r, 11, g.get("activo", 1))
-        ws.row_dimensions[r].height = 16
-
-    if gastos:
-        xl_fila_totales(ws, len(gastos) + 4, NCOLS, [6])
-
-    xl_col_widths(ws, [18, 28, 20, 30, 22, 13, 13, 18, 16, 18, 11])
+    wb = exportar_gastos_excel_service(
+        ids_de_args(request.args),
+        ids_de_args(request.args, "id_categoria") or None,
+        request.args.get("fecha_inicio") or None,
+        request.args.get("fecha_fin") or None,
+        request.args.get("eliminados") == "1",
+    )
     return send_excel(wb, "gastos")

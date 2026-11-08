@@ -323,9 +323,14 @@ function setBarrasH(chart, filas, valor, etiqueta, colores) {
     chart.update();
 }
 
+// Cada carga recibe un número; si llega una respuesta de una carga anterior
+// (el usuario cambió filtros mientras tanto) se descarta para no pintar datos viejos.
+let _dashSeq = 0;
+
 async function cargarDashboard() {
     const p = getParams();
     if (!p) return;
+    const seq = ++_dashSeq;
 
     if (p.inicio && p.fin && (new Date(p.fin)-new Date(p.inicio))/86400000 > 186) {
         mostrarError("El rango máximo es 6 meses en modo Personalizado.");
@@ -343,8 +348,10 @@ async function cargarDashboard() {
             agrupacion_gastos: agrupacionGastos, modo: p.modo,
         });
         const res = await fetch(`/api/estadisticas/dashboard?${qs.toString()}`);
+        if (seq !== _dashSeq) return;
         if (!res.ok) { const j=await res.json().catch(()=>({})); mostrarError(j.error||`Error ${res.status}`); return; }
         const data = await res.json();
+        if (seq !== _dashSeq) return;
 
         // ── Texto "Comparando X con Y" ──
         const elBox = document.getElementById("comparativaBox");
@@ -443,10 +450,12 @@ async function cargarDashboard() {
 
         renderTopClientes(data.top_clientes||[]);
 
-    } catch(err) { mostrarError("No se pudieron cargar las estadísticas. Revisa tu conexión e intenta de nuevo."); }
+    } catch(err) {
+        if (seq === _dashSeq) mostrarError("No se pudieron cargar las estadísticas. Revisa tu conexión e intenta de nuevo.");
+    }
     finally {
         clearTimeout(skeletonTimer);
-        document.body.classList.remove("stats-cargando");
+        if (seq === _dashSeq) document.body.classList.remove("stats-cargando");
     }
 }
 

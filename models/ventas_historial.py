@@ -57,10 +57,10 @@ def _filtros_historial(id_negocio, fecha_inicio, fecha_fin, mostrar_eliminadas,
 
     col = tipo_fecha if tipo_fecha in _COLS_FECHA_HISTORIAL else "fecha_recibo"
     if fecha_inicio:
-        sql += f" AND DATE(v.{col}) >= %s"
+        sql += f" AND v.{col} >= %s"
         params.append(fecha_inicio)
     if fecha_fin:
-        sql += f" AND DATE(v.{col}) <= %s"
+        sql += f" AND v.{col} < DATE_ADD(%s, INTERVAL 1 DAY)"
         params.append(fecha_fin)
     if q:
         sql_cli, params_cli = filtro_cliente(q)

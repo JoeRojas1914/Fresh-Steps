@@ -1,6 +1,12 @@
 import logging
 from datetime import date, datetime, timedelta
 from models.clientes import contar_clientes
+from models.ventas import contar_entregas_resumen
+from models.estadisticas_ventas import (
+    contar_unidades_por_dia_rango,
+    contar_unidades_hoy,
+    contar_ventas_entregadas_hoy,
+)
 from models.servicios import contar_servicios
 from models.negocio import obtener_negocios
 
@@ -215,6 +221,7 @@ def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrup
 
 
 def exportar_estadisticas_service(args):
+    """(Workbook, None) con KPIs y series del periodo, o (None, mensaje de error)."""
     inicio_str = args.get("inicio")
     fin_str    = args.get("fin")
     id_negocio = args.get("id_negocio", "all")
@@ -233,7 +240,7 @@ def exportar_estadisticas_service(args):
 
     from openpyxl import Workbook
     from services.excel_helpers import (
-        C, xl_cell, xl_titulo_hoja, xl_fila_headers, xl_col_widths, send_excel
+        C, xl_cell, xl_titulo_hoja, xl_fila_headers, xl_col_widths
     )
 
     kpis   = _calcular_kpis(inicio, fin, id_negocio)
@@ -282,7 +289,7 @@ def exportar_estadisticas_service(args):
         xl_cell(ws2, row, 4, unidades[i],     fg=bg, align="right", num_fmt='#,##0')
     xl_col_widths(ws2, {1: 20, 2: 12, 3: 16, 4: 12})
 
-    return send_excel(wb, "estadisticas"), None
+    return wb, None
 
 
 def dashboard_api_service(args):
@@ -323,3 +330,44 @@ def dashboard_api_service(args):
         "periodo_anterior": periodo_anterior_str,
         "kpis":             {**kpis, **pcts},
     }, None
+
+
+def kpis_inicio_service(negocio, es_admin: bool) -> dict:
+    """KPIs de la pantalla de inicio. `negocio`: 'all', un id o la lista de ids de la caja."""
+    hoy_dt         = date.today()
+    negocio_filtro = negocio if negocio != "all" else None
+
+    total_entregas, total_pendientes = contar_entregas_resumen(id_negocio=negocio_filtro)
+
+    lunes         = hoy_dt - timedelta(days=hoy_dt.weekday())
+    sabado        = lunes + timedelta(days=5)
+    ventas_semana   = contar_ventas_por_dia_rango(lunes, sabado, negocio)
+    unidades_semana = contar_unidades_por_dia_rango(lunes, sabado, negocio)
+    ventas_hoy      = contar_ventas_por_dia_rango(hoy_dt, hoy_dt, negocio)[0]["total"]
+
+    unidades_recibidas_hoy  = contar_unidades_hoy("fecha_recibo",  negocio)
+    unidades_entregadas_hoy = contar_unidades_hoy("fecha_entrega", negocio)
+    ventas_entregadas_hoy   = contar_ventas_entregadas_hoy(negocio)
+
+    ingresos_hoy = None
+    kpis_mes     = None
+    if es_admin:
+        ingresos_hoy   = float(obtener_total_ingresos(hoy_dt, hoy_dt, negocio))
+        primer_dia_mes = date(hoy_dt.year, hoy_dt.month, 1)
+        ing_mes  = float(obtener_total_ingresos(primer_dia_mes, hoy_dt, negocio))
+        gas_mes  = float(obtener_total_gastos(primer_dia_mes, hoy_dt, negocio))
+        kpis_mes = {"ingresos": ing_mes, "gastos": gas_mes, "ganancia": ing_mes - gas_mes}
+
+    return {
+        "total_entregas":          total_entregas,
+        "total_pendientes":        total_pendientes,
+        "ventas_hoy":              ventas_hoy,
+        "chart_labels":            [x["label"] for x in ventas_semana],
+        "chart_data":              [x["total"]  for x in ventas_semana],
+        "chart_unidades":          [x["total"]  for x in unidades_semana],
+        "unidades_recibidas_hoy":  unidades_recibidas_hoy,
+        "unidades_entregadas_hoy": unidades_entregadas_hoy,
+        "ventas_entregadas_hoy":   ventas_entregadas_hoy,
+        "ingresos_hoy":            ingresos_hoy,
+        "kpis_mes":                kpis_mes,
+    }

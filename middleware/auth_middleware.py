@@ -3,7 +3,7 @@ from functools import wraps
 from flask import session, redirect, url_for, flash, render_template, request, jsonify
 from datetime import datetime, timedelta
 from config import TIMEOUT_ADMIN, TIMEOUT_CAJA
-from models.usuario import obtener_session_token
+from services.auth_service import obtener_session_token_service
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +103,7 @@ def init_auth_middleware(app):
 
 
         try:
-            token_bd = obtener_session_token(session["id_usuario"])
+            token_bd = obtener_session_token_service(session["id_usuario"])
         except Exception:  
             logger.exception("Error al verificar session token id_usuario=%s", session.get("id_usuario"))
             session.clear()

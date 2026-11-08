@@ -73,16 +73,17 @@ def abrir_whatsapp():
     # desde otra terminal se regresa la URL para abrirla en el navegador del cliente.
     is_local = request.remote_addr in _IPS_LOCALES and not request.headers.get("X-Forwarded-For")
     if is_local:
-        try:
-            paths = _EDGE_PATHS if negocio_id == 1 else _CHROME_PATHS
-            exe   = _encontrar_browser(paths)
-            if exe:
+        paths = _EDGE_PATHS if negocio_id == 1 else _CHROME_PATHS
+        exe   = _encontrar_browser(paths)
+        if exe:
+            try:
                 subprocess.Popen([exe, url])  # pragma: no cover
-            else:  # pragma: no cover
-                logger.warning("No se encontró el navegador para negocio_id=%s", negocio_id)
-        except Exception:  # pragma: no cover
-            logger.exception("Error al abrir WhatsApp negocio_id=%s", negocio_id)
-        return jsonify({"ok": True, "opened": True})
+                return jsonify({"ok": True, "opened": True})  # pragma: no cover
+            except Exception:  # pragma: no cover
+                logger.exception("Error al abrir WhatsApp negocio_id=%s", negocio_id)
+        else:
+            logger.warning("No se encontró el navegador para negocio_id=%s", negocio_id)
+    # Sin navegador dedicado (o desde otra terminal): el cliente abre la URL en su navegador
     return jsonify({"ok": True, "opened": False, "url": url})
 
 

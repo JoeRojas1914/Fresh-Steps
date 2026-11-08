@@ -544,20 +544,18 @@ def test_fixture_teardown_limpia_gastos(app, db_conn, usuario_admin):
 # ventas_routes — rutas no autenticadas y ramas no cubiertas
 # ===========================================================================
 
-def test_abrir_whatsapp_local_sin_forward(logged_client):
-    """Cubre ventas_routes.py:61-70 — is_local=True, exe=None, rama else."""
-    res = logged_client.post(
-        "/ventas/abrir-whatsapp",
-        json={
-            "url": "https://web.whatsapp.com/send?phone=521234567890&text=hola",
-            "negocio_id": 2,  # Chrome path, no instalado en CI
-        },
-        # SIN X-Forwarded-For → is_local=True
-    )
+def test_abrir_whatsapp_local_sin_navegador_regresa_url(logged_client, monkeypatch):
+    """Petición local sin navegador instalado: el servidor no lo abre y regresa la URL
+    para que el cliente la abra (antes respondía opened=True y no se abría nada)."""
+    import routes.ventas_routes as vr
+    monkeypatch.setattr(vr, "_encontrar_browser", lambda paths: None)
+    url = "https://web.whatsapp.com/send?phone=521234567890&text=hola"
+    res = logged_client.post("/ventas/abrir-whatsapp", json={"url": url, "negocio_id": 2})
     assert res.status_code == 200
     data = res.get_json()
     assert data["ok"] is True
-    assert data.get("opened") is True
+    assert data["opened"] is False
+    assert data["url"] == url
 
 
 def test_historial_ventas_tipo_fecha_invalido(logged_client):

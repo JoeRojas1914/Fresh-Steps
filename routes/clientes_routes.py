@@ -3,13 +3,7 @@ from urllib.parse import urlparse
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 
 logger = logging.getLogger(__name__)
-from openpyxl import Workbook
-from services.excel_helpers import (
-    xl_cell, xl_row_bg,
-    xl_titulo_hoja, xl_fila_headers,
-    xl_col_widths, xl_badge_activo, send_excel,
-    build_excel_cliente,
-)
+from services.excel_helpers import send_excel
 
 from middleware.auth_middleware import admin_required
 from extensions import limiter
@@ -29,8 +23,8 @@ from services.clientes_service import (
     obtener_cliente_detalle_service,
     obtener_historial_cliente_service,
     obtener_cliente_service,
-    exportar_clientes_service,
-    exportar_cliente_service,
+    exportar_clientes_excel_service,
+    exportar_cliente_excel_service,
 )
 
 clientes_bp = Blueprint("clientes", __name__)
@@ -204,61 +198,25 @@ def api_editar_cliente(id_cliente):
 @clientes_bp.route("/clientes/exportar")
 @admin_required
 def exportar_clientes_excel():
-    incluir_eliminados = request.args.get("eliminados") == "1"
-    q                  = request.args.get("q", "").strip() or None
-    clientes, pedidos_map = exportar_clientes_service(
-        incluir_eliminados, q=q,
+    wb = exportar_clientes_excel_service(
+        incluir_eliminados=request.args.get("eliminados") == "1",
+        q=request.args.get("q", "").strip() or None,
         orden=request.args.get("orden") or None,
         direccion=request.args.get("dir") or None,
     )
-
-    subtexto = "Incluye eliminados" if incluir_eliminados else "Solo clientes activos"
-    if q:
-        subtexto += f"  |  Búsqueda: {q}"
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Clientes"
-    ws.freeze_panes = "A4"
-
-    xl_titulo_hoja(ws, "Clientes — Fresh Steps", 7, subtexto)
-    xl_fila_headers(ws, ["Nombre", "Apellido", "Teléfono", "Correo", "Dirección", "Estado", "Total pedidos"])
-
-    for i, cl in enumerate(clientes):
-        r  = i + 4
-        bg = xl_row_bg(i)
-        xl_cell(ws, r, 1, cl.get("nombre",    ""),  fg=bg, bold=True)
-        xl_cell(ws, r, 2, cl.get("apellido",  ""),  fg=bg, bold=True)
-        xl_cell(ws, r, 3, cl.get("telefono",  "—"), fg=bg)
-        xl_cell(ws, r, 4, cl.get("correo",    "—"), fg=bg)
-        xl_cell(ws, r, 5, cl.get("direccion", "—"), fg=bg)
-        xl_badge_activo(ws, r, 6, cl.get("activo", 1))
-        xl_cell(ws, r, 7, pedidos_map.get(cl["id_cliente"], 0), fg=bg, align="center")
-        ws.row_dimensions[r].height = 16
-
-    xl_col_widths(ws, [20, 20, 14, 28, 30, 11, 13])
     return send_excel(wb, "clientes")
 
 
 @clientes_bp.route("/clientes/<int:id_cliente>/exportar")
 @admin_required
 def exportar_cliente_excel(id_cliente):
-    id_negocio   = ids_de_args(request.args)
-    fecha_inicio = request.args.get("fecha_inicio") or None
-    fecha_fin    = request.args.get("fecha_fin")    or None
-
-    cliente, pedidos, detalles_map, pagos_map = exportar_cliente_service(
-        id_cliente, id_negocio, fecha_inicio, fecha_fin
+    resultado = exportar_cliente_excel_service(
+        id_cliente,
+        ids_de_args(request.args),
+        request.args.get("fecha_inicio") or None,
+        request.args.get("fecha_fin") or None,
     )
-    if not cliente:
+    if not resultado:
         return render_template("errors/404.html"), 404
-
-    nombre_cliente = f"{cliente['nombre']} {cliente['apellido']}"
-    filtro_txt = "  ".join(filter(None, [
-        f"Desde: {fecha_inicio}" if fecha_inicio else "",
-        f"Hasta: {fecha_fin}"   if fecha_fin    else "",
-    ])) or "Sin filtros de fecha"
-
-    wb = build_excel_cliente(pedidos, detalles_map, pagos_map, nombre_cliente, filtro_txt)
-    nombre_archivo = f"pedidos_{cliente['nombre']}_{cliente['apellido']}".replace(" ", "_")
+    wb, nombre_archivo = resultado
     return send_excel(wb, nombre_archivo)

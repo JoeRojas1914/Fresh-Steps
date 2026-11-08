@@ -6,6 +6,7 @@ import { initNavigationGuard } from '../base/navigation_guard.js';
 import { cargarServicios, agregarServicio, eliminarServicioPro, onChangeServicio, marcarPrecioEditado, opcionesServiciosHTML } from './ventas_servicios.js';
 import { agregarArticulo, eliminarArticulo, validarArticuloVisual } from './ventas_articulos.js';
 import { initSelectorHora, ajustarHorasPorFecha } from '../components/selector_hora.js';
+import { esEnteroPositivo } from './ventas_validacion.js';
 
 
 function calcularDeltaNuevos() {
@@ -456,6 +457,7 @@ const _CAMPOS_MINIMO = { cantidad: 1, precio_unitario: 0.01 };
 function _campoEsInvalido(campo, inp) {
     const raw = (inp.value || "").trim();
     if (raw === "") return true;
+    if (campo === "cantidad") return !esEnteroPositivo(raw);
     if (campo in _CAMPOS_MINIMO) {
         const val = parseFloat(raw);
         if (isNaN(val) || val < _CAMPOS_MINIMO[campo]) return true;
@@ -475,7 +477,8 @@ function _validarCamposObligatorios() {
             if (!inp) continue;
             if (_campoEsInvalido(campo, inp)) {
                 const etiq = _ETIQUETAS_CAMPO[campo] || campo;
-                const sufijo = campo in _CAMPOS_MINIMO ? " debe ser mayor a 0." : " es obligatorio.";
+                const sufijo = campo === "cantidad" ? " debe ser un entero mayor a 0."
+                             : campo in _CAMPOS_MINIMO ? " debe ser mayor a 0." : " es obligatorio.";
                 return `Art. #${i + 1}: "${etiq}"${sufijo}`;
             }
         }

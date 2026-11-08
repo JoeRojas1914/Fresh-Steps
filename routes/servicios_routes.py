@@ -2,17 +2,12 @@ import logging
 from flask import Blueprint, render_template, request, redirect, flash, jsonify, session, url_for
 
 logger = logging.getLogger(__name__)
-from openpyxl import Workbook
-from services.excel_helpers import (
-    xl_cell, xl_row_bg,
-    xl_titulo_hoja, xl_fila_headers,
-    xl_col_widths, xl_badge_activo, send_excel
-)
+from services.excel_helpers import send_excel
 
 
 from middleware.auth_middleware import admin_required
 from extensions import limiter
-from utils import ids_de_args, nombres_negocios
+from utils import ids_de_args
 from services.servicios_service import (
     listar_servicios,
     listar_servicios_api,
@@ -22,7 +17,7 @@ from services.servicios_service import (
     restaurar_servicio_service,
     alternar_servicio_default_service,
     obtener_negocios,
-    exportar_servicios_service,
+    exportar_servicios_excel_service,
 )
 
 servicios_bp = Blueprint("servicios", __name__)
@@ -149,39 +144,11 @@ def restaurar_servicio(id_servicio):
 @servicios_bp.route("/servicios/exportar")
 @admin_required
 def exportar_servicios_excel():
-    id_negocio         = ids_de_args(request.args)
-    incluir_eliminados = request.args.get("eliminados") == "1"
-    q                  = request.args.get("q", "").strip() or None
-
-    servicios = exportar_servicios_service(
-        id_negocio, incluir_eliminados, q=q,
+    wb = exportar_servicios_excel_service(
+        ids_de_args(request.args),
+        request.args.get("eliminados") == "1",
+        q=request.args.get("q", "").strip() or None,
         orden=request.args.get("orden") or None,
         direccion=request.args.get("dir") or None,
     )
-
-    subtexto = nombres_negocios(id_negocio, obtener_negocios()) or "Todos los negocios"
-    if q:
-        subtexto += f"  |  Búsqueda: {q}"
-    if incluir_eliminados:
-        subtexto += "  |  Incluye eliminados"
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Servicios"
-    ws.freeze_panes = "A4"
-
-    xl_titulo_hoja(ws, "Catálogo de Servicios — Fresh Steps", 4, subtexto)
-    xl_fila_headers(ws, ["Negocio", "Servicio", "Precio ($)", "Estado"])
-
-    for i, s in enumerate(servicios):
-        r  = i + 4
-        bg = xl_row_bg(i)
-        xl_cell(ws, r, 1, s.get("negocio", ""), fg=bg)
-        xl_cell(ws, r, 2, s.get("nombre",  ""), fg=bg)
-        xl_cell(ws, r, 3, float(s.get("precio") or 0), fg=bg, bold=True,
-                align="right", num_fmt='"$"#,##0.00')
-        xl_badge_activo(ws, r, 4, s.get("activo", 1))
-        ws.row_dimensions[r].height = 16
-
-    xl_col_widths(ws, [20, 32, 14, 12])
     return send_excel(wb, "servicios")

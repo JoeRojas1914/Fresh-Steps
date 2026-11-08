@@ -7,6 +7,7 @@ from services.estadisticas_service import (
     exportar_estadisticas_service
 )
 from extensions import limiter
+from services.excel_helpers import send_excel
 from middleware.auth_middleware import admin_required
 
 estadisticas_bp = Blueprint("estadisticas", __name__)
@@ -29,10 +30,10 @@ def estadisticas():
 @limiter.limit("10 per minute")
 def exportar_estadisticas():
     try:
-        respuesta, error = exportar_estadisticas_service(request.args)
+        wb, error = exportar_estadisticas_service(request.args)
         if error:
             return jsonify({"error": error}), 400
-        return respuesta
+        return send_excel(wb, "estadisticas")
     except Exception:  # pragma: no cover
         logger.exception("Error en exportar_estadisticas id_usuario=%s", session.get("id_usuario"))
         return jsonify({"error": "Error al generar el archivo"}), 500

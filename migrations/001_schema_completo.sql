@@ -317,35 +317,39 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =============================================================
 
 -- usuario
-CREATE INDEX IF NOT EXISTS idx_usuario_usuario             ON usuario(usuario);
+CREATE INDEX idx_usuario_usuario             ON usuario(usuario);
 
 -- cliente
-CREATE INDEX IF NOT EXISTS idx_cliente_nombre_apellido     ON cliente(nombre, apellido);
-CREATE INDEX IF NOT EXISTS idx_cliente_id_usuario          ON cliente(id_usuario);
+CREATE INDEX idx_cliente_nombre_apellido     ON cliente(nombre, apellido);
+CREATE INDEX idx_cliente_id_usuario          ON cliente(id_usuario);
 
 -- venta
-CREATE INDEX IF NOT EXISTS idx_venta_id_cliente            ON venta(id_cliente, eliminado);
-CREATE INDEX IF NOT EXISTS idx_venta_id_negocio            ON venta(id_negocio, eliminado);
-CREATE INDEX IF NOT EXISTS idx_venta_fecha_recibo          ON venta(fecha_recibo);
-CREATE INDEX IF NOT EXISTS idx_venta_fecha_lista           ON venta(fecha_lista);
+CREATE INDEX idx_venta_id_cliente            ON venta(id_cliente, eliminado);
+CREATE INDEX idx_venta_id_negocio            ON venta(id_negocio, eliminado);
+CREATE INDEX idx_venta_fecha_recibo          ON venta(fecha_recibo);
+CREATE INDEX idx_venta_fecha_lista           ON venta(fecha_lista);
+CREATE INDEX idx_venta_fecha_entrega         ON venta(fecha_entrega);
 
 -- articulo
-CREATE INDEX IF NOT EXISTS idx_articulo_id_venta           ON articulo(id_venta);
+CREATE INDEX idx_articulo_id_venta           ON articulo(id_venta);
 
 -- articulo_servicio
-CREATE INDEX IF NOT EXISTS idx_articulo_servicio_id_articulo ON articulo_servicio(id_articulo);
+CREATE INDEX idx_articulo_servicio_id_articulo ON articulo_servicio(id_articulo);
 
 -- pago_venta
-CREATE INDEX IF NOT EXISTS idx_pago_venta_id_venta         ON pago_venta(id_venta);
-CREATE INDEX IF NOT EXISTS idx_pago_venta_fecha_pago       ON pago_venta(fecha_pago);
+CREATE INDEX idx_pago_venta_id_venta         ON pago_venta(id_venta);
+CREATE INDEX idx_pago_venta_fecha_pago       ON pago_venta(fecha_pago);
 
 -- gastos
-CREATE INDEX IF NOT EXISTS idx_gastos_fecha_registro       ON gastos(fecha_registro);
-CREATE INDEX IF NOT EXISTS idx_gastos_id_negocio           ON gastos(id_negocio, activo);
+CREATE INDEX idx_gastos_fecha_registro       ON gastos(fecha_registro);
+CREATE INDEX idx_gastos_id_negocio           ON gastos(id_negocio, activo);
+
+-- usuario: login por PIN filtra por rol y activo
+CREATE INDEX idx_usuario_rol_activo          ON usuario(rol, activo);
 
 -- login_intentos
-CREATE INDEX IF NOT EXISTS idx_login_intentos_usuario      ON login_intentos(usuario);
+CREATE INDEX idx_login_intentos_usuario      ON login_intentos(usuario);
 
 -- venta: índices compuestos para filtros de rendimiento
-CREATE INDEX IF NOT EXISTS idx_venta_fecha_recibo_eliminado   ON venta(fecha_recibo, eliminado);
-CREATE INDEX IF NOT EXISTS idx_venta_id_cliente_fecha_recibo  ON venta(id_cliente, fecha_recibo, eliminado);
+CREATE INDEX idx_venta_fecha_recibo_eliminado   ON venta(fecha_recibo, eliminado);
+CREATE INDEX idx_venta_id_cliente_fecha_recibo  ON venta(id_cliente, fecha_recibo, eliminado);

@@ -18,7 +18,8 @@ python -m pytest tests/test_ventas_service.py::test_venta_calzado_valida_crea_re
 
 Three-layer: **routes/** (Flask Blueprints) → **services/** (business logic) → **models/** (data access).
 
-- `routes/` import exclusively from `services/` — never directly from `models/`.
+- `routes/`, `app.py` and `middleware/` import exclusively from `services/` — never directly from `models/`.
+- Excel exports: the service builds and returns an `openpyxl.Workbook` (e.g. `exportar_gastos_excel_service`); the route only calls `send_excel(wb, nombre)` from `services/excel_helpers.py`.
 - `services/ventas_service.py` re-exports `marcar_entregada`, `obtener_venta`, `obtener_detalles_venta` from `models/ventas.py` so routes stay in one layer.
 - `db.py` exposes `get_connection()` (raw connection) and `get_db()` (context manager with auto-commit/rollback). Pool size: 20, `autocommit=False`.
 
@@ -50,6 +51,8 @@ Middleware in `middleware/auth_middleware.py` enforces session validity (the `se
 ## Database
 
 - Production DB: `freshstepsproduccion`
+- Dates in SQL: never wrap an indexed column in `DATE()`; filter by range (`col >= %s AND col < DATE_ADD(%s, INTERVAL 1 DAY)`) and pass "today" from Python (`date.today()`), not `CURDATE()`. Python and MySQL (`DB_TIMEZONE`, default `-06:00`) must agree on the time zone.
+- MySQL 8.0 does not support `CREATE INDEX IF NOT EXISTS`; for existing DBs use the `information_schema` pattern in `migrations/007_indices_faltantes.sql`.
 - Test DB: `freshsteps` (configured in `scripts/.env.test`)
 - Full schema: `migrations/001_schema_completo.sql` — apply to an empty DB with `mysql -u user -p freshsteps < migrations/001_schema_completo.sql`. It already contains every incremental migration; `002+` files are only for existing DBs (CI applies only `001`).
 

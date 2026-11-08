@@ -192,7 +192,7 @@ def contar_ventas_por_hora(inicio: date, fin: date, id_negocio: str, col: str = 
     sql = f"""
         SELECT HOUR({col}) AS hora, COUNT(*) AS total
         FROM venta
-        WHERE DATE({col}) BETWEEN %s AND %s
+        WHERE {col} >= %s AND {col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND eliminado = 0
     """
     params = [inicio, fin]
@@ -210,7 +210,7 @@ def obtener_ingresos_por_hora(inicio: date, fin: date, id_negocio: str):
         SELECT HOUR(pv.fecha_pago) AS hora, COALESCE(SUM(pv.monto), 0) AS total
         FROM pago_venta pv
         JOIN venta v ON v.id_venta = pv.id_venta
-        WHERE DATE(pv.fecha_pago) BETWEEN %s AND %s
+        WHERE pv.fecha_pago >= %s AND pv.fecha_pago < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -229,7 +229,7 @@ def obtener_unidades_por_hora(inicio: date, fin: date, id_negocio: str, col: str
         SELECT HOUR(v.{col}) AS hora, COUNT(a.id_articulo) AS total
         FROM venta v
         JOIN articulo a ON a.id_venta = v.id_venta
-        WHERE DATE(v.{col}) BETWEEN %s AND %s
+        WHERE v.{col} >= %s AND v.{col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -247,7 +247,7 @@ def contar_ventas_por_dia_rango(inicio: date, fin: date, id_negocio: str, col: s
     sql = f"""
         SELECT DATE({col}) AS dia, COUNT(*) AS total
         FROM venta
-        WHERE DATE({col}) BETWEEN %s AND %s
+        WHERE {col} >= %s AND {col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND eliminado = 0
     """
     sql_neg, params_neg = filtro_negocios(id_negocio)
@@ -273,7 +273,7 @@ def contar_unidades_por_dia_rango(inicio: date, fin: date, id_negocio="all"):
         SELECT DATE(v.fecha_recibo) AS dia, COUNT(a.id_articulo) AS total
         FROM venta v
         JOIN articulo a ON a.id_venta = v.id_venta
-        WHERE DATE(v.fecha_recibo) BETWEEN %s AND %s
+        WHERE v.fecha_recibo >= %s AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     sql_neg, params_neg = filtro_negocios(id_negocio, "v.id_negocio")
@@ -296,7 +296,7 @@ def obtener_ingresos_por_dia_rango(inicio: date, fin: date, id_negocio: str):
         SELECT DATE(pv.fecha_pago) AS dia, COALESCE(SUM(pv.monto), 0) AS total
         FROM pago_venta pv
         JOIN venta v ON v.id_venta = pv.id_venta
-        WHERE DATE(pv.fecha_pago) BETWEEN %s AND %s
+        WHERE pv.fecha_pago >= %s AND pv.fecha_pago < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -321,7 +321,7 @@ def obtener_unidades_por_dia_rango(inicio: date, fin: date, id_negocio: str, col
         SELECT DATE(v.{col}) AS dia, COUNT(a.id_articulo) AS total
         FROM venta v
         JOIN articulo a ON a.id_venta = v.id_venta
-        WHERE DATE(v.{col}) BETWEEN %s AND %s
+        WHERE v.{col} >= %s AND v.{col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -348,7 +348,7 @@ def obtener_uso_servicios(inicio, fin, id_negocio, col: str = "fecha_recibo"):
         JOIN servicio s ON s.id_servicio = aps.id_servicio
         JOIN articulo a ON a.id_articulo = aps.id_articulo
         JOIN venta v ON v.id_venta = a.id_venta
-        WHERE DATE(v.{col}) BETWEEN %s AND %s
+        WHERE v.{col} >= %s AND v.{col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -372,7 +372,7 @@ def obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio, col: str = "fecha_
             FROM pago_venta
             WHERE tipo_pago_venta = 'prepago'
         ) pv_pre ON pv_pre.id_venta = v.id_venta
-        WHERE DATE(v.{col}) BETWEEN %s AND %s
+        WHERE v.{col} >= %s AND v.{col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -391,7 +391,7 @@ def obtener_ventas_por_dia(inicio, fin, id_negocio, col: str = "fecha_recibo"):
             WEEKDAY({col}) AS dia,
             COUNT(*) AS total
         FROM venta
-        WHERE DATE({col}) BETWEEN %s AND %s
+        WHERE {col} >= %s AND {col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND WEEKDAY({col}) BETWEEN 0 AND 5
           AND eliminado = 0
     """
@@ -415,7 +415,7 @@ def obtener_ticket_promedio(inicio, fin, id_negocio, col: str = "fecha_recibo"):
         SELECT COALESCE(AVG(total), 0) AS promedio,
                COUNT(*)               AS num_ventas
         FROM venta
-        WHERE DATE({col}) BETWEEN %s AND %s
+        WHERE {col} >= %s AND {col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND eliminado = 0
     """
     params = [inicio, fin]
@@ -439,7 +439,7 @@ def obtener_saldo_por_cobrar(inicio, fin, id_negocio, col: str = "fecha_recibo")
             FROM pago_venta
             GROUP BY id_venta
         ) p ON p.id_venta = v.id_venta
-        WHERE DATE(v.{col}) BETWEEN %s AND %s
+        WHERE v.{col} >= %s AND v.{col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
           AND (v.total - COALESCE(p.pagado, 0)) > 0
     """
@@ -456,7 +456,7 @@ def obtener_tiempo_promedio_entrega(inicio, fin, id_negocio):
         SELECT ROUND(AVG(DATEDIFF(fecha_lista, fecha_recibo)), 1) AS dias_promedio,
                COUNT(*) AS ventas_completadas
         FROM venta
-        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+        WHERE fecha_recibo >= %s AND fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
           AND fecha_lista IS NOT NULL
           AND eliminado   = 0
     """
@@ -479,7 +479,7 @@ def obtener_ingresos_por_negocio(inicio, fin, col: str = "fecha_recibo"):
             SELECT v.id_negocio, n.nombre, COALESCE(SUM(v.total), 0) AS total
             FROM venta v
             JOIN negocio n ON n.id_negocio = v.id_negocio
-            WHERE DATE(v.{col}) BETWEEN %s AND %s
+            WHERE v.{col} >= %s AND v.{col} < DATE_ADD(%s, INTERVAL 1 DAY)
               AND v.eliminado = 0
             GROUP BY v.id_negocio
             ORDER BY total DESC
@@ -495,7 +495,7 @@ def obtener_metodos_pago(inicio, fin, id_negocio):
         SELECT pv.tipo_pago AS metodo, COUNT(*) AS total, COALESCE(SUM(pv.monto),0) AS monto
         FROM pago_venta pv
         JOIN venta v ON v.id_venta = pv.id_venta
-        WHERE DATE(pv.fecha_pago) BETWEEN %s AND %s
+        WHERE pv.fecha_pago >= %s AND pv.fecha_pago < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
     params = [inicio, fin]
@@ -514,7 +514,7 @@ def obtener_hora_pico_recepcion(inicio, fin, id_negocio):
     sql = """
         SELECT HOUR(fecha_recibo) AS hora, COUNT(*) AS total
         FROM venta
-        WHERE DATE(fecha_recibo) BETWEEN %s AND %s
+        WHERE fecha_recibo >= %s AND fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
           AND eliminado = 0
           AND HOUR(fecha_recibo) BETWEEN 7 AND 21
     """
@@ -532,7 +532,7 @@ def obtener_hora_pico_entrega(inicio, fin, id_negocio):
     sql = """
         SELECT HOUR(fecha_entrega) AS hora, COUNT(*) AS total
         FROM venta
-        WHERE DATE(fecha_entrega) BETWEEN %s AND %s
+        WHERE fecha_entrega >= %s AND fecha_entrega < DATE_ADD(%s, INTERVAL 1 DAY)
           AND fecha_entrega IS NOT NULL
           AND eliminado = 0
           AND HOUR(fecha_entrega) BETWEEN 7 AND 21
@@ -553,11 +553,13 @@ def contar_unidades_hoy(col: str = "fecha_recibo", id_negocio: str = "all") -> i
         SELECT COUNT(a.id_articulo) AS total
         FROM venta v
         JOIN articulo a ON a.id_venta = v.id_venta
-        WHERE DATE(v.{col}) = CURDATE()
+        WHERE v.{col} >= %s AND v.{col} < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
-    sql_neg, params = filtro_negocios(id_negocio, "v.id_negocio")
+    hoy = date.today()
+    sql_neg, params_neg = filtro_negocios(id_negocio, "v.id_negocio")
     sql += sql_neg
+    params = [hoy, hoy] + params_neg
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
         return int(cursor.fetchone()["total"] or 0)
@@ -567,11 +569,13 @@ def contar_ventas_entregadas_hoy(id_negocio: str = "all") -> int:
     sql = """
         SELECT COUNT(*) AS total
         FROM venta v
-        WHERE DATE(v.fecha_entrega) = CURDATE()
+        WHERE v.fecha_entrega >= %s AND v.fecha_entrega < DATE_ADD(%s, INTERVAL 1 DAY)
           AND v.eliminado = 0
     """
-    sql_neg, params = filtro_negocios(id_negocio, "v.id_negocio")
+    hoy = date.today()
+    sql_neg, params_neg = filtro_negocios(id_negocio, "v.id_negocio")
     sql += sql_neg
+    params = [hoy, hoy] + params_neg
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
         return int(cursor.fetchone()["total"] or 0)

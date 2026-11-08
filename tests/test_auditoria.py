@@ -238,3 +238,69 @@ def test_next_con_barra_invertida_no_redirige_fuera(logged_client, db_conn):
         cur.execute("DELETE FROM cliente WHERE nombre = 'RedirPytest'")
         db_conn.commit()
         cur.close()
+
+
+# ---------------------------------------------------------------------------
+# Segunda ronda: rangos de fecha sin DATE(), caché acotada, logs y WhatsApp
+# ---------------------------------------------------------------------------
+
+def test_historial_rango_de_un_dia_incluye_venta_de_hoy(app, venta_pendiente):
+    from services.ventas_service import historial_ventas_service
+    hoy = date.today().isoformat()
+    with app.test_request_context("/"):
+        data = historial_ventas_service(fecha_inicio=hoy, fecha_fin=hoy,
+                                        id_venta=venta_pendiente["id_venta"])
+    assert data["total_registros"] == 1
+
+
+def test_kpis_de_hoy_cuentan_la_venta_recien_creada(venta_pendiente):
+    from models.estadisticas_ventas import contar_unidades_hoy, contar_ventas_por_dia_rango
+    hoy = date.today()
+    assert contar_unidades_hoy("fecha_recibo", "1") >= 1
+    assert contar_ventas_por_dia_rango(hoy, hoy, "1")[0]["total"] >= 1
+
+
+def test_pagos_rango_de_un_dia_incluye_pago_de_hoy(app, logged_client, venta_pendiente):
+    from services.pagos_service import listar_pagos_service
+    logged_client.post(f"/ventas/marcar-lista/{venta_pendiente['id_venta']}")
+    logged_client.post("/ventas/pago-final", json={
+        "id_venta": venta_pendiente["id_venta"], "monto": "150.00", "metodo_pago": "efectivo",
+    })
+    hoy = date.today().isoformat()
+    data = listar_pagos_service([1], None, None, hoy, hoy, pagina=1)
+    assert any(p["id_venta"] == venta_pendiente["id_venta"] for p in data["pagos"])
+
+
+def test_cache_de_servicios_no_guarda_negocios_inexistentes():
+    from services import servicios_service as ss
+    ss._invalidar_cache_servicios()
+    assert ss.listar_servicios_api(987654)["servicios"] == []
+    assert "987654" not in ss._servicios_cache
+
+
+def test_logs_de_acceso_de_werkzeug_no_van_al_archivo():
+    import logging
+    from logging.handlers import RotatingFileHandler
+    fh = next(h for h in logging.getLogger().handlers if isinstance(h, RotatingFileHandler))
+
+    def registro(nombre, nivel):
+        return logging.LogRecord(nombre, nivel, __file__, 1, "GET /api/clientes?q=Juan", None, None)
+
+    assert not fh.filter(registro("werkzeug", logging.INFO))
+    assert fh.filter(registro("werkzeug", logging.ERROR))
+    assert fh.filter(registro("routes.ventas_routes", logging.INFO))
+
+
+def test_mi_perfil_no_expone_hashes(app, usuario_caja):
+    from services.usuarios_service import obtener_mi_perfil_service
+    perfil = obtener_mi_perfil_service(usuario_caja["id_usuario"])
+    assert perfil["usuario"] == usuario_caja["usuario"]
+    assert not {"password_hash", "pin_hash", "session_token"} & perfil.keys()
+
+
+@pytest.mark.parametrize("ruta", ["/clientes/exportar", "/servicios/exportar", "/gastos/exportar",
+                                  "/pagos/exportar-excel"])
+def test_exportaciones_siguen_generando_xlsx(logged_client, ruta):
+    res = logged_client.get(ruta)
+    assert res.status_code == 200
+    assert res.mimetype == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

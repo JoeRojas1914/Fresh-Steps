@@ -161,14 +161,13 @@ def test_exportar_rango_excede_maximo():
     assert str(MAX_DIAS_RANGO) in error
 
 
-def test_exportar_rango_valido_devuelve_response(app):
+def test_exportar_rango_valido_devuelve_workbook(app):
+    from openpyxl import Workbook
     with app.test_request_context("/"):
-        resp, error = exportar_estadisticas_service({
+        wb, error = exportar_estadisticas_service({
             "inicio": "2026-06-01",
             "fin":    "2026-06-30",
         })
     assert error is None
-    assert resp is not None
-    assert resp.content_type == (
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    assert isinstance(wb, Workbook)
+    assert wb.sheetnames == ["Resumen", "Series por período"]

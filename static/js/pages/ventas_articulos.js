@@ -53,7 +53,7 @@ function crearCamposArticulo(index, tipoArticulo) {
                 ${inputConLabel("Material",                    `articulos[${index}][material]`,         "Mezclilla, Gamuza...", true)}
                 ${inputConLabel("Color base",                  `articulos[${index}][color_base]`,       "Negro, Blanco...",     true)}
                 ${inputConLabel("Color secundario (Opcional)", `articulos[${index}][color_secundario]`, "Negro, Blanco...",     false)}
-                ${inputConLabel("Cantidad",                    `articulos[${index}][cantidad]`,         "1,2...",               true, "number", `min="1"`)}
+                ${inputConLabel("Cantidad",                    `articulos[${index}][cantidad]`,         "1,2...",               true, "number", `min="1" step="1"`)}
             </div>
             ${crearServiciosSelect(index)}
             ${inputConLabel("Comentario", `articulos[${index}][comentario]`, "(opcional)", false)}
@@ -63,7 +63,7 @@ function crearCamposArticulo(index, tipoArticulo) {
     return `
         <div class="form-group form-row articulo-row">
             ${inputConLabel("Tipo",            `articulos[${index}][tipo]`,           "Mandil, Bata...", true)}
-            ${inputConLabel("Cantidad",        `articulos[${index}][cantidad]`,       "1,2...",          true, "number", `min="1"`)}
+            ${inputConLabel("Cantidad",        `articulos[${index}][cantidad]`,       "1,2...",          true, "number", `min="1" step="1"`)}
             ${inputConLabel("Precio unitario", `articulos[${index}][precio_unitario]`,"$10.00",          true, "number", `min="0"`)}
         </div>
         ${inputConLabel("Comentario", `articulos[${index}][comentario]`, "(opcional)", false)}

@@ -12,7 +12,7 @@ from models.login import (
     limpiar_intentos
 )
 from config import MAX_INTENTOS_PIN, BLOQUEO_MIN_PIN, BLOQUEO_REINCIDENTE_MIN_PIN, CLAVE_PIN_TERMINAL
-from models.usuario import actualizar_session_token
+from models.usuario import actualizar_session_token, obtener_session_token
 
 
 _HASH_FALSO = generate_password_hash(secrets.token_hex(16))
@@ -127,3 +127,7 @@ def registrar_logout_service(id_usuario: int, username: str, ip: str) -> None:
 
 def invalidar_session_token_service(id_usuario: int) -> None:
     actualizar_session_token(id_usuario, None)
+
+
+def obtener_session_token_service(id_usuario: int) -> str | None:
+    return obtener_session_token(id_usuario)
