@@ -1,4 +1,5 @@
 import logging
+import unicodedata
 from datetime import date, datetime, timedelta
 from models.clientes import contar_clientes
 from models.ventas import contar_entregas_resumen
@@ -39,9 +40,12 @@ from models.estadisticas import (
     contar_ventas_por_dia_rango,
     obtener_ingresos_por_dia_rango,
     obtener_unidades_por_dia_rango,
+    obtener_top_calzado,
+    obtener_primer_anio_ventas,
 )
 
 MAX_DIAS_RANGO = 186
+MAX_DIAS_ANIO  = 366   # modo "Año" y exportación
 
 _log = logging.getLogger(__name__)
 
@@ -54,12 +58,13 @@ def dashboard_page_data_service():
         "total_clientes":  contar_clientes(),
         "total_servicios": contar_servicios(),
         "negocios":        obtener_negocios(),
+        "anios":           list(range(hoy.year, min(obtener_primer_anio_ventas() or hoy.year, hoy.year) - 1, -1)),
         "fecha_inicio":    fecha_inicio.isoformat(),
         "fecha_fin":       fecha_fin.isoformat(),
     }
 
 
-_MODOS = frozenset({"dia", "semana", "mes", "personalizado"})
+_MODOS = frozenset({"dia", "semana", "mes", "anio", "personalizado"})
 
 
 def _periodo_anterior(inicio: date, fin: date):
@@ -81,6 +86,14 @@ def _mes_anterior(d: date) -> date:
     return ultimo_ant.replace(day=min(d.day, ultimo_ant.day))
 
 
+def _anio_anterior(d: date) -> date:
+    """Misma fecha un año antes (el 29 de febrero pasa al 28)."""
+    try:
+        return d.replace(year=d.year - 1)
+    except ValueError:
+        return d.replace(year=d.year - 1, day=28)
+
+
 def _periodo_comparacion(inicio: date, fin: date, modo: str | None, hoy: date | None = None):
     """
     Devuelve ((inicio_act, fin_act), (inicio_ant, fin_ant)) con el criterio "mismo avance":
@@ -90,6 +103,7 @@ def _periodo_comparacion(inicio: date, fin: date, modo: str | None, hoy: date | 
     - mes:    mes calendario anterior, mismos días.
     - semana: semana anterior, mismos días de la semana.
     - dia:    mismo día de la semana anterior.
+    - anio:   año anterior, mismas fechas (año completo si el actual ya terminó).
     - personalizado / None: período inmediato anterior de igual duración (comportamiento original).
     """
     if modo not in _MODOS or modo == "personalizado":
@@ -105,6 +119,9 @@ def _periodo_comparacion(inicio: date, fin: date, modo: str | None, hoy: date | 
         else:
             fin_ant = _mes_anterior(corte)
         return (inicio, corte), (inicio_ant, fin_ant)
+
+    if modo == "anio":
+        return (inicio, corte), (_anio_anterior(inicio), _anio_anterior(corte))
 
     semana = timedelta(days=7)
     return (inicio, corte), (inicio - semana, corte - semana)
@@ -152,7 +169,89 @@ def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio,
     return pcts, periodo_anterior_str, periodo_actual_str
 
 
+
+_SIN_NOMBRE = frozenset({"Sin marca", "Sin tipo"})
+
+
+def _clave_nombre(nombre: str) -> str:
+    """Forma comparable: sin acentos, en minúsculas y solo letras/números
+    ("New-Balance", "new balance" y "NewBalance" → "newbalance")."""
+    sin_acentos = unicodedata.normalize("NFKD", nombre)
+    return "".join(c for c in sin_acentos.lower() if c.isalnum())
+
+
+def _tolerancia(largo: int) -> int:
+    """Errores de dedo permitidos según el largo. Los nombres cortos deben coincidir
+    exacto: con 4 letras, un cambio ya puede ser otra marca ("Fila" / "Vila")."""
+    if largo <= 4:
+        return 0
+    return 1 if largo <= 8 else 2
+
+
+def _distancia(a: str, b: str, maximo: int) -> int:
+    """Distancia de edición con transposiciones (Damerau-Levenshtein restringida):
+    letra de más, de menos, cambiada o dos letras volteadas cuentan 1.
+    Deja de calcular en cuanto se pasa de `maximo`."""
+    if abs(len(a) - len(b)) > maximo:
+        return maximo + 1
+    previa2, previa = None, list(range(len(b) + 1))
+    for i in range(1, len(a) + 1):
+        actual = [i] + [0] * len(b)
+        for j in range(1, len(b) + 1):
+            costo = 0 if a[i - 1] == b[j - 1] else 1
+            actual[j] = min(previa[j] + 1, actual[j - 1] + 1, previa[j - 1] + costo)
+            if (previa2 is not None and i > 1 and j > 1
+                    and a[i - 1] == b[j - 2] and a[i - 2] == b[j - 1]):
+                actual[j] = min(actual[j], previa2[j - 2] + 1)
+        if min(actual) > maximo:
+            return maximo + 1
+        previa2, previa = previa, actual
+    return previa[-1]
+
+
+def _nombre_visible(variantes: dict) -> str:
+    """La forma más usada; si está toda en minúsculas o mayúsculas, con Mayúscula Inicial."""
+    nombre = max(variantes.items(), key=lambda kv: kv[1])[0]
+    return nombre.title() if nombre.islower() or nombre.isupper() else nombre
+
+
+def agrupar_nombres_similares(filas: list[dict], limite: int = 8) -> list[dict]:
+    """Une las variantes de un mismo nombre (mayúsculas, acentos, espacios y errores de
+    dedo) y devuelve el top `limite` como [{"nombre", "total"}].
+
+    Se recorren de más a menos frecuente: cada nombre se une al primer grupo cuya
+    clave quede dentro de la tolerancia, así la forma correcta (la más común) manda.
+    """
+    grupos = []   # [{"clave", "total", "variantes": {nombre: total}}]
+    for fila in sorted(filas, key=lambda f: -f["total"]):
+        nombre = (fila["nombre"] or "").strip()
+        clave  = _clave_nombre(nombre)
+        exacto = nombre in _SIN_NOMBRE or not clave
+
+        grupo = None
+        for g in grupos:
+            if g["exacto"] or exacto:
+                coincide = g["clave"] == clave and g["exacto"] == exacto
+            else:
+                tol = _tolerancia(min(len(clave), len(g["clave"])))
+                coincide = _distancia(clave, g["clave"], tol) <= tol
+            if coincide:
+                grupo = g
+                break
+
+        if grupo is None:
+            grupo = {"clave": clave, "exacto": exacto, "total": 0, "variantes": {}}
+            grupos.append(grupo)
+        grupo["total"] += fila["total"]
+        grupo["variantes"][nombre] = grupo["variantes"].get(nombre, 0) + fila["total"]
+
+    grupos.sort(key=lambda g: -g["total"])
+    return [{"nombre": _nombre_visible(g["variantes"]), "total": g["total"]} for g in grupos[:limite]]
+
+
 def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrupacion_gastos: str = "proveedor") -> dict:
+    # Cubetas de las series largas y de los gastos: por mes en modo Año, si no por semana
+    periodo = "mes" if granularidad == "mes" else "semana"
     if granularidad == "hora":
         ventas_semanales   = contar_ventas_por_hora(inicio, fin, id_negocio)
         ingresos_semanales = obtener_ingresos_por_hora(inicio, fin, id_negocio)
@@ -162,14 +261,14 @@ def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrup
         ingresos_semanales = obtener_ingresos_por_dia_rango(inicio, fin, id_negocio)
         unidades_semanales = obtener_unidades_por_dia_rango(inicio, fin, id_negocio)
     else:
-        ventas_semanales   = contar_ventas_por_semana(inicio, fin, id_negocio)
-        ingresos_semanales = obtener_ingresos_por_semana(inicio, fin, id_negocio)
-        unidades_semanales = obtener_unidades_por_semana(inicio, fin, id_negocio)
+        ventas_semanales   = contar_ventas_por_semana(inicio, fin, id_negocio, periodo=periodo)
+        ingresos_semanales = obtener_ingresos_por_semana(inicio, fin, id_negocio, periodo=periodo)
+        unidades_semanales = obtener_unidades_por_semana(inicio, fin, id_negocio, periodo=periodo)
 
     if agrupacion_gastos == "categoria":
-        gastos_semanales = obtener_gastos_por_semana_y_categoria(inicio, fin, id_negocio)
+        gastos_semanales = obtener_gastos_por_semana_y_categoria(inicio, fin, id_negocio, periodo=periodo)
     else:
-        gastos_semanales = obtener_gastos_por_semana_y_proveedor(inicio, fin, id_negocio)
+        gastos_semanales = obtener_gastos_por_semana_y_proveedor(inicio, fin, id_negocio, periodo=periodo)
     ventas_prepago     = obtener_ventas_con_y_sin_prepago(inicio, fin, id_negocio)
     uso_servicios      = obtener_uso_servicios(inicio, fin, id_negocio)
     ventas_por_dia     = obtener_ventas_por_dia(inicio, fin, id_negocio)
@@ -180,6 +279,9 @@ def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrup
     hora_recepcion     = obtener_hora_pico_recepcion(inicio, fin, id_negocio)
     hora_entrega       = obtener_hora_pico_entrega(inicio, fin, id_negocio)
     clientes_unicos    = obtener_clientes_unicos(inicio, fin, id_negocio)
+    hay_calzado        = str(id_negocio) in ("all", "1")
+    calzado_marcas     = agrupar_nombres_similares(obtener_top_calzado(inicio, fin, "marca")) if hay_calzado else []
+    calzado_tipos      = agrupar_nombres_similares(obtener_top_calzado(inicio, fin, "tipo"))  if hay_calzado else []
 
     try:
         clientes_nuevos = obtener_clientes_nuevos(inicio, fin, id_negocio)
@@ -217,6 +319,8 @@ def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrup
         "clientes_nuevos":    clientes_nuevos,
         "tasa_retorno":       tasa_retorno,
         "gasto_prom_cliente": gasto_prom_cliente,
+        "calzado_marcas":     calzado_marcas,
+        "calzado_tipos":      calzado_tipos,
     }
 
 
@@ -235,8 +339,8 @@ def exportar_estadisticas_service(args):
         return None, "Formato de fecha inválido"
     if fin < inicio:
         return None, "La fecha fin no puede ser menor a inicio"
-    if (fin - inicio).days > MAX_DIAS_RANGO:
-        return None, f"El rango máximo permitido es {MAX_DIAS_RANGO} días"
+    if (fin - inicio).days >= MAX_DIAS_ANIO:
+        return None, "El rango máximo permitido es de un año"
 
     from openpyxl import Workbook
     from services.excel_helpers import (
@@ -244,7 +348,9 @@ def exportar_estadisticas_service(args):
     )
 
     kpis   = _calcular_kpis(inicio, fin, id_negocio)
-    series = _cargar_series(inicio, fin, id_negocio, "dia" if (fin - inicio).days <= 31 else "semana")
+    dias   = (fin - inicio).days
+    series = _cargar_series(inicio, fin, id_negocio,
+                            "dia" if dias <= 31 else "semana" if dias <= MAX_DIAS_RANGO else "mes")
 
     negocio_label = {"1": "Calzado", "2": "Confección", "3": "Maquila"}.get(str(id_negocio), "Todos los negocios")
     subtitulo = f"{inicio_str} al {fin_str} — {negocio_label}"
@@ -309,20 +415,29 @@ def dashboard_api_service(args):
     if fin < inicio:
         return None, "La fecha fin no puede ser menor a inicio"
 
-    if (fin - inicio).days > MAX_DIAS_RANGO:
+    modo = args.get("modo")
+    if modo not in _MODOS:
+        modo = None
+
+    if modo == "anio":
+        if inicio.year != fin.year:
+            return None, "El modo Año abarca un solo año calendario"
+    elif (fin - inicio).days > MAX_DIAS_RANGO:
         return None, f"El rango máximo permitido es {MAX_DIAS_RANGO} días (~6 meses)"
 
     agrupacion_gastos = args.get("agrupacion_gastos", "proveedor")
     if agrupacion_gastos not in {"proveedor", "categoria"}:
         agrupacion_gastos = "proveedor"
 
-    modo = args.get("modo")
-    if modo not in _MODOS:
-        modo = None
+    granularidad = args.get("granularidad", "semana")
+    if modo == "anio":
+        granularidad = "mes"
+    elif granularidad == "mes":
+        granularidad = "semana"   # por mes solo en modo Año
 
     kpis   = _calcular_kpis(inicio, fin, id_negocio)
     pcts, periodo_anterior_str, periodo_actual_str = _calcular_comparativa(kpis, inicio, fin, id_negocio, modo)
-    series = _cargar_series(inicio, fin, id_negocio, args.get("granularidad", "semana"), agrupacion_gastos)
+    series = _cargar_series(inicio, fin, id_negocio, granularidad, agrupacion_gastos)
 
     return {
         **series,

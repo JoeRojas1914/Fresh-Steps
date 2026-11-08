@@ -37,6 +37,12 @@ D = date.fromisoformat
     ("2026-11-01", "2026-11-30", None, "2026-11-05", ("2026-11-01", "2026-11-30"), ("2026-10-02", "2026-10-31")),
     # Mes futuro: no se recorta
     ("2026-12-01", "2026-12-31", "mes", "2026-11-05", ("2026-12-01", "2026-12-31"), ("2026-11-01", "2026-11-30")),
+    # Año en curso: 1 ene – 8 nov contra el mismo tramo del año anterior
+    ("2026-01-01", "2026-12-31", "anio", "2026-11-08", ("2026-01-01", "2026-11-08"), ("2025-01-01", "2025-11-08")),
+    # Año terminado: completo contra completo
+    ("2025-01-01", "2025-12-31", "anio", "2026-11-08", ("2025-01-01", "2025-12-31"), ("2024-01-01", "2024-12-31")),
+    # Corte el 29 de febrero (bisiesto): el año anterior llega al 28
+    ("2028-01-01", "2028-12-31", "anio", "2028-02-29", ("2028-01-01", "2028-02-29"), ("2027-01-01", "2027-02-28")),
 ])
 def test_periodo_comparacion(inicio, fin, modo, hoy, actual, anterior):
     act, ant = _periodo_comparacion(D(inicio), D(fin), modo, D(hoy))

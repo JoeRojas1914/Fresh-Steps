@@ -60,22 +60,8 @@ const gridNone = { display: false };
 const noBorder = { display: false };
 const legendTop = { position: 'top', align: 'end', labels: { color: '#334155', boxWidth: 12, boxHeight: 12, padding: 14, font: { size: 12 } } };
 
-// Línea con relleno suave y plano (sin degradado)
-const lineaDataset = (label, color) => ({
-    label, data: [],
-    borderColor: color,
-    borderWidth: 2,
-    backgroundColor: color + "1A",   // ~10% de opacidad
-    fill: true,
-    tension: 0.3,
-    pointBackgroundColor: color,
-    pointBorderColor: "#ffffff",
-    pointBorderWidth: 1.5,
-    pointRadius: 3,
-    pointHoverRadius: 5,
-});
-
-const lineaOpts = (fmtVal=fmtN) => ({
+// Barras verticales de una serie en el tiempo (cobrado, ventas, unidades)
+const barrasVOpts = (fmtVal=fmtN) => ({
     responsive: true,
     plugins: {
         legend: { display: false },
@@ -130,7 +116,7 @@ let agrupacionGastos = "proveedor";
 
 let gastosChart, ingresosChart, ventasSemanaChart, unidadesSemanaChart,
     tipoPagoChart, serviciosChart, ventasPorDiaChart, ingresosNegocioChart,
-    metodosPagoChart, horaPicoChart;
+    metodosPagoChart, horaPicoChart, calzadoMarcasChart, calzadoTiposChart;
 
 function initCharts() {
     const el = id => document.getElementById(id);
@@ -151,9 +137,9 @@ function initCharts() {
         }
     });
 
-    ingresosChart       = new Chart(el("ingresosChart"),       { type: "line", data: { labels: [], datasets: [lineaDataset("Cobrado", C.verde)] }, options: lineaOpts(fmt$) });
-    ventasSemanaChart   = new Chart(el("ventasSemanaChart"),   { type: "line", data: { labels: [], datasets: [lineaDataset("Ventas", C.azul)] },   options: lineaOpts() });
-    unidadesSemanaChart = new Chart(el("unidadesSemanaChart"), { type: "line", data: { labels: [], datasets: [lineaDataset("Unidades", C.marino)] }, options: lineaOpts() });
+    ingresosChart       = new Chart(el("ingresosChart"),       { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.verde),  label: "Cobrado" }] },  options: barrasVOpts(fmt$) });
+    ventasSemanaChart   = new Chart(el("ventasSemanaChart"),   { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.azul),   label: "Ventas" }] },   options: barrasVOpts() });
+    unidadesSemanaChart = new Chart(el("unidadesSemanaChart"), { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.marino), label: "Unidades" }] }, options: barrasVOpts() });
 
     ventasPorDiaChart = new Chart(el("ventasPorDiaChart"), {
         type: "bar",
@@ -175,6 +161,8 @@ function initCharts() {
     tipoPagoChart        = new Chart(el("tipoPagoChart"),        { type: "bar", data: { labels: [], datasets: [barraDataset(C.azul)] }, options: barrasHOpts(fmtN, " ventas") });
     metodosPagoChart     = new Chart(el("metodosPagoChart"),     { type: "bar", data: { labels: [], datasets: [barraDataset(C.marino)] }, options: barrasHOpts(fmtN, " pagos") });
     serviciosChart       = new Chart(el("serviciosChart"),       { type: "bar", data: { labels: [], datasets: [barraDataset(C.azul)] }, options: barrasHOpts(fmtN, " usos") });
+    calzadoMarcasChart   = new Chart(el("calzadoMarcasChart"),   { type: "bar", data: { labels: [], datasets: [barraDataset(C.azul)] }, options: barrasHOpts(fmtN, " artículos") });
+    calzadoTiposChart    = new Chart(el("calzadoTiposChart"),    { type: "bar", data: { labels: [], datasets: [barraDataset(C.marino)] }, options: barrasHOpts(fmtN, " artículos") });
 
     horaPicoChart = new Chart(el("horaPicoChart"), {
         type: "bar",
@@ -239,6 +227,8 @@ function setModo(modo, btn) {
         document.getElementById("fecha-semana").value = `${anio}-W${pad(semana)}`;
     } else if (modo==="mes") {
         document.getElementById("fecha-mes").value = `${hoy.getFullYear()}-${pad(hoy.getMonth()+1)}`;
+    } else if (modo==="anio") {
+        document.getElementById("fecha-anio").value = String(hoy.getFullYear());
     }
 
     const cardDia = document.getElementById("card-ventas-por-dia");
@@ -270,6 +260,11 @@ function getParams() {
         const ultimo = new Date(parseInt(y),parseInt(m),0).getDate();
         return {inicio:`${y}-${m}-01`, fin:`${y}-${m}-${pad(ultimo)}`, id_negocio:neg("negocio-stats"), granularidad:"semana", modo};
     }
+    if (modo==="anio") {
+        const y = document.getElementById("fecha-anio").value;
+        if (!y) return null;
+        return {inicio:`${y}-01-01`, fin:`${y}-12-31`, id_negocio:neg("negocio-stats"), granularidad:"mes", modo};
+    }
     if (modo==="personalizado") {
         const inicio = document.getElementById("fecha-inicio-custom").value;
         const fin    = document.getElementById("fecha-fin-custom").value;
@@ -280,7 +275,7 @@ function getParams() {
 }
 
 function actualizarTitulos() {
-    const sufijos = {dia:"por hora", semana:"por día", mes:"por semana", personalizado:"por semana"};
+    const sufijos = {dia:"por hora", semana:"por día", mes:"por semana", anio:"por mes", personalizado:"por semana"};
     const s = sufijos[modoActual] || "por semana";
     const baseVentas   = "Número de ventas";
     const baseUnidades = "Unidades recibidas";
@@ -300,7 +295,8 @@ function actualizarTitulos() {
 
 const chartsPerTab = {
     financiero:  () => [ingresosChart, gastosChart, tipoPagoChart, metodosPagoChart, ingresosNegocioChart],
-    operacional: () => [ventasSemanaChart, unidadesSemanaChart, ventasPorDiaChart, horaPicoChart, serviciosChart],
+    operacional: () => [ventasSemanaChart, unidadesSemanaChart, ventasPorDiaChart, horaPicoChart, serviciosChart,
+                        calzadoMarcasChart, calzadoTiposChart],
     clientes:    () => [],
 };
 
@@ -332,7 +328,7 @@ async function cargarDashboard() {
     if (!p) return;
     const seq = ++_dashSeq;
 
-    if (p.inicio && p.fin && (new Date(p.fin)-new Date(p.inicio))/86400000 > 186) {
+    if (p.modo === "personalizado" && (new Date(p.fin)-new Date(p.inicio))/86400000 > 186) {
         mostrarError("El rango máximo es 6 meses en modo Personalizado.");
         return;
     }
@@ -377,12 +373,12 @@ async function cargarDashboard() {
         setKpi("totalVentas",    k.num_ventas,       k.ventas_pct,   false);
 
         // ── Series en el tiempo ──
-        const setLinea = (chart, serie) => {
+        const setSerie = (chart, serie) => {
             chart.data.labels = serie.map(x => x.label);
             chart.data.datasets[0].data = serie.map(x => x.total);
             chart.update();
         };
-        if (data.ingresos_semanales) setLinea(ingresosChart, data.ingresos_semanales);
+        if (data.ingresos_semanales) setSerie(ingresosChart, data.ingresos_semanales);
         if (data.gastos_semanales) {
             gastosChart.data.labels = data.gastos_semanales.labels || [];
             gastosChart.data.datasets = (data.gastos_semanales.datasets || []).map((d, i) => ({
@@ -391,12 +387,12 @@ async function cargarDashboard() {
             gastosChart.update();
         }
         if (data.ventas_semanales) {
-            setLinea(ventasSemanaChart, data.ventas_semanales);
+            setSerie(ventasSemanaChart, data.ventas_semanales);
             const el = document.getElementById("total-ventas");
             if (el) el.textContent = `Total: ${fmtN(data.ventas_semanales.reduce((s,x)=>s+x.total,0))}`;
         }
         if (data.unidades_semanales) {
-            setLinea(unidadesSemanaChart, data.unidades_semanales);
+            setSerie(unidadesSemanaChart, data.unidades_semanales);
             const el = document.getElementById("total-unidades");
             if (el) el.textContent = `Total: ${fmtN(data.unidades_semanales.reduce((s,x)=>s+x.total,0))}`;
         }
@@ -414,6 +410,13 @@ async function cargarDashboard() {
             setBarrasH(metodosPagoChart, data.metodos_pago, x => x.total, x => cap(x.metodo));
         }
         if (data.uso_servicios) setBarrasH(serviciosChart, data.uso_servicios, x => x.total, x => x.nombre);
+
+        // Calzado: solo con Todos o Calzado y si llegó algo en el periodo
+        const cardCalzado = document.getElementById("card-calzado");
+        const marcas = data.calzado_marcas || [], tipos = data.calzado_tipos || [];
+        if (cardCalzado) cardCalzado.classList.toggle("d-none", !marcas.length && !tipos.length);
+        setBarrasH(calzadoMarcasChart, marcas, x => x.total, x => x.nombre);
+        setBarrasH(calzadoTiposChart,  tipos,  x => x.total, x => x.nombre);
 
         const cardN = document.getElementById("card-ingresos-negocio");
         if (data.ingresos_x_negocio?.length > 0) {
@@ -542,11 +545,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Chart.js mide las etiquetas al dibujar; si Inter aún no carga, las corta. Redibujar al cargar.
     document.fonts?.ready.then(() => {
         [gastosChart, ingresosChart, ventasSemanaChart, unidadesSemanaChart, tipoPagoChart, serviciosChart,
-         ventasPorDiaChart, ingresosNegocioChart, metodosPagoChart, horaPicoChart].forEach(c => c?.update('none'));
+         ventasPorDiaChart, ingresosNegocioChart, metodosPagoChart, horaPicoChart,
+         calzadoMarcasChart, calzadoTiposChart].forEach(c => c?.update('none'));
     });
 
     [
-        "fecha-dia", "fecha-semana", "fecha-mes",
+        "fecha-dia", "fecha-semana", "fecha-mes", "fecha-anio",
         "fecha-inicio-custom", "fecha-fin-custom",
         "negocio-stats",
     ].forEach(id => {

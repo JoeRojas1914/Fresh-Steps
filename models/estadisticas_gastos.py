@@ -2,20 +2,18 @@ from collections import defaultdict
 from datetime import date
 from db import get_db
 from utils import sql_negocios
-from .estadisticas_ventas import generar_semanas_rango
+from .estadisticas_ventas import generar_periodos, _expr_periodo
 
 
-def obtener_gastos_por_semana_y_proveedor(inicio: date, fin: date, id_negocio: str):
-    semanas = generar_semanas_rango(inicio, fin)
+def obtener_gastos_por_semana_y_proveedor(inicio: date, fin: date, id_negocio: str,
+                                          periodo: str = "semana"):
+    semanas = generar_periodos(inicio, fin, periodo)
     data_por_proveedor = defaultdict(lambda: [0.0] * len(semanas))
 
-    yw_to_idx = {
-        s["inicio"].isocalendar()[0] * 100 + s["inicio"].isocalendar()[1]: i
-        for i, s in enumerate(semanas)
-    }
+    yw_to_idx = {s["clave"]: i for i, s in enumerate(semanas)}
 
-    sql = """
-        SELECT YEARWEEK(fecha_registro, 1) AS yw, proveedor, SUM(total) AS total
+    sql = f"""
+        SELECT {_expr_periodo("fecha_registro", periodo)} AS yw, proveedor, SUM(total) AS total
         FROM gastos
         WHERE fecha_registro >= %s
           AND fecha_registro <= %s
@@ -39,17 +37,15 @@ def obtener_gastos_por_semana_y_proveedor(inicio: date, fin: date, id_negocio: s
     }
 
 
-def obtener_gastos_por_semana_y_categoria(inicio: date, fin: date, id_negocio: str):
-    semanas = generar_semanas_rango(inicio, fin)
+def obtener_gastos_por_semana_y_categoria(inicio: date, fin: date, id_negocio: str,
+                                          periodo: str = "semana"):
+    semanas = generar_periodos(inicio, fin, periodo)
     data_por_cat = defaultdict(lambda: [0.0] * len(semanas))
 
-    yw_to_idx = {
-        s["inicio"].isocalendar()[0] * 100 + s["inicio"].isocalendar()[1]: i
-        for i, s in enumerate(semanas)
-    }
+    yw_to_idx = {s["clave"]: i for i, s in enumerate(semanas)}
 
-    sql = """
-        SELECT YEARWEEK(g.fecha_registro, 1) AS yw,
+    sql = f"""
+        SELECT {_expr_periodo("g.fecha_registro", periodo)} AS yw,
                COALESCE(c.nombre, 'Sin categoría') AS categoria,
                SUM(g.total) AS total
         FROM gastos g

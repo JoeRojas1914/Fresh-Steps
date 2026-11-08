@@ -13,7 +13,7 @@
 {% block content %}
 
 <h1><i data-lucide="bar-chart-2" width="24" height="24"></i> Estadísticas</h1>
-<p class="page-sub">Cómo va el negocio en el periodo que elijas</p>
+<p class="page-sub">Indicadores de ingresos, ventas y operación del periodo seleccionado</p>
 
 {# ── Filtros: todo en una sola caja y una sola fila ── #}
 <div class="filtro-box st-filtros">
@@ -28,6 +28,7 @@
                 <button type="button" class="modo-btn" data-modo="dia">Día</button>
                 <button type="button" class="modo-btn" data-modo="semana">Semana</button>
                 <button type="button" class="modo-btn active" data-modo="mes">Mes</button>
+                <button type="button" class="modo-btn" data-modo="anio">Año</button>
                 <button type="button" class="modo-btn" data-modo="personalizado">Personalizado</button>
             </div>
         </div>
@@ -42,6 +43,15 @@
 
         <div id="panel-mes" class="modo-panel st-panel">
             <div class="filtro-item st-field"><label for="fecha-mes">Mes</label><input type="month" id="fecha-mes" value="{{ fecha_inicio[:7] }}"></div>
+        </div>
+
+        <div id="panel-anio" class="modo-panel st-panel d-none">
+            <div class="filtro-item st-field st-field--anio">
+                <label for="fecha-anio">Año</label>
+                <select id="fecha-anio">
+                    {% for a in anios %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
+                </select>
+            </div>
         </div>
 
         <div id="panel-personalizado" class="modo-panel st-panel d-none">
@@ -197,6 +207,20 @@
         <div class="stats-card full-width">
             <h2 class="stats-title">Uso de servicios</h2>
             <div class="st-chart st-chart--auto"><canvas id="serviciosChart"></canvas></div>
+        </div>
+    </div>
+
+    {# Solo con Todos o Calzado; se oculta si no llegó calzado en el periodo #}
+    <div id="card-calzado" class="stats-page">
+        <div class="stats-card">
+            <h2 class="stats-title">Marcas de calzado más comunes</h2>
+            <p class="stats-nota">Artículos de calzado recibidos en el periodo, por marca.</p>
+            <div class="st-chart st-chart--auto"><canvas id="calzadoMarcasChart"></canvas></div>
+        </div>
+        <div class="stats-card">
+            <h2 class="stats-title">Tipos de calzado</h2>
+            <p class="stats-nota">Artículos de calzado recibidos en el periodo, por tipo.</p>
+            <div class="st-chart st-chart--auto"><canvas id="calzadoTiposChart"></canvas></div>
         </div>
     </div>
 </div>

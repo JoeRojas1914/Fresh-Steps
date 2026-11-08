@@ -26,6 +26,7 @@
 .st-field input[type="month"] { width: 170px; }
 
 .st-field--negocio select { width: 180px; }
+.st-field--anio select { width: 120px; }
 
 .st-label {
     font-size: 13px;
@@ -425,7 +426,8 @@ body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
     .st-field input[type="date"],
     .st-field input[type="week"],
     .st-field input[type="month"],
-    .st-field--negocio select { width: 100%; }
+    .st-field--negocio select,
+    .st-field--anio select { width: 100%; }
 
     .modo-group { display: flex; }
     .st-filtros .modo-btn { flex: 1; padding: 0 8px; }

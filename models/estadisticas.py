@@ -20,6 +20,8 @@ from .estadisticas_ventas import (
     obtener_metodos_pago,
     obtener_hora_pico_recepcion,
     obtener_hora_pico_entrega,
+    obtener_top_calzado,
+    obtener_primer_anio_ventas,
 )
 from .estadisticas_gastos import (
     obtener_gastos_por_semana_y_proveedor,

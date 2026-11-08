@@ -8,6 +8,7 @@ from services.estadisticas_service import (
     dashboard_api_service,
     exportar_estadisticas_service,
     MAX_DIAS_RANGO,
+    MAX_DIAS_ANIO,
 )
 
 
@@ -152,13 +153,13 @@ def test_exportar_fin_menor_que_inicio():
 
 def test_exportar_rango_excede_maximo():
     inicio = date(2026, 1, 1)
-    fin    = inicio + timedelta(days=MAX_DIAS_RANGO + 1)
+    fin    = inicio + timedelta(days=MAX_DIAS_ANIO)
     resp, error = exportar_estadisticas_service({
         "inicio": inicio.isoformat(),
         "fin":    fin.isoformat(),
     })
     assert resp is None
-    assert str(MAX_DIAS_RANGO) in error
+    assert "un año" in error
 
 
 def test_exportar_rango_valido_devuelve_workbook(app):

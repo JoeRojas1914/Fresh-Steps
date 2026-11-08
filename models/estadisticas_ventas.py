@@ -52,12 +52,44 @@ def _label_dia(d: date) -> str:
     return f"{_DIAS_CORTOS[d.weekday()]} {d.day} {_MESES_CORTOS[d.month - 1]}"
 
 
-def contar_ventas_por_semana(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo"):
+def generar_periodos(inicio: date, fin: date, periodo: str = "semana"):
+    """Cubetas del rango: [{"inicio", "label", "clave"}].
+
+    `clave` coincide con `_expr_periodo` en SQL: año*100+semana ISO para "semana",
+    año*100+mes para "mes".
+    """
+    if periodo == "mes":
+        meses = []
+        actual = inicio.replace(day=1)
+        while actual <= fin:
+            meses.append({
+                "inicio": actual,
+                "label":  f"{_MESES_CORTOS[actual.month - 1]} {actual.year}",
+                "clave":  actual.year * 100 + actual.month,
+            })
+            actual = date(actual.year + (actual.month == 12), actual.month % 12 + 1, 1)
+        return meses
+
+    return [
+        {**s, "clave": s["inicio"].isocalendar()[0] * 100 + s["inicio"].isocalendar()[1]}
+        for s in generar_semanas_rango(inicio, fin)
+    ]
+
+
+def _expr_periodo(col: str, periodo: str = "semana") -> str:
+    """Expresión SQL de la clave de cubeta (ver `generar_periodos`). `col` ya validada."""
+    if periodo == "mes":
+        return f"EXTRACT(YEAR_MONTH FROM {col})"
+    return f"YEARWEEK({col}, 1)"
+
+
+def contar_ventas_por_semana(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo",
+                             periodo: str = "semana"):
     col = _col_v(col)
-    semanas = generar_semanas_rango(inicio, fin)
+    semanas = generar_periodos(inicio, fin, periodo)
 
     sql = f"""
-        SELECT YEARWEEK({col}, 1) AS yw, COUNT(*) AS total
+        SELECT {_expr_periodo(col, periodo)} AS yw, COUNT(*) AS total
         FROM venta
         WHERE {col} >= %s
           AND {col} < DATE_ADD(%s, INTERVAL 1 DAY)
@@ -71,24 +103,20 @@ def contar_ventas_por_semana(inicio: date, fin: date, id_negocio: str, col: str 
         cursor.execute(sql, params)
         rows = {r["yw"]: r["total"] for r in cursor.fetchall()}
 
-    return [
-        {
-            "label": s["label"],
-            "total": rows.get(s["inicio"].isocalendar()[0] * 100 + s["inicio"].isocalendar()[1], 0),
-        }
-        for s in semanas
-    ]
+    return [{"label": s["label"], "total": rows.get(s["clave"], 0)} for s in semanas]
 
 
-def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo"):
+def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo",
+                                periodo: str = "semana"):
     col = _col_v(col)
-    semanas = generar_semanas_rango(inicio, fin)
+    semanas = generar_periodos(inicio, fin, periodo)
+    expr    = _expr_periodo(f"v.{col}", periodo)
     totals: defaultdict = defaultdict(int)
 
     with get_db() as (_, cursor):
         if id_negocio in ("1", "all"):
             cursor.execute(f"""
-                SELECT YEARWEEK(v.{col}, 1) AS yw, COUNT(a.id_articulo) AS u
+                SELECT {expr} AS yw, COUNT(a.id_articulo) AS u
                 FROM venta v
                 JOIN articulo a          ON a.id_venta     = v.id_venta
                 JOIN articulo_calzado ac ON ac.id_articulo = a.id_articulo
@@ -103,7 +131,7 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str, col: s
 
         if id_negocio in ("2", "all"):
             cursor.execute(f"""
-                SELECT YEARWEEK(v.{col}, 1) AS yw, COALESCE(SUM(ac2.cantidad), 0) AS u
+                SELECT {expr} AS yw, COALESCE(SUM(ac2.cantidad), 0) AS u
                 FROM venta v
                 JOIN articulo a              ON a.id_venta      = v.id_venta
                 JOIN articulo_confeccion ac2 ON ac2.id_articulo = a.id_articulo
@@ -118,7 +146,7 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str, col: s
 
         if id_negocio in ("3", "all"):
             cursor.execute(f"""
-                SELECT YEARWEEK(v.{col}, 1) AS yw, COALESCE(SUM(am.cantidad), 0) AS u
+                SELECT {expr} AS yw, COALESCE(SUM(am.cantidad), 0) AS u
                 FROM venta v
                 JOIN articulo a          ON a.id_venta     = v.id_venta
                 JOIN articulo_maquila am ON am.id_articulo = a.id_articulo
@@ -131,13 +159,7 @@ def obtener_unidades_por_semana(inicio: date, fin: date, id_negocio: str, col: s
             for r in cursor.fetchall():
                 totals[r["yw"]] += int(r["u"] or 0)
 
-    return [
-        {
-            "label": s["label"],
-            "total": totals[s["inicio"].isocalendar()[0] * 100 + s["inicio"].isocalendar()[1]],
-        }
-        for s in semanas
-    ]
+    return [{"label": s["label"], "total": totals[s["clave"]]} for s in semanas]
 
 
 def obtener_total_ingresos(inicio, fin, id_negocio):
@@ -157,11 +179,11 @@ def obtener_total_ingresos(inicio, fin, id_negocio):
         return float(cursor.fetchone()["total"] or 0)
 
 
-def obtener_ingresos_por_semana(inicio, fin, id_negocio):
-    semanas = generar_semanas_rango(inicio, fin)
+def obtener_ingresos_por_semana(inicio, fin, id_negocio, periodo: str = "semana"):
+    semanas = generar_periodos(inicio, fin, periodo)
 
-    sql = """
-        SELECT YEARWEEK(pv.fecha_pago, 1) AS yw, COALESCE(SUM(pv.monto), 0) AS total
+    sql = f"""
+        SELECT {_expr_periodo("pv.fecha_pago", periodo)} AS yw, COALESCE(SUM(pv.monto), 0) AS total
         FROM pago_venta pv
         JOIN venta v ON v.id_venta = pv.id_venta
         WHERE pv.fecha_pago >= %s
@@ -176,15 +198,7 @@ def obtener_ingresos_por_semana(inicio, fin, id_negocio):
         cursor.execute(sql, params)
         rows = {r["yw"]: float(r["total"]) for r in cursor.fetchall()}
 
-    return [
-        {
-            "label": s["label"],
-            "total": rows.get(
-                s["inicio"].isocalendar()[0] * 100 + s["inicio"].isocalendar()[1], 0.0
-            ),
-        }
-        for s in semanas
-    ]
+    return [{"label": s["label"], "total": rows.get(s["clave"], 0.0)} for s in semanas]
 
 
 def contar_ventas_por_hora(inicio: date, fin: date, id_negocio: str, col: str = "fecha_recibo"):
@@ -579,3 +593,42 @@ def contar_ventas_entregadas_hoy(id_negocio: str = "all") -> int:
     with get_db() as (_, cursor):
         cursor.execute(sql, params)
         return int(cursor.fetchone()["total"] or 0)
+
+
+_CAMPOS_CALZADO = {"marca": "Sin marca", "tipo": "Sin tipo"}
+
+
+def obtener_top_calzado(inicio: date, fin: date, campo: str, limit: int | None = None):
+    """Marcas o tipos de calzado que más llegan en el rango: [{"nombre", "total"}].
+
+    Sin `limit` devuelve todos los nombres, para que el servicio pueda unir las
+    variantes mal escritas antes de recortar el top.
+    """
+    if campo not in _CAMPOS_CALZADO:
+        raise ValueError(f"campo no permitido: {campo}")
+    sql = f"""
+        SELECT COALESCE(NULLIF(TRIM(ac.{campo}), ''), %s) AS nombre, COUNT(*) AS total
+        FROM articulo_calzado ac
+        JOIN articulo a ON a.id_articulo = ac.id_articulo
+        JOIN venta v    ON v.id_venta    = a.id_venta
+        WHERE v.fecha_recibo >= %s AND v.fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
+          AND v.id_negocio = 1
+          AND v.eliminado  = 0
+        GROUP BY nombre
+        ORDER BY total DESC, nombre
+    """
+    params = [_CAMPOS_CALZADO[campo], inicio, fin]
+    if limit is not None:
+        sql += " LIMIT %s"
+        params.append(int(limit))
+    with get_db() as (_, cursor):
+        cursor.execute(sql, params)
+        return [{"nombre": r["nombre"], "total": int(r["total"])} for r in cursor.fetchall()]
+
+
+def obtener_primer_anio_ventas():
+    """Año de la venta más antigua, o None si no hay ventas."""
+    with get_db() as (_, cursor):
+        cursor.execute("SELECT YEAR(MIN(fecha_recibo)) AS anio FROM venta WHERE eliminado = 0")
+        row = cursor.fetchone()
+        return int(row["anio"]) if row and row["anio"] else None
