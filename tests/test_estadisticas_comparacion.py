@@ -66,6 +66,15 @@ def test_api_devuelve_periodo_actual_y_sin_saldo_pct():
     assert "saldo_pct" not in resultado["kpis"]
 
 
+def test_api_devuelve_cifras_del_periodo_anterior():
+    resultado, _ = dashboard_api_service({
+        "inicio": "2026-06-01", "fin": "2026-06-30", "modo": "mes",
+    })
+    ant = resultado["kpis"]["anterior"]
+    assert set(ant) == {"ingresos", "gastos", "ganancia", "ticket_promedio", "num_ventas"}
+    assert ant["ganancia"] == ant["ingresos"] - ant["gastos"]
+
+
 def test_api_modo_invalido_usa_comportamiento_original():
     resultado, error = dashboard_api_service({
         "inicio": "2026-06-01", "fin": "2026-06-30", "modo": "xyz",

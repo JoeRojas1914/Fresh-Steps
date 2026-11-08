@@ -79,73 +79,48 @@
 }
 .st-acciones .btn { height: 42px; }
 
-/* Comparación */
-.comparativa-box {
-    display: none;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid #eef2f7;
-    font-size: 13px;
+/* La caja de filtros comparte el borde fino del resto de la página */
+.filtro-box.st-filtros {
+    border-color: #e2e8f0;
+    border-radius: 10px;
+    box-shadow: none;
 }
 
-.comparativa-label,
-.comparativa-vs { color: #475569; }
-
-.comparativa-badge--actual,
-.comparativa-badge--anterior {
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 999px;
-}
-
-.comparativa-badge--actual {
-    background: var(--color-bg-blue);
-    color: var(--color-primary-dark);
-}
-
-.comparativa-badge--anterior {
-    background: #f1f5f9;
-    color: #334155;
-}
-
-.comparativa-nota {
-    color: #64748b;
-    font-size: 12px;
-}
-
-/* ── Cifras ── */
-.st-kpis {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 16px;
+/* ── Resumen del periodo: una sola franja con divisiones finas ──
+   Las divisiones son el fondo gris asomándose por un gap de 1px entre celdas blancas. */
+.st-resumen {
     margin-bottom: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-.st-grupo-head {
+.st-resumen-head {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    min-height: 34px;
-    margin-bottom: 8px;
+    gap: 12px 16px;
+    flex-wrap: wrap;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid #eef2f7;
 }
 
-.st-grupo-titulo {
+.page-content .st-resumen-titulo {
     margin: 0;
     font-size: 15px;
     font-weight: 700;
     color: var(--color-navy);
 }
 
-.st-kpis { position: relative; }
+.st-comparacion {
+    margin: 3px 0 0;
+    font-size: 13px;
+    color: #64748b;
+}
+.st-comparacion span:not(#comparativaNota) { color: #334155; font-weight: 600; }
 
 .btn-blur-toggle.st-toggle-montos {
-    position: absolute;
-    top: 1px;
-    right: 0;
-    z-index: 1;
     width: auto;
     height: 32px;
     padding: 0 12px;
@@ -155,72 +130,66 @@
     white-space: nowrap;
 }
 
-.st-grid {
+.st-resumen-cuerpo,
+.st-fila {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 12px;
+    gap: 1px;
+    background: #eef2f7;
 }
 
-.st-grupo--clientes { margin: 20px 0; }
+.st-fila                { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.st-fila--principal     { grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); }
+.st-fila--cuatro        { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
-.st-kpi {
-    background: #ffffff;
-    border: 1px solid #e8eef5;
-    border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-    padding: 16px 18px;
+.st-celda {
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
+    padding: 16px 20px;
+    background: #ffffff;
 }
 
 .st-kpi-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #475569;
-}
-
-.st-kpi-num {
-    margin: 2px 0 0;
-    font-size: 26px;
-    font-weight: 800;
-    color: var(--color-navy);
-    letter-spacing: -0.5px;
-    line-height: 1.15;
-    font-variant-numeric: tabular-nums;
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 2px 8px;
-}
-
-.st-kpi-num--ok   .kpi-anim-num { color: #15803d; }
-.st-kpi-num--bad  .kpi-anim-num { color: #dc2626; }
-.st-kpi-num--warn .kpi-anim-num { color: #b45309; }
-
-.st-kpi-sub {
     font-size: 12px;
+    font-weight: 600;
     color: #64748b;
 }
 
-/* % de cambio */
-.badge-pct {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0;
-    padding: 1px 7px;
-    border-radius: 999px;
-    white-space: nowrap;
+.st-kpi-num {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-navy);
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
 }
-.badge-pct--ok    { color: #15803d; background: #dcfce7; }
-.badge-pct--mal   { color: #b91c1c; background: #fee2e2; }
-.badge-pct--igual { color: #475569; background: #f1f5f9; }
-.badge-pct--na    { color: #64748b; background: transparent; font-weight: 500; padding: 1px 0; }
 
+.st-celda--principal { padding: 20px 24px; }
+.st-celda--principal .st-kpi-num {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+}
+
+/* "▲ 12.4% · antes $16,390.00": solo flecha y % en color */
+.st-delta {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+    font-variant-numeric: tabular-nums;
+}
+.st-delta strong { font-weight: 700; }
+.st-delta .st-delta--bien { color: #15803d; }
+.st-delta .st-delta--mal  { color: #b91c1c; }
+
+/* Montos ocultos: se difumina solo el número, no la celda */
 .st-kpi-num.dato-sensible { filter: none; }
 .st-kpi-num.dato-sensible .kpi-anim-num { filter: blur(7px); transition: filter .18s ease; }
 body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
+
+.st-resumen--clientes { margin: 20px 0; }
 
 /* ── Tarjetas de gráficas ── */
 .stats-page {
@@ -237,9 +206,8 @@ body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
     min-width: 0;
     min-height: 0;         
     background: #ffffff;
-    border: 1px solid #e8eef5;
-    border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
     padding: 18px 20px 20px;
 }
 
@@ -247,7 +215,7 @@ body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
 .stats-card.d-none { display: none; }
 
 .stats-title {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--color-navy);
     margin: 0 0 14px;
@@ -280,17 +248,38 @@ body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
 }
 .stats-subtitulo + .st-chart { margin-bottom: 14px; }
 
-.chart-total-badge {
+/* Total de la gráfica como texto: "Total $31,900.00" a la derecha del título */
+.st-total {
     margin-left: auto;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-primary-dark);
-    background: var(--color-bg-blue);
-    padding: 2px 10px;
-    border-radius: 999px;
+    font-size: 13px;
+    color: #64748b;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
-.chart-total-badge:empty { display: none; }
+.st-total strong { color: var(--color-navy); font-weight: 700; }
+.st-total:empty { display: none; }
+.stats-card-header .stats-title { flex: 1 1 auto; }
+
+/* Proveedor / Categoría: mismo control segmentado tonal que el selector de periodo */
+.stats-card .agrupacion-toggle {
+    gap: 2px;
+    padding: 2px;
+    border-radius: 8px;
+    background: #eef2f6;
+    box-shadow: inset 0 0 0 1px #d3dbe4;
+}
+.stats-card .agrupacion-btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 6px;
+    color: #475569;
+}
+.stats-card .agrupacion-btn:hover { background: #e2e8f0; color: #0f172a; }
+.stats-card .agrupacion-btn.active {
+    background: #e8f2fc;
+    color: #1765b5;
+    box-shadow: inset 0 0 0 1px #b9d4f1;
+}
 
 /* Contenedor con altura fija: Chart.js usa maintainAspectRatio:false */
 .st-chart {
@@ -387,6 +376,7 @@ body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
     filter: none !important;
 }
 .stats-cargando .st-kpi-num * { visibility: hidden; }
+.stats-cargando .st-delta { visibility: hidden; }
 
 .stats-cargando .stats-card::after {
     content: "";
@@ -408,8 +398,14 @@ body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
 
 /* ── Responsive ── */
 @media (max-width: 1100px) {
-    .st-kpis { grid-template-columns: 1fr; }
     .st-acciones { margin-left: 0; }
+
+    /* Franja en 2 columnas: la principal a lo ancho; si sobra una celda, también */
+    .st-fila,
+    .st-fila--principal,
+    .st-fila--cuatro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .st-celda--principal,
+    .st-fila:not(.st-fila--cuatro):not(.st-fila--principal) > .st-celda:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 
 @media (max-width: 900px) {
@@ -417,8 +413,9 @@ body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
 }
 
 @media (max-width: 768px) {
-    .st-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .st-kpi-num { font-size: 22px; }
+    .st-celda { padding: 14px 16px; }
+    .st-celda--principal .st-kpi-num { font-size: 28px; }
+    .st-kpi-num { font-size: 20px; }
 
     .st-filtros-row,
     .st-panel { flex-direction: column; align-items: stretch; }
@@ -435,5 +432,7 @@ body.montos-visibles .st-kpi-num.dato-sensible .kpi-anim-num { filter: none; }
 }
 
 @media (max-width: 420px) {
-    .st-grid { grid-template-columns: 1fr; }
+    .st-fila,
+    .st-fila--principal,
+    .st-fila--cuatro { grid-template-columns: 1fr; }
 }

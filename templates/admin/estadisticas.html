@@ -68,70 +68,44 @@
             </button>
         </div>
     </div>
+</div>
 
-    <div id="comparativaBox" class="comparativa-box">
-        <span class="comparativa-label">Comparando</span>
-        <span id="comparativaPeriodoActual" class="comparativa-badge--actual"></span>
-        <span class="comparativa-vs">con</span>
-        <span id="comparativaPeriodoAnterior" class="comparativa-badge--anterior"></span>
-        <span id="comparativaNota" class="comparativa-nota"></span>
+{# ── Cifras del periodo: una sola franja, Ganancia como cifra principal ── #}
+{% macro celda(id, etiqueta, nota, sensible=False, principal=False) -%}
+<div class="st-celda{% if principal %} st-celda--principal{% endif %}">
+    <span class="st-kpi-label">{{ etiqueta }}</span>
+    <p id="{{ id }}" class="st-kpi-num{% if sensible %} dato-sensible{% endif %}">{{ "$0" if sensible else "0" }}</p>
+    <p class="st-delta" id="{{ id }}Delta">{{ nota }}</p>
+</div>
+{%- endmacro %}
+<section class="st-resumen" aria-labelledby="st-resumen-titulo">
+    <header class="st-resumen-head">
+        <div>
+            <h2 class="st-resumen-titulo" id="st-resumen-titulo">Resumen del periodo</h2>
+            <p class="st-comparacion" id="comparativaBox" hidden>
+                <span id="comparativaPeriodoActual"></span> frente a
+                <span id="comparativaPeriodoAnterior"></span><span id="comparativaNota"></span>
+            </p>
+        </div>
+        <button type="button" id="toggleMontos" class="btn-blur-toggle st-toggle-montos" aria-pressed="false">
+            <i data-lucide="eye" width="16" height="16" class="icon-eye"></i>
+            <i data-lucide="eye-off" width="16" height="16" class="icon-eye-off"></i>
+            <span class="st-toggle-texto">Mostrar montos</span>
+        </button>
+    </header>
+    <div class="st-resumen-cuerpo">
+        <div class="st-fila st-fila--principal">
+            {{ celda("gananciaMes", "Ganancia", "Cobrado menos gastos", sensible=True, principal=True) }}
+            {{ celda("ventasMes",   "Cobrado",  "Pagos recibidos",      sensible=True) }}
+            {{ celda("gastosMes",   "Gastos",   "Gastos registrados",   sensible=True) }}
+        </div>
+        <div class="st-fila">
+            {{ celda("totalVentas",    "Ventas",          "Recibos registrados") }}
+            {{ celda("ticketPromedio", "Ticket promedio", "Total promedio por venta", sensible=True) }}
+            {{ celda("saldoCobrar",    "Por cobrar",      "Saldo pendiente de estas ventas", sensible=True) }}
+        </div>
     </div>
-</div>
-
-{# ── Cifras del periodo ── #}
-<div class="st-kpis">
-    {# Esquina superior derecha de las cifras (ver .st-toggle-montos) #}
-    <button type="button" id="toggleMontos" class="btn-blur-toggle st-toggle-montos" aria-pressed="false">
-        <i data-lucide="eye" width="16" height="16" class="icon-eye"></i>
-        <i data-lucide="eye-off" width="16" height="16" class="icon-eye-off"></i>
-        <span class="st-toggle-texto">Mostrar montos</span>
-    </button>
-    <section class="st-grupo st-grupo--dinero" aria-labelledby="st-dinero">
-        <div class="st-grupo-head">
-            <h2 class="st-grupo-titulo" id="st-dinero">Dinero</h2>
-        </div>
-        <div class="st-grid">
-            <div class="st-kpi">
-                <span class="st-kpi-label">Cobrado</span>
-                <p id="ventasMes" class="st-kpi-num st-kpi-num--ok dato-sensible">$0</p>
-                <span class="st-kpi-sub">Pagos recibidos en el periodo</span>
-            </div>
-            <div class="st-kpi">
-                <span class="st-kpi-label">Gastos</span>
-                <p id="gastosMes" class="st-kpi-num st-kpi-num--bad dato-sensible">$0</p>
-                <span class="st-kpi-sub">Gastos registrados</span>
-            </div>
-            <div class="st-kpi">
-                <span class="st-kpi-label">Ganancia</span>
-                <p id="gananciaMes" class="st-kpi-num dato-sensible">$0</p>
-                <span class="st-kpi-sub">Cobrado menos gastos</span>
-            </div>
-            <div class="st-kpi">
-                <span class="st-kpi-label">Por cobrar</span>
-                <p id="saldoCobrar" class="st-kpi-num st-kpi-num--warn dato-sensible">$0</p>
-                <span class="st-kpi-sub">Saldo pendiente de estas ventas</span>
-            </div>
-        </div>
-    </section>
-
-    <section class="st-grupo st-grupo--ventas" aria-labelledby="st-ventas">
-        <div class="st-grupo-head">
-            <h2 class="st-grupo-titulo" id="st-ventas">Ventas</h2>
-        </div>
-        <div class="st-grid">
-            <div class="st-kpi">
-                <span class="st-kpi-label">Ventas</span>
-                <p id="totalVentas" class="st-kpi-num">0</p>
-                <span class="st-kpi-sub">Recibos registrados</span>
-            </div>
-            <div class="st-kpi">
-                <span class="st-kpi-label">Ticket promedio</span>
-                <p id="ticketPromedio" class="st-kpi-num dato-sensible">$0</p>
-                <span class="st-kpi-sub">Según el total de las ventas</span>
-            </div>
-        </div>
-    </section>
-</div>
+</section>
 
 {# ── Pestañas ── #}
 <div class="tab-bar" role="tablist">
@@ -144,12 +118,16 @@
 <div id="tab-financiero" class="tab-panel">
     <div class="stats-page">
         <div class="stats-card">
-            <h2 class="stats-title" id="titulo-ingresos">Cobrado</h2>
+            <div class="stats-card-header">
+                <h2 class="stats-title" id="titulo-ingresos">Cobrado</h2>
+                <span class="st-total" id="total-ingresos"></span>
+            </div>
             <div class="st-chart"><canvas id="ingresosChart" class="dato-sensible"></canvas></div>
         </div>
         <div class="stats-card">
             <div class="stats-card-header">
                 <h2 class="stats-title" id="titulo-gastos">Gastos</h2>
+                <span class="st-total" id="total-gastos"></span>
                 <div class="agrupacion-toggle" id="gastos-agrupacion" role="group" aria-label="Agrupar gastos por">
                     <button type="button" class="agrupacion-btn active" data-agrupacion="proveedor">Proveedor</button>
                     <button type="button" class="agrupacion-btn" data-agrupacion="categoria">Categoría</button>
@@ -178,11 +156,17 @@
 <div id="tab-operacional" class="tab-panel d-none">
     <div class="stats-page">
         <div class="stats-card">
-            <h2 class="stats-title" id="titulo-ventas">Número de ventas <span class="chart-total-badge" id="total-ventas"></span></h2>
+            <div class="stats-card-header">
+                <h2 class="stats-title" id="titulo-ventas">Número de ventas</h2>
+                <span class="st-total" id="total-ventas"></span>
+            </div>
             <div class="st-chart"><canvas id="ventasSemanaChart"></canvas></div>
         </div>
         <div class="stats-card">
-            <h2 class="stats-title" id="titulo-unidades">Unidades recibidas <span class="chart-total-badge" id="total-unidades"></span></h2>
+            <div class="stats-card-header">
+                <h2 class="stats-title" id="titulo-unidades">Unidades recibidas</h2>
+                <span class="st-total" id="total-unidades"></span>
+            </div>
             <div class="st-chart"><canvas id="unidadesSemanaChart"></canvas></div>
         </div>
     </div>
@@ -190,7 +174,10 @@
     {# En modo "día" se oculta: no tiene sentido #}
     <div id="card-ventas-por-dia" class="stats-page">
         <div class="stats-card full-width">
-            <h2 class="stats-title">Ventas por día de la semana <span class="chart-total-badge" id="total-ventas-dia"></span></h2>
+            <div class="stats-card-header">
+                <h2 class="stats-title">Ventas por día de la semana</h2>
+                <span class="st-total" id="total-ventas-dia"></span>
+            </div>
             <div class="st-chart st-chart--sm"><canvas id="ventasPorDiaChart"></canvas></div>
         </div>
     </div>
@@ -227,30 +214,16 @@
 
 {# ── Clientes ── #}
 <div id="tab-clientes" class="tab-panel d-none">
-    <div class="st-grupo st-grupo--clientes">
-        <div class="st-grid">
-            <div class="st-kpi">
-                <span class="st-kpi-label">Clientes atendidos</span>
-                <p id="clientesUnicos" class="st-kpi-num">0</p>
-                <span class="st-kpi-sub">Clientes distintos en el periodo</span>
-            </div>
-            <div class="st-kpi">
-                <span class="st-kpi-label">Clientes nuevos</span>
-                <p id="clientesNuevos" class="st-kpi-num">0</p>
-                <span class="st-kpi-sub">Su primera visita</span>
-            </div>
-            <div class="st-kpi">
-                <span class="st-kpi-label">Regresaron</span>
-                <p id="tasaRetorno" class="st-kpi-num">0%</p>
-                <span class="st-kpi-sub" id="tasaRetornoSub">Ya habían venido antes</span>
-            </div>
-            <div class="st-kpi">
-                <span class="st-kpi-label">Promedio por cliente</span>
-                <p id="gastoPorCliente" class="st-kpi-num dato-sensible">$0</p>
-                <span class="st-kpi-sub">Según el total de las ventas</span>
+    <section class="st-resumen st-resumen--clientes" aria-label="Clientes del periodo">
+        <div class="st-resumen-cuerpo">
+            <div class="st-fila st-fila--cuatro">
+                {{ celda("clientesUnicos",  "Clientes atendidos",   "Clientes distintos en el periodo") }}
+                {{ celda("clientesNuevos",  "Clientes nuevos",      "Su primera visita") }}
+                {{ celda("tasaRetorno",     "Regresaron",           "Ya habían venido antes") }}
+                {{ celda("gastoPorCliente", "Promedio por cliente", "Según el total de las ventas", sensible=True) }}
             </div>
         </div>
-    </div>
+    </section>
 
     <div class="stats-page">
         <div class="stats-card full-width">

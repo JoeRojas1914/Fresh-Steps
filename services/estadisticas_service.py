@@ -163,6 +163,14 @@ def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio,
         "ganancia_pct": _pct_cambio(kpis["ganancia"],         ganancia_ant),
         "ticket_pct":   _pct_cambio(kpis["ticket_promedio"],  ticket_ant),
         "ventas_pct":   _pct_cambio(kpis["num_ventas"],       ventas_ant),
+        # Cifras del periodo anterior, para mostrar "antes $X" junto a cada %
+        "anterior": {
+            "ingresos":        ingresos_ant,
+            "gastos":          gastos_ant,
+            "ganancia":        ganancia_ant,
+            "ticket_promedio": ticket_ant,
+            "num_ventas":      ventas_ant,
+        },
     }
     periodo_anterior_str = {"inicio": inicio_ant.isoformat(), "fin": fin_ant.isoformat()}
     periodo_actual_str   = {"inicio": inicio_act.isoformat(), "fin": fin_act.isoformat()}

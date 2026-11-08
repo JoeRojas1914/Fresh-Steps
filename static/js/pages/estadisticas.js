@@ -16,25 +16,26 @@ const fmtRango = (ini, fin) => {
     if (y1 === y2 && m1 === m2) return `${parseInt(ini.split("-")[2])} – ${fmtFecha(fin)}`;
     return `${fmtFecha(ini)} – ${fmtFecha(fin)}`;
 };
-const badgePct = (pct, invert=false) => {
-    if (pct===null||pct===undefined) return `<span class="badge-pct badge-pct--na">sin datos previos</span>`;
-    if (pct === 0) return `<span class="badge-pct badge-pct--igual">= 0%</span>`;
+
+const textoCambio = (pct, anterior, monetario, invert=false) => {
+    const antes = anterior === undefined || anterior === null ? "" :
+        ` · antes <span class="${monetario ? "dato-sensible" : ""}">${monetario ? fmt$(anterior) : fmtN(anterior)}</span>`;
+    if (pct === null || pct === undefined) return `Sin datos del periodo anterior${antes}`;
+    if (pct === 0) return `Sin cambio${antes}`;
     const bueno = invert ? pct < 0 : pct > 0;
-    return `<span class="badge-pct ${bueno ? 'badge-pct--ok' : 'badge-pct--mal'}">${pct>0?"↑":"↓"} ${Math.abs(pct).toFixed(1)}%</span>`;
+    const pctTxt = Math.abs(pct).toLocaleString("es-MX", { maximumFractionDigits: 1 });
+    return `<strong class="${bueno ? "st-delta--bien" : "st-delta--mal"}">${pct > 0 ? "▲" : "▼"} ${pctTxt}%</strong>${antes}`;
 };
 
 // ── Paleta fija (colores de la app) ──────────────────────────────────────────
 const C = {
     azul:   "#1e7fd6",
     marino: "#0b3c5d",
-    verde:  "#15803d",
     rojo:   "#dc2626",
     ambar:  "#b45309",
     gris:   "#94a3b8",
 };
-// Mismos colores que los badges .negocio-* (components/badges.css)
 const COLOR_NEGOCIO = { 1: "#1e7fd6", 2: "#c44569", 3: "#1a7a87" };
-// Gastos apilados: tonos de rojo, del más fuerte al más claro
 const ROJOS = ["#991b1b", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fecaca"];
 
 Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
@@ -60,7 +61,6 @@ const gridNone = { display: false };
 const noBorder = { display: false };
 const legendTop = { position: 'top', align: 'end', labels: { color: '#334155', boxWidth: 12, boxHeight: 12, padding: 14, font: { size: 12 } } };
 
-// Barras verticales de una serie en el tiempo (cobrado, ventas, unidades)
 const barrasVOpts = (fmtVal=fmtN) => ({
     responsive: true,
     plugins: {
@@ -73,7 +73,6 @@ const barrasVOpts = (fmtVal=fmtN) => ({
     }
 });
 
-// Barras horizontales con el % del total en el tooltip
 const barrasHOpts = (fmtVal=fmtN, unidad="") => ({
     responsive: true,
     indexAxis: "y",
@@ -104,7 +103,6 @@ const barraDataset = color => ({
     maxBarThickness: 28,
 });
 
-// Altura de las gráficas horizontales según cuántas filas tienen
 function ajustarAltura(chart, filas) {
     const wrap = chart.canvas.parentElement;
     if (wrap) wrap.style.height = `${Math.max(filas, 1) * 34 + 36}px`;
@@ -137,7 +135,7 @@ function initCharts() {
         }
     });
 
-    ingresosChart       = new Chart(el("ingresosChart"),       { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.verde),  label: "Cobrado" }] },  options: barrasVOpts(fmt$) });
+    ingresosChart       = new Chart(el("ingresosChart"),       { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.azul),   label: "Cobrado" }] },  options: barrasVOpts(fmt$) });
     ventasSemanaChart   = new Chart(el("ventasSemanaChart"),   { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.azul),   label: "Ventas" }] },   options: barrasVOpts() });
     unidadesSemanaChart = new Chart(el("unidadesSemanaChart"), { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.marino), label: "Unidades" }] }, options: barrasVOpts() });
 
@@ -187,11 +185,9 @@ function initCharts() {
     });
 }
 
-// Fecha local en formato YYYY-MM-DD (toISOString usa UTC y de noche adelanta el día)
 const pad = n => String(n).padStart(2,"0");
 const isoLocal = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
-// Semana ISO 8601 de una fecha → { anio, semana }
 function semanaISO(fecha) {
     const d = new Date(Date.UTC(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()));
     const dia = d.getUTCDay() || 7;
@@ -200,7 +196,6 @@ function semanaISO(fecha) {
     return { anio: d.getUTCFullYear(), semana: Math.ceil(((d - inicioAnio) / 86400000 + 1) / 7) };
 }
 
-// Lunes de la semana ISO indicada
 function lunesDeSemanaISO(anio, semana) {
     const cuatroEne = new Date(anio, 0, 4);
     const lunesSem1 = new Date(cuatroEne);
@@ -287,9 +282,7 @@ function actualizarTitulos() {
     ].forEach(([id,base]) => {
         const el = document.getElementById(id);
         if (!el) return;
-        const badge = el.querySelector('.chart-total-badge');
         el.textContent = `${base} ${s}`;
-        if (badge) el.appendChild(badge);
     });
 }
 
@@ -307,7 +300,6 @@ function switchTab(nombre, btn) {
         b.classList.toggle("active", activo);
         b.setAttribute("aria-selected", activo ? "true" : "false");
     });
-    // Las gráficas creadas dentro de un panel oculto miden 0: hay que redimensionarlas al mostrarlas
     (chartsPerTab[nombre]?.() || []).forEach(c => { if (c) { c.resize(); c.update('none'); } });
 }
 
@@ -319,8 +311,7 @@ function setBarrasH(chart, filas, valor, etiqueta, colores) {
     chart.update();
 }
 
-// Cada carga recibe un número; si llega una respuesta de una carga anterior
-// (el usuario cambió filtros mientras tanto) se descarta para no pintar datos viejos.
+
 let _dashSeq = 0;
 
 async function cargarDashboard() {
@@ -358,49 +349,58 @@ async function cargarDashboard() {
             document.getElementById("comparativaPeriodoAnterior").textContent = fmtRango(ant.inicio, ant.fin);
             const enCurso = act.fin !== p.fin;
             document.getElementById("comparativaNota").textContent = enCurso
-                ? "El periodo va en curso: se compara contra los mismos días del periodo anterior."
+                ? " · periodo en curso, se comparan los mismos días"
                 : "";
-            elBox.style.display = "flex";
+            elBox.hidden = false;
         }
 
         // ── Cifras ──
         const k = data.kpis||{};
-        setKpi("ventasMes",      k.ingresos,         k.ingresos_pct, true);
-        setKpi("gastosMes",      k.gastos,           k.gastos_pct,   true, true);
-        setKpi("gananciaMes",    k.ganancia,         k.ganancia_pct, true);
-        setKpi("ticketPromedio", k.ticket_promedio,  k.ticket_pct,   true);
+        const ant = k.anterior || {};
+        setKpi("ventasMes",      k.ingresos,         k.ingresos_pct, true,  false, ant.ingresos);
+        setKpi("gastosMes",      k.gastos,           k.gastos_pct,   true,  true,  ant.gastos);
+        setKpi("gananciaMes",    k.ganancia,         k.ganancia_pct, true,  false, ant.ganancia);
+        setKpi("ticketPromedio", k.ticket_promedio,  k.ticket_pct,   true,  false, ant.ticket_promedio);
         setKpi("saldoCobrar",    k.saldo_por_cobrar, undefined,      true);
-        setKpi("totalVentas",    k.num_ventas,       k.ventas_pct,   false);
+        setKpi("totalVentas",    k.num_ventas,       k.ventas_pct,   false, false, ant.num_ventas);
 
         // ── Series en el tiempo ──
+        const setTotal = (id, valor, monetario=false) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = `Total <strong class="${monetario ? "dato-sensible" : ""}">${monetario ? fmt$(valor) : fmtN(valor)}</strong>`;
+        };
+        const suma = arr => (arr || []).reduce((a, v) => a + (Number(v) || 0), 0);
+
         const setSerie = (chart, serie) => {
             chart.data.labels = serie.map(x => x.label);
             chart.data.datasets[0].data = serie.map(x => x.total);
             chart.update();
         };
-        if (data.ingresos_semanales) setSerie(ingresosChart, data.ingresos_semanales);
+        if (data.ingresos_semanales) {
+            setSerie(ingresosChart, data.ingresos_semanales);
+            setTotal("total-ingresos", suma(data.ingresos_semanales.map(x => x.total)), true);
+        }
         if (data.gastos_semanales) {
             gastosChart.data.labels = data.gastos_semanales.labels || [];
             gastosChart.data.datasets = (data.gastos_semanales.datasets || []).map((d, i) => ({
                 ...d, backgroundColor: ROJOS[i % ROJOS.length], borderWidth: 0, borderRadius: 4, maxBarThickness: 40,
             }));
             gastosChart.update();
+            setTotal("total-gastos", suma((data.gastos_semanales.datasets || []).flatMap(d => d.data)), true);
         }
         if (data.ventas_semanales) {
             setSerie(ventasSemanaChart, data.ventas_semanales);
-            const el = document.getElementById("total-ventas");
-            if (el) el.textContent = `Total: ${fmtN(data.ventas_semanales.reduce((s,x)=>s+x.total,0))}`;
+            setTotal("total-ventas", suma(data.ventas_semanales.map(x => x.total)));
         }
         if (data.unidades_semanales) {
             setSerie(unidadesSemanaChart, data.unidades_semanales);
-            const el = document.getElementById("total-unidades");
-            if (el) el.textContent = `Total: ${fmtN(data.unidades_semanales.reduce((s,x)=>s+x.total,0))}`;
+            setTotal("total-unidades", suma(data.unidades_semanales.map(x => x.total)));
         }
         if (data.ventas_por_dia) {
             ventasPorDiaChart.data.datasets[0].data = data.ventas_por_dia;
             ventasPorDiaChart.update();
-            const el = document.getElementById("total-ventas-dia");
-            if (el) el.textContent = `Total: ${fmtN(data.ventas_por_dia.reduce((s,v)=>s+v,0))}`;
+            setTotal("total-ventas-dia", suma(data.ventas_por_dia));
         }
 
         // ── Barras horizontales ──
@@ -411,7 +411,6 @@ async function cargarDashboard() {
         }
         if (data.uso_servicios) setBarrasH(serviciosChart, data.uso_servicios, x => x.total, x => x.nombre);
 
-        // Calzado: solo con Todos o Calzado y si llegó algo en el periodo
         const cardCalzado = document.getElementById("card-calzado");
         const marcas = data.calzado_marcas || [], tipos = data.calzado_tipos || [];
         if (cardCalzado) cardCalzado.classList.toggle("d-none", !marcas.length && !tipos.length);
@@ -443,7 +442,7 @@ async function cargarDashboard() {
 
         if (data.tasa_retorno) {
             const elTR  = document.getElementById("tasaRetorno");
-            const elSub = document.getElementById("tasaRetornoSub");
+            const elSub = document.getElementById("tasaRetornoDelta");
             if (elTR)  elTR.textContent = fmtPct(data.tasa_retorno.tasa);
             if (elSub) elSub.textContent = `${fmtN(data.tasa_retorno.recurrentes)} de ${fmtN(data.tasa_retorno.total)} ya habían venido antes`;
         }
@@ -491,11 +490,14 @@ function renderTopClientes(clientes) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function setKpi(id, valor, pct, monetario, invert=false) {
+// Cifra + su línea de cambio (#<id>Delta). Sin `pct` (p. ej. "Por cobrar") la línea
+// conserva su descripción fija.
+function setKpi(id, valor, pct, monetario, invert=false, anterior) {
     const el = document.getElementById(id);
     if (!el) return;
-    const badge = pct === undefined ? "" : badgePct(pct, invert);
-    el.innerHTML = `<span class="kpi-anim-num"></span>${badge}`;
+    el.innerHTML = `<span class="kpi-anim-num"></span>`;
+    const delta = document.getElementById(`${id}Delta`);
+    if (delta && pct !== undefined) delta.innerHTML = textoCambio(pct, anterior, monetario, invert);
     countUp(el.querySelector(".kpi-anim-num"), Number(valor || 0), monetario);
 }
 function mostrarError(msg) {
@@ -542,7 +544,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initCharts();
     initToggleMontos();
 
-    // Chart.js mide las etiquetas al dibujar; si Inter aún no carga, las corta. Redibujar al cargar.
     document.fonts?.ready.then(() => {
         [gastosChart, ingresosChart, ventasSemanaChart, unidadesSemanaChart, tipoPagoChart, serviciosChart,
          ventasPorDiaChart, ingresosNegocioChart, metodosPagoChart, horaPicoChart,
