@@ -94,15 +94,18 @@
         </button>
     </header>
     <div class="st-resumen-cuerpo">
+        {# Fila 1: el dinero que entra y sale. Fila 2: lo que se vendió. #}
         <div class="st-fila st-fila--principal">
-            {{ celda("gananciaMes", "Ganancia", "Cobrado menos gastos", sensible=True, principal=True) }}
-            {{ celda("ventasMes",   "Cobrado",  "Pagos recibidos",      sensible=True) }}
-            {{ celda("gastosMes",   "Gastos",   "Gastos registrados",   sensible=True) }}
+            {{ celda("gananciaMes", "Ganancia",   "Ingresos menos gastos", sensible=True, principal=True) }}
+            {{ celda("ingresosMes", "Ingresos",   "Lo que se cobró en el periodo", sensible=True) }}
+            {{ celda("gastosMes",   "Gastos",     "Gastos registrados",    sensible=True) }}
+            {{ celda("saldoCobrar", "Por cobrar", "Saldo pendiente de estas ventas", sensible=True) }}
         </div>
-        <div class="st-fila">
-            {{ celda("totalVentas",    "Ventas",          "Recibos registrados") }}
-            {{ celda("ticketPromedio", "Ticket promedio", "Total promedio por venta", sensible=True) }}
-            {{ celda("saldoCobrar",    "Por cobrar",      "Saldo pendiente de estas ventas", sensible=True) }}
+        <div class="st-fila st-fila--cuatro">
+            {{ celda("totalVendido",   "Total de ventas", "Precio de las ventas, antes de descuentos", sensible=True) }}
+            {{ celda("descuentosMes",  "Descuentos",      "Descuentos dados en estas ventas", sensible=True) }}
+            {{ celda("totalVentas",    "Número de ventas", "Recibos registrados") }}
+            {{ celda("ticketPromedio", "Ticket promedio", "Promedio por venta, con descuento", sensible=True) }}
         </div>
     </div>
 </section>
@@ -119,12 +122,22 @@
     <div class="stats-page">
         <div class="stats-card">
             <div class="stats-card-header">
-                <h2 class="stats-title" id="titulo-ingresos">Cobrado</h2>
+                <h2 class="stats-title" id="titulo-vendido">Total de ventas</h2>
+                <span class="st-total" id="total-vendido"></span>
+            </div>
+            <p class="stats-nota">Precio de las ventas recibidas, antes de descuentos.</p>
+            <div class="st-chart"><canvas id="vendidoChart" class="dato-sensible"></canvas></div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-card-header">
+                <h2 class="stats-title" id="titulo-ingresos">Ingresos</h2>
                 <span class="st-total" id="total-ingresos"></span>
             </div>
             <div class="st-chart"><canvas id="ingresosChart" class="dato-sensible"></canvas></div>
         </div>
-        <div class="stats-card">
+    </div>
+    <div class="stats-page">
+        <div class="stats-card full-width">
             <div class="stats-card-header">
                 <h2 class="stats-title" id="titulo-gastos">Gastos</h2>
                 <span class="st-total" id="total-gastos"></span>
@@ -139,7 +152,7 @@
     <div class="stats-page">
         <div class="stats-card" id="card-ingresos-negocio">
             <h2 class="stats-title">Vendido por negocio</h2>
-            <p class="stats-nota">Total de las ventas de cada negocio, cobradas o no.</p>
+            <p class="stats-nota">Total de ventas de cada negocio antes de descuentos, cobradas o no.</p>
             <div class="st-chart st-chart--auto"><canvas id="ingresosNegocioChart" class="dato-sensible"></canvas></div>
         </div>
         <div class="stats-card">

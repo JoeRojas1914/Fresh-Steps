@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+import secrets
 from datetime import datetime
 
 from services.auth_service import (
@@ -20,6 +21,7 @@ def _poblar_sesion(usuario: dict, rol: str) -> None:
     session["rol"]              = rol
     session["ultima_actividad"] = datetime.now().isoformat()
     session["session_token"]    = usuario.get("_session_token")
+    session["id_inicio_sesion"] = secrets.token_hex(8)
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])

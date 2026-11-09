@@ -32,7 +32,8 @@
             <span class="pill-dot pill-dot--maquila"></span> Maquila
         </a>
     </div>
-    <button type="button" id="toggleMontos" class="btn-blur-toggle home-toggle-montos" aria-pressed="false">
+    <button type="button" id="toggleMontos" class="btn-blur-toggle home-toggle-montos" aria-pressed="false"
+            data-sesion="{{ session.get('id_inicio_sesion', '') }}">
         <i data-lucide="eye" width="16" height="16" class="icon-eye"></i>
         <i data-lucide="eye-off" width="16" height="16" class="icon-eye-off"></i>
         <span class="home-toggle-texto">Mostrar montos</span>

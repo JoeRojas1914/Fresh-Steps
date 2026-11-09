@@ -133,7 +133,8 @@ if (_canvas && _rawChart && window.Chart) {
     var toggleBtn = document.getElementById("toggleMontos");
     if (!toggleBtn) return;
 
-    var STORAGE_KEY = "fs_montos_visibles";
+    var STORAGE_KEY = "fs_montos_sesion";
+    var sesion      = toggleBtn.dataset.sesion || "";
 
     var texto = toggleBtn.querySelector(".home-toggle-texto");
 
@@ -143,12 +144,20 @@ if (_canvas && _rawChart && window.Chart) {
         if (texto) texto.textContent = visible ? "Ocultar montos" : "Mostrar montos";
     }
 
-    aplicar(localStorage.getItem(STORAGE_KEY) === "1");
+    var guardado = null;
+    try {
+        localStorage.removeItem("fs_montos_visibles");   // formato anterior, sin sesión
+        guardado = localStorage.getItem(STORAGE_KEY);
+    } catch (e) { /* almacenamiento bloqueado: siempre censurado */ }
+    aplicar(sesion !== "" && guardado === sesion);
 
     toggleBtn.addEventListener("click", function() {
         var visible = toggleBtn.getAttribute("aria-pressed") !== "true";
         aplicar(visible);
-        localStorage.setItem(STORAGE_KEY, visible ? "1" : "0");
+        try {
+            if (visible && sesion) localStorage.setItem(STORAGE_KEY, sesion);
+            else localStorage.removeItem(STORAGE_KEY);
+        } catch (e) { /* sin almacenamiento: solo dura esta página */ }
     });
 }());
 

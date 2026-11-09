@@ -9,7 +9,6 @@ const fmtFecha = iso => {
     const [y,m,d] = iso.split("-");
     return `${parseInt(d)} ${MESES[parseInt(m)-1]} ${y}`;
 };
-// "1 – 5 nov 2026" cuando comparten mes y año; si no, ambas fechas completas
 const fmtRango = (ini, fin) => {
     if (ini === fin) return fmtFecha(ini);
     const [y1,m1] = ini.split("-"), [y2,m2] = fin.split("-");
@@ -112,7 +111,7 @@ function ajustarAltura(chart, filas) {
 let modoActual = "mes";
 let agrupacionGastos = "proveedor";
 
-let gastosChart, ingresosChart, ventasSemanaChart, unidadesSemanaChart,
+let gastosChart, ingresosChart, vendidoChart, ventasSemanaChart, unidadesSemanaChart,
     tipoPagoChart, serviciosChart, ventasPorDiaChart, ingresosNegocioChart,
     metodosPagoChart, horaPicoChart, calzadoMarcasChart, calzadoTiposChart;
 
@@ -135,7 +134,8 @@ function initCharts() {
         }
     });
 
-    ingresosChart       = new Chart(el("ingresosChart"),       { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.azul),   label: "Cobrado" }] },  options: barrasVOpts(fmt$) });
+    vendidoChart        = new Chart(el("vendidoChart"),        { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.marino), label: "Total de ventas" }] }, options: barrasVOpts(fmt$) });
+    ingresosChart       = new Chart(el("ingresosChart"),       { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.azul),   label: "Ingresos" }] },  options: barrasVOpts(fmt$) });
     ventasSemanaChart   = new Chart(el("ventasSemanaChart"),   { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.azul),   label: "Ventas" }] },   options: barrasVOpts() });
     unidadesSemanaChart = new Chart(el("unidadesSemanaChart"), { type: "bar", data: { labels: [], datasets: [{ ...barraDataset(C.marino), label: "Unidades" }] }, options: barrasVOpts() });
 
@@ -275,7 +275,8 @@ function actualizarTitulos() {
     const baseVentas   = "Número de ventas";
     const baseUnidades = "Unidades recibidas";
     [
-        ["titulo-ingresos", "Cobrado"],
+        ["titulo-vendido",  "Total de ventas"],
+        ["titulo-ingresos", "Ingresos"],
         ["titulo-gastos",   "Gastos"],
         ["titulo-ventas",   baseVentas],
         ["titulo-unidades", baseUnidades],
@@ -287,20 +288,30 @@ function actualizarTitulos() {
 }
 
 const chartsPerTab = {
-    financiero:  () => [ingresosChart, gastosChart, tipoPagoChart, metodosPagoChart, ingresosNegocioChart],
+    financiero:  () => [vendidoChart, ingresosChart, gastosChart, tipoPagoChart, metodosPagoChart, ingresosNegocioChart],
     operacional: () => [ventasSemanaChart, unidadesSemanaChart, ventasPorDiaChart, horaPicoChart, serviciosChart,
                         calzadoMarcasChart, calzadoTiposChart],
     clientes:    () => [],
 };
 
+const _sinMovimiento = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+
 function switchTab(nombre, btn) {
+    if (btn?.classList.contains("active")) return;  
     document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("d-none", p.id !== `tab-${nombre}`));
     document.querySelectorAll(".tab-btn").forEach(b => {
         const activo = b === btn;
         b.classList.toggle("active", activo);
         b.setAttribute("aria-selected", activo ? "true" : "false");
     });
-    (chartsPerTab[nombre]?.() || []).forEach(c => { if (c) { c.resize(); c.update('none'); } });
+    if (nombre === "clientes") animarClientes();
+    (chartsPerTab[nombre]?.() || []).forEach(c => {
+        if (!c) return;
+        c.resize();
+        if (_sinMovimiento?.matches) { c.update("none"); return; }
+        c.reset();
+        c.update();
+    });
 }
 
 function setBarrasH(chart, filas, valor, etiqueta, colores) {
@@ -357,12 +368,14 @@ async function cargarDashboard() {
         // ── Cifras ──
         const k = data.kpis||{};
         const ant = k.anterior || {};
-        setKpi("ventasMes",      k.ingresos,         k.ingresos_pct, true,  false, ant.ingresos);
+        setKpi("ingresosMes",    k.ingresos,         k.ingresos_pct, true,  false, ant.ingresos);
         setKpi("gastosMes",      k.gastos,           k.gastos_pct,   true,  true,  ant.gastos);
         setKpi("gananciaMes",    k.ganancia,         k.ganancia_pct, true,  false, ant.ganancia);
         setKpi("ticketPromedio", k.ticket_promedio,  k.ticket_pct,   true,  false, ant.ticket_promedio);
         setKpi("saldoCobrar",    k.saldo_por_cobrar, undefined,      true);
         setKpi("totalVentas",    k.num_ventas,       k.ventas_pct,   false, false, ant.num_ventas);
+        setKpi("totalVendido",   k.total_vendido,    k.vendido_pct,  true,  false, ant.total_vendido);
+        setKpi("descuentosMes",  k.descuentos,       k.descuentos_pct, true, true, ant.descuentos);
 
         // ── Series en el tiempo ──
         const setTotal = (id, valor, monetario=false) => {
@@ -377,6 +390,10 @@ async function cargarDashboard() {
             chart.data.datasets[0].data = serie.map(x => x.total);
             chart.update();
         };
+        if (data.vendido_semanales) {
+            setSerie(vendidoChart, data.vendido_semanales);
+            setTotal("total-vendido", suma(data.vendido_semanales.map(x => x.total)), true);
+        }
         if (data.ingresos_semanales) {
             setSerie(ingresosChart, data.ingresos_semanales);
             setTotal("total-ingresos", suma(data.ingresos_semanales.map(x => x.total)), true);
@@ -434,23 +451,18 @@ async function cargarDashboard() {
         }
 
         // ── Clientes ──
-        const elCU = document.getElementById("clientesUnicos");
-        if (elCU && data.clientes_unicos !== undefined) countUp(elCU, Number(data.clientes_unicos), false);
-
-        const elCN = document.getElementById("clientesNuevos");
-        if (elCN && data.clientes_nuevos !== undefined) countUp(elCN, Number(data.clientes_nuevos), false);
-
+        _cifrasClientes = {
+            clientesUnicos:  Number(data.clientes_unicos || 0),
+            clientesNuevos:  Number(data.clientes_nuevos || 0),
+            tasaRetorno:     Number(data.tasa_retorno?.tasa || 0),
+            gastoPorCliente: Number(data.gasto_prom_cliente || 0),
+        };
         if (data.tasa_retorno) {
-            const elTR  = document.getElementById("tasaRetorno");
             const elSub = document.getElementById("tasaRetornoDelta");
-            if (elTR)  elTR.textContent = fmtPct(data.tasa_retorno.tasa);
             if (elSub) elSub.textContent = `${fmtN(data.tasa_retorno.recurrentes)} de ${fmtN(data.tasa_retorno.total)} ya habían venido antes`;
         }
-
-        const elGP = document.getElementById("gastoPorCliente");
-        if (elGP && data.gasto_prom_cliente !== undefined) countUp(elGP, Number(data.gasto_prom_cliente), true);
-
         renderTopClientes(data.top_clientes||[]);
+        animarClientes();
 
     } catch(err) {
         if (seq === _dashSeq) mostrarError("No se pudieron cargar las estadísticas. Revisa tu conexión e intenta de nuevo.");
@@ -459,6 +471,48 @@ async function cargarDashboard() {
         clearTimeout(skeletonTimer);
         if (seq === _dashSeq) document.body.classList.remove("stats-cargando");
     }
+}
+
+// ── Animación de la pestaña Clientes ─────────────────────────────────────────
+let _cifrasClientes = null;
+
+const _FORMATO_CLIENTES = {
+    clientesUnicos:  v => fmtN(Math.round(v)),
+    clientesNuevos:  v => fmtN(Math.round(v)),
+    tasaRetorno:     v => fmtPct(v),
+    gastoPorCliente: v => fmt$(v),
+};
+
+function animarNumero(el, objetivo, formato, duracion = 900) {
+    if (_sinMovimiento?.matches) { el.textContent = formato(objetivo); return; }
+    const inicio = performance.now();
+    const paso = ahora => {
+        const t = 1 - Math.pow(1 - Math.min((ahora - inicio) / duracion, 1), 3);
+        el.textContent = formato(objetivo * t);
+        if (t < 1) requestAnimationFrame(paso);
+    };
+    requestAnimationFrame(paso);
+}
+
+function animarClientes() {
+    if (_cifrasClientes) {
+        Object.entries(_cifrasClientes).forEach(([id, valor]) => {
+            const celda = document.getElementById(id);
+            if (!celda) return;
+            let num = celda.querySelector(".kpi-anim-num");
+            if (!num) { celda.innerHTML = '<span class="kpi-anim-num"></span>'; num = celda.firstChild; }
+            animarNumero(num, valor, _FORMATO_CLIENTES[id]);
+        });
+    }
+    const barras = document.querySelectorAll("#topClientesContainer .tc-bar[data-pct]");
+    barras.forEach(bar => { bar.style.transition = "none"; bar.style.width = "0"; });
+    if (!barras.length) return;
+    void barras[0].offsetWidth; 
+    barras.forEach((bar, i) => {
+        bar.style.transition = _sinMovimiento?.matches ? "none" : "";
+        bar.style.transitionDelay = _sinMovimiento?.matches ? "" : `${i * 60}ms`;
+        bar.style.width = `${bar.dataset.pct}%`;
+    });
 }
 
 function renderTopClientes(clientes) {
@@ -485,13 +539,9 @@ function renderTopClientes(clientes) {
             </div>
         </li>`;
     }).join('')}</ol>`;
-
-    c.querySelectorAll(".tc-bar[data-pct]").forEach(bar => { bar.style.width = `${bar.dataset.pct}%`; });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-// Cifra + su línea de cambio (#<id>Delta). Sin `pct` (p. ej. "Por cobrar") la línea
-// conserva su descripción fija.
 function setKpi(id, valor, pct, monetario, invert=false, anterior) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -545,7 +595,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initToggleMontos();
 
     document.fonts?.ready.then(() => {
-        [gastosChart, ingresosChart, ventasSemanaChart, unidadesSemanaChart, tipoPagoChart, serviciosChart,
+        [gastosChart, vendidoChart, ingresosChart, ventasSemanaChart, unidadesSemanaChart, tipoPagoChart, serviciosChart,
          ventasPorDiaChart, ingresosNegocioChart, metodosPagoChart, horaPicoChart,
          calzadoMarcasChart, calzadoTiposChart].forEach(c => c?.update('none'));
     });

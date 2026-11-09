@@ -71,7 +71,8 @@ def test_api_devuelve_cifras_del_periodo_anterior():
         "inicio": "2026-06-01", "fin": "2026-06-30", "modo": "mes",
     })
     ant = resultado["kpis"]["anterior"]
-    assert set(ant) == {"ingresos", "gastos", "ganancia", "ticket_promedio", "num_ventas"}
+    assert set(ant) == {"ingresos", "gastos", "ganancia", "ticket_promedio", "num_ventas",
+                        "total_vendido", "descuentos"}
     assert ant["ganancia"] == ant["ingresos"] - ant["gastos"]
 
 

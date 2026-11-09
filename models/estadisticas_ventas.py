@@ -486,11 +486,76 @@ def obtener_tiempo_promedio_entrega(inicio, fin, id_negocio):
         }
 
 
+# `venta.total` se guarda con el descuento ya restado (ver crear_venta); el precio
+# original de la venta es total + descuento.
+_DESCUENTO_SQL = "CASE WHEN {t}aplica_descuento = 1 THEN {t}cantidad_descuento ELSE 0 END"
+
+
+def obtener_ventas_brutas(inicio, fin, id_negocio):
+    """Total de ventas antes de descuentos y total de descuentos de las ventas recibidas
+    en el rango: {"total_ventas", "descuentos"}.
+
+    Si un descuento fue mayor que el precio, la venta quedó en $0 y aquí se cuenta el
+    descuento completo (no se guarda el subtotal para recortarlo)."""
+    descuento = _DESCUENTO_SQL.format(t="")
+    sql = f"""
+        SELECT COALESCE(SUM(total + {descuento}), 0) AS total_ventas,
+               COALESCE(SUM({descuento}), 0)         AS descuentos
+        FROM venta
+        WHERE fecha_recibo >= %s AND fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
+          AND eliminado = 0
+    """
+    params = [inicio, fin]
+    sql += sql_negocios(params, id_negocio, "id_negocio")
+
+    with get_db() as (_, cursor):
+        cursor.execute(sql, params)
+        row = cursor.fetchone()
+        return {"total_ventas": float(row["total_ventas"] or 0),
+                "descuentos":   float(row["descuentos"] or 0)}
+
+
+def obtener_vendido_serie(inicio: date, fin: date, id_negocio, granularidad: str = "semana"):
+    """Total de ventas (antes de descuentos) en el tiempo, por fecha de recibo:
+    [{"label", "total"}] con las mismas cubetas y etiquetas que las demás series
+    (hora 7–21, día, semana ISO o mes)."""
+    if granularidad == "hora":
+        clave = "HOUR(fecha_recibo)"
+    elif granularidad == "dia":
+        clave = "DATE(fecha_recibo)"
+    else:
+        clave = _expr_periodo("fecha_recibo", "mes" if granularidad == "mes" else "semana")
+
+    sql = f"""
+        SELECT {clave} AS clave, COALESCE(SUM(total + {_DESCUENTO_SQL.format(t="")}), 0) AS total
+        FROM venta
+        WHERE fecha_recibo >= %s AND fecha_recibo < DATE_ADD(%s, INTERVAL 1 DAY)
+          AND eliminado = 0
+    """
+    params = [inicio, fin]
+    sql += sql_negocios(params, id_negocio, "id_negocio")
+    sql += " GROUP BY clave"
+
+    with get_db() as (_, cursor):
+        cursor.execute(sql, params)
+        rows = {r["clave"]: float(r["total"]) for r in cursor.fetchall()}
+
+    if granularidad == "hora":
+        return [{"label": f"{h}:00", "total": rows.get(h, 0.0)} for h in range(7, 22)]
+    if granularidad == "dia":
+        dias = [inicio + timedelta(days=i) for i in range((fin - inicio).days + 1)]
+        return [{"label": _label_dia(d), "total": rows.get(d, 0.0)} for d in dias]
+    periodos = generar_periodos(inicio, fin, "mes" if granularidad == "mes" else "semana")
+    return [{"label": p["label"], "total": rows.get(p["clave"], 0.0)} for p in periodos]
+
+
 def obtener_ingresos_por_negocio(inicio, fin, col: str = "fecha_recibo"):
+    """Total vendido por negocio, antes de descuentos (mismo criterio que "Total de ventas")."""
     col = _col_v(col)
     with get_db() as (_, cursor):
         cursor.execute(f"""
-            SELECT v.id_negocio, n.nombre, COALESCE(SUM(v.total), 0) AS total
+            SELECT v.id_negocio, n.nombre,
+                   COALESCE(SUM(v.total + {_DESCUENTO_SQL.format(t="v.")}), 0) AS total
             FROM venta v
             JOIN negocio n ON n.id_negocio = v.id_negocio
             WHERE v.{col} >= %s AND v.{col} < DATE_ADD(%s, INTERVAL 1 DAY)

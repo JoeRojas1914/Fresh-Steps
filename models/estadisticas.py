@@ -17,6 +17,8 @@ from .estadisticas_ventas import (
     obtener_saldo_por_cobrar,
     obtener_tiempo_promedio_entrega,
     obtener_ingresos_por_negocio,
+    obtener_ventas_brutas,
+    obtener_vendido_serie,
     obtener_metodos_pago,
     obtener_hora_pico_recepcion,
     obtener_hora_pico_entrega,

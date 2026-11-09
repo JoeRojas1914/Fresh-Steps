@@ -27,6 +27,8 @@ from models.estadisticas import (
     obtener_top_clientes,
     obtener_tiempo_promedio_entrega,
     obtener_ingresos_por_negocio,
+    obtener_ventas_brutas,
+    obtener_vendido_serie,
     obtener_metodos_pago,
     obtener_hora_pico_recepcion,
     obtener_hora_pico_entrega,
@@ -138,7 +140,12 @@ def _calcular_kpis(inicio: date, fin: date, id_negocio) -> dict:
     total_gastos                = obtener_total_gastos(inicio,   fin, id_negocio)
     ticket_promedio, num_ventas = obtener_ticket_promedio(inicio, fin, id_negocio)
     saldo_por_cobrar            = obtener_saldo_por_cobrar(inicio, fin, id_negocio)
+    brutas                      = obtener_ventas_brutas(inicio, fin, id_negocio)
     return {
+        # Total de ventas = precio antes de descuentos (por fecha de recibo).
+        # Ingresos = lo que realmente se cobró (por fecha de pago).
+        "total_vendido":    brutas["total_ventas"],
+        "descuentos":       brutas["descuentos"],
         "ingresos":         total_ingresos,
         "gastos":           total_gastos,
         "ganancia":         total_ingresos - total_gastos,
@@ -156,6 +163,7 @@ def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio,
     gastos_ant             = obtener_total_gastos(inicio_ant,   fin_ant, id_negocio)
     ticket_ant, ventas_ant = obtener_ticket_promedio(inicio_ant, fin_ant, id_negocio)
     ganancia_ant           = ingresos_ant - gastos_ant
+    brutas_ant             = obtener_ventas_brutas(inicio_ant, fin_ant, id_negocio)
 
     pcts = {
         "ingresos_pct": _pct_cambio(kpis["ingresos"],         ingresos_ant),
@@ -163,6 +171,8 @@ def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio,
         "ganancia_pct": _pct_cambio(kpis["ganancia"],         ganancia_ant),
         "ticket_pct":   _pct_cambio(kpis["ticket_promedio"],  ticket_ant),
         "ventas_pct":   _pct_cambio(kpis["num_ventas"],       ventas_ant),
+        "vendido_pct":    _pct_cambio(kpis["total_vendido"], brutas_ant["total_ventas"]),
+        "descuentos_pct": _pct_cambio(kpis["descuentos"],    brutas_ant["descuentos"]),
         # Cifras del periodo anterior, para mostrar "antes $X" junto a cada %
         "anterior": {
             "ingresos":        ingresos_ant,
@@ -170,6 +180,8 @@ def _calcular_comparativa(kpis: dict, inicio: date, fin: date, id_negocio,
             "ganancia":        ganancia_ant,
             "ticket_promedio": ticket_ant,
             "num_ventas":      ventas_ant,
+            "total_vendido":   brutas_ant["total_ventas"],
+            "descuentos":      brutas_ant["descuentos"],
         },
     }
     periodo_anterior_str = {"inicio": inicio_ant.isoformat(), "fin": fin_ant.isoformat()}
@@ -273,6 +285,8 @@ def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrup
         ingresos_semanales = obtener_ingresos_por_semana(inicio, fin, id_negocio, periodo=periodo)
         unidades_semanales = obtener_unidades_por_semana(inicio, fin, id_negocio, periodo=periodo)
 
+    vendido_serie = obtener_vendido_serie(inicio, fin, id_negocio, granularidad)
+
     if agrupacion_gastos == "categoria":
         gastos_semanales = obtener_gastos_por_semana_y_categoria(inicio, fin, id_negocio, periodo=periodo)
     else:
@@ -313,6 +327,7 @@ def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrup
         "ventas_semanales":   ventas_semanales,
         "gastos_semanales":   gastos_semanales,
         "ingresos_semanales": ingresos_semanales,
+        "vendido_semanales":  vendido_serie,
         "unidades_semanales": unidades_semanales,
         "ventas_prepago":     ventas_prepago,
         "uso_servicios":      uso_servicios,
@@ -372,10 +387,12 @@ def exportar_estadisticas_service(args):
     xl_fila_headers(ws1, ["Indicador", "Valor"], fila=3)
 
     kpi_rows = [
-        ("Ingresos",          kpis["ingresos"],         '#,##0.00'),
+        ("Total de ventas (antes de descuentos)", kpis["total_vendido"], '#,##0.00'),
+        ("Descuentos",        kpis["descuentos"],        '#,##0.00'),
+        ("Ingresos (cobrado)", kpis["ingresos"],         '#,##0.00'),
         ("Gastos",            kpis["gastos"],            '#,##0.00'),
         ("Ganancia",          kpis["ganancia"],          '#,##0.00'),
-        ("Total de ventas",   kpis["num_ventas"],        '#,##0'),
+        ("Número de ventas",  kpis["num_ventas"],        '#,##0'),
         ("Ticket promedio",   kpis["ticket_promedio"],   '#,##0.00'),
         ("Saldo por cobrar",  kpis["saldo_por_cobrar"],  '#,##0.00'),
     ]
@@ -383,7 +400,7 @@ def exportar_estadisticas_service(args):
         bg = C["gris"] if i % 2 == 0 else C["blanco"]
         xl_cell(ws1, i, 1, label, fg=bg)
         xl_cell(ws1, i, 2, value, fg=bg, align="right", num_fmt=fmt)
-    xl_col_widths(ws1, {1: 24, 2: 18})
+    xl_col_widths(ws1, {1: 38, 2: 18})
 
     # ── Hoja 2: Series ──
     ws2 = wb.create_sheet("Series por período")
@@ -391,17 +408,19 @@ def exportar_estadisticas_service(args):
     ventas    = [r["total"] for r in series.get("ventas_semanales", [])]
     ingresos  = [r["total"] for r in series.get("ingresos_semanales", [])]
     unidades  = [r["total"] for r in series.get("unidades_semanales", [])]
+    vendido   = [r["total"] for r in series.get("vendido_semanales", [])]
 
-    xl_titulo_hoja(ws2, "Series por período", 4, subtitulo)
-    xl_fila_headers(ws2, ["Período", "Ventas", "Ingresos ($)", "Unidades"], fila=3)
+    xl_titulo_hoja(ws2, "Series por período", 5, subtitulo)
+    xl_fila_headers(ws2, ["Período", "Ventas", "Total de ventas ($)", "Ingresos ($)", "Unidades"], fila=3)
     for i, lbl in enumerate(labels):
         row = i + 4
         bg  = C["gris"] if i % 2 == 0 else C["blanco"]
         xl_cell(ws2, row, 1, lbl,             fg=bg)
         xl_cell(ws2, row, 2, ventas[i],       fg=bg, align="right", num_fmt='#,##0')
-        xl_cell(ws2, row, 3, ingresos[i],     fg=bg, align="right", num_fmt='#,##0.00')
-        xl_cell(ws2, row, 4, unidades[i],     fg=bg, align="right", num_fmt='#,##0')
-    xl_col_widths(ws2, {1: 20, 2: 12, 3: 16, 4: 12})
+        xl_cell(ws2, row, 3, vendido[i],      fg=bg, align="right", num_fmt='#,##0.00')
+        xl_cell(ws2, row, 4, ingresos[i],     fg=bg, align="right", num_fmt='#,##0.00')
+        xl_cell(ws2, row, 5, unidades[i],     fg=bg, align="right", num_fmt='#,##0')
+    xl_col_widths(ws2, {1: 20, 2: 12, 3: 20, 4: 16, 5: 12})
 
     return wb, None
 
