@@ -269,7 +269,7 @@ def agrupar_nombres_similares(filas: list[dict], limite: int = 8) -> list[dict]:
     return [{"nombre": _nombre_visible(g["variantes"]), "total": g["total"]} for g in grupos[:limite]]
 
 
-def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrupacion_gastos: str = "proveedor") -> dict:
+def _cargar_series(inicio: date, fin: date, id_negocio, granularidad: str, agrupacion_gastos: str = "categoria") -> dict:
     # Cubetas de las series largas y de los gastos: por mes en modo Año, si no por semana
     periodo = "mes" if granularidad == "mes" else "semana"
     if granularidad == "hora":
@@ -452,9 +452,9 @@ def dashboard_api_service(args):
     elif (fin - inicio).days > MAX_DIAS_RANGO:
         return None, f"El rango máximo permitido es {MAX_DIAS_RANGO} días (~6 meses)"
 
-    agrupacion_gastos = args.get("agrupacion_gastos", "proveedor")
+    agrupacion_gastos = args.get("agrupacion_gastos", "categoria")
     if agrupacion_gastos not in {"proveedor", "categoria"}:
-        agrupacion_gastos = "proveedor"
+        agrupacion_gastos = "categoria"
 
     granularidad = args.get("granularidad", "semana")
     if modo == "anio":

@@ -109,7 +109,7 @@ function ajustarAltura(chart, filas) {
 }
 
 let modoActual = "mes";
-let agrupacionGastos = "proveedor";
+let agrupacionGastos = "categoria";
 
 let gastosChart, ingresosChart, vendidoChart, ventasSemanaChart, unidadesSemanaChart,
     tipoPagoChart, serviciosChart, ventasPorDiaChart, ingresosNegocioChart,

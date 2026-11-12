@@ -1,7 +1,3 @@
--- 006 — noviembre 2026
--- Los registros de historial_usuario guardaban la fila completa del usuario,
--- incluyendo password_hash, pin_hash y session_token. Se eliminan esas llaves.
-
 UPDATE historial_usuario
 SET datos_antes = JSON_REMOVE(datos_antes, '$.password_hash', '$.pin_hash', '$.session_token')
 WHERE datos_antes IS NOT NULL AND JSON_VALID(datos_antes);
